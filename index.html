@@ -109,7 +109,7 @@
         .products-container {
             max-width: 1400px;
             margin: 0 auto;
-            column-count: 3;
+            column-count: 4;
             column-gap: 20px;
         }
         
@@ -138,7 +138,7 @@
             width: 100%;
             background: #f5f5f5;
             overflow: hidden;
-            cursor: pointer;
+            cursor: zoom-in;
         }
         
         .product-image-container img {
@@ -148,82 +148,79 @@
         }
         
         .product-info {
-            padding: 25px;
+            padding: 15px;
         }
         
-        .product-header {
-            margin-bottom: 16px;
-        }
-        
-        .product-top {
+        .product-name-row {
             display: flex;
-            justify-content: flex-end;
-            align-items: center;
-            margin-top: 20px;
-        }
-        
-        .checkbox-container {
-            display: flex;
-            align-items: center;
-            gap: 0;
-            cursor: pointer;
-            user-select: none;
-        }
-        
-        .checkbox-container input[type="checkbox"] {
-            width: 28px;
-            height: 28px;
-            cursor: pointer;
-            accent-color: #c1b2a3;
-            margin: 0;
-            border: 2px solid #c1b2a3;
-        }
-        
-        .checkbox-label {
-            display: none;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 10px;
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #c1b2a3;
         }
         
         .product-name {
-            font-size: 22px;
+            font-size: 18px;
             font-weight: 600;
             color: #564636;
-            margin-bottom: 20px;
-            line-height: 1.3;
-            border-bottom: 1px solid #c1b2a3;
-            padding-bottom: 16px;
+            line-height: 1.2;
+            flex: 1;
+        }
+        
+        .price {
+            font-size: 18px;
+            font-weight: 700;
+            color: #564636;
+            white-space: nowrap;
         }
         
         .size-available-label {
-            font-size: 15px;
+            font-size: 13px;
             color: #564636;
-            margin-bottom: 10px;
+            margin-bottom: 6px;
             font-weight: 400;
         }
         
         .product-sizes {
             display: flex;
-            gap: 10px;
+            gap: 6px;
             flex-wrap: wrap;
-            margin-bottom: 20px;
+            margin-bottom: 12px;
         }
         
         .size-tag {
-            padding: 8px 16px;
+            padding: 4px 10px;
             background: #edece6;
             color: #564636;
             border-radius: 0;
-            font-size: 15px;
+            font-size: 13px;
             font-weight: 600;
         }
         
+        .product-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-top: 12px;
+        }
+        
         .product-details {
-            font-size: 15px;
+            font-size: 14px;
             color: #564636;
-            line-height: 1.8;
+            line-height: 1.6;
+            flex: 1;
+        }
+        
+        .bundle-price {
+            font-size: 13px;
+            color: #8b7355;
+            margin-bottom: 6px;
         }
         
         .detail-row {
-            margin-bottom: 8px;
+            margin-bottom: 6px;
         }
         
         .detail-label {
@@ -231,19 +228,43 @@
             color: #564636;
         }
         
-        .price {
-            font-size: 22px;
-            font-weight: 700;
-            color: #564636;
-            margin-bottom: 8px;
+        .checkbox-container {
+            display: flex;
+            align-items: flex-start;
+            cursor: pointer;
+            user-select: none;
         }
         
-        .bundle-price {
-            font-size: 15px;
-            color: #8b7355;
-            display: block;
-            margin-top: 0;
-            margin-bottom: 8px;
+        .checkbox-container input[type="checkbox"] {
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            accent-color: #c1b2a3;
+            margin: 0;
+        }
+        
+        .lightbox {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.9);
+            cursor: zoom-out;
+        }
+        
+        .lightbox.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .lightbox img {
+            max-width: 90%;
+            max-height: 90%;
+            object-fit: contain;
         }
         
         .no-results {
@@ -252,11 +273,16 @@
             color: #999;
             font-size: 18px;
             display: none;
-            grid-column: 1 / -1;
         }
         
         .no-results.show {
             display: block;
+        }
+        
+        @media (max-width: 1200px) {
+            .products-container {
+                column-count: 3;
+            }
         }
         
         @media (max-width: 1024px) {
@@ -291,13 +317,9 @@
                 column-count: 1;
             }
             
-            .filter-buttons {
-                gap: 8px;
-            }
-            
-            .filter-btn {
-                padding: 10px 18px;
-                font-size: 14px;
+            .product-name-row {
+                flex-direction: column;
+                gap: 6px;
             }
         }
     </style>
@@ -311,15 +333,15 @@
             <div class="disclaimer-section">
                 <p class="disclaimer">Select your items and screenshot the page to share with us.<br>We'll confirm availability as inventory changes daily.<br>5+ items order qualifies for bundle price.</p>
                 <div class="filter-buttons">
-                    <button class="filter-btn active" onclick="filterSize('all')">All Sizes</button>
-                    <button class="filter-btn" onclick="filterSize('selected')">Selected <span class="selected-count" id="selectedCount">0</span></button>
-                    <button class="filter-btn" onclick="filterSize('3-6m')">3-6M</button>
-                    <button class="filter-btn" onclick="filterSize('6-12m')">6-12M</button>
-                    <button class="filter-btn" onclick="filterSize('12-24m')">12-24M</button>
-                    <button class="filter-btn" onclick="filterSize('2t')">2T</button>
-                    <button class="filter-btn" onclick="filterSize('3t')">3T</button>
-                    <button class="filter-btn" onclick="filterSize('4t')">4T</button>
-                    <button class="filter-btn" onclick="filterSize('5t')">5T</button>
+                    <button class="filter-btn active" onclick="window.filterSize('all')">All Sizes</button>
+                    <button class="filter-btn" onclick="window.filterSize('selected')">Selected <span class="selected-count" id="selectedCount">0</span></button>
+                    <button class="filter-btn" onclick="window.filterSize('3-6m')">3-6M</button>
+                    <button class="filter-btn" onclick="window.filterSize('6-12m')">6-12M</button>
+                    <button class="filter-btn" onclick="window.filterSize('12-24m')">12-24M</button>
+                    <button class="filter-btn" onclick="window.filterSize('2t')">2T</button>
+                    <button class="filter-btn" onclick="window.filterSize('3t')">3T</button>
+                    <button class="filter-btn" onclick="window.filterSize('4t')">4T</button>
+                    <button class="filter-btn" onclick="window.filterSize('5t')">5T</button>
                 </div>
             </div>
         </div>
@@ -328,29 +350,29 @@
     <div class="products-container">
         <!-- Product 1 -->
         <div class="product" data-sizes="3-6m,6-12m,12-24m" data-selected="false">
-            <div class="product-image-container">
+            <div class="product-image-container" onclick="window.openLightbox('https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/6.jpg')">
                 <img src="https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/6.jpg" alt="Cotton Waffle Overall">
             </div>
             <div class="product-info">
-                <div class="product-header">
+                <div class="product-name-row">
                     <div class="product-name">Cotton Waffle Overall</div>
-                    <div class="size-available-label">Size Available</div>
-                    <div class="product-sizes">
-                        <span class="size-tag">3-6M</span>
-                        <span class="size-tag">6-12M</span>
-                        <span class="size-tag">12-24M</span>
-                    </div>
-                </div>
-                <div class="product-details">
                     <div class="price">$16</div>
-                    <div class="bundle-price">Bundle Price: $14</div>
-                    <div class="detail-row">
-                        <span class="detail-label">Material:</span> 95% Cotton
-                    </div>
+                </div>
+                <div class="size-available-label">Size Available</div>
+                <div class="product-sizes">
+                    <span class="size-tag">3-6M</span>
+                    <span class="size-tag">6-12M</span>
+                    <span class="size-tag">12-24M</span>
                 </div>
                 <div class="product-top">
-                    <div class="checkbox-container" onclick="toggleSelect(this)">
-                        <input type="checkbox" onclick="event.stopPropagation(); toggleSelect(this.parentElement)">
+                    <div class="product-details">
+                        <div class="bundle-price">Bundle Price: $14</div>
+                        <div class="detail-row">
+                            <span class="detail-label">Material:</span> 95% Cotton
+                        </div>
+                    </div>
+                    <div class="checkbox-container" onclick="window.toggleSelect(this, event)">
+                        <input type="checkbox">
                     </div>
                 </div>
             </div>
@@ -358,29 +380,29 @@
 
         <!-- Product 2 -->
         <div class="product" data-sizes="6-12m,12-24m,2t" data-selected="false">
-            <div class="product-image-container">
+            <div class="product-image-container" onclick="window.openLightbox('https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/28.jpg')">
                 <img src="https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/28.jpg" alt="Cotton Linen Kimono Overall">
             </div>
             <div class="product-info">
-                <div class="product-header">
+                <div class="product-name-row">
                     <div class="product-name">Cotton Linen Kimono Overall</div>
-                    <div class="size-available-label">Size Available</div>
-                    <div class="product-sizes">
-                        <span class="size-tag">6-12M</span>
-                        <span class="size-tag">12-24M</span>
-                        <span class="size-tag">2T</span>
-                    </div>
-                </div>
-                <div class="product-details">
                     <div class="price">$14</div>
-                    <div class="bundle-price">Bundle Price: $12</div>
-                    <div class="detail-row">
-                        <span class="detail-label">Material:</span> Cotton Linen
-                    </div>
+                </div>
+                <div class="size-available-label">Size Available</div>
+                <div class="product-sizes">
+                    <span class="size-tag">6-12M</span>
+                    <span class="size-tag">12-24M</span>
+                    <span class="size-tag">2T</span>
                 </div>
                 <div class="product-top">
-                    <div class="checkbox-container" onclick="toggleSelect(this)">
-                        <input type="checkbox" onclick="event.stopPropagation(); toggleSelect(this.parentElement)">
+                    <div class="product-details">
+                        <div class="bundle-price">Bundle Price: $12</div>
+                        <div class="detail-row">
+                            <span class="detail-label">Material:</span> Cotton Linen
+                        </div>
+                    </div>
+                    <div class="checkbox-container" onclick="window.toggleSelect(this, event)">
+                        <input type="checkbox">
                     </div>
                 </div>
             </div>
@@ -388,29 +410,29 @@
 
         <!-- Product 3 -->
         <div class="product" data-sizes="6-12m,12-24m,2t" data-selected="false">
-            <div class="product-image-container">
+            <div class="product-image-container" onclick="window.openLightbox('https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/11.jpg')">
                 <img src="https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/11.jpg" alt="Ruffle Cotton Romper">
             </div>
             <div class="product-info">
-                <div class="product-header">
+                <div class="product-name-row">
                     <div class="product-name">Ruffle Cotton Romper</div>
-                    <div class="size-available-label">Size Available</div>
-                    <div class="product-sizes">
-                        <span class="size-tag">6-12M</span>
-                        <span class="size-tag">12-24M</span>
-                        <span class="size-tag">2T</span>
-                    </div>
-                </div>
-                <div class="product-details">
                     <div class="price">$12</div>
-                    <div class="bundle-price">Bundle Price: $10</div>
-                    <div class="detail-row">
-                        <span class="detail-label">Material:</span> 100% Cotton
-                    </div>
+                </div>
+                <div class="size-available-label">Size Available</div>
+                <div class="product-sizes">
+                    <span class="size-tag">6-12M</span>
+                    <span class="size-tag">12-24M</span>
+                    <span class="size-tag">2T</span>
                 </div>
                 <div class="product-top">
-                    <div class="checkbox-container" onclick="toggleSelect(this)">
-                        <input type="checkbox" onclick="event.stopPropagation(); toggleSelect(this.parentElement)">
+                    <div class="product-details">
+                        <div class="bundle-price">Bundle Price: $10</div>
+                        <div class="detail-row">
+                            <span class="detail-label">Material:</span> 100% Cotton
+                        </div>
+                    </div>
+                    <div class="checkbox-container" onclick="window.toggleSelect(this, event)">
+                        <input type="checkbox">
                     </div>
                 </div>
             </div>
@@ -418,27 +440,27 @@
 
         <!-- Product 4 -->
         <div class="product" data-sizes="12-24m" data-selected="false">
-            <div class="product-image-container">
+            <div class="product-image-container" onclick="window.openLightbox('https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/15.jpg')">
                 <img src="https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/15.jpg" alt="Strawberry Romper">
             </div>
             <div class="product-info">
-                <div class="product-header">
+                <div class="product-name-row">
                     <div class="product-name">Strawberry Romper</div>
-                    <div class="size-available-label">Size Available</div>
-                    <div class="product-sizes">
-                        <span class="size-tag">12-24M</span>
-                    </div>
-                </div>
-                <div class="product-details">
                     <div class="price">$12</div>
-                    <div class="bundle-price">Bundle Price: $10</div>
-                    <div class="detail-row">
-                        <span class="detail-label">Material:</span> 100% Cotton
-                    </div>
+                </div>
+                <div class="size-available-label">Size Available</div>
+                <div class="product-sizes">
+                    <span class="size-tag">12-24M</span>
                 </div>
                 <div class="product-top">
-                    <div class="checkbox-container" onclick="toggleSelect(this)">
-                        <input type="checkbox" onclick="event.stopPropagation(); toggleSelect(this.parentElement)">
+                    <div class="product-details">
+                        <div class="bundle-price">Bundle Price: $10</div>
+                        <div class="detail-row">
+                            <span class="detail-label">Material:</span> 100% Cotton
+                        </div>
+                    </div>
+                    <div class="checkbox-container" onclick="window.toggleSelect(this, event)">
+                        <input type="checkbox">
                     </div>
                 </div>
             </div>
@@ -446,30 +468,30 @@
 
         <!-- Product 5 -->
         <div class="product" data-sizes="3-6m,6-12m,12-24m,2t" data-selected="false">
-            <div class="product-image-container">
+            <div class="product-image-container" onclick="window.openLightbox('https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/19.jpg')">
                 <img src="https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/19.jpg" alt="Embroidered Cotton Floral Romper">
             </div>
             <div class="product-info">
-                <div class="product-header">
+                <div class="product-name-row">
                     <div class="product-name">Embroidered Cotton Floral Romper</div>
-                    <div class="size-available-label">Size Available</div>
-                    <div class="product-sizes">
-                        <span class="size-tag">3-6M</span>
-                        <span class="size-tag">6-12M</span>
-                        <span class="size-tag">12-24M</span>
-                        <span class="size-tag">2T</span>
-                    </div>
-                </div>
-                <div class="product-details">
                     <div class="price">$18</div>
-                    <div class="bundle-price">Bundle Price: $16</div>
-                    <div class="detail-row">
-                        <span class="detail-label">Material:</span> 100% Cotton
-                    </div>
+                </div>
+                <div class="size-available-label">Size Available</div>
+                <div class="product-sizes">
+                    <span class="size-tag">3-6M</span>
+                    <span class="size-tag">6-12M</span>
+                    <span class="size-tag">12-24M</span>
+                    <span class="size-tag">2T</span>
                 </div>
                 <div class="product-top">
-                    <div class="checkbox-container" onclick="toggleSelect(this)">
-                        <input type="checkbox" onclick="event.stopPropagation(); toggleSelect(this.parentElement)">
+                    <div class="product-details">
+                        <div class="bundle-price">Bundle Price: $16</div>
+                        <div class="detail-row">
+                            <span class="detail-label">Material:</span> 100% Cotton
+                        </div>
+                    </div>
+                    <div class="checkbox-container" onclick="window.toggleSelect(this, event)">
+                        <input type="checkbox">
                     </div>
                 </div>
             </div>
@@ -477,28 +499,28 @@
 
         <!-- Product 6 -->
         <div class="product" data-sizes="6-12m,12-24m" data-selected="false">
-            <div class="product-image-container">
+            <div class="product-image-container" onclick="window.openLightbox('https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/18.jpg')">
                 <img src="https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/18.jpg" alt="Cotton Muslin Romper">
             </div>
             <div class="product-info">
-                <div class="product-header">
+                <div class="product-name-row">
                     <div class="product-name">Cotton Muslin Romper</div>
-                    <div class="size-available-label">Size Available</div>
-                    <div class="product-sizes">
-                        <span class="size-tag">6-12M</span>
-                        <span class="size-tag">12-24M</span>
-                    </div>
-                </div>
-                <div class="product-details">
                     <div class="price">$14</div>
-                    <div class="bundle-price">Bundle Price: $12</div>
-                    <div class="detail-row">
-                        <span class="detail-label">Material:</span> 100% Cotton
-                    </div>
+                </div>
+                <div class="size-available-label">Size Available</div>
+                <div class="product-sizes">
+                    <span class="size-tag">6-12M</span>
+                    <span class="size-tag">12-24M</span>
                 </div>
                 <div class="product-top">
-                    <div class="checkbox-container" onclick="toggleSelect(this)">
-                        <input type="checkbox" onclick="event.stopPropagation(); toggleSelect(this.parentElement)">
+                    <div class="product-details">
+                        <div class="bundle-price">Bundle Price: $12</div>
+                        <div class="detail-row">
+                            <span class="detail-label">Material:</span> 100% Cotton
+                        </div>
+                    </div>
+                    <div class="checkbox-container" onclick="window.toggleSelect(this, event)">
+                        <input type="checkbox">
                     </div>
                 </div>
             </div>
@@ -506,28 +528,28 @@
 
         <!-- Product 7 -->
         <div class="product" data-sizes="3-6m,6-12m" data-selected="false">
-            <div class="product-image-container">
+            <div class="product-image-container" onclick="window.openLightbox('https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/27.jpg')">
                 <img src="https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/27.jpg" alt="Lightweight Cotton Terry Solid Romper">
             </div>
             <div class="product-info">
-                <div class="product-header">
+                <div class="product-name-row">
                     <div class="product-name">Lightweight Cotton Terry Solid Romper</div>
-                    <div class="size-available-label">Size Available</div>
-                    <div class="product-sizes">
-                        <span class="size-tag">3-6M</span>
-                        <span class="size-tag">6-12M</span>
-                    </div>
-                </div>
-                <div class="product-details">
                     <div class="price">$14</div>
-                    <div class="bundle-price">Bundle Price: $12</div>
-                    <div class="detail-row">
-                        <span class="detail-label">Material:</span> 95% Cotton
-                    </div>
+                </div>
+                <div class="size-available-label">Size Available</div>
+                <div class="product-sizes">
+                    <span class="size-tag">3-6M</span>
+                    <span class="size-tag">6-12M</span>
                 </div>
                 <div class="product-top">
-                    <div class="checkbox-container" onclick="toggleSelect(this)">
-                        <input type="checkbox" onclick="event.stopPropagation(); toggleSelect(this.parentElement)">
+                    <div class="product-details">
+                        <div class="bundle-price">Bundle Price: $12</div>
+                        <div class="detail-row">
+                            <span class="detail-label">Material:</span> 95% Cotton
+                        </div>
+                    </div>
+                    <div class="checkbox-container" onclick="window.toggleSelect(this, event)">
+                        <input type="checkbox">
                     </div>
                 </div>
             </div>
@@ -535,32 +557,32 @@
 
         <!-- Product 8 -->
         <div class="product" data-sizes="6-12m,12-24m,2t,3t,4t,5t" data-selected="false">
-            <div class="product-image-container">
+            <div class="product-image-container" onclick="window.openLightbox('https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/2.jpg')">
                 <img src="https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/2.jpg" alt="Smile Cotton Long Sleeve Shirt with Stripes">
             </div>
             <div class="product-info">
-                <div class="product-header">
+                <div class="product-name-row">
                     <div class="product-name">Smile Cotton Long Sleeve Shirt with Stripes</div>
-                    <div class="size-available-label">Size Available</div>
-                    <div class="product-sizes">
-                        <span class="size-tag">6-12M</span>
-                        <span class="size-tag">12-24M</span>
-                        <span class="size-tag">2T</span>
-                        <span class="size-tag">3T</span>
-                        <span class="size-tag">4T</span>
-                        <span class="size-tag">5T</span>
-                    </div>
-                </div>
-                <div class="product-details">
                     <div class="price">$10</div>
-                    <div class="bundle-price">Bundle Price: $9</div>
-                    <div class="detail-row">
-                        <span class="detail-label">Material:</span> 100% Cotton
-                    </div>
+                </div>
+                <div class="size-available-label">Size Available</div>
+                <div class="product-sizes">
+                    <span class="size-tag">6-12M</span>
+                    <span class="size-tag">12-24M</span>
+                    <span class="size-tag">2T</span>
+                    <span class="size-tag">3T</span>
+                    <span class="size-tag">4T</span>
+                    <span class="size-tag">5T</span>
                 </div>
                 <div class="product-top">
-                    <div class="checkbox-container" onclick="toggleSelect(this)">
-                        <input type="checkbox" onclick="event.stopPropagation(); toggleSelect(this.parentElement)">
+                    <div class="product-details">
+                        <div class="bundle-price">Bundle Price: $9</div>
+                        <div class="detail-row">
+                            <span class="detail-label">Material:</span> 100% Cotton
+                        </div>
+                    </div>
+                    <div class="checkbox-container" onclick="window.toggleSelect(this, event)">
+                        <input type="checkbox">
                     </div>
                 </div>
             </div>
@@ -568,32 +590,32 @@
 
         <!-- Product 9 -->
         <div class="product" data-sizes="6-12m,12-24m,2t,3t,4t,5t" data-selected="false">
-            <div class="product-image-container">
+            <div class="product-image-container" onclick="window.openLightbox('https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/3.jpg')">
                 <img src="https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/3.jpg" alt="Solid Cotton Long Sleeve">
             </div>
             <div class="product-info">
-                <div class="product-header">
+                <div class="product-name-row">
                     <div class="product-name">Solid Cotton Long Sleeve</div>
-                    <div class="size-available-label">Size Available</div>
-                    <div class="product-sizes">
-                        <span class="size-tag">6-12M</span>
-                        <span class="size-tag">12-24M</span>
-                        <span class="size-tag">2T</span>
-                        <span class="size-tag">3T</span>
-                        <span class="size-tag">4T</span>
-                        <span class="size-tag">5T</span>
-                    </div>
-                </div>
-                <div class="product-details">
                     <div class="price">$10</div>
-                    <div class="bundle-price">Bundle Price: $9</div>
-                    <div class="detail-row">
-                        <span class="detail-label">Material:</span> 100% Cotton
-                    </div>
+                </div>
+                <div class="size-available-label">Size Available</div>
+                <div class="product-sizes">
+                    <span class="size-tag">6-12M</span>
+                    <span class="size-tag">12-24M</span>
+                    <span class="size-tag">2T</span>
+                    <span class="size-tag">3T</span>
+                    <span class="size-tag">4T</span>
+                    <span class="size-tag">5T</span>
                 </div>
                 <div class="product-top">
-                    <div class="checkbox-container" onclick="toggleSelect(this)">
-                        <input type="checkbox" onclick="event.stopPropagation(); toggleSelect(this.parentElement)">
+                    <div class="product-details">
+                        <div class="bundle-price">Bundle Price: $9</div>
+                        <div class="detail-row">
+                            <span class="detail-label">Material:</span> 100% Cotton
+                        </div>
+                    </div>
+                    <div class="checkbox-container" onclick="window.toggleSelect(this, event)">
+                        <input type="checkbox">
                     </div>
                 </div>
             </div>
@@ -601,31 +623,31 @@
 
         <!-- Product 10 -->
         <div class="product" data-sizes="6-12m,12-24m,2t,3t,4t" data-selected="false">
-            <div class="product-image-container">
+            <div class="product-image-container" onclick="window.openLightbox('https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/12.jpg')">
                 <img src="https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/12.jpg" alt="Solid Cotton Long Sleeve">
             </div>
             <div class="product-info">
-                <div class="product-header">
+                <div class="product-name-row">
                     <div class="product-name">Solid Cotton Long Sleeve</div>
-                    <div class="size-available-label">Size Available</div>
-                    <div class="product-sizes">
-                        <span class="size-tag">6-12M</span>
-                        <span class="size-tag">12-24M</span>
-                        <span class="size-tag">2T</span>
-                        <span class="size-tag">3T</span>
-                        <span class="size-tag">4T</span>
-                    </div>
-                </div>
-                <div class="product-details">
                     <div class="price">$12</div>
-                    <div class="bundle-price">Bundle Price: $10</div>
-                    <div class="detail-row">
-                        <span class="detail-label">Material:</span> 100% Cotton
-                    </div>
+                </div>
+                <div class="size-available-label">Size Available</div>
+                <div class="product-sizes">
+                    <span class="size-tag">6-12M</span>
+                    <span class="size-tag">12-24M</span>
+                    <span class="size-tag">2T</span>
+                    <span class="size-tag">3T</span>
+                    <span class="size-tag">4T</span>
                 </div>
                 <div class="product-top">
-                    <div class="checkbox-container" onclick="toggleSelect(this)">
-                        <input type="checkbox" onclick="event.stopPropagation(); toggleSelect(this.parentElement)">
+                    <div class="product-details">
+                        <div class="bundle-price">Bundle Price: $10</div>
+                        <div class="detail-row">
+                            <span class="detail-label">Material:</span> 100% Cotton
+                        </div>
+                    </div>
+                    <div class="checkbox-container" onclick="window.toggleSelect(this, event)">
+                        <input type="checkbox">
                     </div>
                 </div>
             </div>
@@ -633,30 +655,30 @@
 
         <!-- Product 11 -->
         <div class="product" data-sizes="6-12m,12-24m,2t,3t" data-selected="false">
-            <div class="product-image-container">
+            <div class="product-image-container" onclick="window.openLightbox('https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/9.jpg')">
                 <img src="https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/9.jpg" alt="Striped Cotton Long Sleeve Shirt with buttons">
             </div>
             <div class="product-info">
-                <div class="product-header">
+                <div class="product-name-row">
                     <div class="product-name">Striped Cotton Long Sleeve Shirt with buttons</div>
-                    <div class="size-available-label">Size Available</div>
-                    <div class="product-sizes">
-                        <span class="size-tag">6-12M</span>
-                        <span class="size-tag">12-24M</span>
-                        <span class="size-tag">2T</span>
-                        <span class="size-tag">3T</span>
-                    </div>
-                </div>
-                <div class="product-details">
                     <div class="price">$14</div>
-                    <div class="bundle-price">Bundle Price: $12</div>
-                    <div class="detail-row">
-                        <span class="detail-label">Material:</span> 95% Cotton
-                    </div>
+                </div>
+                <div class="size-available-label">Size Available</div>
+                <div class="product-sizes">
+                    <span class="size-tag">6-12M</span>
+                    <span class="size-tag">12-24M</span>
+                    <span class="size-tag">2T</span>
+                    <span class="size-tag">3T</span>
                 </div>
                 <div class="product-top">
-                    <div class="checkbox-container" onclick="toggleSelect(this)">
-                        <input type="checkbox" onclick="event.stopPropagation(); toggleSelect(this.parentElement)">
+                    <div class="product-details">
+                        <div class="bundle-price">Bundle Price: $12</div>
+                        <div class="detail-row">
+                            <span class="detail-label">Material:</span> 95% Cotton
+                        </div>
+                    </div>
+                    <div class="checkbox-container" onclick="window.toggleSelect(this, event)">
+                        <input type="checkbox">
                     </div>
                 </div>
             </div>
@@ -664,29 +686,29 @@
 
         <!-- Product 12 -->
         <div class="product" data-sizes="6-12m,12-24m,2t" data-selected="false">
-            <div class="product-image-container">
+            <div class="product-image-container" onclick="window.openLightbox('https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/17.jpg')">
                 <img src="https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/17.jpg" alt="Cotton Long Sleeve Bear Shirt">
             </div>
             <div class="product-info">
-                <div class="product-header">
+                <div class="product-name-row">
                     <div class="product-name">Cotton Long Sleeve Bear Shirt</div>
-                    <div class="size-available-label">Size Available</div>
-                    <div class="product-sizes">
-                        <span class="size-tag">6-12M</span>
-                        <span class="size-tag">12-24M</span>
-                        <span class="size-tag">2T</span>
-                    </div>
-                </div>
-                <div class="product-details">
                     <div class="price">$11</div>
-                    <div class="bundle-price">Bundle Price: $9</div>
-                    <div class="detail-row">
-                        <span class="detail-label">Material:</span> 95% Cotton
-                    </div>
+                </div>
+                <div class="size-available-label">Size Available</div>
+                <div class="product-sizes">
+                    <span class="size-tag">6-12M</span>
+                    <span class="size-tag">12-24M</span>
+                    <span class="size-tag">2T</span>
                 </div>
                 <div class="product-top">
-                    <div class="checkbox-container" onclick="toggleSelect(this)">
-                        <input type="checkbox" onclick="event.stopPropagation(); toggleSelect(this.parentElement)">
+                    <div class="product-details">
+                        <div class="bundle-price">Bundle Price: $9</div>
+                        <div class="detail-row">
+                            <span class="detail-label">Material:</span> 95% Cotton
+                        </div>
+                    </div>
+                    <div class="checkbox-container" onclick="window.toggleSelect(this, event)">
+                        <input type="checkbox">
                     </div>
                 </div>
             </div>
@@ -694,46 +716,8 @@
 
         <!-- Product 13 -->
         <div class="product" data-sizes="6-12m,12-24m,2t,3t,4t,5t" data-selected="false">
-            <div class="product-image-container">
+            <div class="product-image-container" onclick="window.openLightbox('https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/16.jpg')">
                 <img src="https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/16.jpg" alt="Striped Cotton Sweatshirts">
             </div>
             <div class="product-info">
-                <div class="product-header">
-                    <div class="product-name">Striped Cotton Sweatshirts</div>
-                    <div class="size-available-label">Size Available</div>
-                    <div class="product-sizes">
-                        <span class="size-tag">6-12M</span>
-                        <span class="size-tag">12-24M</span>
-                        <span class="size-tag">2T</span>
-                        <span class="size-tag">3T</span>
-                        <span class="size-tag">4T</span>
-                        <span class="size-tag">5T</span>
-                    </div>
-                </div>
-                <div class="product-details">
-                    <div class="price">$16</div>
-                    <div class="bundle-price">Bundle Price: $15</div>
-                    <div class="detail-row">
-                        <span class="detail-label">Material:</span> 95% Cotton
-                    </div>
-                </div>
-                <div class="product-top">
-                    <div class="checkbox-container" onclick="toggleSelect(this)">
-                        <input type="checkbox" onclick="event.stopPropagation(); toggleSelect(this.parentElement)">
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Product 14 -->
-        <div class="product" data-sizes="3-6m,6-12m,12-24m,2t,3t" data-selected="false">
-            <div class="product-image-container">
-                <img src="https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/7.jpg" alt="Scalloped Cotton Knited Cardigan">
-            </div>
-            <div class="product-info">
-                <div class="product-header">
-                    <div class="product-name">Scalloped Cotton Knited Cardigan</div>
-                    <div class="size-available-label">Size Available</div>
-                    <div class="product-sizes">
-                        <span class="size-tag">3-6M</span>
-                        <span class="size-tag">6-12M
+                <div class="product-
