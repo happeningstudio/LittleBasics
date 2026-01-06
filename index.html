@@ -21,8 +21,8 @@
         .filter-btn.active { background: #564636; }
         .selected-count { display: inline-block; background: #edece6; color: #564636; padding: 2px 8px; border-radius: 10px; font-size: 13px; margin-left: 6px; font-weight: 600; }
         
-        .products-container { max-width: 1400px; margin: 0 auto; display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
-        .product { background: #fafaf8; overflow: hidden; border: 1px solid #c1b2a3; transition: all 0.3s; width: 100%; }
+        .products-container { max-width: 1400px; margin: 0 auto; column-count: 4; column-gap: 20px; }
+        .product { background: #fafaf8; overflow: hidden; border: 1px solid #c1b2a3; transition: all 0.3s; width: 100%; margin-bottom: 20px; break-inside: avoid; display: inline-block; }
         .product:hover { border-color: #8b7355; transform: translateY(-2px); }
         .product.hidden { display: none; }
         
@@ -49,15 +49,15 @@
         
         .no-results { text-align: center; padding: 60px 20px; color: #999; font-size: 18px; display: none; }
         
-        @media (max-width: 1200px) { .products-container { grid-template-columns: repeat(3, 1fr); } }
+        @media (max-width: 1200px) { .products-container { column-count: 3; } }
         @media (max-width: 1024px) { 
-            .products-container { grid-template-columns: repeat(2, 1fr); }
+            .products-container { column-count: 2; }
             .header-content { grid-template-columns: 1fr; gap: 12px; }
             .title-section, .disclaimer-section { text-align: center; }
             .filter-buttons { justify-content: center; }
         }
         @media (max-width: 640px) { 
-            .products-container { grid-template-columns: 1fr; }
+            .products-container { column-count: 1; }
             .product-name-row { flex-direction: column; gap: 6px; }
         }
     </style>
@@ -72,7 +72,6 @@
                 <p class="disclaimer">Select your items and screenshot the page to share with us.<br>We'll confirm availability as inventory changes daily.<br>5+ items order qualifies for bundle price.</p>
                 <div class="filter-buttons">
                     <button class="filter-btn active" onclick="filterSize('all')">All Sizes</button>
-                    <button class="filter-btn" onclick="filterSize('selected')">Selected <span class="selected-count" id="selectedCount">0</span></button>
                     <button class="filter-btn" onclick="filterSize('3-6m')">3-6M</button>
                     <button class="filter-btn" onclick="filterSize('6-12m')">6-12M</button>
                     <button class="filter-btn" onclick="filterSize('12-24m')">12-24M</button>
@@ -664,6 +663,7 @@
                 </div>
             </div>
         </div>
+
         </div>
 
     <div class="lightbox" id="lightbox" onclick="closeLightbox()">
