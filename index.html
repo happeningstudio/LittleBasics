@@ -21,20 +21,8 @@
         .filter-btn.active { background: #564636; }
         .selected-count { display: inline-block; background: #edece6; color: #564636; padding: 2px 8px; border-radius: 10px; font-size: 13px; margin-left: 6px; font-weight: 600; }
         
-        .products-container { 
-            max-width: 1400px; 
-            margin: 0 auto; 
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 20px;
-        }
-        .product { 
-            background: #fafaf8; 
-            overflow: hidden; 
-            border: 1px solid #c1b2a3; 
-            transition: all 0.3s; 
-            width: 100%; 
-        }
+        .products-container { max-width: 1400px; margin: 0 auto; display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+        .product { background: #fafaf8; overflow: hidden; border: 1px solid #c1b2a3; transition: all 0.3s; width: 100%; }
         .product:hover { border-color: #8b7355; transform: translateY(-2px); }
         .product.hidden { display: none; }
         
@@ -60,7 +48,6 @@
         .lightbox img { max-width: 90%; max-height: 90%; object-fit: contain; }
         
         .no-results { text-align: center; padding: 60px 20px; color: #999; font-size: 18px; display: none; }
-        .no-results.show { display: block; }
         
         @media (max-width: 1200px) { .products-container { grid-template-columns: repeat(3, 1fr); } }
         @media (max-width: 1024px) { 
@@ -98,7 +85,7 @@
         </div>
     </div>
 
-    <div class="products-container" id="products">
+    <div class="products-container">
         <div class="product" data-sizes="3-6m,6-12m,12-24m" data-selected="false">
             <div class="product-image-container" onclick="openLightbox('https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/6.jpg')">
                 <img src="https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/6.jpg" alt="Cotton Waffle Overall">
@@ -373,7 +360,6 @@
                 </div>
             </div>
         </div>
-
         <div class="product" data-sizes="6-12m,12-24m,2t,3t" data-selected="false">
             <div class="product-image-container" onclick="openLightbox('https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/9.jpg')">
                 <img src="https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/9.jpg" alt="Striped Cotton Long Sleeve Shirt with buttons">
@@ -488,8 +474,7 @@
             </div>
         </div>
 
-        <div class="product" data-sizes="3-6m,6-12m,12-24m,2t,3t" data-selected="
-            <div class="product" data-sizes="3-6m,6-12m,12-24m,2t,3t" data-selected="false">
+        <div class="product" data-sizes="3-6m,6-12m,12-24m,2t,3t" data-selected="false">
             <div class="product-image-container" onclick="openLightbox('https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/1.jpg')">
                 <img src="https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/1.jpg" alt="Ruffled Cotton Muslin Pants">
             </div>
