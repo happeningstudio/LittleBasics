@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Little Basics Product Catalog</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f9fafb;
+            padding: 1rem;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+
+        .header p {
+            color: #6b7280;
+            margin-bottom: 0.5rem;
+        }
+
+        .header .bundle-info {
+            font-weight: 600;
+        }
+
+        .selected-counter {
+            display: inline-block;
+            background-color: #dbeafe;
+            color: #1e40af;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            margin-top: 1rem;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .grid {
+            column-count: 1;
+            column-gap: 0.75rem;
+        }
+
+        @media (min-width: 640px) {
+            .grid {
+                column-count: 2;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .grid {
+                column-count: 3;
+            }
+        }
+
+        @media (min-width: 1280px) {
+            .grid {
+                column-count: 4;
+            }
+        }
+
+        .product-card {
+            break-inside: avoid;
+            margin-bottom: 0.75rem;
+            background: white;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+            transition: box-shadow 0.2s;
+            cursor: pointer;
+        }
+
+        .product-card:hover {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .product-card.selected {
+            outline: 3px solid #10b981;
+            outline-offset: -3px;
+        }
+
+        .product-image {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .product-details {
+            padding: 1rem;
+        }
+
+        .product-name {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .product-price {
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: #111827;
+            margin-bottom: 0.25rem;
+        }
+
+        .bundle-price {
+            font-size: 0.875rem;
+            color: #059669;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .product-material {
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin-bottom: 0.5rem;
+        }
+
+        .sizes-label {
+            font-size: 0.875rem;
+            color: #4b5563;
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+        }
+
+        .sizes-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.25rem;
+        }
+
+        .size-badge {
+            font-size: 0.75rem;
+            background-color: #f3f4f6;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Little Basics Product Catalog</h1>
+            <p>Select your items and screenshot the page to share with us.</p>
+            <p>We'll confirm availability as inventory changes daily.</p>
+            <p class="bundle-info">5+ items order qualifies for bundle price.</p>
+            <div id="selectedCounter" class="selected-counter hidden"></div>
+        </div>
+
+        <div id="productGrid" class="grid"></div>
+    </div>
+
+    <script>
+        const products = [
+            {
+                id: 1,
+                name: "Cotton Waffle Overall",
+                price: 16,
+                bundlePrice: 14,
+                sizes: ["3-6M", "6-12M", "12-24M"],
+                material: "95% Cotton",
+                image: "https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/6.jpg"
+            },
+            {
+                id: 2,
+                name: "Cotton Linen Kimono Overall",
+                price: 14,
+                bundlePrice: 12,
+                sizes: ["6-12M", "12-24M", "2T"],
+                material: "Cotton Linen",
+                image: "https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/28.jpg"
+            },
+            {
+                id: 3,
+                name: "Ruffle Cotton Romper",
+                price: 12,
+                bundlePrice: 10,
+                sizes: ["6-12M", "12-24M", "2T"],
+                material: "100% Cotton",
+                image: "https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/11.jpg"
+            },
+            {
+                id: 4,
+                name: "Strawberry Romper",
+                price: 12,
+                bundlePrice: 10,
+                sizes: ["12-24M"],
+                material: "100% Cotton",
+                image: "https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/15.jpg"
+            },
+            {
+                id: 5,
+                name: "Embroidered Cotton Floral Romper",
+                price: 18,
+                bundlePrice: 16,
+                sizes: ["3-6M", "6-12M", "12-24M", "2T"],
+                material: "100% Cotton",
+                image: "https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/19.jpg"
+            },
+            {
+                id: 6,
+                name: "Cotton Muslin Romper",
+                price: 14,
+                bundlePrice: 12,
+                sizes: ["6-12M", "12-24M"],
+                material: "100% Cotton",
+                image: "https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/18.jpg"
+            },
+            {
+                id: 7,
+                name: "Lightweight Cotton Terry Solid Romper",
+                price: 14,
+                bundlePrice: 12,
+                sizes: ["3-6M", "6-12M"],
+                material: "95% Cotton",
+                image: "https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/27.jpg"
+            },
+            {
+                id: 8,
+                name: "Smile Cotton Long Sleeve Shirt with Stripes",
+                price: 10,
+                bundlePrice: 9,
+                sizes: ["6-12M", "12-24M", "2T", "3T", "4T", "5T"],
+                material: "100% Cotton",
+                image: "https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/2.jpg"
+            },
+            {
+                id: 9,
+                name: "Solid Cotton Long Sleeve",
+                price: 10,
+                bundlePrice: 9,
+                sizes: ["6-12M", "12-24M", "2T", "3T", "4T", "5T"],
+                material: "100% Cotton",
+                image: "https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/3.jpg"
+            },
+            {
+                id: 10,
+                name: "Solid Cotton Long Sleeve",
+                price: 12,
+                bundlePrice: 10,
+                sizes: ["6-12M", "12-24M", "2T", "3T", "4T"],
+                material: "100% Cotton",
+                image: "https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/12.jpg"
+            },
+            {
+                id: 11,
+                name: "Striped Cotton Long Sleeve Shirt with buttons",
+                price: 14,
+                bundlePrice: 12,
+                sizes: ["6-12M", "12-24M", "2T", "3T"],
+                material: "95% Cotton",
+                image: "https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/9.jpg"
+            },
+            {
+                id: 12,
+                name: "Cotton Long Sleeve Bear Shirt",
+                price: 11,
+                bundlePrice: 9,
+                sizes: ["6-12M", "12-24M", "2T"],
+                material: "95% Cotton",
+                image: "https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/17.jpg"
+            },
+            {
+                id: 13,
+                name: "Striped Cotton Sweatshirts",
+                price: 16,
+                bundlePrice: 15,
+                sizes: ["6-12M", "12-24M", "2T", "3T", "4T", "5T"],
+                material: "95% Cotton",
+                image: "https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/16.jpg"
+            },
+            {
+                id: 14,
+                name: "Scalloped Cotton Knited Cardigan",
+                price: 24,
+                bundlePrice: 22,
+                sizes: ["3-6M", "6-12M", "12-24M", "2T", "3T"],
+                material: "100% Cotton",
+                image: "https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/7.jpg"
+            },
+            {
+                id: 15,
+                name: "Ruffled Cotton Muslin Pants",
+                price: 12,
+                bundlePrice: 10,
+                sizes: ["3-6M", "6-12M", "12-24M", "2T", "3T"],
+                material: "100% Cotton",
+                image: "https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/1.jpg"
+            },
+            {
+                id: 16,
+                name: "Cotton Fleece pants with Pocket",
+                price: 15,
+                bundlePrice: 13,
+                sizes: ["3-6M", "6-12M", "2T"],
+                material: "95% Cotton",
+                image: "https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/5.jpg"
+            },
+            {
+                id: 17,
+                name: "Cotton Fleece Leggings",
+                price: 12,
+                bundlePrice: 10,
+                sizes: ["12-24M", "2T", "3T"],
+                material: "95% Cotton",
+                image: "https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/14.jpg"
+            },
+            {
+                id: 18,
+                name: "Striped Pants",
+                price: 14,
+                bundlePrice: 12,
+                sizes: ["6-12M", "12-24M"],
+                material: "Cotton Linen",
+                image: "https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/13.jpg"
+            },
+            {
+                id: 19,
+                name: "Open Back Cotton Lace Set",
+                price: 18,
+                bundlePrice: 16,
+                sizes: ["12-24M", "2T"],
+                material: "95% Cotton",
+                image: "https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/4.jpg"
+            },
+            {
+                id: 20,
+                name: "Embroidered Cotton Fleece Suit",
+                price: "28/set",
+                bundlePrice: "26/set",
+                sizes: ["6-12M", "12-24M", "2T", "3T", "4T", "5T"],
+                material: "95% Cotton",
+                image: "https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/8.jpg"
+            },
+            {
+                id: 21,
+                name: "Solid Cotton Track Suit",
+                price: "24/set",
+                bundlePrice: "22/set",
+                sizes: ["2T", "3T"],
+                material: "95% Cotton",
+                image: "https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/10.jpg"
+            }
+        ];
+
+        let selectedProducts = new Set();
+
+        function toggleSelection(productId) {
+            if (selectedProducts.has(productId)) {
+                selectedProducts.delete(productId);
+            } else {
+                selectedProducts.add(productId);
+            }
+            updateUI();
+        }
+
+        function updateUI() {
+            // Update selected counter
+            const counter = document.getElementById('selectedCounter');
+            if (selectedProducts.size > 0) {
+                counter.classList.remove('hidden');
+                let text = `${selectedProducts.size} item${selectedProducts.size !== 1 ? 's' : ''} selected`;
+                if (selectedProducts.size >= 5) {
+                    text += ' - Bundle price applies! 🎉';
+                }
+                counter.textContent = text;
+            } else {
+                counter.classList.add('hidden');
+            }
+
+            // Update card selection state
+            products.forEach(product => {
+                const card = document.getElementById(`product-${product.id}`);
+                if (selectedProducts.has(product.id)) {
+                    card.classList.add('selected');
+                } else {
+                    card.classList.remove('selected');
+                }
+            });
+        }
+
+        function renderProducts() {
+            const grid = document.getElementById('productGrid');
+            
+            products.forEach(product => {
+                const card = document.createElement('div');
+                card.className = 'product-card';
+                card.id = `product-${product.id}`;
+                card.onclick = () => toggleSelection(product.id);
+
+                const sizeBadges = product.sizes.map(size => 
+                    `<span class="size-badge">${size}</span>`
+                ).join('');
+
+                card.innerHTML = `
+                    <img src="${product.image}" alt="${product.name}" class="product-image">
+                    <div class="product-details">
+                        <div class="product-name">${product.name}</div>
+                        <div class="product-price">$${product.price}</div>
+                        <div class="bundle-price">Bundle Price: $${product.bundlePrice}</div>
+                        <div class="product-material">Material: ${product.material}</div>
+                        <div class="sizes-label">Size Available</div>
+                        <div class="sizes-container">${sizeBadges}</div>
+                    </div>
+                `;
+
+                grid.appendChild(card);
+            });
+        }
+
+        // Initialize
+        renderProducts();
+    </script>
+</body>
+</html>
