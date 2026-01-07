@@ -12,8 +12,8 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background-color: #f9fafb;
+            font-family: 'Georgia', serif;
+            background-color: #faf8f5;
             padding: 1rem;
         }
 
@@ -29,13 +29,15 @@
 
         .header h1 {
             font-size: 2.5rem;
-            font-weight: bold;
+            font-weight: normal;
             margin-bottom: 1rem;
+            color: #2c2c2c;
         }
 
         .header p {
-            color: #6b7280;
+            color: #666;
             margin-bottom: 0.5rem;
+            font-size: 0.95rem;
         }
 
         .header .bundle-info {
@@ -62,23 +64,25 @@
 
         .filter-btn {
             padding: 0.5rem 1rem;
-            border: 2px solid #d1d5db;
-            background-color: white;
+            border: 1px solid #d4c5b9;
+            background-color: #fff;
             border-radius: 0.5rem;
             cursor: pointer;
             font-size: 0.875rem;
-            font-weight: 500;
+            font-weight: normal;
             transition: all 0.2s;
+            color: #5a5a5a;
         }
 
         .filter-btn:hover {
-            border-color: #9ca3af;
+            border-color: #b8a89a;
+            background-color: #fefdfb;
         }
 
         .filter-btn.active {
-            background-color: #3b82f6;
+            background-color: #8b7355;
             color: white;
-            border-color: #3b82f6;
+            border-color: #8b7355;
         }
 
         .hidden {
@@ -114,18 +118,18 @@
             background: white;
             border-radius: 0.5rem;
             overflow: hidden;
-            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
             transition: box-shadow 0.2s;
             cursor: pointer;
+            border: 2px solid transparent;
         }
 
         .product-card:hover {
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.08);
         }
 
         .product-card.selected {
-            outline: 3px solid #10b981;
-            outline-offset: -3px;
+            border-color: #8b7355;
         }
 
         .product-image {
@@ -140,34 +144,35 @@
 
         .product-name {
             font-size: 1.125rem;
-            font-weight: 600;
+            font-weight: normal;
             margin-bottom: 0.5rem;
+            color: #2c2c2c;
         }
 
         .product-price {
             font-size: 1.25rem;
-            font-weight: bold;
-            color: #111827;
+            font-weight: normal;
+            color: #2c2c2c;
             margin-bottom: 0.25rem;
         }
 
         .bundle-price {
             font-size: 0.875rem;
-            color: #059669;
-            font-weight: 600;
+            color: #8b7355;
+            font-weight: normal;
             margin-bottom: 0.5rem;
         }
 
         .product-material {
             font-size: 0.875rem;
-            color: #6b7280;
+            color: #888;
             margin-bottom: 0.5rem;
         }
 
         .sizes-label {
             font-size: 0.875rem;
-            color: #4b5563;
-            font-weight: 500;
+            color: #666;
+            font-weight: normal;
             margin-bottom: 0.25rem;
         }
 
@@ -179,9 +184,10 @@
 
         .size-badge {
             font-size: 0.75rem;
-            background-color: #f3f4f6;
+            background-color: #f5f1ed;
             padding: 0.25rem 0.5rem;
             border-radius: 0.25rem;
+            color: #5a5a5a;
         }
     </style>
 </head>
