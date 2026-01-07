@@ -44,16 +44,6 @@
             font-weight: 600;
         }
 
-        .selected-counter {
-            display: inline-block;
-            background-color: #dbeafe;
-            color: #1e40af;
-            padding: 0.5rem 1rem;
-            border-radius: 0.5rem;
-            font-weight: 600;
-            margin-top: 1rem;
-        }
-
         .filter-buttons {
             display: flex;
             flex-wrap: wrap;
@@ -120,16 +110,10 @@
             overflow: hidden;
             box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
             transition: box-shadow 0.2s;
-            cursor: pointer;
-            border: 2px solid transparent;
         }
 
         .product-card:hover {
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.08);
-        }
-
-        .product-card.selected {
-            border-color: #8b7355;
         }
 
         .product-image {
@@ -198,7 +182,6 @@
             <p>Select your items and screenshot the page to share with us.</p>
             <p>We'll confirm availability as inventory changes daily.</p>
             <p class="bundle-info">5+ items order qualifies for bundle price.</p>
-            <div id="selectedCounter" class="selected-counter hidden"></div>
         </div>
 
         <div class="filter-buttons">
@@ -408,7 +391,6 @@
             }
         ];
 
-        let selectedProducts = new Set();
         let currentSizeFilter = 'all';
 
         function setFilter(size) {
@@ -424,40 +406,6 @@
             });
 
             renderProducts();
-        }
-
-        function toggleSelection(productId) {
-            if (selectedProducts.has(productId)) {
-                selectedProducts.delete(productId);
-            } else {
-                selectedProducts.add(productId);
-            }
-            updateUI();
-        }
-
-        function updateUI() {
-            // Update selected counter
-            const counter = document.getElementById('selectedCounter');
-            if (selectedProducts.size > 0) {
-                counter.classList.remove('hidden');
-                let text = `${selectedProducts.size} item${selectedProducts.size !== 1 ? 's' : ''} selected`;
-                if (selectedProducts.size >= 5) {
-                    text += ' - Bundle price applies! 🎉';
-                }
-                counter.textContent = text;
-            } else {
-                counter.classList.add('hidden');
-            }
-
-            // Update card selection state
-            products.forEach(product => {
-                const card = document.getElementById(`product-${product.id}`);
-                if (selectedProducts.has(product.id)) {
-                    card.classList.add('selected');
-                } else {
-                    card.classList.remove('selected');
-                }
-            });
         }
 
         function renderProducts() {
