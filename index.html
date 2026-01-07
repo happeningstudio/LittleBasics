@@ -1,270 +1,729 @@
-import React, { useState } from 'react';
-import { Check } from 'lucide-react';
-
-const ProductCatalog = () => {
-  const [selectedProducts, setSelectedProducts] = useState(new Set());
-
-  const products = [
-    {
-      id: 1,
-      name: "Cotton Waffle Overall",
-      price: 16,
-      bundlePrice: 14,
-      sizes: ["3-6M", "6-12M", "12-24M"],
-      material: "95% Cotton",
-      image: "https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/6.jpg"
-    },
-    {
-      id: 2,
-      name: "Cotton Linen Kimono Overall",
-      price: 14,
-      bundlePrice: 12,
-      sizes: ["6-12M", "12-24M", "2T"],
-      material: "Cotton Linen",
-      image: "https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/28.jpg"
-    },
-    {
-      id: 3,
-      name: "Ruffle Cotton Romper",
-      price: 12,
-      bundlePrice: 10,
-      sizes: ["6-12M", "12-24M", "2T"],
-      material: "100% Cotton",
-      image: "https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/11.jpg"
-    },
-    {
-      id: 4,
-      name: "Strawberry Romper",
-      price: 12,
-      bundlePrice: 10,
-      sizes: ["12-24M"],
-      material: "100% Cotton",
-      image: "https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/15.jpg"
-    },
-    {
-      id: 5,
-      name: "Embroidered Cotton Floral Romper",
-      price: 18,
-      bundlePrice: 16,
-      sizes: ["3-6M", "6-12M", "12-24M", "2T"],
-      material: "100% Cotton",
-      image: "https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/19.jpg"
-    },
-    {
-      id: 6,
-      name: "Cotton Muslin Romper",
-      price: 14,
-      bundlePrice: 12,
-      sizes: ["6-12M", "12-24M"],
-      material: "100% Cotton",
-      image: "https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/18.jpg"
-    },
-    {
-      id: 7,
-      name: "Lightweight Cotton Terry Solid Romper",
-      price: 14,
-      bundlePrice: 12,
-      sizes: ["3-6M", "6-12M"],
-      material: "95% Cotton",
-      image: "https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/27.jpg"
-    },
-    {
-      id: 8,
-      name: "Smile Cotton Long Sleeve Shirt with Stripes",
-      price: 10,
-      bundlePrice: 9,
-      sizes: ["6-12M", "12-24M", "2T", "3T", "4T", "5T"],
-      material: "100% Cotton",
-      image: "https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/2.jpg"
-    },
-    {
-      id: 9,
-      name: "Solid Cotton Long Sleeve",
-      price: 10,
-      bundlePrice: 9,
-      sizes: ["6-12M", "12-24M", "2T", "3T", "4T", "5T"],
-      material: "100% Cotton",
-      image: "https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/3.jpg"
-    },
-    {
-      id: 10,
-      name: "Solid Cotton Long Sleeve",
-      price: 12,
-      bundlePrice: 10,
-      sizes: ["6-12M", "12-24M", "2T", "3T", "4T"],
-      material: "100% Cotton",
-      image: "https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/12.jpg"
-    },
-    {
-      id: 11,
-      name: "Striped Cotton Long Sleeve Shirt with buttons",
-      price: 14,
-      bundlePrice: 12,
-      sizes: ["6-12M", "12-24M", "2T", "3T"],
-      material: "95% Cotton",
-      image: "https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/9.jpg"
-    },
-    {
-      id: 12,
-      name: "Cotton Long Sleeve Bear Shirt",
-      price: 11,
-      bundlePrice: 9,
-      sizes: ["6-12M", "12-24M", "2T"],
-      material: "95% Cotton",
-      image: "https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/17.jpg"
-    },
-    {
-      id: 13,
-      name: "Striped Cotton Sweatshirts",
-      price: 16,
-      bundlePrice: 15,
-      sizes: ["6-12M", "12-24M", "2T", "3T", "4T", "5T"],
-      material: "95% Cotton",
-      image: "https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/16.jpg"
-    },
-    {
-      id: 14,
-      name: "Scalloped Cotton Knited Cardigan",
-      price: 24,
-      bundlePrice: 22,
-      sizes: ["3-6M", "6-12M", "12-24M", "2T", "3T"],
-      material: "100% Cotton",
-      image: "https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/7.jpg"
-    },
-    {
-      id: 15,
-      name: "Ruffled Cotton Muslin Pants",
-      price: 12,
-      bundlePrice: 10,
-      sizes: ["3-6M", "6-12M", "12-24M", "2T", "3T"],
-      material: "100% Cotton",
-      image: "https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/1.jpg"
-    },
-    {
-      id: 16,
-      name: "Cotton Fleece pants with Pocket",
-      price: 15,
-      bundlePrice: 13,
-      sizes: ["3-6M", "6-12M", "2T"],
-      material: "95% Cotton",
-      image: "https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/5.jpg"
-    },
-    {
-      id: 17,
-      name: "Cotton Fleece Leggings",
-      price: 12,
-      bundlePrice: 10,
-      sizes: ["12-24M", "2T", "3T"],
-      material: "95% Cotton",
-      image: "https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/14.jpg"
-    },
-    {
-      id: 18,
-      name: "Striped Pants",
-      price: 14,
-      bundlePrice: 12,
-      sizes: ["6-12M", "12-24M"],
-      material: "Cotton Linen",
-      image: "https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/13.jpg"
-    },
-    {
-      id: 19,
-      name: "Open Back Cotton Lace Set",
-      price: 18,
-      bundlePrice: 16,
-      sizes: ["12-24M", "2T"],
-      material: "95% Cotton",
-      image: "https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/4.jpg"
-    },
-    {
-      id: 20,
-      name: "Embroidered Cotton Fleece Suit",
-      price: "28/set",
-      bundlePrice: "26/set",
-      sizes: ["6-12M", "12-24M", "2T", "3T", "4T", "5T"],
-      material: "95% Cotton",
-      image: "https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/8.jpg"
-    },
-    {
-      id: 21,
-      name: "Solid Cotton Track Suit",
-      price: "24/set",
-      bundlePrice: "22/set",
-      sizes: ["2T", "3T"],
-      material: "95% Cotton",
-      image: "https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/10.jpg"
-    }
-  ];
-
-  const toggleSelection = (id) => {
-    const newSelected = new Set(selectedProducts);
-    if (newSelected.has(id)) {
-      newSelected.delete(id);
-    } else {
-      newSelected.add(id);
-    }
-    setSelectedProducts(newSelected);
-  };
-
-  return (
-    <div className="min-h-screen bg-gray-50 p-4 sm:p-6 lg:p-8">
-      <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold mb-4">Little Basics Product Catalog</h1>
-          <p className="text-gray-600 mb-2">Select your items and screenshot the page to share with us.</p>
-          <p className="text-gray-600 mb-2">We'll confirm availability as inventory changes daily.</p>
-          <p className="text-gray-600 font-semibold">5+ items order qualifies for bundle price.</p>
-          
-          {selectedProducts.size > 0 && (
-            <div className="mt-4 inline-block bg-blue-100 text-blue-800 px-4 py-2 rounded-lg font-semibold">
-              {selectedProducts.size} item{selectedProducts.size !== 1 ? 's' : ''} selected
-              {selectedProducts.size >= 5 && " - Bundle price applies! 🎉"}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Little Basics Product Catalog</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: #edece6; padding: 20px; color: #564636; }
+        
+        .header { text-align: center; margin-bottom: 30px; position: sticky; top: 0; background: #edece6; padding: 15px 0; z-index: 100; }
+        .header-content { display: grid; grid-template-columns: 1fr 3fr; align-items: center; max-width: 1400px; margin: 0 auto; padding: 0 20px; gap: 30px; }
+        .title-section { text-align: left; }
+        .header h1 { color: #564636; font-weight: 600; letter-spacing: -0.5px; font-size: 28px; line-height: 1.2; }
+        .disclaimer-section { text-align: left; }
+        .disclaimer { color: #8b7355; font-size: 13px; line-height: 1.5; margin-bottom: 10px; }
+        .filter-buttons { display: flex; gap: 8px; flex-wrap: wrap; }
+        .filter-btn { padding: 8px 16px; border: none; background: #8b7355; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 500; color: #edece6; transition: all 0.3s; font-family: 'Inter', sans-serif; }
+        .filter-btn:hover { background: #6d5a45; transform: translateY(-1px); }
+        .filter-btn.active { background: #564636; }
+        .selected-count { display: inline-block; background: #edece6; color: #564636; padding: 2px 8px; border-radius: 10px; font-size: 13px; margin-left: 6px; font-weight: 600; }
+        
+        .products-container { max-width: 1400px; margin: 0 auto; column-count: 4; column-gap: 20px; }
+        .product { background: #fafaf8; overflow: hidden; border: 1px solid #c1b2a3; transition: all 0.3s; width: 100%; margin-bottom: 20px; break-inside: avoid; display: inline-block; }
+        .product:hover { border-color: #8b7355; transform: translateY(-2px); }
+        .product.hidden { display: none; }
+        
+        .product-image-container { width: 100%; background: #f5f5f5; overflow: hidden; cursor: zoom-in; }
+        .product-image-container img { width: 100%; height: auto; display: block; }
+        .product-info { padding: 15px; }
+        .product-name-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid #c1b2a3; }
+        .product-name { font-size: 18px; font-weight: 600; color: #564636; line-height: 1.2; flex: 1; }
+        .price { font-size: 18px; font-weight: 700; color: #564636; white-space: nowrap; }
+        .size-available-label { font-size: 13px; color: #564636; margin-bottom: 6px; }
+        .product-sizes { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+        .size-tag { padding: 4px 10px; background: #edece6; color: #564636; font-size: 13px; font-weight: 600; }
+        .product-top { display: flex; justify-content: space-between; align-items: flex-start; margin-top: 12px; }
+        .product-details { font-size: 14px; color: #564636; line-height: 1.6; flex: 1; }
+        .bundle-price { font-size: 13px; color: #8b7355; margin-bottom: 6px; }
+        .detail-row { margin-bottom: 6px; }
+        .detail-label { font-weight: 600; }
+        .checkbox-container { cursor: pointer; }
+        .checkbox-container input { width: 24px; height: 24px; cursor: pointer; accent-color: #c1b2a3; }
+        
+        .lightbox { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); cursor: zoom-out; }
+        .lightbox.active { display: flex; align-items: center; justify-content: center; }
+        .lightbox img { max-width: 90%; max-height: 90%; object-fit: contain; }
+        
+        .no-results { text-align: center; padding: 60px 20px; color: #999; font-size: 18px; display: none; }
+        
+        @media (max-width: 1200px) { .products-container { column-count: 3; } }
+        @media (max-width: 1024px) { 
+            .products-container { column-count: 2; }
+            .header-content { grid-template-columns: 1fr; gap: 12px; }
+            .title-section, .disclaimer-section { text-align: center; }
+            .filter-buttons { justify-content: center; }
+        }
+        @media (max-width: 640px) { 
+            .products-container { column-count: 1; }
+            .product-name-row { flex-direction: column; gap: 6px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div class="title-section">
+                <h1>Little Basics<br>Product Catalog</h1>
             </div>
-          )}
-        </div>
-
-        <div className="mb-8">
-          <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-3">
-            {products.map(product => (
-              <div 
-                key={product.id} 
-                className="break-inside-avoid mb-3 bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow"
-                onClick={() => toggleSelection(product.id)}
-              >
-                <div className="relative cursor-pointer">
-                  <img 
-                    src={product.image} 
-                    alt={product.name}
-                    className="w-full h-auto object-cover"
-                  />
+            <div class="disclaimer-section">
+                <p class="disclaimer">Select your items and screenshot the page to share with us.<br>We'll confirm availability as inventory changes daily.<br>5+ items order qualifies for bundle price.</p>
+                <div class="filter-buttons">
+                    <button class="filter-btn active" onclick="filterSize('all')">All Sizes</button>
+                    <button class="filter-btn" onclick="filterSize('3-6m')">3-6M</button>
+                    <button class="filter-btn" onclick="filterSize('6-12m')">6-12M</button>
+                    <button class="filter-btn" onclick="filterSize('12-24m')">12-24M</button>
+                    <button class="filter-btn" onclick="filterSize('2t')">2T</button>
+                    <button class="filter-btn" onclick="filterSize('3t')">3T</button>
+                    <button class="filter-btn" onclick="filterSize('4t')">4T</button>
+                    <button class="filter-btn" onclick="filterSize('5t')">5T</button>
                 </div>
-                
-                <div className="p-4">
-                  <h3 className="font-semibold text-lg mb-2">{product.name}</h3>
-                  <p className="text-xl font-bold text-gray-900 mb-1">${product.price}</p>
-                  <p className="text-sm text-green-600 font-semibold mb-2">
-                    Bundle Price: ${product.bundlePrice}
-                  </p>
-                  <p className="text-sm text-gray-500 mb-2">Material: {product.material}</p>
-                  
-                  <div className="mb-0">
-                    <p className="text-sm text-gray-600 font-medium">Size Available</p>
-                    <div className="flex flex-wrap gap-1 mt-1">
-                      {product.sizes.map(size => (
-                        <span key={size} className="text-xs bg-gray-100 px-2 py-1 rounded">
-                          {size}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+            </div>
         </div>
-      </div>
     </div>
-  );
-};
 
-export default ProductCatalog;
+    <div class="products-container">
+        <div class="product" data-sizes="3-6m,6-12m,12-24m" data-selected="false">
+            <div class="product-image-container" onclick="openLightbox('https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/6.jpg')">
+                <img src="https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/6.jpg" alt="Cotton Waffle Overall">
+            </div>
+            <div class="product-info">
+                <div class="product-name-row">
+                    <div class="product-name">Cotton Waffle Overall</div>
+                    <div class="price">$16</div>
+                </div>
+                <div class="size-available-label">Size Available</div>
+                <div class="product-sizes">
+                    <span class="size-tag">3-6M</span>
+                    <span class="size-tag">6-12M</span>
+                    <span class="size-tag">12-24M</span>
+                </div>
+                <div class="product-top">
+                    <div class="product-details">
+                        <div class="bundle-price">Bundle Price: $14</div>
+                        <div class="detail-row"><span class="detail-label">Material:</span> 95% Cotton</div>
+                    </div>
+                    <div class="checkbox-container" onclick="toggleSelect(this)">
+                        <input type="checkbox" onclick="event.stopPropagation()">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="product" data-sizes="6-12m,12-24m,2t" data-selected="false">
+            <div class="product-image-container" onclick="openLightbox('https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/28.jpg')">
+                <img src="https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/28.jpg" alt="Cotton Linen Kimono Overall">
+            </div>
+            <div class="product-info">
+                <div class="product-name-row">
+                    <div class="product-name">Cotton Linen Kimono Overall</div>
+                    <div class="price">$14</div>
+                </div>
+                <div class="size-available-label">Size Available</div>
+                <div class="product-sizes">
+                    <span class="size-tag">6-12M</span>
+                    <span class="size-tag">12-24M</span>
+                    <span class="size-tag">2T</span>
+                </div>
+                <div class="product-top">
+                    <div class="product-details">
+                        <div class="bundle-price">Bundle Price: $12</div>
+                        <div class="detail-row"><span class="detail-label">Material:</span> Cotton Linen</div>
+                    </div>
+                    <div class="checkbox-container" onclick="toggleSelect(this)">
+                        <input type="checkbox" onclick="event.stopPropagation()">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="product" data-sizes="6-12m,12-24m,2t" data-selected="false">
+            <div class="product-image-container" onclick="openLightbox('https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/11.jpg')">
+                <img src="https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/11.jpg" alt="Ruffle Cotton Romper">
+            </div>
+            <div class="product-info">
+                <div class="product-name-row">
+                    <div class="product-name">Ruffle Cotton Romper</div>
+                    <div class="price">$12</div>
+                </div>
+                <div class="size-available-label">Size Available</div>
+                <div class="product-sizes">
+                    <span class="size-tag">6-12M</span>
+                    <span class="size-tag">12-24M</span>
+                    <span class="size-tag">2T</span>
+                </div>
+                <div class="product-top">
+                    <div class="product-details">
+                        <div class="bundle-price">Bundle Price: $10</div>
+                        <div class="detail-row"><span class="detail-label">Material:</span> 100% Cotton</div>
+                    </div>
+                    <div class="checkbox-container" onclick="toggleSelect(this)">
+                        <input type="checkbox" onclick="event.stopPropagation()">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="product" data-sizes="12-24m" data-selected="false">
+            <div class="product-image-container" onclick="openLightbox('https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/15.jpg')">
+                <img src="https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/15.jpg" alt="Strawberry Romper">
+            </div>
+            <div class="product-info">
+                <div class="product-name-row">
+                    <div class="product-name">Strawberry Romper</div>
+                    <div class="price">$12</div>
+                </div>
+                <div class="size-available-label">Size Available</div>
+                <div class="product-sizes">
+                    <span class="size-tag">12-24M</span>
+                </div>
+                <div class="product-top">
+                    <div class="product-details">
+                        <div class="bundle-price">Bundle Price: $10</div>
+                        <div class="detail-row"><span class="detail-label">Material:</span> 100% Cotton</div>
+                    </div>
+                    <div class="checkbox-container" onclick="toggleSelect(this)">
+                        <input type="checkbox" onclick="event.stopPropagation()">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="product" data-sizes="3-6m,6-12m,12-24m,2t" data-selected="false">
+            <div class="product-image-container" onclick="openLightbox('https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/19.jpg')">
+                <img src="https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/19.jpg" alt="Embroidered Cotton Floral Romper">
+            </div>
+            <div class="product-info">
+                <div class="product-name-row">
+                    <div class="product-name">Embroidered Cotton Floral Romper</div>
+                    <div class="price">$18</div>
+                </div>
+                <div class="size-available-label">Size Available</div>
+                <div class="product-sizes">
+                    <span class="size-tag">3-6M</span>
+                    <span class="size-tag">6-12M</span>
+                    <span class="size-tag">12-24M</span>
+                    <span class="size-tag">2T</span>
+                </div>
+                <div class="product-top">
+                    <div class="product-details">
+                        <div class="bundle-price">Bundle Price: $16</div>
+                        <div class="detail-row"><span class="detail-label">Material:</span> 100% Cotton</div>
+                    </div>
+                    <div class="checkbox-container" onclick="toggleSelect(this)">
+                        <input type="checkbox" onclick="event.stopPropagation()">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="product" data-sizes="6-12m,12-24m" data-selected="false">
+            <div class="product-image-container" onclick="openLightbox('https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/18.jpg')">
+                <img src="https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/18.jpg" alt="Cotton Muslin Romper">
+            </div>
+            <div class="product-info">
+                <div class="product-name-row">
+                    <div class="product-name">Cotton Muslin Romper</div>
+                    <div class="price">$14</div>
+                </div>
+                <div class="size-available-label">Size Available</div>
+                <div class="product-sizes">
+                    <span class="size-tag">6-12M</span>
+                    <span class="size-tag">12-24M</span>
+                </div>
+                <div class="product-top">
+                    <div class="product-details">
+                        <div class="bundle-price">Bundle Price: $12</div>
+                        <div class="detail-row"><span class="detail-label">Material:</span> 100% Cotton</div>
+                    </div>
+                    <div class="checkbox-container" onclick="toggleSelect(this)">
+                        <input type="checkbox" onclick="event.stopPropagation()">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="product" data-sizes="3-6m,6-12m" data-selected="false">
+            <div class="product-image-container" onclick="openLightbox('https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/27.jpg')">
+                <img src="https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/27.jpg" alt="Lightweight Cotton Terry Solid Romper">
+            </div>
+            <div class="product-info">
+                <div class="product-name-row">
+                    <div class="product-name">Lightweight Cotton Terry Solid Romper</div>
+                    <div class="price">$14</div>
+                </div>
+                <div class="size-available-label">Size Available</div>
+                <div class="product-sizes">
+                    <span class="size-tag">3-6M</span>
+                    <span class="size-tag">6-12M</span>
+                </div>
+                <div class="product-top">
+                    <div class="product-details">
+                        <div class="bundle-price">Bundle Price: $12</div>
+                        <div class="detail-row"><span class="detail-label">Material:</span> 95% Cotton</div>
+                    </div>
+                    <div class="checkbox-container" onclick="toggleSelect(this)">
+                        <input type="checkbox" onclick="event.stopPropagation()">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="product" data-sizes="6-12m,12-24m,2t,3t,4t,5t" data-selected="false">
+            <div class="product-image-container" onclick="openLightbox('https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/2.jpg')">
+                <img src="https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/2.jpg" alt="Smile Cotton Long Sleeve Shirt with Stripes">
+            </div>
+            <div class="product-info">
+                <div class="product-name-row">
+                    <div class="product-name">Smile Cotton Long Sleeve Shirt with Stripes</div>
+                    <div class="price">$10</div>
+                </div>
+                <div class="size-available-label">Size Available</div>
+                <div class="product-sizes">
+                    <span class="size-tag">6-12M</span>
+                    <span class="size-tag">12-24M</span>
+                    <span class="size-tag">2T</span>
+                    <span class="size-tag">3T</span>
+                    <span class="size-tag">4T</span>
+                    <span class="size-tag">5T</span>
+                </div>
+                <div class="product-top">
+                    <div class="product-details">
+                        <div class="bundle-price">Bundle Price: $9</div>
+                        <div class="detail-row"><span class="detail-label">Material:</span> 100% Cotton</div>
+                    </div>
+                    <div class="checkbox-container" onclick="toggleSelect(this)">
+                        <input type="checkbox" onclick="event.stopPropagation()">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="product" data-sizes="6-12m,12-24m,2t,3t,4t,5t" data-selected="false">
+            <div class="product-image-container" onclick="openLightbox('https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/3.jpg')">
+                <img src="https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/3.jpg" alt="Solid Cotton Long Sleeve">
+            </div>
+            <div class="product-info">
+                <div class="product-name-row">
+                    <div class="product-name">Solid Cotton Long Sleeve</div>
+                    <div class="price">$10</div>
+                </div>
+                <div class="size-available-label">Size Available</div>
+                <div class="product-sizes">
+                    <span class="size-tag">6-12M</span>
+                    <span class="size-tag">12-24M</span>
+                    <span class="size-tag">2T</span>
+                    <span class="size-tag">3T</span>
+                    <span class="size-tag">4T</span>
+                    <span class="size-tag">5T</span>
+                </div>
+                <div class="product-top">
+                    <div class="product-details">
+                        <div class="bundle-price">Bundle Price: $9</div>
+                        <div class="detail-row"><span class="detail-label">Material:</span> 100% Cotton</div>
+                    </div>
+                    <div class="checkbox-container" onclick="toggleSelect(this)">
+                        <input type="checkbox" onclick="event.stopPropagation()">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="product" data-sizes="6-12m,12-24m,2t,3t,4t" data-selected="false">
+            <div class="product-image-container" onclick="openLightbox('https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/12.jpg')">
+                <img src="https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/12.jpg" alt="Solid Cotton Long Sleeve">
+            </div>
+            <div class="product-info">
+                <div class="product-name-row">
+                    <div class="product-name">Solid Cotton Long Sleeve</div>
+                    <div class="price">$12</div>
+                </div>
+                <div class="size-available-label">Size Available</div>
+                <div class="product-sizes">
+                    <span class="size-tag">6-12M</span>
+                    <span class="size-tag">12-24M</span>
+                    <span class="size-tag">2T</span>
+                    <span class="size-tag">3T</span>
+                    <span class="size-tag">4T</span>
+                </div>
+                <div class="product-top">
+                    <div class="product-details">
+                        <div class="bundle-price">Bundle Price: $10</div>
+                        <div class="detail-row"><span class="detail-label">Material:</span> 100% Cotton</div>
+                    </div>
+                    <div class="checkbox-container" onclick="toggleSelect(this)">
+                        <input type="checkbox" onclick="event.stopPropagation()">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="product" data-sizes="6-12m,12-24m,2t,3t" data-selected="false">
+            <div class="product-image-container" onclick="openLightbox('https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/9.jpg')">
+                <img src="https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/9.jpg" alt="Striped Cotton Long Sleeve Shirt with buttons">
+            </div>
+            <div class="product-info">
+                <div class="product-name-row">
+                    <div class="product-name">Striped Cotton Long Sleeve Shirt with buttons</div>
+                    <div class="price">$14</div>
+                </div>
+                <div class="size-available-label">Size Available</div>
+                <div class="product-sizes">
+                    <span class="size-tag">6-12M</span>
+                    <span class="size-tag">12-24M</span>
+                    <span class="size-tag">2T</span>
+                    <span class="size-tag">3T</span>
+                </div>
+                <div class="product-top">
+                    <div class="product-details">
+                        <div class="bundle-price">Bundle Price: $12</div>
+                        <div class="detail-row"><span class="detail-label">Material:</span> 95% Cotton</div>
+                    </div>
+                    <div class="checkbox-container" onclick="toggleSelect(this)">
+                        <input type="checkbox" onclick="event.stopPropagation()">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="product" data-sizes="6-12m,12-24m,2t" data-selected="false">
+            <div class="product-image-container" onclick="openLightbox('https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/17.jpg')">
+                <img src="https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/17.jpg" alt="Cotton Long Sleeve Bear Shirt">
+            </div>
+            <div class="product-info">
+                <div class="product-name-row">
+                    <div class="product-name">Cotton Long Sleeve Bear Shirt</div>
+                    <div class="price">$11</div>
+                </div>
+                <div class="size-available-label">Size Available</div>
+                <div class="product-sizes">
+                    <span class="size-tag">6-12M</span>
+                    <span class="size-tag">12-24M</span>
+                    <span class="size-tag">2T</span>
+                </div>
+                <div class="product-top">
+                    <div class="product-details">
+                        <div class="bundle-price">Bundle Price: $9</div>
+                        <div class="detail-row"><span class="detail-label">Material:</span> 95% Cotton</div>
+                    </div>
+                    <div class="checkbox-container" onclick="toggleSelect(this)">
+                        <input type="checkbox" onclick="event.stopPropagation()">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="product" data-sizes="6-12m,12-24m,2t,3t,4t,5t" data-selected="false">
+            <div class="product-image-container" onclick="openLightbox('https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/16.jpg')">
+                <img src="https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/16.jpg" alt="Striped Cotton Sweatshirts">
+            </div>
+            <div class="product-info">
+                <div class="product-name-row">
+                    <div class="product-name">Striped Cotton Sweatshirts</div>
+                    <div class="price">$16</div>
+                </div>
+                <div class="size-available-label">Size Available</div>
+                <div class="product-sizes">
+                    <span class="size-tag">6-12M</span>
+                    <span class="size-tag">12-24M</span>
+                    <span class="size-tag">2T</span>
+                    <span class="size-tag">3T</span>
+                    <span class="size-tag">4T</span>
+                    <span class="size-tag">5T</span>
+                </div>
+                <div class="product-top">
+                    <div class="product-details">
+                        <div class="bundle-price">Bundle Price: $15</div>
+                        <div class="detail-row"><span class="detail-label">Material:</span> 95% Cotton</div>
+                    </div>
+                    <div class="checkbox-container" onclick="toggleSelect(this)">
+                        <input type="checkbox" onclick="event.stopPropagation()">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="product" data-sizes="3-6m,6-12m,12-24m,2t,3t" data-selected="false">
+            <div class="product-image-container" onclick="openLightbox('https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/7.jpg')">
+                <img src="https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/7.jpg" alt="Scalloped Cotton Knited Cardigan">
+            </div>
+            <div class="product-info">
+                <div class="product-name-row">
+                    <div class="product-name">Scalloped Cotton Knited Cardigan</div>
+                    <div class="price">$24</div>
+                </div>
+                <div class="size-available-label">Size Available</div>
+                <div class="product-sizes">
+                    <span class="size-tag">3-6M</span>
+                    <span class="size-tag">6-12M</span>
+                    <span class="size-tag">12-24M</span>
+                    <span class="size-tag">2T</span>
+                    <span class="size-tag">3T</span>
+                </div>
+                <div class="product-top">
+                    <div class="product-details">
+                        <div class="bundle-price">Bundle Price: $22</div>
+                        <div class="detail-row"><span class="detail-label">Material:</span> 100% Cotton</div>
+                    </div>
+                    <div class="checkbox-container" onclick="toggleSelect(this)">
+                        <input type="checkbox" onclick="event.stopPropagation()">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="product" data-sizes="3-6m,6-12m,12-24m,2t,3t" data-selected="false">
+            <div class="product-image-container" onclick="openLightbox('https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/1.jpg')">
+                <img src="https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/1.jpg" alt="Ruffled Cotton Muslin Pants">
+            </div>
+            <div class="product-info">
+                <div class="product-name-row">
+                    <div class="product-name">Ruffled Cotton Muslin Pants</div>
+                    <div class="price">$12</div>
+                </div>
+                <div class="size-available-label">Size Available</div>
+                <div class="product-sizes">
+                    <span class="size-tag">3-6M</span>
+                    <span class="size-tag">6-12M</span>
+                    <span class="size-tag">12-24M</span>
+                    <span class="size-tag">2T</span>
+                    <span class="size-tag">3T</span>
+                </div>
+                <div class="product-top">
+                    <div class="product-details">
+                        <div class="bundle-price">Bundle Price: $10</div>
+                        <div class="detail-row"><span class="detail-label">Material:</span> 100% Cotton</div>
+                    </div>
+                    <div class="checkbox-container" onclick="toggleSelect(this)">
+                        <input type="checkbox" onclick="event.stopPropagation()">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="product" data-sizes="3-6m,6-12m,2t" data-selected="false">
+            <div class="product-image-container" onclick="openLightbox('https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/5.jpg')">
+                <img src="https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/5.jpg" alt="Cotton Fleece pants with Pocket">
+            </div>
+            <div class="product-info">
+                <div class="product-name-row">
+                    <div class="product-name">Cotton Fleece pants with Pocket</div>
+                    <div class="price">$15</div>
+                </div>
+                <div class="size-available-label">Size Available</div>
+                <div class="product-sizes">
+                    <span class="size-tag">3-6M</span>
+                    <span class="size-tag">6-12M</span>
+                    <span class="size-tag">2T</span>
+                </div>
+                <div class="product-top">
+                    <div class="product-details">
+                        <div class="bundle-price">Bundle Price: $13</div>
+                        <div class="detail-row"><span class="detail-label">Material:</span> 95% Cotton</div>
+                    </div>
+                    <div class="checkbox-container" onclick="toggleSelect(this)">
+                        <input type="checkbox" onclick="event.stopPropagation()">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="product" data-sizes="12-24m,2t,3t" data-selected="false">
+            <div class="product-image-container" onclick="openLightbox('https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/14.jpg')">
+                <img src="https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/14.jpg" alt="Cotton Fleece Leggings">
+            </div>
+            <div class="product-info">
+                <div class="product-name-row">
+                    <div class="product-name">Cotton Fleece Leggings</div>
+                    <div class="price">$12</div>
+                </div>
+                <div class="size-available-label">Size Available</div>
+                <div class="product-sizes">
+                    <span class="size-tag">12-24M</span>
+                    <span class="size-tag">2T</span>
+                    <span class="size-tag">3T</span>
+                </div>
+                <div class="product-top">
+                    <div class="product-details">
+                        <div class="bundle-price">Bundle Price: $10</div>
+                        <div class="detail-row"><span class="detail-label">Material:</span> 95% Cotton</div>
+                    </div>
+                    <div class="checkbox-container" onclick="toggleSelect(this)">
+                        <input type="checkbox" onclick="event.stopPropagation()">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="product" data-sizes="6-12m,12-24m" data-selected="false">
+            <div class="product-image-container" onclick="openLightbox('https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/13.jpg')">
+                <img src="https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/13.jpg" alt="Striped Pants">
+            </div>
+            <div class="product-info">
+                <div class="product-name-row">
+                    <div class="product-name">Striped Pants</div>
+                    <div class="price">$14</div>
+                </div>
+                <div class="size-available-label">Size Available</div>
+                <div class="product-sizes">
+                    <span class="size-tag">6-12M</span>
+                    <span class="size-tag">12-24M</span>
+                </div>
+                <div class="product-top">
+                    <div class="product-details">
+                        <div class="bundle-price">Bundle Price: $12</div>
+                        <div class="detail-row"><span class="detail-label">Material:</span> Cotton Linen</div>
+                    </div>
+                    <div class="checkbox-container" onclick="toggleSelect(this)">
+                        <input type="checkbox" onclick="event.stopPropagation()">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="product" data-sizes="12-24m,2t" data-selected="false">
+            <div class="product-image-container" onclick="openLightbox('https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/4.jpg')">
+                <img src="https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/4.jpg" alt="Open Back Cotton Lace Set">
+            </div>
+            <div class="product-info">
+                <div class="product-name-row">
+                    <div class="product-name">Open Back Cotton Lace Set</div>
+                    <div class="price">$18</div>
+                </div>
+                <div class="size-available-label">Size Available</div>
+                <div class="product-sizes">
+                    <span class="size-tag">12-24M</span>
+                    <span class="size-tag">2T</span>
+                </div>
+                <div class="product-top">
+                    <div class="product-details">
+                        <div class="bundle-price">Bundle Price: $16</div>
+                        <div class="detail-row"><span class="detail-label">Material:</span> 95% Cotton</div>
+                    </div>
+                    <div class="checkbox-container" onclick="toggleSelect(this)">
+                        <input type="checkbox" onclick="event.stopPropagation()">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="product" data-sizes="6-12m,12-24m,2t,3t,4t,5t" data-selected="false">
+            <div class="product-image-container" onclick="openLightbox('https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/8.jpg')">
+                <img src="https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/8.jpg" alt="Embroidered Cotton Fleece Suit">
+            </div>
+            <div class="product-info">
+                <div class="product-name-row">
+                    <div class="product-name">Embroidered Cotton Fleece Suit</div>
+                    <div class="price">$28/set</div>
+                </div>
+                <div class="size-available-label">Size Available</div>
+                <div class="product-sizes">
+                    <span class="size-tag">6-12M</span>
+                    <span class="size-tag">12-24M</span>
+                    <span class="size-tag">2T</span>
+                    <span class="size-tag">3T</span>
+                    <span class="size-tag">4T</span>
+                    <span class="size-tag">5T</span>
+                </div>
+                <div class="product-top">
+                    <div class="product-details">
+                        <div class="bundle-price">Bundle Price: $26/set</div>
+                        <div class="detail-row"><span class="detail-label">Material:</span> 95% Cotton</div>
+                    </div>
+                    <div class="checkbox-container" onclick="toggleSelect(this)">
+                        <input type="checkbox" onclick="event.stopPropagation()">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="product" data-sizes="2t,3t" data-selected="false">
+            <div class="product-image-container" onclick="openLightbox('https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/10.jpg')">
+                <img src="https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/10.jpg" alt="Solid Cotton Track Suit">
+            </div>
+            <div class="product-info">
+                <div class="product-name-row">
+                    <div class="product-name">Solid Cotton Track Suit</div>
+                    <div class="price">$24/set</div>
+                </div>
+                <div class="size-available-label">Size Available</div>
+                <div class="product-sizes">
+                    <span class="size-tag">2T</span>
+                    <span class="size-tag">3T</span>
+                </div>
+                <div class="product-top">
+                    <div class="product-details">
+                        <div class="bundle-price">Bundle Price: $22/set</div>
+                        <div class="detail-row"><span class="detail-label">Material:</span> 95% Cotton</div>
+                    </div>
+                    <div class="checkbox-container" onclick="toggleSelect(this)">
+                        <input type="checkbox" onclick="event.stopPropagation()">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        </div>
+
+    <div class="lightbox" id="lightbox" onclick="closeLightbox()">
+        <img id="lightbox-img" src="" alt="">
+    </div>
+
+    <div class="no-results" id="noResults">No products found</div>
+
+    <script>
+        function openLightbox(src) {
+            document.getElementById('lightbox').classList.add('active');
+            document.getElementById('lightbox-img').src = src;
+        }
+        
+        function closeLightbox() {
+            document.getElementById('lightbox').classList.remove('active');
+        }
+        
+        function updateSelectedCount() {
+            const count = document.querySelectorAll('.product[data-selected="true"]').length;
+            document.getElementById('selectedCount').textContent = count;
+        }
+        
+        function toggleSelect(container) {
+            const checkbox = container.querySelector('input[type="checkbox"]');
+            const product = container.closest('.product');
+            checkbox.checked = !checkbox.checked;
+            product.setAttribute('data-selected', checkbox.checked);
+            updateSelectedCount();
+        }
+        
+        function filterSize(size) {
+            const products = document.querySelectorAll('.product');
+            const noResults = document.getElementById('noResults');
+            let visibleCount = 0;
+            
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            products.forEach(product => {
+                const sizes = product.getAttribute('data-sizes');
+                const selected = product.getAttribute('data-selected') === 'true';
+                
+                if (size === 'selected') {
+                    if (selected) {
+                        product.classList.remove('hidden');
+                        visibleCount++;
+                    } else {
+                        product.classList.add('hidden');
+                    }
+                } else if (size === 'all' || sizes.includes(size)) {
+                    product.classList.remove('hidden');
+                    visibleCount++;
+                } else {
+                    product.classList.add('hidden');
+                }
+            });
+            
+            noResults.style.display = visibleCount === 0 ? 'block' : 'none';
+        }
+    </script>
+</body>
+</html>
