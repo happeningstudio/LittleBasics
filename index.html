@@ -388,6 +388,114 @@
                 sizes: ["2T", "3T"],
                 material: "95% Cotton",
                 image: "https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/10.jpg"
+            },
+            {
+                id: 22,
+                name: "Striped Pants",
+                price: 14,
+                bundlePrice: 12,
+                sizes: ["2T", "3T", "4T", "5T"],
+                material: "Cotton Linen",
+                image: "https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/26.jpg"
+            },
+            {
+                id: 23,
+                name: "Solid Cotton Knit Sweater",
+                price: 24,
+                bundlePrice: 22,
+                sizes: ["2T", "3T", "4T", "5T"],
+                material: "100% Cotton",
+                image: "https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/25.jpg"
+            },
+            {
+                id: 24,
+                name: "Cropped Striped Pants",
+                price: 14,
+                bundlePrice: 12,
+                sizes: ["12-24M", "2T", "3T", "4T", "5T"],
+                material: "100% Cotton",
+                image: "https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/21.jpg"
+            },
+            {
+                id: 25,
+                name: "Cotton Solid Sweatshirt",
+                price: 20,
+                bundlePrice: 18,
+                sizes: ["12-24M", "2T", "3T", "4T", "5T"],
+                material: "100% Cotton",
+                image: "https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/23.jpg"
+            },
+            {
+                id: 26,
+                name: "Cotton Solid Pants",
+                price: 20,
+                bundlePrice: 18,
+                sizes: ["12-24M", "2T", "3T", "4T", "5T"],
+                material: "100% Cotton",
+                image: "https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/22.jpg"
+            },
+            {
+                id: 27,
+                name: "Striped Cotton Fleeced Sweatshirt",
+                price: 24,
+                bundlePrice: 22,
+                sizes: ["12-24M", "2T", "3T", "4T", "5T"],
+                material: "100% Cotton",
+                image: "https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/32.jpg"
+            },
+            {
+                id: 28,
+                name: "Cotton Light Fleeced Leggings",
+                price: 10,
+                bundlePrice: 9,
+                sizes: ["12-24M", "2T", "3T", "4T", "5T"],
+                material: "100% Cotton",
+                image: "https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/33.jpg"
+            },
+            {
+                id: 29,
+                name: "Cotton Knot Leggings",
+                price: 10,
+                bundlePrice: 9,
+                sizes: ["12-24M", "2T", "3T", "4T", "5T"],
+                material: "100% Cotton",
+                image: "https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/34.jpg"
+            },
+            {
+                id: 30,
+                name: "Cotton Sleeveless Romper",
+                price: 12,
+                bundlePrice: 10,
+                sizes: ["3-6M"],
+                material: "100% Cotton",
+                image: "https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/35.jpg"
+            },
+            {
+                id: 31,
+                name: "Cotton Light Fleeced Leggings",
+                price: 13,
+                bundlePrice: 10,
+                sizes: ["12-24M", "2T", "3T", "4T", "5T"],
+                material: "100% Cotton",
+                image: "https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/36.jpg"
+            },
+            {
+                id: 32,
+                name: "Cotton Knot Leggings",
+                price: 14,
+                bundlePrice: 11,
+                sizes: ["12-24M", "2T", "3T", "4T", "5T"],
+                material: "100% Cotton",
+                image: "https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/37.jpg"
+            },
+            {
+                id: 33,
+                name: "Cotton Sleeveless Romper",
+                price: 15,
+                bundlePrice: 11,
+                sizes: ["3-6M"],
+                material: "100% Cotton",
+                image: "https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/38.jpg"
             }
         ];
 
@@ -420,7 +528,6 @@
                 const card = document.createElement('div');
                 card.className = 'product-card';
                 card.id = `product-${product.id}`;
-                card.onclick = () => toggleSelection(product.id);
 
                 const sizeBadges = product.sizes.map(size => 
                     `<span class="size-badge">${size}</span>`
