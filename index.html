@@ -385,7 +385,7 @@
                 name: "Solid Cotton Track Suit",
                 price: "24/set",
                 bundlePrice: "22/set",
-                sizes: ["3-6M", "6-12M", "12-24M", "2T", "3T", "4T"],
+                sizes: ["2T", "3T"],
                 material: "95% Cotton",
                 image: "https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/10.jpg"
             },
@@ -457,7 +457,7 @@
                 name: "Cotton Knot Leggings",
                 price: 10,
                 bundlePrice: 9,
-                sizes: ["3-6M", "6-12", "12-24M"],
+                sizes: ["12-24M", "2T", "3T", "4T", "5T"],
                 material: "100% Cotton",
                 image: "https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/34.jpg"
             },
@@ -703,6 +703,24 @@
                 sizes: ["3T"],
                 material: "100% Cotton",
                 image: "https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/61.jpg"
+            },
+            {
+                id: 57,
+                name: "Cotton Knit Set",
+                price: 24,
+                bundlePrice: 22,
+                sizes: ["12-24M"],
+                material: "100% Cotton",
+                image: "https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/64.jpg"
+            },
+            {
+                id: 58,
+                name: "Cotton Knit Sprinkle Sweater",
+                price: 16,
+                bundlePrice: 14,
+                sizes: ["6-12M", "4T", "5T"],
+                material: "100% Cotton",
+                image: "https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/65.jpg"
             }
         ];
 
@@ -731,8 +749,8 @@
                 ? products 
                 : products.filter(p => p.sizes.includes(currentSizeFilter));
             
-            // Reverse to show newest products first
-            filteredProducts = [...filteredProducts].reverse();
+            // Randomize the order
+            filteredProducts = [...filteredProducts].sort(() => Math.random() - 0.5);
 
             filteredProducts.forEach(product => {
                 const card = document.createElement('div');
