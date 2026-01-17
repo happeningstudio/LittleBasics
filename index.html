@@ -727,9 +727,12 @@
             const grid = document.getElementById('productGrid');
             grid.innerHTML = ''; // Clear existing products
             
-            const filteredProducts = currentSizeFilter === 'all' 
+            let filteredProducts = currentSizeFilter === 'all' 
                 ? products 
                 : products.filter(p => p.sizes.includes(currentSizeFilter));
+            
+            // Reverse to show newest products first
+            filteredProducts = [...filteredProducts].reverse();
 
             filteredProducts.forEach(product => {
                 const card = document.createElement('div');
