@@ -33,31 +33,44 @@
         }
 
         .header-content {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 2rem 1rem;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 2rem;
-            align-items: start;
-            transition: all 0.3s ease;
-        }
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+    display: grid;
+    grid-template-columns: auto 1fr 1fr;
+    gap: 2rem;
+    align-items: start;
+    transition: all 0.3s ease;
+}
 
-        .header.minimized .header-content {
-            padding: 1rem;
-            align-items: center;
-        }
+.header.minimized .header-content {
+    padding: 1rem;
+    align-items: center;
+.header-content {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+    display: grid;
+    grid-template-columns: auto 1fr 1fr;
+    gap: 2rem;
+    align-items: start;
+    transition: all 0.3s ease;
+}
 
-       .header-logo {
-    height: 80px;
+.header.minimized .header-content {
+    padding: 1rem;
+    align-items: center;
+}
+
+
+.header-logo {
+    height: 120px;
     width: auto;
-    margin-bottom: 1rem;
     transition: all 0.3s ease;
 }
 
 .header.minimized .header-logo {
-    height: 40px;
-    margin-bottom: 0;
+    height: 50px;
 }
 
         .header-left p {
@@ -155,20 +168,26 @@
             }
         }
 
-        @media (max-width: 768px) {
-            .header-content {
-                grid-template-columns: 1fr;
-                gap: 1.5rem;
-            }
+       @media (max-width: 768px) {
+    .header-content {
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
 
-            .header-left h1 {
-                font-size: 1.5rem;
-            }
+    .header-logo {
+        grid-column: 1 / -1;
+        height: 80px;
+    }
 
-            .header.minimized .header-left h1 {
-                font-size: 1.25rem;
-            }
-        }
+    .header.minimized .header-logo {
+        grid-column: auto;
+        height: 40px;
+    }
+
+    .header.minimized .header-content {
+        grid-template-columns: auto 1fr;
+    }
+}
 
         .product-card {
             break-inside: avoid;
