@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Little Basics Product Catalog</title>
     <style>
-      * {
+   * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
@@ -23,6 +23,7 @@ body {
     padding: 0 1rem;
 }
 
+/* ── HEADER ── */
 .header {
     background-color: #fff;
     border-bottom: 1px solid #e5e5e5;
@@ -37,30 +38,28 @@ body {
     margin: 0 auto;
     padding: 1.5rem 1rem;
     display: grid;
-    grid-template-columns: 180px 1fr 1fr;
+    grid-template-columns: 160px 1fr 1fr;
+    grid-template-rows: auto;
     gap: 2rem;
     align-items: center;
     transition: all 0.3s ease;
 }
 
-.header.minimized .header-content {
-    padding: 0.75rem 1rem;
-}
-
+/* Column 1: Logo */
 .header-logo {
-    height: 100px;
+    grid-column: 1;
+    grid-row: 1;
+    height: 90px;
     width: auto;
-    display: block;
-    align-self: center;
     object-fit: contain;
+    display: block;
     transition: all 0.3s ease;
 }
 
-.header.minimized .header-logo {
-    height: 45px;
-}
-
+/* Column 2: Info text */
 .header-left {
+    grid-column: 2;
+    grid-row: 1;
     display: flex;
     flex-direction: column;
     gap: 0.4rem;
@@ -73,16 +72,15 @@ body {
     transition: all 0.3s ease;
 }
 
-.header.minimized .header-left p {
-    display: none;
-}
-
 .header-left .bundle-info {
     font-weight: 600;
     color: #8b7355;
 }
 
+/* Column 3: Filters */
 .header-right {
+    grid-column: 3;
+    grid-row: 1;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -94,10 +92,6 @@ body {
     margin-bottom: 0.75rem;
     font-weight: 600;
     transition: all 0.3s ease;
-}
-
-.header.minimized .filter-label {
-    display: none;
 }
 
 .filter-buttons {
@@ -129,6 +123,24 @@ body {
     border-color: #8b7355;
 }
 
+/* Minimized state */
+.header.minimized .header-content {
+    padding: 0.75rem 1rem;
+}
+
+.header.minimized .header-logo {
+    height: 40px;
+}
+
+.header.minimized .header-left {
+    display: none;
+}
+
+.header.minimized .filter-label {
+    display: none;
+}
+
+/* ── PRODUCT GRID ── */
 .product-grid-container {
     padding: 1.5rem 0;
 }
@@ -139,57 +151,58 @@ body {
 }
 
 @media (min-width: 640px) {
-    .grid {
-        column-count: 2;
-    }
+    .grid { column-count: 2; }
 }
 
 @media (min-width: 1024px) {
-    .grid {
-        column-count: 3;
-    }
+    .grid { column-count: 3; }
 }
 
 @media (min-width: 1280px) {
-    .grid {
-        column-count: 4;
-    }
+    .grid { column-count: 4; }
 }
 
+/* ── MOBILE ── */
 @media (max-width: 768px) {
     .header-content {
         grid-template-columns: 1fr;
         grid-template-rows: auto auto auto;
-        gap: 1rem;
+        gap: 0.75rem;
         padding: 1rem;
     }
 
     .header-logo {
-        height: 70px;
+        grid-column: 1;
         grid-row: 1;
+        height: 65px;
     }
 
     .header-right {
+        grid-column: 1;
         grid-row: 2;
     }
 
     .header-left {
+        grid-column: 1;
         grid-row: 3;
     }
 
     .header.minimized .header-content {
         grid-template-columns: auto 1fr;
         grid-template-rows: auto;
+        gap: 1rem;
         align-items: center;
     }
 
     .header.minimized .header-logo {
-        height: 35px;
-        grid-row: auto;
+        grid-column: 1;
+        grid-row: 1;
+        height: 32px;
     }
 
     .header.minimized .header-right {
-        grid-row: auto;
+        grid-column: 2;
+        grid-row: 1;
     }
 
     .header.minimized .header-left {
@@ -197,6 +210,7 @@ body {
     }
 }
 
+/* ── PRODUCT CARDS ── */
 .product-card {
     break-inside: avoid;
     margin-bottom: 0.75rem;
@@ -271,11 +285,11 @@ body {
     </style>
 </head>
 <body>
-   <div class="header" id="header">
+<div class="header" id="header">
     <div class="header-content">
+        <img src="https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/LittleBasics.png" 
+             alt="Little Basics" class="header-logo">
         <div class="header-left">
-            <img src="https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/LittleBasics.png" 
-                 alt="Little Basics" class="header-logo">
             <p>Select your items and screenshot the page to share with us.</p>
             <p>We'll confirm availability as inventory changes daily.</p>
             <p class="bundle-info">5+ items in an order qualify for the bundle price.</p>
