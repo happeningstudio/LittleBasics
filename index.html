@@ -925,19 +925,19 @@ body {
 
         // Scroll detection for header minimization
         let lastScrollTop = 0;
-        const header = document.getElementById('header');
-        
-        window.addEventListener('scroll', () => {
-            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-            
-            if (scrollTop > 100) {
-                header.classList.add('minimized');
-            } else {
-                header.classList.remove('minimized');
-            }
-            
-            lastScrollTop = scrollTop;
-        });
+const header = document.getElementById('header');
+
+window.addEventListener('scroll', () => {
+    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+
+    if (scrollTop > 100) {
+        header.classList.add('minimized');
+    } else if (scrollTop < 80) {
+        header.classList.remove('minimized');
+    }
+
+    lastScrollTop = scrollTop;
+}, { passive: true });
 
         function setFilter(size) {
             currentSizeFilter = size;
