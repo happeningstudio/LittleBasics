@@ -48,18 +48,17 @@
             align-items: center;
         }
 
-        .header-left h1 {
-            font-size: 2rem;
-            font-weight: normal;
-            margin-bottom: 1rem;
-            color: #2c2c2c;
-            transition: all 0.3s ease;
-        }
+       .header-logo {
+    height: 80px;
+    width: auto;
+    margin-bottom: 1rem;
+    transition: all 0.3s ease;
+}
 
-        .header.minimized .header-left h1 {
-            font-size: 1.5rem;
-            margin-bottom: 0;
-        }
+.header.minimized .header-logo {
+    height: 40px;
+    margin-bottom: 0;
+}
 
         .header-left p {
             color: #666;
@@ -245,29 +244,31 @@
     </style>
 </head>
 <body>
-    <div class="header" id="header">
-        <div class="header-content">
-            <div class="header-left">
-                <h1>Little Basics Product Catalog</h1>
-                <p>Select your items and screenshot the page to share with us.</p>
-                <p>We'll confirm availability as inventory changes daily.</p>
-                <p class="bundle-info">5+ items in an order qualify for the bundle price.</p>
-                <p>Shipping is available, $7-8 (up to 10 items)</p>
-            </div>
-            <div class="header-right">
-                <div class="filter-label">Filter by Size:</div>
-                <div class="filter-buttons">
-                    <button class="filter-btn active" data-size="all">All Sizes</button>
-                    <button class="filter-btn" data-size="3-6M">3-6M</button>
-                    <button class="filter-btn" data-size="6-12M">6-12M</button>
-                    <button class="filter-btn" data-size="12-24M">12-24M</button>
-                    <button class="filter-btn" data-size="2T">2T</button>
-                    <button class="filter-btn" data-size="3T">3T</button>
-                    <button class="filter-btn" data-size="4T">4T</button>
-                    <button class="filter-btn" data-size="5T">5T</button>
-                </div>
+   <div class="header" id="header">
+    <div class="header-content">
+        <div class="header-left">
+            <img src="https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/littlebasic.png" 
+                 alt="Little Basics" class="header-logo">
+            <p>Select your items and screenshot the page to share with us.</p>
+            <p>We'll confirm availability as inventory changes daily.</p>
+            <p class="bundle-info">5+ items in an order qualify for the bundle price.</p>
+            <p>Shipping is available, $7-8 (up to 10 items)</p>
+        </div>
+        <div class="header-right">
+            <div class="filter-label">Filter by Size:</div>
+            <div class="filter-buttons">
+                <button class="filter-btn active" data-size="all">All Sizes</button>
+                <button class="filter-btn" data-size="3-6M">3-6M</button>
+                <button class="filter-btn" data-size="6-12M">6-12M</button>
+                <button class="filter-btn" data-size="12-24M">12-24M</button>
+                <button class="filter-btn" data-size="2T">2T</button>
+                <button class="filter-btn" data-size="3T">3T</button>
+                <button class="filter-btn" data-size="4T">4T</button>
+                <button class="filter-btn" data-size="5T">5T</button>
             </div>
         </div>
+    </div>
+</div>
     </div>
 
     <div class="container">
