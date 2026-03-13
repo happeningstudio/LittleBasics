@@ -175,6 +175,7 @@ body {
         grid-column: 1;
         grid-row: 1;
         height: 65px;
+        justify-self: start;
     }
 
     .header-right {
@@ -187,6 +188,7 @@ body {
         grid-row: 3;
     }
 
+    /* Minimized: logo left, filters right */
     .header.minimized .header-content {
         grid-template-columns: auto 1fr;
         grid-template-rows: auto;
@@ -198,6 +200,7 @@ body {
         grid-column: 1;
         grid-row: 1;
         height: 32px;
+        justify-self: start;
     }
 
     .header.minimized .header-right {
@@ -206,6 +209,10 @@ body {
     }
 
     .header.minimized .header-left {
+        display: none;
+    }
+
+    .header.minimized .filter-label {
         display: none;
     }
 }
