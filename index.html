@@ -30,7 +30,6 @@ body {
     position: sticky;
     top: 0;
     z-index: 100;
-    overflow: visible;
     transition: all 0.3s ease;
 }
 
@@ -43,7 +42,6 @@ body {
     grid-template-rows: auto;
     gap: 2rem;
     align-items: center;
-    overflow: visible;
     transition: all 0.3s ease;
 }
 
@@ -126,7 +124,7 @@ body {
     border-color: #8b7355;
 }
 
-/* Minimized state */
+/* ── MINIMIZED STATE (desktop) ── */
 .header.minimized .header-content {
     padding: 0.75rem 1rem;
 }
@@ -211,20 +209,33 @@ body {
     .header.minimized .header-content {
         grid-template-columns: auto 1fr;
         grid-template-rows: auto;
-        gap: 1rem;
+        gap: 0.75rem;
         align-items: center;
+        padding: 0.5rem 1rem;
     }
 
     .header.minimized .header-logo {
         grid-column: 1;
         grid-row: 1;
-        height: 32px;
+        height: 28px;
         justify-self: start;
     }
 
     .header.minimized .header-right {
         grid-column: 2;
         grid-row: 1;
+        overflow: hidden;
+    }
+
+    .header.minimized .filter-buttons {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+    }
+
+    .header.minimized .filter-buttons::-webkit-scrollbar {
+        display: none;
     }
 
     .header.minimized .header-left {
@@ -364,7 +375,7 @@ body {
 
 <footer class="footer">
     <div class="footer-content">
-        <p>Little Basics by Epic Layers</p>
+        <p>Little Basics is part of Epic Layers Inc.</p>
     </div>
 </footer>
 
@@ -945,14 +956,22 @@ let currentSizeFilter = 'all';
 window.scrollTo(0, 0);
 window.addEventListener('load', () => { window.scrollTo(0, 0); });
 
-// Scroll detection for header minimization
+// Scroll detection with requestAnimationFrame to prevent flickering
 const header = document.getElementById('header');
+let ticking = false;
+
 window.addEventListener('scroll', () => {
-    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-    if (scrollTop > 100) {
-        header.classList.add('minimized');
-    } else if (scrollTop < 80) {
-        header.classList.remove('minimized');
+    if (!ticking) {
+        window.requestAnimationFrame(() => {
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            if (scrollTop > 120) {
+                header.classList.add('minimized');
+            } else if (scrollTop < 60) {
+                header.classList.remove('minimized');
+            }
+            ticking = false;
+        });
+        ticking = true;
     }
 }, { passive: true });
 
