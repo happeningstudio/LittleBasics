@@ -30,7 +30,6 @@ body {
     position: sticky;
     top: 0;
     z-index: 100;
-    transition: all 0.3s ease;
 }
 
 .header-content {
@@ -42,7 +41,6 @@ body {
     grid-template-rows: auto;
     gap: 2rem;
     align-items: center;
-    transition: all 0.3s ease;
 }
 
 /* Column 1: Logo */
@@ -53,7 +51,6 @@ body {
     width: auto;
     object-fit: contain;
     display: block;
-    transition: all 0.3s ease;
 }
 
 /* Column 2: Info text */
@@ -69,7 +66,6 @@ body {
     color: #666;
     font-size: 0.9rem;
     line-height: 1.4;
-    transition: all 0.3s ease;
 }
 
 .header-left .bundle-info {
@@ -91,7 +87,6 @@ body {
     color: #666;
     margin-bottom: 0.75rem;
     font-weight: 600;
-    transition: all 0.3s ease;
 }
 
 .filter-buttons {
@@ -126,11 +121,11 @@ body {
 
 /* ── MINIMIZED STATE (desktop) ── */
 .header.minimized .header-content {
-    padding: 0.75rem 1rem;
+    padding: 0.6rem 1rem;
 }
 
 .header.minimized .header-logo {
-    height: 40px;
+    height: 38px;
 }
 
 .header.minimized .header-left {
@@ -181,6 +176,8 @@ body {
 
 /* ── MOBILE ── */
 @media (max-width: 768px) {
+
+    /* Expanded: single column, logo / filters / text */
     .header-content {
         grid-template-columns: 1fr;
         grid-template-rows: auto auto auto;
@@ -191,7 +188,7 @@ body {
     .header-logo {
         grid-column: 1;
         grid-row: 1;
-        height: 65px;
+        height: 60px;
         justify-self: start;
     }
 
@@ -205,13 +202,12 @@ body {
         grid-row: 3;
     }
 
-    /* Minimized: logo left, filters right */
+    /* Minimized: logo top-left, filter label + buttons below full width */
     .header.minimized .header-content {
-        grid-template-columns: auto 1fr;
-        grid-template-rows: auto;
-        gap: 0.75rem;
-        align-items: center;
-        padding: 0.5rem 1rem;
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto;
+        gap: 0.5rem;
+        padding: 0.75rem 1rem;
     }
 
     .header.minimized .header-logo {
@@ -222,27 +218,25 @@ body {
     }
 
     .header.minimized .header-right {
-        grid-column: 2;
-        grid-row: 1;
-        overflow: hidden;
-    }
-
-    .header.minimized .filter-buttons {
-        flex-wrap: nowrap;
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-        scrollbar-width: none;
-    }
-
-    .header.minimized .filter-buttons::-webkit-scrollbar {
-        display: none;
-    }
-
-    .header.minimized .header-left {
-        display: none;
+        grid-column: 1;
+        grid-row: 2;
     }
 
     .header.minimized .filter-label {
+        display: block;
+        margin-bottom: 0.4rem;
+    }
+
+    .header.minimized .filter-buttons {
+        flex-wrap: wrap;
+    }
+
+    .header.minimized .filter-btn {
+        padding: 0.4rem 0.7rem;
+        font-size: 0.8rem;
+    }
+
+    .header.minimized .header-left {
         display: none;
     }
 }
@@ -951,12 +945,13 @@ const products = [
 ];
 
 let currentSizeFilter = 'all';
+let isMinimized = false;
 
 // Scroll to top on load
 window.scrollTo(0, 0);
 window.addEventListener('load', () => { window.scrollTo(0, 0); });
 
-// Scroll detection with requestAnimationFrame to prevent flickering
+// Flicker-free scroll: only trigger at firm thresholds, never in the middle zone
 const header = document.getElementById('header');
 let ticking = false;
 
@@ -964,9 +959,11 @@ window.addEventListener('scroll', () => {
     if (!ticking) {
         window.requestAnimationFrame(() => {
             const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-            if (scrollTop > 120) {
+            if (!isMinimized && scrollTop > 200) {
+                isMinimized = true;
                 header.classList.add('minimized');
-            } else if (scrollTop < 60) {
+            } else if (isMinimized && scrollTop < 50) {
+                isMinimized = false;
                 header.classList.remove('minimized');
             }
             ticking = false;
