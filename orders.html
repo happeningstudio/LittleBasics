@@ -1,1 +1,1067 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Little Basics — Order Tracker</title>
+    <style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #f5f5f5;
+    color: #2c2c2c;
+    font-size: 13px;
+}
+
+/* ── TOPBAR ── */
+.topbar {
+    background: #fff;
+    border-bottom: 1px solid #ddd;
+    padding: 0.6rem 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 300;
+}
+
+.topbar img { height: 34px; }
+
+.topbar-center {
+    display: flex;
+    gap: 0;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.tab-btn {
+    padding: 0.4rem 1.1rem;
+    font-size: 0.78rem;
+    font-weight: 500;
+    background: #fff;
+    border: none;
+    cursor: pointer;
+    color: #888;
+    font-family: inherit;
+    transition: background 0.15s;
+}
+
+.tab-btn.active { background: #8b7355; color: #fff; }
+.tab-btn:not(.active):hover { background: #f5f1ed; }
+
+.topbar-actions { display: flex; gap: 0.5rem; align-items: center; }
+
+.btn {
+    padding: 0.38rem 0.85rem;
+    font-size: 0.78rem;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    background: #fff;
+    cursor: pointer;
+    font-family: inherit;
+    color: #555;
+    white-space: nowrap;
+}
+
+.btn:hover { border-color: #8b7355; color: #8b7355; }
+.btn.primary { background: #8b7355; color: #fff; border-color: #8b7355; }
+.btn.primary:hover { background: #7a6348; }
+
+/* ── VIEWS ── */
+.view { display: none; }
+.view.active { display: block; }
+
+/* ── ORDER VIEW LAYOUT ── */
+.order-layout {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    height: calc(100vh - 53px);
+}
+
+/* ── LEFT: TABLE AREA ── */
+.table-area {
+    overflow-y: auto;
+    padding: 1rem 1.25rem;
+}
+
+.toolbar {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+}
+
+.search-input {
+    padding: 0.38rem 0.7rem;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 0.82rem;
+    width: 220px;
+    font-family: inherit;
+    background: #fff;
+}
+
+.search-input:focus { outline: none; border-color: #8b7355; }
+
+.filter-chip {
+    padding: 0.3rem 0.7rem;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    background: #fff;
+    cursor: pointer;
+    color: #666;
+}
+
+.filter-chip.active { background: #8b7355; color: #fff; border-color: #8b7355; }
+
+/* Product table */
+.product-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+
+.product-table th {
+    background: #faf8f5;
+    font-size: 0.68rem;
+    font-weight: 600;
+    color: #999;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    padding: 0.55rem 0.75rem;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+    white-space: nowrap;
+}
+
+.product-table td {
+    padding: 0.45rem 0.75rem;
+    border-bottom: 1px solid #f0f0f0;
+    vertical-align: middle;
+}
+
+.product-table tr:last-child td { border-bottom: none; }
+
+.product-table tr.product-group-header td {
+    background: #faf8f5;
+    font-weight: 600;
+    font-size: 0.78rem;
+    color: #555;
+    padding: 0.5rem 0.75rem 0.3rem;
+    border-bottom: none;
+}
+
+.product-table tr.variant-row:hover { background: #fdfcfb; }
+.product-table tr.variant-row.in-order { background: #fdf8f3; }
+
+/* Thumbnail */
+.thumb {
+    width: 36px;
+    height: 36px;
+    object-fit: cover;
+    border-radius: 4px;
+    display: block;
+}
+
+/* Color swatch */
+.swatch {
+    width: 18px;
+    height: 18px;
+    border-radius: 3px;
+    border: 1px solid rgba(0,0,0,0.12);
+    display: inline-block;
+    flex-shrink: 0;
+}
+
+.variant-label {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.8rem;
+    color: #444;
+}
+
+.size-pill {
+    font-size: 0.68rem;
+    background: #f0ede9;
+    padding: 0.15rem 0.45rem;
+    border-radius: 10px;
+    color: #666;
+    white-space: nowrap;
+}
+
+/* Stock indicator */
+.stock-cell {
+    font-size: 0.78rem;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.stock-cell.ok { color: #4a7c59; }
+.stock-cell.low { color: #e07b3a; }
+.stock-cell.zero { color: #c0392b; }
+
+/* Qty controls */
+.qty-ctrl {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.qb {
+    width: 22px;
+    height: 22px;
+    border: 1px solid #ddd;
+    background: #fff;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #555;
+    flex-shrink: 0;
+    line-height: 1;
+}
+
+.qb:hover { border-color: #8b7355; color: #8b7355; }
+
+.qn {
+    font-size: 0.82rem;
+    font-weight: 600;
+    min-width: 18px;
+    text-align: center;
+    color: #2c2c2c;
+}
+
+.qn.active { color: #8b7355; }
+
+.line-total {
+    font-size: 0.82rem;
+    color: #2c2c2c;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.line-total.bundle { color: #8b7355; }
+
+/* ── RIGHT: FLOATING PANEL ── */
+.summary-panel {
+    background: #fff;
+    border-left: 1px solid #ddd;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+}
+
+.panel-section {
+    padding: 1rem;
+    border-bottom: 1px solid #eee;
+}
+
+.panel-section:last-child { border-bottom: none; }
+
+.panel-section h4 {
+    font-size: 0.68rem;
+    font-weight: 600;
+    color: #aaa;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 0.75rem;
+}
+
+/* Order items list */
+.order-item-list { list-style: none; }
+
+.order-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 0.3rem 0;
+    border-bottom: 1px solid #f5f5f5;
+    gap: 0.5rem;
+}
+
+.order-item:last-child { border-bottom: none; }
+
+.oi-name {
+    font-size: 0.75rem;
+    color: #444;
+    flex: 1;
+    line-height: 1.3;
+}
+
+.oi-detail {
+    font-size: 0.72rem;
+    color: #888;
+    white-space: nowrap;
+}
+
+.empty-msg {
+    font-size: 0.78rem;
+    color: #ccc;
+    text-align: center;
+    padding: 0.5rem 0;
+}
+
+.bundle-badge {
+    display: none;
+    background: #f5f1ed;
+    color: #8b7355;
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 0.3rem 0.6rem;
+    border-radius: 4px;
+    margin-bottom: 0.6rem;
+    text-align: center;
+}
+
+.bundle-badge.on { display: block; }
+
+/* Summary rows */
+.sum-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    padding: 0.28rem 0;
+    border-bottom: 1px solid #f5f5f5;
+}
+
+.sum-row:last-child { border-bottom: none; }
+.sum-label { color: #888; }
+.sum-val { font-weight: 500; }
+.sum-row.total { padding-top: 0.5rem; margin-top: 0.3rem; border-top: 2px solid #eee; border-bottom: none; }
+.sum-row.total .sum-label { font-weight: 600; color: #2c2c2c; }
+.sum-val.profit { color: #4a7c59; font-size: 0.95rem; font-weight: 700; }
+.sum-val.loss { color: #c0392b; font-size: 0.95rem; font-weight: 700; }
+
+/* Form fields */
+.field { margin-bottom: 0.55rem; }
+
+.field label {
+    display: block;
+    font-size: 0.68rem;
+    color: #aaa;
+    margin-bottom: 0.2rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.field input,
+.field select,
+.field textarea {
+    width: 100%;
+    border: 1px solid #e5e5e5;
+    border-radius: 5px;
+    padding: 0.38rem 0.55rem;
+    font-size: 0.8rem;
+    color: #2c2c2c;
+    background: #fafafa;
+    font-family: inherit;
+}
+
+.field input:focus,
+.field select:focus,
+.field textarea:focus { outline: none; border-color: #8b7355; }
+
+.field textarea { resize: vertical; min-height: 48px; }
+
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 0.4rem; }
+
+/* Copy button */
+.copy-btn {
+    width: 100%;
+    background: #8b7355;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 0.6rem;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    margin-top: 0.4rem;
+}
+
+.copy-btn:hover { background: #7a6348; }
+
+.copy-confirm {
+    text-align: center;
+    font-size: 0.72rem;
+    color: #4a7c59;
+    margin-top: 0.3rem;
+    min-height: 1em;
+}
+
+/* ── INVENTORY VIEW ── */
+.inv-area {
+    padding: 1.25rem;
+    overflow-x: auto;
+}
+
+.inv-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.inv-table {
+    border-collapse: collapse;
+    background: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    min-width: 100%;
+}
+
+.inv-table th {
+    background: #faf8f5;
+    font-size: 0.68rem;
+    font-weight: 600;
+    color: #999;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    padding: 0.5rem 0.75rem;
+    text-align: center;
+    border-bottom: 1px solid #eee;
+    border-right: 1px solid #eee;
+    white-space: nowrap;
+}
+
+.inv-table th.product-col { text-align: left; min-width: 200px; }
+.inv-table th.color-col { min-width: 100px; }
+
+.inv-table td {
+    padding: 0.4rem 0.75rem;
+    border-bottom: 1px solid #f0f0f0;
+    border-right: 1px solid #f0f0f0;
+    vertical-align: middle;
+    text-align: center;
+}
+
+.inv-table td.product-col { text-align: left; }
+.inv-table td.color-col { text-align: left; }
+
+.inv-table tr:last-child td { border-bottom: none; }
+
+.inv-input {
+    width: 52px;
+    text-align: center;
+    border: 1px solid #e5e5e5;
+    border-radius: 4px;
+    padding: 0.25rem;
+    font-size: 0.8rem;
+    background: #fafafa;
+    font-family: inherit;
+}
+
+.inv-input:focus { outline: none; border-color: #8b7355; }
+.inv-input.low { background: #fff8f0; border-color: #e07b3a; }
+.inv-input.zero { background: #fff0f0; border-color: #c0392b; }
+
+.na-cell { color: #ddd; font-size: 0.75rem; }
+
+.color-cell {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.78rem;
+    color: #444;
+}
+
+.save-stock-bar {
+    position: sticky;
+    bottom: 0;
+    background: #fff;
+    border-top: 1px solid #ddd;
+    padding: 0.75rem 1.25rem;
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+}
+    </style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+    <img src="https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/LittleBasics.png" alt="Little Basics">
+    <div class="topbar-center">
+        <button class="tab-btn active" onclick="switchView('order')">📋 Order Builder</button>
+        <button class="tab-btn" onclick="switchView('inventory')">📦 Inventory</button>
+    </div>
+    <div class="topbar-actions">
+        <span id="topbarOrderCount" style="font-size:0.75rem;color:#888;"></span>
+        <button class="btn" onclick="clearOrder()">Clear Order</button>
+    </div>
+</div>
+
+<!-- ORDER VIEW -->
+<div class="view active" id="view-order">
+    <div class="order-layout">
+
+        <!-- LEFT: Product Table -->
+        <div class="table-area">
+            <div class="toolbar">
+                <input class="search-input" type="text" id="searchInput" placeholder="🔍 Search products..." oninput="renderTable()">
+                <button class="filter-chip active" data-size="all" onclick="setFilter(this)">All</button>
+                <button class="filter-chip" data-size="3-6M" onclick="setFilter(this)">3-6M</button>
+                <button class="filter-chip" data-size="6-12M" onclick="setFilter(this)">6-12M</button>
+                <button class="filter-chip" data-size="12-24M" onclick="setFilter(this)">12-24M</button>
+                <button class="filter-chip" data-size="2T" onclick="setFilter(this)">2T</button>
+                <button class="filter-chip" data-size="3T" onclick="setFilter(this)">3T</button>
+                <button class="filter-chip" data-size="4T" onclick="setFilter(this)">4T</button>
+                <button class="filter-chip" data-size="5T" onclick="setFilter(this)">5T</button>
+            </div>
+
+            <table class="product-table" id="productTable">
+                <thead>
+                    <tr>
+                        <th style="width:44px"></th>
+                        <th>Product</th>
+                        <th>Color / Pattern</th>
+                        <th>Size</th>
+                        <th>Stock</th>
+                        <th>Regular</th>
+                        <th>Bundle <span style="font-size:0.6rem;color:#8b7355">(5+)</span></th>
+                        <th>Your Cost</th>
+                        <th>Qty</th>
+                        <th>Line Total</th>
+                    </tr>
+                </thead>
+                <tbody id="productTbody"></tbody>
+            </table>
+        </div>
+
+        <!-- RIGHT: Summary Panel -->
+        <div class="summary-panel">
+
+            <!-- Order Items -->
+            <div class="panel-section">
+                <h4>This Order</h4>
+                <div class="bundle-badge" id="bundleBadge">🎉 Bundle price active (5+ items)</div>
+                <ul class="order-item-list" id="orderItemList">
+                    <li class="empty-msg">No items added yet</li>
+                </ul>
+            </div>
+
+            <!-- Financials -->
+            <div class="panel-section">
+                <h4>Financials</h4>
+                <div class="sum-row">
+                    <span class="sum-label">Items</span>
+                    <span class="sum-val" id="sItems">0</span>
+                </div>
+                <div class="sum-row">
+                    <span class="sum-label">Gross Earning</span>
+                    <span class="sum-val" id="sRevenue">$0.00</span>
+                </div>
+                <div class="sum-row">
+                    <span class="sum-label">Purchase Price</span>
+                    <span class="sum-val" id="sCost">$0.00</span>
+                </div>
+                <div class="sum-row">
+                    <span class="sum-label">Shipping Collected</span>
+                    <span class="sum-val" id="sShipIn">$0.00</span>
+                </div>
+                <div class="sum-row">
+                    <span class="sum-label">Shipping Paid Out</span>
+                    <span class="sum-val" id="sShipOut">$0.00</span>
+                </div>
+                <div class="sum-row">
+                    <span class="sum-label">PayPal / Venmo Fee</span>
+                    <span class="sum-val" id="sFee">$0.00</span>
+                </div>
+                <div class="sum-row total">
+                    <span class="sum-label">Est. Profit</span>
+                    <span class="sum-val profit" id="sProfit">$0.00</span>
+                </div>
+                <div class="sum-row">
+                    <span class="sum-label">Margin</span>
+                    <span class="sum-val" id="sMargin">—</span>
+                </div>
+            </div>
+
+            <!-- Order Details -->
+            <div class="panel-section">
+                <h4>Order Details</h4>
+                <div class="field">
+                    <label>Date</label>
+                    <input type="date" id="fDate">
+                </div>
+                <div class="field">
+                    <label>Customer Name</label>
+                    <input type="text" id="fName" placeholder="Full name">
+                </div>
+                <div class="field">
+                    <label>Address</label>
+                    <textarea id="fAddress" placeholder="Street, City, State ZIP"></textarea>
+                </div>
+                <div class="field">
+                    <label>Tracking</label>
+                    <input type="text" id="fTracking" placeholder="Tracking number">
+                </div>
+                <div class="two-col">
+                    <div class="field">
+                        <label>Shipping In ($)</label>
+                        <input type="number" id="fShipIn" placeholder="0.00" step="0.01" oninput="updatePanel()">
+                    </div>
+                    <div class="field">
+                        <label>Shipping Out ($)</label>
+                        <input type="number" id="fShipOut" placeholder="0.00" step="0.01" oninput="updatePanel()">
+                    </div>
+                </div>
+                <div class="two-col">
+                    <div class="field">
+                        <label>Fee ($)</label>
+                        <input type="number" id="fFee" placeholder="0.00" step="0.01" oninput="updatePanel()">
+                    </div>
+                    <div class="field">
+                        <label>Payment</label>
+                        <select id="fPayment">
+                            <option>Venmo</option>
+                            <option>PayPal</option>
+                            <option>Zelle</option>
+                            <option>Cash</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="field">
+                    <label>Status</label>
+                    <select id="fStatus">
+                        <option>Pending</option>
+                        <option>Paid</option>
+                        <option>Shipped</option>
+                        <option>Delivered</option>
+                        <option>Cancelled</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label>Notes</label>
+                    <textarea id="fNotes" placeholder="Notes..."></textarea>
+                </div>
+            </div>
+
+            <!-- Export -->
+            <div class="panel-section">
+                <h4>Export</h4>
+                <p style="font-size:0.72rem;color:#aaa;margin-bottom:0.5rem;">Copies tab-separated row for Google Sheet. Also deducts qty from inventory.</p>
+                <button class="copy-btn" onclick="copyAndDeduct()">📋 Copy Row + Save to Inventory</button>
+                <div class="copy-confirm" id="copyConfirm"></div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- INVENTORY VIEW -->
+<div class="view" id="view-inventory">
+    <div class="inv-area">
+        <div class="inv-toolbar">
+            <input class="search-input" type="text" id="invSearch" placeholder="🔍 Search products..." oninput="renderInventory()">
+            <span style="font-size:0.75rem;color:#aaa;">Edit stock counts below. Red = 0, Orange = ≤2.</span>
+        </div>
+        <table class="inv-table" id="invTable">
+            <thead id="invThead"></thead>
+            <tbody id="invTbody"></tbody>
+        </table>
+    </div>
+    <div class="save-stock-bar">
+        <button class="btn" onclick="renderInventory()">Reset</button>
+        <button class="btn primary" onclick="saveInventory()">💾 Save Stock</button>
+    </div>
+</div>
+
+<script>
+// ─────────────────────────────────────────
+// PRODUCT DATA
+// Each variant: { pid, name, image, color (label), hex, size, price, bundlePrice, cost }
+// ─────────────────────────────────────────
+const ALL_SIZES = ["3-6M","6-12M","12-24M","2T","3T","4T","5T"];
+
+const products = [
+  { pid:1,  name:"Cotton Waffle Overall",                    image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/6.jpg",   color:"Natural", hex:"#e8ddd0", sizes:["6-12M"],                              price:14, bundlePrice:12, cost:100 },
+  { pid:2,  name:"Cotton Linen Kimono Overall",              image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/28.jpg",  color:"Natural", hex:"#e8ddd0", sizes:["6-12M","12-24M","2T"],               price:12, bundlePrice:10, cost:100 },
+  { pid:3,  name:"Ruffle Cotton Romper",                     image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/11.jpg",  color:"White",   hex:"#f5f5f5", sizes:["2T"],                                price:12, bundlePrice:10, cost:100 },
+  { pid:5,  name:"Embroidered Cotton Floral Romper",         image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/19.jpg",  color:"Floral",  hex:"#f0e6f0", sizes:["3-6M","12-24M","2T"],               price:18, bundlePrice:16, cost:100 },
+  { pid:6,  name:"Cotton Muslin Romper",                     image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/18.jpg",  color:"Natural", hex:"#e8ddd0", sizes:["6-12M","12-24M"],                    price:14, bundlePrice:12, cost:100 },
+  { pid:7,  name:"Lightweight Cotton Terry Romper",          image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/27.jpg",  color:"Natural", hex:"#e8ddd0", sizes:["3-6M","6-12M"],                      price:12, bundlePrice:10, cost:100 },
+  { pid:8,  name:"Smile Cotton L/S Shirt Stripes",           image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/2.jpg",   color:"Stripe",  hex:"#c8d8e8", sizes:["6-12M","12-24M","2T","3T","4T","5T"], price:10, bundlePrice:9,  cost:100 },
+  { pid:9,  name:"Solid Cotton Long Sleeve (A)",             image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/3.jpg",   color:"White",   hex:"#f5f5f5", sizes:["6-12M","12-24M","3T","4T","5T"],     price:10, bundlePrice:9,  cost:100 },
+  { pid:10, name:"Solid Cotton Long Sleeve (B)",             image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/12.jpg",  color:"Natural", hex:"#e8ddd0", sizes:["6-12M","12-24M","2T","3T","4T"],     price:12, bundlePrice:10, cost:100 },
+  { pid:11, name:"Striped Cotton L/S Shirt w/ Buttons",     image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/9.jpg",   color:"Stripe",  hex:"#c8d8e8", sizes:["6-12M"],                              price:14, bundlePrice:12, cost:100 },
+  { pid:12, name:"Cotton Long Sleeve Bear Shirt",            image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/17.jpg",  color:"White",   hex:"#f5f5f5", sizes:["6-12M","12-24M"],                    price:11, bundlePrice:9,  cost:100 },
+  { pid:13, name:"Striped Cotton Sweatshirt",                image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/16.jpg",  color:"Stripe",  hex:"#c8d8e8", sizes:["6-12M","12-24M","2T","3T","4T","5T"], price:18, bundlePrice:16, cost:100 },
+  { pid:14, name:"Scalloped Cotton Knitted Cardigan",        image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/7.jpg",   color:"Natural", hex:"#e8ddd0", sizes:["3-6M","6-12M"],                      price:24, bundlePrice:22, cost:100 },
+  { pid:15, name:"Ruffled Cotton Muslin Pants",              image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/1.jpg",   color:"Natural", hex:"#e8ddd0", sizes:["3-6M","6-12M","12-24M","2T","3T"],   price:12, bundlePrice:10, cost:100 },
+  { pid:16, name:"Cotton Fleece Pants with Pocket",          image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/5.jpg",   color:"Natural", hex:"#e8ddd0", sizes:["3-6M","6-12M","4T","5T"],            price:14, bundlePrice:12, cost:100 },
+  { pid:17, name:"Cotton Fleece Leggings",                   image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/14.jpg",  color:"Natural", hex:"#e8ddd0", sizes:["6-12M","12-24M","2T","3T","4T","5T"], price:12, bundlePrice:10, cost:100 },
+  { pid:18, name:"Striped Pants (6-12M–12-24M)",            image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/13.jpg",  color:"Stripe",  hex:"#c8d8e8", sizes:["6-12M","12-24M"],                    price:14, bundlePrice:12, cost:100 },
+  { pid:19, name:"Open Back Cotton Lace Set",                image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/4.jpg",   color:"White",   hex:"#f5f5f5", sizes:["12-24M","2T"],                       price:18, bundlePrice:16, cost:100 },
+  { pid:20, name:"Embroidered Cotton Fleece Suit",           image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/8.jpg",   color:"Natural", hex:"#e8ddd0", sizes:["6-12M","12-24M","2T","4T"],          price:24, bundlePrice:22, cost:100 },
+  { pid:21, name:"Solid Cotton Track Suit",                  image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/10.jpg",  color:"Natural", hex:"#e8ddd0", sizes:["3-6M","6-12M","12-24M","2T","3T","4T"], price:24, bundlePrice:22, cost:100 },
+  { pid:22, name:"Striped Pants (2T–5T)",                   image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/26.jpg", color:"Stripe", hex:"#c8d8e8", sizes:["2T","3T","4T","5T"],        price:14, bundlePrice:12, cost:100 },
+  { pid:23, name:"Solid Cotton Knit Sweater",                image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/25.jpg", color:"Natural", hex:"#e8ddd0", sizes:["2T","3T","4T","5T"],      price:22, bundlePrice:20, cost:100 },
+  { pid:24, name:"Cropped Striped Pants",                    image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/21.jpg", color:"Stripe", hex:"#c8d8e8", sizes:["5T"],                      price:16, bundlePrice:14, cost:100 },
+  { pid:25, name:"Cotton Solid Sweatshirt",                  image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/23.jpg", color:"Natural", hex:"#e8ddd0", sizes:["12-24M","2T","3T","4T","5T"], price:18, bundlePrice:16, cost:100 },
+  { pid:26, name:"Cotton Solid Pants",                       image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/22.jpg", color:"Natural", hex:"#e8ddd0", sizes:["2T","3T","4T","5T"],      price:18, bundlePrice:16, cost:100 },
+  { pid:27, name:"Striped Cotton Fleeced Sweatshirt",        image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/32.jpg", color:"Stripe", hex:"#c8d8e8", sizes:["12-24M","2T","3T","4T","5T"], price:22, bundlePrice:20, cost:100 },
+  { pid:28, name:"Cotton Light Fleeced Leggings",            image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/33.jpg", color:"Natural", hex:"#e8ddd0", sizes:["2T","3T","5T"],           price:10, bundlePrice:9,  cost:100 },
+  { pid:29, name:"Cotton Knot Leggings",                     image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/34.jpg", color:"Natural", hex:"#e8ddd0", sizes:["3-6M","6-12M","12-24M"],  price:9,  bundlePrice:8,  cost:100 },
+  { pid:30, name:"Cotton Sleeveless Romper",                 image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/35.jpg", color:"Natural", hex:"#e8ddd0", sizes:["3-6M"],                   price:12, bundlePrice:10, cost:100 },
+  { pid:31, name:"Cotton Romper Shirt Set",                  image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/36.jpg", color:"Natural", hex:"#e8ddd0", sizes:["3-6M"],                   price:11, bundlePrice:9,  cost:100 },
+  { pid:33, name:"Solid Cotton Muslin Pants",                image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/38.jpg", color:"Natural", hex:"#e8ddd0", sizes:["6-12M","12-24M"],         price:12, bundlePrice:10, cost:100 },
+  { pid:35, name:"Cotton Knit Animal Cardigan",              image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/66.jpg", color:"Natural", hex:"#e8ddd0", sizes:["3-6M","6-12M"],           price:24, bundlePrice:22, cost:100 },
+  { pid:36, name:"Cotton Rainbow Suit",                      image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/43.jpg", color:"Rainbow", hex:"#f0d0e0", sizes:["6-12M","12-24M","2T","3T"], price:16, bundlePrice:14, cost:100 },
+  { pid:37, name:"Cotton Embroidered Floral Romper",         image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/60.jpg", color:"Floral",  hex:"#f0e6f0", sizes:["3-6M","6-12M","12-24M","2T"], price:18, bundlePrice:15, cost:100 },
+  { pid:38, name:"Cotton Embroidered Floral Romper (Linen)", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/40.jpg", color:"Floral",  hex:"#f0e6f0", sizes:["3-6M"],                   price:18, bundlePrice:16, cost:100 },
+  { pid:41, name:"Cotton Quilt Padded Pants",                image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/47.jpg", color:"Natural", hex:"#e8ddd0", sizes:["12-24M","2T","3T","5T"],  price:18, bundlePrice:16, cost:100 },
+  { pid:43, name:"Cotton Stripes Shirt w/ Elbow Patches",   image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/51.jpg", color:"Stripe",  hex:"#c8d8e8", sizes:["6-12M"],                   price:10, bundlePrice:8,  cost:100 },
+  { pid:44, name:"Cotton Citrus Suit",                       image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/46.jpg", color:"Yellow",  hex:"#f5e6b0", sizes:["2T","3T"],                price:18, bundlePrice:16, cost:100 },
+  { pid:45, name:"Cotton Quilt Padded Floral Pants",         image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/53.jpg", color:"Floral",  hex:"#f0e6f0", sizes:["12-24M"],                 price:16, bundlePrice:14, cost:100 },
+  { pid:46, name:"Cotton Knit Solid Sweater",                image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/52.jpg", color:"Natural", hex:"#e8ddd0", sizes:["6-12M"],                   price:20, bundlePrice:18, cost:100 },
+  { pid:47, name:"Cotton Padded Reversible Sweatshirt",      image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/49.jpg", color:"Natural", hex:"#e8ddd0", sizes:["12-24M","2T"],             price:22, bundlePrice:20, cost:100 },
+  { pid:48, name:"Cotton Striped Leggings w/ Knee Patch",   image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/50.jpg", color:"Stripe",  hex:"#c8d8e8", sizes:["3-6M","6-12M"],           price:10, bundlePrice:8,  cost:100 },
+  { pid:49, name:"Quilt Padded Pants",                       image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/55.jpg", color:"Natural", hex:"#e8ddd0", sizes:["2T","4T"],                price:12, bundlePrice:10, cost:100 },
+  { pid:51, name:"Cotton Muslin Romper",                     image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/44.jpg", color:"Natural", hex:"#e8ddd0", sizes:["6-12M"],                   price:14, bundlePrice:12, cost:100 },
+  { pid:53, name:"Cotton Solid Pants with Footies",          image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/41.jpg", color:"Natural", hex:"#e8ddd0", sizes:["3-6M","6-12M"],           price:8,  bundlePrice:6,  cost:100 },
+  { pid:54, name:"Cotton Striped Smile Shirt",               image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/45.jpg", color:"Stripe",  hex:"#c8d8e8", sizes:["12-24M","2T","3T","4T","5T"], price:7, bundlePrice:6,  cost:100 },
+  { pid:55, name:"Cotton Muslin Solid Pants",                image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/62.jpg", color:"Natural", hex:"#e8ddd0", sizes:["2T","3T","4T","5T"],      price:12, bundlePrice:10, cost:100 },
+  { pid:57, name:"Cotton Knit Set",                          image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/64.jpg", color:"Natural", hex:"#e8ddd0", sizes:["12-24M"],                  price:22, bundlePrice:20, cost:100 },
+  { pid:58, name:"Cotton Knit Sprinkle Sweater",             image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/65.jpg", color:"Natural", hex:"#e8ddd0", sizes:["6-12M"],                   price:18, bundlePrice:16, cost:100 },
+  { pid:59, name:"Cotton Quilted Sweatshirt",                image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/39.jpg", color:"Natural", hex:"#e8ddd0", sizes:["12-24M","2T","3T","4T","5T"], price:24, bundlePrice:22, cost:100 },
+  { pid:60, name:"Pattern Cotton Muslin Pants",              image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/70.jpg", color:"Pattern", hex:"#d8e8d8", sizes:["6-12M","12-24M","2T","3T","4T","5T"], price:12, bundlePrice:10, cost:100 },
+  { pid:61, name:"Solid Cotton Shirt",                       image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/69.jpg", color:"Natural", hex:"#e8ddd0", sizes:["2T","3T","4T","5T"],      price:12, bundlePrice:10, cost:100 },
+  { pid:64, name:"Cotton Striped Short Sleeve Shirt",        image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/58.jpg", color:"Stripe",  hex:"#c8d8e8", sizes:["3-6M","6-12M","12-24M","2T"], price:8, bundlePrice:6,  cost:100 },
+  { pid:65, name:"Cotton Embroidered Floral Set",            image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/72.jpg", color:"Floral",  hex:"#f0e6f0", sizes:["12-24M"],                  price:17, bundlePrice:15, cost:100 },
+  { pid:66, name:"Cotton Animal Short Sleeve Shirt",         image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/73.jpg", color:"Natural", hex:"#e8ddd0", sizes:["6-12M","3T","4T","5T"],   price:10, bundlePrice:8,  cost:100 }
+];
+
+// ── STATE ──
+let stock = JSON.parse(localStorage.getItem('lb_stock2') || '{}');
+let order = {}; // key: "pid_size" → qty
+let activeFilter = 'all';
+
+function skey(pid, size) { return pid + '_' + size; }
+function getStock(pid, size) { const k = skey(pid,size); return stock[k] !== undefined ? stock[k] : 0; }
+function totalOrderQty() { return Object.values(order).reduce((s,v)=>s+v,0); }
+function isBundle() { return totalOrderQty() >= 5; }
+
+// Init date
+document.getElementById('fDate').valueAsDate = new Date();
+
+// ── VIEW SWITCHER ──
+function switchView(v) {
+    document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+    document.getElementById('view-' + v).classList.add('active');
+    document.querySelector(`.tab-btn[onclick="switchView('${v}')"]`).classList.add('active');
+    if (v === 'inventory') renderInventory();
+}
+
+// ── SIZE FILTER ──
+function setFilter(el) {
+    document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+    activeFilter = el.dataset.size;
+    renderTable();
+}
+
+// ── RENDER ORDER TABLE ──
+function renderTable() {
+    const search = document.getElementById('searchInput').value.toLowerCase();
+    const tbody = document.getElementById('productTbody');
+    tbody.innerHTML = '';
+    const bundle = isBundle();
+
+    // Build flat variant rows: one row per product+size
+    const variants = [];
+    products.forEach(p => {
+        p.sizes.forEach(size => {
+            if (activeFilter !== 'all' && size !== activeFilter) return;
+            if (search && !p.name.toLowerCase().includes(search) && !p.color.toLowerCase().includes(search)) return;
+            variants.push({ p, size });
+        });
+    });
+
+    if (variants.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:2rem;color:#ccc;">No products found</td></tr>';
+        return;
+    }
+
+    variants.forEach(({ p, size }) => {
+        const k = skey(p.pid, size);
+        const qty = order[k] || 0;
+        const inStock = getStock(p.pid, size);
+        const sellPrice = bundle ? p.bundlePrice : p.price;
+        const lineTotal = sellPrice * qty;
+
+        let stockClass = 'ok', stockLabel = inStock + ' left';
+        if (inStock === 0) { stockClass = 'zero'; stockLabel = '0 left'; }
+        else if (inStock <= 2) { stockClass = 'low'; }
+
+        const tr = document.createElement('tr');
+        tr.className = 'variant-row' + (qty > 0 ? ' in-order' : '');
+        tr.id = 'row-' + k;
+
+        tr.innerHTML = `
+            <td><img class="thumb" src="${p.image}" alt="" loading="lazy"></td>
+            <td style="font-size:0.8rem;color:#333;min-width:160px;line-height:1.3">${p.name}</td>
+            <td>
+                <div class="variant-label">
+                    <span class="swatch" style="background:${p.hex}"></span>
+                    <span>${p.color}</span>
+                </div>
+            </td>
+            <td><span class="size-pill">${size}</span></td>
+            <td><span class="stock-cell ${stockClass}">${stockLabel}</span></td>
+            <td style="font-size:0.8rem;white-space:nowrap;${!bundle ? 'font-weight:600' : 'color:#aaa'}">$${p.price}</td>
+            <td style="font-size:0.8rem;white-space:nowrap;${bundle ? 'font-weight:600;color:#8b7355' : 'color:#aaa'}">$${p.bundlePrice}</td>
+            <td style="font-size:0.8rem;white-space:nowrap;color:#aaa">$${p.cost}</td>
+            <td>
+                <div class="qty-ctrl">
+                    <button class="qb" onclick="changeQty(${p.pid},'${size}',-1)">−</button>
+                    <span class="qn ${qty>0?'active':''}" id="qn-${k}">${qty}</span>
+                    <button class="qb" onclick="changeQty(${p.pid},'${size}',1)">+</button>
+                </div>
+            </td>
+            <td class="line-total ${bundle&&qty>0?'bundle':''}">${qty > 0 ? '$'+lineTotal.toFixed(2) : '—'}</td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+function changeQty(pid, size, delta) {
+    const k = skey(pid, size);
+    const newQty = Math.max(0, (order[k] || 0) + delta);
+    if (newQty === 0) delete order[k]; else order[k] = newQty;
+    renderTable();
+    updatePanel();
+}
+
+// ── UPDATE PANEL ──
+function updatePanel() {
+    const bundle = isBundle();
+    let revenue = 0, cost = 0, totalQty = 0;
+    const entries = Object.entries(order).filter(([,q])=>q>0);
+
+    entries.forEach(([k, qty]) => {
+        const [pidStr, ...sizeParts] = k.split('_');
+        const pid = parseInt(pidStr);
+        const size = sizeParts.join('_');
+        const p = products.find(p=>p.pid===pid);
+        if (!p) return;
+        const sp = bundle ? p.bundlePrice : p.price;
+        revenue += sp * qty;
+        cost += p.cost * qty;
+        totalQty += qty;
+    });
+
+    const shipIn  = parseFloat(document.getElementById('fShipIn').value) || 0;
+    const shipOut = parseFloat(document.getElementById('fShipOut').value) || 0;
+    const fee     = parseFloat(document.getElementById('fFee').value) || 0;
+    const profit  = revenue + shipIn - cost - shipOut - fee;
+    const margin  = revenue > 0 ? ((profit/revenue)*100).toFixed(1) : null;
+
+    document.getElementById('sItems').textContent = totalQty;
+    document.getElementById('sRevenue').textContent = '$' + revenue.toFixed(2);
+    document.getElementById('sCost').textContent = '$' + cost.toFixed(2);
+    document.getElementById('sShipIn').textContent = '$' + shipIn.toFixed(2);
+    document.getElementById('sShipOut').textContent = '$' + shipOut.toFixed(2);
+    document.getElementById('sFee').textContent = '$' + fee.toFixed(2);
+    document.getElementById('sMargin').textContent = margin ? margin + '%' : '—';
+
+    const profitEl = document.getElementById('sProfit');
+    profitEl.textContent = '$' + profit.toFixed(2);
+    profitEl.className = 'sum-val ' + (profit >= 0 ? 'profit' : 'loss');
+
+    document.getElementById('bundleBadge').className = 'bundle-badge' + (bundle ? ' on' : '');
+
+    document.getElementById('topbarOrderCount').textContent = totalQty > 0 ? totalQty + ' item' + (totalQty>1?'s':'') + ' in order' : '';
+
+    // Order item list
+    const list = document.getElementById('orderItemList');
+    if (entries.length === 0) {
+        list.innerHTML = '<li class="empty-msg">No items added yet</li>';
+    } else {
+        list.innerHTML = entries.map(([k, qty]) => {
+            const [pidStr, ...sizeParts] = k.split('_');
+            const pid = parseInt(pidStr);
+            const size = sizeParts.join('_');
+            const p = products.find(p=>p.pid===pid);
+            if (!p) return '';
+            const sp = bundle ? p.bundlePrice : p.price;
+            return `<li class="order-item">
+                <span class="oi-name">${p.name} <span style="color:#8b7355;font-size:0.7rem">${p.color} / ${size}</span></span>
+                <span class="oi-detail">×${qty} $${(sp*qty).toFixed(2)}</span>
+            </li>`;
+        }).join('');
+    }
+}
+
+// ── COPY + DEDUCT ──
+function copyAndDeduct() {
+    const bundle = isBundle();
+    let revenue = 0, cost = 0, totalQty = 0;
+    const entries = Object.entries(order).filter(([,q])=>q>0);
+
+    entries.forEach(([k, qty]) => {
+        const [pidStr, ...sizeParts] = k.split('_');
+        const p = products.find(p=>p.pid===parseInt(pidStr));
+        if (!p) return;
+        revenue += (bundle ? p.bundlePrice : p.price) * qty;
+        cost += p.cost * qty;
+        totalQty += qty;
+    });
+
+    const shipIn  = parseFloat(document.getElementById('fShipIn').value) || 0;
+    const shipOut = parseFloat(document.getElementById('fShipOut').value) || 0;
+    const fee     = parseFloat(document.getElementById('fFee').value) || 0;
+    const profit  = revenue + shipIn - cost - shipOut - fee;
+    const grossEarning = (revenue + shipIn).toFixed(2);
+
+    // Build items summary for notes
+    const itemsSummary = entries.map(([k,qty]) => {
+        const [pidStr,...sizeParts] = k.split('_');
+        const p = products.find(p=>p.pid===parseInt(pidStr));
+        return p ? `${qty}x ${p.name} (${sizeParts.join('_')})` : '';
+    }).join(', ');
+
+    const row = [
+        document.getElementById('fDate').value,
+        grossEarning,
+        cost.toFixed(2),
+        shipOut.toFixed(2),
+        fee.toFixed(2),
+        profit.toFixed(2),
+        document.getElementById('fStatus').value,
+        document.getElementById('fName').value,
+        document.getElementById('fAddress').value.replace(/\n/g,' '),
+        document.getElementById('fTracking').value,
+        totalQty,
+        document.getElementById('fNotes').value || itemsSummary
+    ].join('\t');
+
+    // Always deduct stock first — regardless of clipboard
+    entries.forEach(([k, qty]) => {
+        const cur = stock[k] !== undefined ? stock[k] : 0;
+        stock[k] = Math.max(0, cur - qty);
+    });
+    localStorage.setItem('lb_stock2', JSON.stringify(stock));
+    renderTable(); // refresh stock counts in table immediately
+
+    // Then try clipboard
+    const el = document.getElementById('copyConfirm');
+    try {
+        navigator.clipboard.writeText(row).then(() => {
+            el.textContent = '✓ Copied & stock updated!';
+            setTimeout(() => el.textContent = '', 3000);
+        }).catch(() => {
+            // Fallback for browsers that block clipboard
+            const ta = document.createElement('textarea');
+            ta.value = row;
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand('copy');
+            document.body.removeChild(ta);
+            el.textContent = '✓ Stock updated! Row copied (fallback).';
+            setTimeout(() => el.textContent = '', 3000);
+        });
+    } catch(e) {
+        el.textContent = '✓ Stock updated! (Copy manually above)';
+        setTimeout(() => el.textContent = '', 3000);
+    }
+}
+
+// ── CLEAR ORDER ──
+function clearOrder() {
+    Object.keys(order).forEach(k => delete order[k]);
+    ['fName','fAddress','fTracking','fShipIn','fShipOut','fFee','fNotes'].forEach(id => {
+        document.getElementById(id).value = '';
+    });
+    document.getElementById('fDate').valueAsDate = new Date();
+    document.getElementById('fStatus').value = 'Pending';
+    document.getElementById('fPayment').value = 'Venmo';
+    renderTable();
+    updatePanel();
+}
+
+// ── INVENTORY VIEW ──
+function renderInventory() {
+    const search = document.getElementById('invSearch').value.toLowerCase();
+    const filtered = products.filter(p =>
+        !search || p.name.toLowerCase().includes(search) || p.color.toLowerCase().includes(search)
+    );
+
+    // Build thead: Product | Color | 3-6M | 6-12M | ... | 5T
+    const thead = document.getElementById('invThead');
+    thead.innerHTML = `<tr>
+        <th class="product-col">Product</th>
+        <th class="color-col">Color</th>
+        ${ALL_SIZES.map(s=>`<th>${s}</th>`).join('')}
+    </tr>`;
+
+    const tbody = document.getElementById('invTbody');
+    tbody.innerHTML = '';
+
+    filtered.forEach(p => {
+        const tr = document.createElement('tr');
+        const sizeCells = ALL_SIZES.map(size => {
+            if (!p.sizes.includes(size)) {
+                return `<td class="na-cell">—</td>`;
+            }
+            const k = skey(p.pid, size);
+            const val = stock[k] !== undefined ? stock[k] : 0;
+            let cls = '';
+            if (val === 0) cls = 'zero';
+            else if (val <= 2) cls = 'low';
+            return `<td><input class="inv-input ${cls}" type="number" min="0" value="${val}" data-key="${k}" oninput="highlightInvInput(this)"></td>`;
+        }).join('');
+
+        tr.innerHTML = `
+            <td class="product-col" style="font-size:0.8rem;color:#333">${p.name}</td>
+            <td class="color-col">
+                <div class="color-cell">
+                    <span class="swatch" style="background:${p.hex}"></span>
+                    ${p.color}
+                </div>
+            </td>
+            ${sizeCells}
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+function highlightInvInput(input) {
+    const val = parseInt(input.value) || 0;
+    input.classList.remove('low','zero');
+    if (val === 0) input.classList.add('zero');
+    else if (val <= 2) input.classList.add('low');
+}
+
+function saveInventory() {
+    document.querySelectorAll('.inv-input').forEach(input => {
+        stock[input.dataset.key] = parseInt(input.value) || 0;
+    });
+    localStorage.setItem('lb_stock2', JSON.stringify(stock));
+    renderTable(); // refresh stock indicators in order view too
+    const bar = document.querySelector('.save-stock-bar');
+    const orig = bar.querySelector('.btn.primary').textContent;
+    bar.querySelector('.btn.primary').textContent = '✓ Saved!';
+    setTimeout(() => { bar.querySelector('.btn.primary').textContent = orig; }, 2000);
+}
+
+// Init
+renderTable();
+updatePanel();
+</script>
+</body>
+</html>
