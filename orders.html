@@ -904,23 +904,29 @@ function renderTable(){
     const orderQty=rows.reduce((s,{p,cm})=>s+(order[skey(p.pid,cm)]||0),0);
     const p0=rows[0].p;
 
-    // Group header row
-    const htr=document.createElement('tr');
-    htr.className='group-header';
-    htr.onclick=()=>toggleOrderGroup(name);
-    htr.innerHTML=`
-      <td colspan="2">
-        <div style="display:flex;align-items:center">
-          <span class="group-toggle ${isOpen?'open':''}">▶</span>
-          <img src="${p0.image}" alt="" style="width:100px;height:100px;border-radius:6px;object-fit:cover;margin-right:.5rem">
-          ${name}
-          <span class="group-meta">${rows.length} size${rows.length>1?'s':''} · ${totalStock} in stock${orderQty>0?' · <span style="color:var(--bark)">'+orderQty+' in order</span>':''}</span>
-        </div>
-      </td>
-      <td colspan="8" style="color:#bbb;font-size:.7rem;text-align:right;padding-right:.8rem">
-        ${fmt(p0.price)} reg · ${fmt(p0.bundlePrice)} bundle
-      </td>`;
-    tbody.appendChild(htr);
+    // Count distinct color variants for this group
+    const distinctPids=new Set(rows.map(({p})=>p.pid));
+    const multiVariant=distinctPids.size>1;
+
+    if(multiVariant){
+      // Group header row — collapsible
+      const htr=document.createElement('tr');
+      htr.className='group-header';
+      htr.onclick=()=>toggleOrderGroup(name);
+      htr.innerHTML=`
+        <td colspan="2">
+          <div style="display:flex;align-items:center">
+            <span class="group-toggle ${isOpen?'open':''}">▶</span>
+            <img src="${p0.image}" alt="" style="width:100px;height:100px;border-radius:6px;object-fit:cover;margin-right:.5rem">
+            ${name}
+            <span class="group-meta">${distinctPids.size} colors · ${totalStock} in stock${orderQty>0?' · <span style="color:var(--bark)">'+orderQty+' in order</span>':''}</span>
+          </div>
+        </td>
+        <td colspan="8" style="color:#bbb;font-size:.7rem;text-align:right;padding-right:.8rem">
+          ${fmt(p0.price)} reg · ${fmt(p0.bundlePrice)} bundle
+        </td>`;
+      tbody.appendChild(htr);
+    }
 
     // Variant rows (one per size)
     rows.forEach(({p,cm})=>{
@@ -933,24 +939,47 @@ function renderTable(){
       if(inStock===0){sCls='stock-zero';sLbl='Out';}
       else if(inStock<=2){sCls='stock-low';}
       const tr=document.createElement('tr');
-      tr.className='variant-row'+(qty>0?' in-order':'')+(isOpen?'':' grp-hidden');
-      tr.dataset.group=name;
-      if(!isOpen) tr.style.display='none';
-      tr.innerHTML=`
-        <td colspan="2" style="font-size:.76rem;color:#333;min-width:140px;line-height:1.3;padding-left:2rem">${p.name}</td>
-        <td><span style="display:flex;align-items:center;gap:.3rem;font-size:.73rem;color:#555">
-          <span class="swatch" style="background:${p.hex}"></span>${p.color}</span></td>
-        <td><span class="spill">${toDisplay(cm)}</span></td>
-        <td><span class="${sCls}">${sLbl}</span></td>
-        <td style="font-size:.76rem;${!bundle?'font-weight:600':'color:#ccc'}">${fmt(p.price)}</td>
-        <td style="font-size:.76rem;${bundle?'font-weight:600;color:var(--bark)':'color:#ccc'}">${fmt(p.bundlePrice)}</td>
-        <td style="font-size:.72rem;color:#bbb">${fmt(p.cost)}</td>
-        <td><div class="qty-ctrl">
-          <button class="qb" onclick="event.stopPropagation();changeQty(${p.pid},'${cm}',-1)">−</button>
-          <span class="qn ${qty>0?'on':''}" id="qn-${k}">${qty}</span>
-          <button class="qb" onclick="event.stopPropagation();changeQty(${p.pid},'${cm}',1)">+</button>
-        </div></td>
-        <td class="line-ttl ${bundle&&qty>0?'bundle':''}">${qty>0?fmt(line):'—'}</td>`;
+
+      if(multiVariant){
+        // Collapsible child row — no image
+        tr.className='variant-row'+(qty>0?' in-order':'');
+        tr.dataset.group=name;
+        if(!isOpen) tr.style.display='none';
+        tr.innerHTML=`
+          <td colspan="2" style="font-size:.76rem;color:#333;min-width:140px;line-height:1.3;padding-left:2rem">${p.name}</td>
+          <td><span style="display:flex;align-items:center;gap:.3rem;font-size:.73rem;color:#555">
+            <span class="swatch" style="background:${p.hex}"></span>${p.color}</span></td>
+          <td><span class="spill">${toDisplay(cm)}</span></td>
+          <td><span class="${sCls}">${sLbl}</span></td>
+          <td style="font-size:.76rem;${!bundle?'font-weight:600':'color:#ccc'}">${fmt(p.price)}</td>
+          <td style="font-size:.76rem;${bundle?'font-weight:600;color:var(--bark)':'color:#ccc'}">${fmt(p.bundlePrice)}</td>
+          <td style="font-size:.72rem;color:#bbb">${fmt(p.cost)}</td>
+          <td><div class="qty-ctrl">
+            <button class="qb" onclick="event.stopPropagation();changeQty(${p.pid},'${cm}',-1)">−</button>
+            <span class="qn ${qty>0?'on':''}" id="qn-${k}">${qty}</span>
+            <button class="qb" onclick="event.stopPropagation();changeQty(${p.pid},'${cm}',1)">+</button>
+          </div></td>
+          <td class="line-ttl ${bundle&&qty>0?'bundle':''}">${qty>0?fmt(line):'—'}</td>`;
+      } else {
+        // Single variant — flat row with image, no indent
+        tr.className='variant-row'+(qty>0?' in-order':'');
+        tr.innerHTML=`
+          <td><img class="thumb" src="${p.image}" alt="" loading="lazy"></td>
+          <td style="font-size:.76rem;color:#333;min-width:140px;line-height:1.3">${p.name}</td>
+          <td><span style="display:flex;align-items:center;gap:.3rem;font-size:.73rem;color:#555">
+            <span class="swatch" style="background:${p.hex}"></span>${p.color}</span></td>
+          <td><span class="spill">${toDisplay(cm)}</span></td>
+          <td><span class="${sCls}">${sLbl}</span></td>
+          <td style="font-size:.76rem;${!bundle?'font-weight:600':'color:#ccc'}">${fmt(p.price)}</td>
+          <td style="font-size:.76rem;${bundle?'font-weight:600;color:var(--bark)':'color:#ccc'}">${fmt(p.bundlePrice)}</td>
+          <td style="font-size:.72rem;color:#bbb">${fmt(p.cost)}</td>
+          <td><div class="qty-ctrl">
+            <button class="qb" onclick="changeQty(${p.pid},'${cm}',-1)">−</button>
+            <span class="qn ${qty>0?'on':''}" id="qn-${k}">${qty}</span>
+            <button class="qb" onclick="changeQty(${p.pid},'${cm}',1)">+</button>
+          </div></td>
+          <td class="line-ttl ${bundle&&qty>0?'bundle':''}">${qty>0?fmt(line):'—'}</td>`;
+      }
       tbody.appendChild(tr);
     });
   });
@@ -1128,21 +1157,24 @@ function renderInventory(){
     const members=groups[name];
     const isOpen=!invCollapsed[name];
     const groupTotal=members.reduce((s,p)=>s+usedSizes.reduce((ss,cm)=>ss+(p.sizes.includes(cm)?(stock[skey(p.pid,cm)]||0):0),0),0);
+    const multiVariant=members.length>1;
 
-    // Group header
-    const htr=document.createElement('tr');
-    htr.className='group-header';
-    htr.onclick=()=>toggleInvGroup(name);
-    htr.innerHTML=`
-      <td class="lh" colspan="${usedSizes.length+2}">
-        <div style="display:flex;align-items:center;gap:.5rem">
-          <span class="group-toggle ${isOpen?'open':''}">▶</span>
-          <img src="${members[0].image}" alt="" style="width:100px;height:100px;border-radius:6px;object-fit:cover;flex-shrink:0">
-          ${name}
-          <span class="group-meta">${members.length} color${members.length>1?'s':''} · ${groupTotal} total in stock</span>
-        </div>
-      </td>`;
-    tbody.appendChild(htr);
+    if(multiVariant){
+      // Group header — collapsible
+      const htr=document.createElement('tr');
+      htr.className='group-header';
+      htr.onclick=()=>toggleInvGroup(name);
+      htr.innerHTML=`
+        <td class="lh" colspan="${usedSizes.length+2}">
+          <div style="display:flex;align-items:center;gap:.5rem">
+            <span class="group-toggle ${isOpen?'open':''}">▶</span>
+            <img src="${members[0].image}" alt="" style="width:100px;height:100px;border-radius:6px;object-fit:cover;flex-shrink:0">
+            ${name}
+            <span class="group-meta">${members.length} colors · ${groupTotal} total in stock</span>
+          </div>
+        </td>`;
+      tbody.appendChild(htr);
+    }
 
     // One row per color variant
     members.forEach(p=>{
@@ -1156,20 +1188,39 @@ function renderInventory(){
         return `<td><input class="inv-input ${cls}" type="number" min="0" value="${val}" data-key="${k}" oninput="hiInv(this)"></td>`;
       }).join('');
       const tr=document.createElement('tr');
-      tr.dataset.group=name;
-      if(!isOpen) tr.style.display='none';
-      tr.innerHTML=`
-        <td class="lh">
-          <div style="display:flex;align-items:center;gap:.4rem;padding-left:1.5rem">
-            <span class="swatch" style="background:${p.hex}"></span>
-            <div>
-              <div style="font-size:.74rem;font-weight:500;color:var(--ink)">${p.name}</div>
-              <div style="font-size:.65rem;color:#aaa">${p.color}</div>
+      if(multiVariant){
+        tr.dataset.group=name;
+        if(!isOpen) tr.style.display='none';
+        tr.innerHTML=`
+          <td class="lh">
+            <div style="display:flex;align-items:center;gap:.4rem;padding-left:1.5rem">
+              <span class="swatch" style="background:${p.hex}"></span>
+              <div>
+                <div style="font-size:.74rem;font-weight:500;color:var(--ink)">${p.name}</div>
+                <div style="font-size:.65rem;color:#aaa">${p.color}</div>
+              </div>
             </div>
-          </div>
-        </td>
-        ${cells}
-        <td class="row-total">${rowTotal}</td>`;
+          </td>
+          ${cells}
+          <td class="row-total">${rowTotal}</td>`;
+      } else {
+        // Single variant — flat row with image, no indent
+        tr.innerHTML=`
+          <td class="lh">
+            <div style="display:flex;align-items:center;gap:.5rem">
+              <img src="${p.image}" alt="" style="width:100px;height:100px;border-radius:6px;object-fit:cover;flex-shrink:0">
+              <div>
+                <div style="font-size:.74rem;font-weight:500;color:var(--ink)">${p.name}</div>
+                <div style="display:flex;align-items:center;gap:.3rem;margin-top:.15rem">
+                  <span class="swatch" style="background:${p.hex}"></span>
+                  <span style="font-size:.65rem;color:#aaa">${p.color}</span>
+                </div>
+              </div>
+            </div>
+          </td>
+          ${cells}
+          <td class="row-total">${rowTotal}</td>`;
+      }
       tbody.appendChild(tr);
     });
   });
@@ -1249,21 +1300,24 @@ function renderSoldSummary(){
     const members=groups[name];
     const isOpen=!soldCollapsed[name];
     const groupTotal=members.reduce((s,p)=>s+usedSizes.reduce((ss,sz)=>ss+(soldCounts[skey(p.pid,sz)]||0),0),0);
+    const multiVariant=members.length>1;
 
-    // Group header — image + name + total sold
-    const htr=document.createElement('tr');
-    htr.className='group-header';
-    htr.onclick=()=>toggleSoldGroup(name);
-    htr.innerHTML=`
-      <td class="lh" colspan="${usedSizes.length+3}">
-        <div style="display:flex;align-items:center;gap:.5rem">
-          <span class="group-toggle ${isOpen?'open':''}">▶</span>
-          <img src="${members[0].image}" alt="" style="width:100px;height:100px;border-radius:6px;object-fit:cover;flex-shrink:0">
-          ${name}
-          <span class="group-meta">${members.length} color${members.length>1?'s':''} · ${groupTotal} sold</span>
-        </div>
-      </td>`;
-    tbody.appendChild(htr);
+    if(multiVariant){
+      // Group header — collapsible
+      const htr=document.createElement('tr');
+      htr.className='group-header';
+      htr.onclick=()=>toggleSoldGroup(name);
+      htr.innerHTML=`
+        <td class="lh" colspan="${usedSizes.length+3}">
+          <div style="display:flex;align-items:center;gap:.5rem">
+            <span class="group-toggle ${isOpen?'open':''}">▶</span>
+            <img src="${members[0].image}" alt="" style="width:100px;height:100px;border-radius:6px;object-fit:cover;flex-shrink:0">
+            ${name}
+            <span class="group-meta">${members.length} colors · ${groupTotal} sold</span>
+          </div>
+        </td>`;
+      tbody.appendChild(htr);
+    }
 
     // One row per color variant — always shown, 0 if nothing sold yet
     members.forEach(p=>{
@@ -1272,28 +1326,45 @@ function renderSoldSummary(){
         const cnt=soldCounts[skey(p.pid,sz)]||0;
         rowTotal+=cnt;
         colTotals[sz]=(colTotals[sz]||0)+cnt;
-        return cnt>0
-          ? `<td class="sold-count">${cnt}</td>`
-          : `<td class="sold-zero">0</td>`;
+        return cnt>0 ? `<td class="sold-count">${cnt}</td>` : `<td class="sold-zero">0</td>`;
       }).join('');
       grandTotal+=rowTotal;
 
       const tr=document.createElement('tr');
-      tr.dataset.soldGroup=name;
-      if(!isOpen) tr.style.display='none';
-      tr.innerHTML=`
-        <td class="lh"></td>
-        <td class="lh" style="padding-left:1.5rem">
-          <div style="display:flex;align-items:center;gap:.4rem">
-            <span class="swatch" style="background:${p.hex}"></span>
-            <div>
-              <div style="font-size:.74rem;font-weight:500;color:var(--ink)">${p.name}</div>
-              <div style="font-size:.65rem;color:#aaa">${p.color}</div>
+      if(multiVariant){
+        tr.dataset.soldGroup=name;
+        if(!isOpen) tr.style.display='none';
+        tr.innerHTML=`
+          <td class="lh"></td>
+          <td class="lh" style="padding-left:1.5rem">
+            <div style="display:flex;align-items:center;gap:.4rem">
+              <span class="swatch" style="background:${p.hex}"></span>
+              <div>
+                <div style="font-size:.74rem;font-weight:500;color:var(--ink)">${p.name}</div>
+                <div style="font-size:.65rem;color:#aaa">${p.color}</div>
+              </div>
             </div>
-          </div>
-        </td>
-        ${cells}
-        <td class="sold-row-total">${rowTotal}</td>`;
+          </td>
+          ${cells}
+          <td class="sold-row-total">${rowTotal}</td>`;
+      } else {
+        // Single variant — flat row with image
+        tr.innerHTML=`
+          <td class="lh">
+            <img src="${p.image}" alt="" style="width:100px;height:100px;border-radius:6px;object-fit:cover;display:block">
+          </td>
+          <td class="lh">
+            <div style="display:flex;align-items:center;gap:.4rem">
+              <span class="swatch" style="background:${p.hex}"></span>
+              <div>
+                <div style="font-size:.74rem;font-weight:500;color:var(--ink)">${p.name}</div>
+                <div style="font-size:.65rem;color:#aaa">${p.color}</div>
+              </div>
+            </div>
+          </td>
+          ${cells}
+          <td class="sold-row-total">${rowTotal}</td>`;
+      }
       tbody.appendChild(tr);
     });
   });
