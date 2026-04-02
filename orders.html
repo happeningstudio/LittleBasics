@@ -80,7 +80,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--mist);color:var(--ink);fo
 
 /* misc */
 .swatch{width:13px;height:13px;border-radius:3px;border:1px solid rgba(0,0,0,.12);display:inline-block;flex-shrink:0}
-.thumb{width:120px;height:120px;border-radius:6px;object-fit:cover;display:block}
+.thumb{width:100px;height:100px;border-radius:6px;object-fit:cover;display:block}
 .spill{font-size:.67rem;background:var(--sand-lt);padding:.1rem .38rem;border-radius:10px;color:#777;white-space:nowrap}
 .na{color:#ddd;font-size:.7rem;text-align:center}
 .stock-ok{color:var(--green);font-weight:500;font-size:.73rem}
@@ -129,7 +129,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--mist);color:var(--ink);fo
 .group-header{cursor:pointer;user-select:none;background:var(--sand-lt)!important}
 .group-header:hover{background:var(--sand)!important}
 .group-header td{padding:.45rem .65rem!important;font-weight:600;font-size:.76rem;color:var(--bark)}
-.group-toggle{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:4px;background:var(--white);border:1px solid var(--sand-dk);font-size:.65rem;color:var(--bark);margin-right:.4rem;flex-shrink:0;transition:transform .2s}
+.group-toggle{display:inline-block;font-size:.75rem;color:var(--bark);cursor:pointer;transition:transform .2s;line-height:1}
 .group-toggle.open{transform:rotate(90deg)}
 .group-meta{font-size:.68rem;color:#aaa;font-weight:400;margin-left:.4rem}
 .variant-rows{transition:opacity .15s}
@@ -977,29 +977,29 @@ function renderTable(){
         htr.onclick=function(){ toggleOrderGroup(name); };
         const td1=document.createElement('td');
         td1.style.cssText='width:110px;padding-right:0';
-        const arrow=document.createElement('span');
-        arrow.className='group-toggle'+(isOpen?' open':'');
-        arrow.innerHTML='&#9654;';
         const img=document.createElement('img');
         img.src=p0.image; img.alt='';
-        img.style.cssText='width:100px;height:100px;border-radius:6px;object-fit:cover;flex-shrink:0;margin-top:4px';
-        const wrap=document.createElement('div');
-        wrap.style.cssText='display:flex;flex-direction:column;align-items:flex-start;gap:.2rem';
-        wrap.appendChild(arrow); wrap.appendChild(img);
-        td1.appendChild(wrap);
+        img.style.cssText='width:100px;height:100px;border-radius:6px;object-fit:cover;display:block;flex-shrink:0';
+        td1.style.cssText='width:116px;padding-right:0;vertical-align:top';
+        td1.appendChild(img);
         const td2=document.createElement('td');
+        td2.style.verticalAlign='top';
         const nameDiv=document.createElement('div');
         nameDiv.style.cssText='font-size:.8rem;font-weight:600;color:#2a2420';
         nameDiv.textContent=name;
         const metaDiv=document.createElement('div');
         metaDiv.style.cssText='font-size:.68rem;color:#aaa;margin-top:.2rem';
-        var metaTxt=(distinctPids.size>1?distinctPids.size+' colors ': '')+totalStock+' in stock';
-        if(orderQty>0) metaTxt+=' / '+orderQty+' in order';
+        var metaTxt=(distinctPids.size>1?distinctPids.size+' colors | ': '')+totalStock+' in stock';
+        if(orderQty>0) metaTxt+=' | '+orderQty+' in order';
         metaDiv.textContent=metaTxt;
         const priceDiv=document.createElement('div');
         priceDiv.style.cssText='font-size:.7rem;color:#bbb;margin-top:.1rem';
-        priceDiv.textContent=fmt(p0.price)+' reg / '+fmt(p0.bundlePrice)+' bundle';
-        td2.appendChild(nameDiv); td2.appendChild(metaDiv); td2.appendChild(priceDiv);
+        priceDiv.textContent=fmt(p0.price)+' reg | '+fmt(p0.bundlePrice)+' bundle';
+        const arrow=document.createElement('span');
+        arrow.className='group-toggle'+(isOpen?' open':'');
+        arrow.innerHTML='&#9654;';
+        arrow.style.cssText='font-size:.75rem;color:#8b7355;cursor:pointer;margin-top:.4rem;display:inline-block';
+        td2.appendChild(nameDiv); td2.appendChild(metaDiv); td2.appendChild(priceDiv); td2.appendChild(arrow);
         const td3=document.createElement('td');
         td3.setAttribute('colspan','8');
         htr.appendChild(td1); htr.appendChild(td2); htr.appendChild(td3);
@@ -1037,15 +1037,11 @@ function renderTable(){
           tr.appendChild(document.createElement('td'));
         } else {
           const tdImg=document.createElement('td');
-          tdImg.style.cssText='width:110px;padding-right:0';
-          const imgWrap=document.createElement('div');
-          imgWrap.style.cssText='display:flex;align-items:center;gap:.35rem';
-          const spacer=document.createElement('span');
-          spacer.style.cssText='width:18px;flex-shrink:0;display:inline-block';
+          tdImg.style.cssText='width:116px;padding-right:0;vertical-align:top';
           const img2=document.createElement('img');
           img2.className='thumb'; img2.src=p.image; img2.alt=''; img2.loading='lazy';
-          imgWrap.appendChild(spacer); imgWrap.appendChild(img2);
-          tdImg.appendChild(imgWrap);
+          img2.style.cssText='width:100px;height:100px;border-radius:6px;object-fit:cover;display:block';
+          tdImg.appendChild(img2);
           tr.appendChild(tdImg);
           const tdName=document.createElement('td');
           tdName.style.cssText='font-size:.76rem;color:#333;min-width:140px;line-height:1.3';
@@ -1328,11 +1324,13 @@ function renderInventory(){
       htr.onclick=()=>toggleInvGroup(name);
       htr.innerHTML=`
         <td class="lh" colspan="${usedSizes.length+2}">
-          <div style="display:flex;align-items:center;gap:.5rem">
-            <span class="group-toggle ${isOpen?'open':''}">▶</span>
-            <img src="${members[0].image}" alt="" style="width:100px;height:100px;border-radius:6px;object-fit:cover;flex-shrink:0">
-            ${name}
-            <span class="group-meta">${members.length} colors · ${groupTotal} total in stock</span>
+          <div style="display:flex;align-items:center;gap:.6rem">
+            <img src="${members[0].image}" alt="" style="width:100px;height:100px;border-radius:6px;object-fit:cover;display:block;flex-shrink:0">
+            <div>
+              <div style="font-size:.78rem;font-weight:600;color:#2a2420">${name}</div>
+              <div class="group-meta" style="margin-top:.15rem">${members.length} colors &middot; ${groupTotal} total in stock</div>
+              <span class="group-toggle ${isOpen?'open':''}" style="font-size:.75rem;color:#8b7355;display:inline-block;margin-top:.3rem">&#9654;</span>
+            </div>
           </div>
         </td>`;
       tbody.appendChild(htr);
@@ -1369,8 +1367,8 @@ function renderInventory(){
         // Single variant — flat row with image, no indent
         tr.innerHTML=`
           <td class="lh">
-            <div style="display:flex;align-items:center;gap:.5rem">
-              <img src="${p.image}" alt="" style="width:100px;height:100px;border-radius:6px;object-fit:cover;flex-shrink:0">
+            <div style="display:flex;align-items:flex-start;gap:.6rem">
+              <img src="${p.image}" alt="" style="width:100px;height:100px;border-radius:6px;object-fit:cover;display:block;flex-shrink:0">
               <div>
                 <div style="font-size:.74rem;font-weight:500;color:var(--ink)">${p.name}</div>
                 <div style="display:flex;align-items:center;gap:.3rem;margin-top:.15rem">
@@ -1387,6 +1385,35 @@ function renderInventory(){
     });
     }); // end names.forEach
   }); // end catGroups.forEach
+
+  // ── Totals row by size ──
+  const colTotals={};
+  usedSizes.forEach(cm=>{ colTotals[cm]=0; });
+  document.querySelectorAll('.inv-input').forEach(input=>{
+    const k=input.dataset.key;
+    if(!k) return;
+    const cm=k.split('_')[1];
+    if(cm) colTotals[cm]=(colTotals[cm]||0)+(parseInt(input.value)||0);
+  });
+  const grandTotalInv=usedSizes.reduce((s,cm)=>s+(colTotals[cm]||0),0);
+  const ttr=document.createElement('tr');
+  ttr.className='sold-col-total-row';
+  const ttd1=document.createElement('td');
+  ttd1.className='lh';
+  ttd1.style.cssText='font-weight:700;font-size:.72rem;color:#8b7355;padding:.4rem .6rem';
+  ttd1.textContent='TOTAL IN STOCK';
+  ttr.appendChild(ttd1);
+  usedSizes.forEach(cm=>{
+    const td=document.createElement('td');
+    td.style.cssText='font-weight:700;color:#8b7355;text-align:center';
+    td.textContent=colTotals[cm]||0;
+    ttr.appendChild(td);
+  });
+  const tdGrand=document.createElement('td');
+  tdGrand.style.cssText='font-weight:700;color:#8b7355;text-align:center';
+  tdGrand.textContent=grandTotalInv;
+  ttr.appendChild(tdGrand);
+  tbody.appendChild(ttr);
 }
 
 function toggleInvGroup(name){
@@ -1459,8 +1486,11 @@ function renderSoldSummary(){
   const tbody=document.getElementById('soldTbody');
   tbody.innerHTML='';
 
-  groupOrder.forEach(name=>{
+  const soldCatGroups=groupByCategory(filtered);
+  soldCatGroups.forEach(({cat:soldCat,names:soldNames})=>{
+    soldNames.forEach(name=>{
     const members=groups[name];
+    if(!members||!members.length) return;
     const isOpen=!soldCollapsed[name];
     const groupTotal=members.reduce((s,p)=>s+usedSizes.reduce((ss,sz)=>ss+(soldCounts[skey(p.pid,sz)]||0),0),0);
     const multiVariant=members.length>1;
@@ -1472,11 +1502,13 @@ function renderSoldSummary(){
       htr.onclick=()=>toggleSoldGroup(name);
       htr.innerHTML=`
         <td class="lh" colspan="${usedSizes.length+3}">
-          <div style="display:flex;align-items:center;gap:.5rem">
-            <span class="group-toggle ${isOpen?'open':''}">▶</span>
-            <img src="${members[0].image}" alt="" style="width:100px;height:100px;border-radius:6px;object-fit:cover;flex-shrink:0">
-            ${name}
-            <span class="group-meta">${members.length} colors · ${groupTotal} sold</span>
+          <div style="display:flex;align-items:center;gap:.6rem">
+            <img src="${members[0].image}" alt="" style="width:100px;height:100px;border-radius:6px;object-fit:cover;display:block;flex-shrink:0">
+            <div>
+              <div style="font-size:.78rem;font-weight:600;color:#2a2420">${name}</div>
+              <div class="group-meta" style="margin-top:.15rem">${members.length} colors &middot; ${groupTotal} sold</div>
+              <span class="group-toggle ${isOpen?'open':''}" style="font-size:.75rem;color:#8b7355;display:inline-block;margin-top:.3rem">&#9654;</span>
+            </div>
           </div>
         </td>`;
       tbody.appendChild(htr);
@@ -1513,7 +1545,7 @@ function renderSoldSummary(){
       } else {
         // Single variant — flat row with image
         tr.innerHTML=`
-          <td class="lh">
+          <td class="lh" style="width:116px">
             <img src="${p.image}" alt="" style="width:100px;height:100px;border-radius:6px;object-fit:cover;display:block">
           </td>
           <td class="lh">
@@ -1530,7 +1562,8 @@ function renderSoldSummary(){
       }
       tbody.appendChild(tr);
     });
-  });
+    }); // end soldNames.forEach
+  }); // end soldCatGroups.forEach
 
   // Totals row
   const ttr=document.createElement('tr');
