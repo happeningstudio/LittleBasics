@@ -106,6 +106,16 @@ body{font-family:'DM Sans',sans-serif;background:var(--mist);color:var(--ink);fo
 .line-ttl.bundle{color:var(--bark)}
 .in-order{background:#fdf9f5!important}
 
+/* ── GROUP COLLAPSE ── */
+.group-header{cursor:pointer;user-select:none;background:var(--sand-lt)!important}
+.group-header:hover{background:var(--sand)!important}
+.group-header td{padding:.45rem .65rem!important;font-weight:600;font-size:.76rem;color:var(--bark)}
+.group-toggle{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:4px;background:var(--white);border:1px solid var(--sand-dk);font-size:.65rem;color:var(--bark);margin-right:.4rem;flex-shrink:0;transition:transform .2s}
+.group-toggle.open{transform:rotate(90deg)}
+.group-meta{font-size:.68rem;color:#aaa;font-weight:400;margin-left:.4rem}
+.variant-rows{transition:opacity .15s}
+.variant-rows.collapsed tr{display:none}
+
 /* PANEL */
 .panel{background:var(--white);border-left:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto}
 .psec{padding:.85rem;border-bottom:1px solid #f0ece8}
@@ -187,7 +197,22 @@ body{font-family:'DM Sans',sans-serif;background:var(--mist);color:var(--ink);fo
 .sold-row-total{font-weight:700;background:var(--sand-lt)!important;color:var(--bark)}
 .sold-col-total-row td{background:var(--sand-lt)!important;font-weight:700;color:var(--bark-dk);font-size:.73rem}
 
-/* order log */
+/* ── ADJUST PANEL ── */
+.adjust-panel{background:var(--mist);border:1px solid var(--border);border-radius:6px;padding:.65rem;margin-top:.45rem;display:none}
+.adjust-panel.open{display:block}
+.adjust-modes{display:flex;gap:.35rem;margin-bottom:.6rem}
+.amode{padding:.25rem .6rem;font-size:.68rem;font-weight:600;border:1px solid var(--border);border-radius:4px;background:var(--white);cursor:pointer;color:#888;font-family:'DM Sans',sans-serif;transition:all .15s}
+.amode:hover{border-color:var(--bark);color:var(--bark)}
+.amode.active{background:var(--bark);color:var(--white);border-color:var(--bark)}
+.adjust-item-row{display:flex;align-items:center;gap:.5rem;padding:.3rem 0;border-bottom:1px solid var(--border);font-size:.74rem}
+.adjust-item-row:last-child{border:none}
+.adjust-item-row input[type=checkbox]{accent-color:var(--bark);width:14px;height:14px;flex-shrink:0}
+.adjust-item-label{flex:1;color:var(--ink)}
+.adjust-item-sub{font-size:.67rem;color:#aaa}
+.exchange-select{border:1px solid var(--border);border-radius:4px;padding:.22rem .35rem;font-size:.7rem;font-family:'DM Sans',sans-serif;background:var(--white);color:var(--ink)}
+.adjust-footer{margin-top:.55rem;display:flex;gap:.4rem;justify-content:flex-end}
+.refunded{border-color:#b84040!important;opacity:.7}
+.log-status-badge.refunded{background:#fdf0f0;color:var(--red)}
 .log-stats{display:flex;gap:.4rem;margin-bottom:.5rem;flex-wrap:wrap;flex-shrink:0}
 .stat-card{background:var(--white);border:1px solid var(--border);border-radius:6px;padding:.32rem .6rem;font-size:.7rem;box-shadow:var(--shadow)}
 .stat-card strong{color:var(--bark)}
@@ -360,6 +385,7 @@ function doPost(e) {
     <button class="tab-btn active" onclick="switchView('order')">📋 Orders</button>
     <button class="tab-btn" onclick="switchView('inventory')">📦 Inventory</button>
     <button class="tab-btn" onclick="switchView('sold')">📊 Sold</button>
+    <button class="tab-btn" onclick="switchView('log')">🗒 Order Log</button>
     <button class="tab-btn" onclick="switchView('mgr')">⚙️ Products</button>
   </div>
   <div class="topbar-right">
@@ -487,28 +513,32 @@ function doPost(e) {
 
 <!-- ══ SOLD RECORDS ══ -->
 <div class="view" id="view-sold">
-  <div class="sold-wrap">
-    <!-- LEFT: Summary table -->
-    <div class="sold-col">
-      <div class="sold-col-hdr">
-        <h3>Units Sold</h3>
-        <span id="soldMeta"></span>
+  <div class="inv-wrap">
+    <div class="inv-toolbar">
+      <div class="search-wrap">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        <input class="search-input" type="text" id="soldSearch" placeholder="Search…" oninput="renderSoldSummary()">
       </div>
-      <div class="sold-scroll" id="soldSummaryArea">
-        <div class="no-data">No sales recorded yet</div>
-      </div>
+      <span style="font-size:.7rem;color:#bbb" id="soldMeta"></span>
     </div>
-    <!-- RIGHT: Order log -->
-    <div class="sold-col">
-      <div class="sold-col-hdr">
-        <h3>Order Log</h3>
-        <span id="logMeta"></span>
-      </div>
-      <div class="log-stats" id="logStats"></div>
-      <div class="log-filters" id="logFilters"></div>
-      <div class="sold-scroll" id="logArea">
-        <div class="no-data">No orders recorded yet</div>
-      </div>
+    <div class="inv-scroll">
+      <table class="inv-tbl" id="soldTable">
+        <thead id="soldThead"></thead>
+        <tbody id="soldTbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ══ ORDER LOG ══ -->
+<div class="view" id="view-log">
+  <div style="padding:1rem 1.25rem;height:calc(100vh - var(--top));display:flex;flex-direction:column;overflow:hidden">
+    <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.5rem;flex-shrink:0">
+      <div class="log-stats" id="logStats" style="display:flex;gap:.4rem;flex-wrap:wrap"></div>
+    </div>
+    <div class="log-filters" id="logFilters" style="flex-shrink:0;margin-bottom:.5rem"></div>
+    <div style="overflow-y:auto;flex:1" id="logArea">
+      <div class="no-data">No orders recorded yet</div>
     </div>
   </div>
 </div>
@@ -762,6 +792,7 @@ function switchView(v){
   document.querySelector(`.tab-btn[onclick="switchView('${v}')"]`).classList.add('active');
   if(v==='inventory') renderInventory();
   if(v==='sold')      renderSold();
+  if(v==='log')       renderLog();
   if(v==='mgr')       renderMgr();
 }
 
@@ -775,55 +806,95 @@ function setFilter(el,type){
 /* ═══════════════════════════════════════════════
    ORDER BUILDER
 ═══════════════════════════════════════════════ */
+// Track which groups are collapsed: key = group name, value = true if collapsed
+// Default: all collapsed
+const orderCollapsed = new Proxy({}, { get: (t,k) => k in t ? t[k] : true });
+
 function renderTable(){
   const search=document.getElementById('searchInput').value.toLowerCase();
   const tbody=document.getElementById('productTbody');
   tbody.innerHTML='';
   const bundle=isBundle();
 
-  const rows=[];
+  // Group products by name
+  const groups={};
   products.forEach(p=>{
+    if(!groups[p.name]) groups[p.name]=[];
     p.sizes.forEach(cm=>{
       if(szFilter!=='all'&&cm!==szFilter) return;
       if(search&&!p.name.toLowerCase().includes(search)&&!p.color.toLowerCase().includes(search)) return;
-      rows.push({p,cm});
+      groups[p.name].push({p,cm});
     });
   });
 
-  if(!rows.length){
+  const groupNames=Object.keys(groups).filter(n=>groups[n].length>0);
+  if(!groupNames.length){
     tbody.innerHTML='<tr><td colspan="10" style="text-align:center;padding:2rem;color:#ccc;font-size:.78rem">No products found</td></tr>';
     return;
   }
 
-  rows.forEach(({p,cm})=>{
-    const k=skey(p.pid,cm);
-    const qty=order[k]||0;
-    const inStock=getStock(p.pid,cm);
-    const sp=bundle?p.bundlePrice:p.price;
-    const line=sp*qty;
-    let sCls='stock-ok',sLbl=inStock+' left';
-    if(inStock===0){sCls='stock-zero';sLbl='Out';}
-    else if(inStock<=2){sCls='stock-low';}
-    const tr=document.createElement('tr');
-    tr.className='variant-row'+(qty>0?' in-order':'');
-    tr.innerHTML=`
-      <td><img class="thumb" src="${p.image}" alt="" loading="lazy"></td>
-      <td style="font-size:.76rem;color:#333;min-width:140px;line-height:1.3">${p.name}</td>
-      <td><span style="display:flex;align-items:center;gap:.3rem;font-size:.73rem;color:#555">
-        <span class="swatch" style="background:${p.hex}"></span>${p.color}</span></td>
-      <td><span class="spill">${toDisplay(cm)}</span></td>
-      <td><span class="${sCls}">${sLbl}</span></td>
-      <td style="font-size:.76rem;${!bundle?'font-weight:600':'color:#ccc'}">${fmt(p.price)}</td>
-      <td style="font-size:.76rem;${bundle?'font-weight:600;color:var(--bark)':'color:#ccc'}">${fmt(p.bundlePrice)}</td>
-      <td style="font-size:.72rem;color:#bbb">${fmt(p.cost)}</td>
-      <td><div class="qty-ctrl">
-        <button class="qb" onclick="changeQty(${p.pid},'${cm}',-1)">−</button>
-        <span class="qn ${qty>0?'on':''}" id="qn-${k}">${qty}</span>
-        <button class="qb" onclick="changeQty(${p.pid},'${cm}',1)">+</button>
-      </div></td>
-      <td class="line-ttl ${bundle&&qty>0?'bundle':''}">${qty>0?fmt(line):'—'}</td>`;
-    tbody.appendChild(tr);
+  groupNames.forEach(name=>{
+    const rows=groups[name];
+    const isOpen=!orderCollapsed[name];
+    const totalStock=rows.reduce((s,{p,cm})=>s+getStock(p.pid,cm),0);
+    const orderQty=rows.reduce((s,{p,cm})=>s+(order[skey(p.pid,cm)]||0),0);
+    const p0=rows[0].p;
+
+    // Group header row
+    const htr=document.createElement('tr');
+    htr.className='group-header';
+    htr.onclick=()=>toggleOrderGroup(name);
+    htr.innerHTML=`
+      <td colspan="2">
+        <div style="display:flex;align-items:center">
+          <span class="group-toggle ${isOpen?'open':''}">▶</span>
+          <img src="${p0.image}" alt="" style="width:28px;height:28px;border-radius:4px;object-fit:cover;margin-right:.5rem">
+          ${name}
+          <span class="group-meta">${rows.length} size${rows.length>1?'s':''} · ${totalStock} in stock${orderQty>0?' · <span style="color:var(--bark)">'+orderQty+' in order</span>':''}</span>
+        </div>
+      </td>
+      <td colspan="8" style="color:#bbb;font-size:.7rem;text-align:right;padding-right:.8rem">
+        ${fmt(p0.price)} reg · ${fmt(p0.bundlePrice)} bundle
+      </td>`;
+    tbody.appendChild(htr);
+
+    // Variant rows (one per size)
+    rows.forEach(({p,cm})=>{
+      const k=skey(p.pid,cm);
+      const qty=order[k]||0;
+      const inStock=getStock(p.pid,cm);
+      const sp=bundle?p.bundlePrice:p.price;
+      const line=sp*qty;
+      let sCls='stock-ok',sLbl=inStock+' left';
+      if(inStock===0){sCls='stock-zero';sLbl='Out';}
+      else if(inStock<=2){sCls='stock-low';}
+      const tr=document.createElement('tr');
+      tr.className='variant-row'+(qty>0?' in-order':'')+(isOpen?'':' grp-hidden');
+      tr.dataset.group=name;
+      if(!isOpen) tr.style.display='none';
+      tr.innerHTML=`
+        <td colspan="2" style="font-size:.76rem;color:#333;min-width:140px;line-height:1.3;padding-left:2rem">${p.name}</td>
+        <td><span style="display:flex;align-items:center;gap:.3rem;font-size:.73rem;color:#555">
+          <span class="swatch" style="background:${p.hex}"></span>${p.color}</span></td>
+        <td><span class="spill">${toDisplay(cm)}</span></td>
+        <td><span class="${sCls}">${sLbl}</span></td>
+        <td style="font-size:.76rem;${!bundle?'font-weight:600':'color:#ccc'}">${fmt(p.price)}</td>
+        <td style="font-size:.76rem;${bundle?'font-weight:600;color:var(--bark)':'color:#ccc'}">${fmt(p.bundlePrice)}</td>
+        <td style="font-size:.72rem;color:#bbb">${fmt(p.cost)}</td>
+        <td><div class="qty-ctrl">
+          <button class="qb" onclick="event.stopPropagation();changeQty(${p.pid},'${cm}',-1)">−</button>
+          <span class="qn ${qty>0?'on':''}" id="qn-${k}">${qty}</span>
+          <button class="qb" onclick="event.stopPropagation();changeQty(${p.pid},'${cm}',1)">+</button>
+        </div></td>
+        <td class="line-ttl ${bundle&&qty>0?'bundle':''}">${qty>0?fmt(line):'—'}</td>`;
+      tbody.appendChild(tr);
+    });
   });
+}
+
+function toggleOrderGroup(name){
+  orderCollapsed[name]=!orderCollapsed[name];
+  renderTable();
 }
 
 function changeQty(pid,cm,delta){
@@ -962,18 +1033,18 @@ function clearOrder(){
 }
 
 /* ═══════════════════════════════════════════════
-   INVENTORY — Product sections × size columns
+   INVENTORY — collapsible product groups × size columns
 ═══════════════════════════════════════════════ */
+const invCollapsed = new Proxy({}, { get: (t,k) => k in t ? t[k] : true });
+
 function renderInventory(){
   const search=document.getElementById('invSearch').value.toLowerCase();
   const filtered=products.filter(p=>!search||p.name.toLowerCase().includes(search)||p.color.toLowerCase().includes(search));
-
-  // Which CM sizes are actually used?
   const usedSizes=ALL_CM.filter(cm=>filtered.some(p=>p.sizes.includes(cm)));
 
   const thead=document.getElementById('invThead');
   thead.innerHTML=`<tr>
-    <th class="lh" style="min-width:200px">Product / Color</th>
+    <th class="lh" style="min-width:220px">Product / Color</th>
     ${usedSizes.map(cm=>`<th>${cm}</th>`).join('')}
     <th>Total</th>
   </tr>`;
@@ -981,34 +1052,68 @@ function renderInventory(){
   const tbody=document.getElementById('invTbody');
   tbody.innerHTML='';
 
-  // Group by product name (for section headers)
-  // Each product is one row (name + color)
+  // Group by product name
+  const groups={};
+  const groupOrder=[];
   filtered.forEach(p=>{
-    const tr=document.createElement('tr');
-    let rowTotal=0;
-    const cells=usedSizes.map(cm=>{
-      if(!p.sizes.includes(cm)) return `<td class="na">—</td>`;
-      const k=skey(p.pid,cm);
-      const val=stock[k]!==undefined?stock[k]:0;
-      rowTotal+=val;
-      const cls=val===0?'zero':val<=2?'low':'';
-      return `<td><input class="inv-input ${cls}" type="number" min="0" value="${val}" data-key="${k}" oninput="hiInv(this)"></td>`;
-    }).join('');
-
-    tr.innerHTML=`
-      <td class="lh">
-        <div style="display:flex;align-items:center;gap:.4rem">
-          <span class="swatch" style="background:${p.hex}"></span>
-          <div>
-            <div style="font-size:.76rem;font-weight:500;color:var(--ink)">${p.name}</div>
-            <div style="font-size:.67rem;color:#aaa">${p.color}</div>
-          </div>
-        </div>
-      </td>
-      ${cells}
-      <td class="row-total">${rowTotal}</td>`;
-    tbody.appendChild(tr);
+    if(!groups[p.name]){groups[p.name]=[];groupOrder.push(p.name);}
+    groups[p.name].push(p);
   });
+
+  groupOrder.forEach(name=>{
+    const members=groups[name];
+    const isOpen=!invCollapsed[name];
+    const groupTotal=members.reduce((s,p)=>s+usedSizes.reduce((ss,cm)=>ss+(p.sizes.includes(cm)?(stock[skey(p.pid,cm)]||0):0),0),0);
+
+    // Group header
+    const htr=document.createElement('tr');
+    htr.className='group-header';
+    htr.onclick=()=>toggleInvGroup(name);
+    htr.innerHTML=`
+      <td class="lh" colspan="${usedSizes.length+2}">
+        <div style="display:flex;align-items:center;gap:.5rem">
+          <span class="group-toggle ${isOpen?'open':''}">▶</span>
+          <img src="${members[0].image}" alt="" style="width:36px;height:36px;border-radius:4px;object-fit:cover;flex-shrink:0">
+          ${name}
+          <span class="group-meta">${members.length} color${members.length>1?'s':''} · ${groupTotal} total in stock</span>
+        </div>
+      </td>`;
+    tbody.appendChild(htr);
+
+    // One row per color variant
+    members.forEach(p=>{
+      let rowTotal=0;
+      const cells=usedSizes.map(cm=>{
+        if(!p.sizes.includes(cm)) return `<td class="na">—</td>`;
+        const k=skey(p.pid,cm);
+        const val=stock[k]!==undefined?stock[k]:0;
+        rowTotal+=val;
+        const cls=val===0?'zero':val<=2?'low':'';
+        return `<td><input class="inv-input ${cls}" type="number" min="0" value="${val}" data-key="${k}" oninput="hiInv(this)"></td>`;
+      }).join('');
+      const tr=document.createElement('tr');
+      tr.dataset.group=name;
+      if(!isOpen) tr.style.display='none';
+      tr.innerHTML=`
+        <td class="lh">
+          <div style="display:flex;align-items:center;gap:.4rem;padding-left:1.5rem">
+            <span class="swatch" style="background:${p.hex}"></span>
+            <div>
+              <div style="font-size:.74rem;font-weight:500;color:var(--ink)">${p.name}</div>
+              <div style="font-size:.65rem;color:#aaa">${p.color}</div>
+            </div>
+          </div>
+        </td>
+        ${cells}
+        <td class="row-total">${rowTotal}</td>`;
+      tbody.appendChild(tr);
+    });
+  });
+}
+
+function toggleInvGroup(name){
+  invCollapsed[name]=!invCollapsed[name];
+  renderInventory();
 }
 
 function hiInv(input){
@@ -1040,63 +1145,109 @@ async function saveInventory(){
 /* ═══════════════════════════════════════════════
    SOLD RECORDS
 ═══════════════════════════════════════════════ */
-function renderSold(){ renderSoldSummary(); renderLog(); }
+const soldCollapsed = new Proxy({}, { get: (t,k) => k in t ? t[k] : true });
+
+function renderSold(){ renderSoldSummary(); }
 
 function renderSoldSummary(){
-  const area=document.getElementById('soldSummaryArea');
-  const keys=Object.keys(soldCounts).filter(k=>soldCounts[k]>0);
-  if(!keys.length){area.innerHTML='<div class="no-data">No sales recorded yet</div>';document.getElementById('soldMeta').textContent='';return;}
+  const search=(document.getElementById('soldSearch')?.value||'').toLowerCase();
+  const filtered=products.filter(p=>!search||p.name.toLowerCase().includes(search)||p.color.toLowerCase().includes(search));
+  const usedSizes=ALL_CM; // always show all sizes, 0 if none sold
 
-  // Which pids and sizes have sales?
-  const pidSet=new Set(keys.map(k=>parseInt(k.split('_')[0])));
-  const sizeSet=new Set(keys.map(k=>k.split('_')[1]));
-  const usedSizes=ALL_CM.filter(s=>sizeSet.has(s));
-  const pidList=[...pidSet].sort((a,b)=>a-b);
+  // Build header
+  const thead=document.getElementById('soldThead');
+  thead.innerHTML=`<tr>
+    <th class="lh" style="width:44px"></th>
+    <th class="lh" style="min-width:200px">Product / Color</th>
+    ${usedSizes.map(s=>`<th>${s}</th>`).join('')}
+    <th>Total</th>
+  </tr>`;
 
-  let totalUnits=keys.reduce((s,k)=>s+(soldCounts[k]||0),0);
-  document.getElementById('soldMeta').textContent=totalUnits+' units';
+  const totalUnits=Object.values(soldCounts).reduce((s,v)=>s+v,0);
+  document.getElementById('soldMeta').textContent=totalUnits+' units sold';
+
+  // Group by product name
+  const groups={};
+  const groupOrder=[];
+  filtered.forEach(p=>{
+    if(!groups[p.name]){groups[p.name]=[];groupOrder.push(p.name);}
+    groups[p.name].push(p);
+  });
 
   let colTotals={};
   usedSizes.forEach(s=>colTotals[s]=0);
   let grandTotal=0;
 
-  // Group by product name prefix to create visual sections (like your Google Sheet)
-  let html=`<div style="overflow-x:auto"><table class="sold-tbl">
-    <thead><tr>
-      <th style="text-align:left;min-width:180px">Product / Color</th>
-      ${usedSizes.map(s=>`<th>${s}</th>`).join('')}
-      <th>Total</th>
-    </tr></thead><tbody>`;
+  const tbody=document.getElementById('soldTbody');
+  tbody.innerHTML='';
 
-  pidList.forEach(pid=>{
-    const p=products.find(pp=>pp.pid===pid);
-    if(!p) return;
-    let rowTotal=0;
-    const cells=usedSizes.map(sz=>{
-      const cnt=soldCounts[skey(pid,sz)]||0;
-      rowTotal+=cnt; colTotals[sz]=(colTotals[sz]||0)+cnt;
-      return cnt>0?`<td class="sold-count">${cnt}</td>`:`<td class="sold-zero">—</td>`;
-    }).join('');
-    grandTotal+=rowTotal;
-    if(!rowTotal) return;
-    html+=`<tr>
-      <td style="display:flex;align-items:center;gap:.35rem;font-size:.74rem">
-        <span class="swatch" style="background:${p.hex}"></span>
-        <span><strong style="color:var(--ink)">${p.name}</strong><br><span style="color:#aaa;font-size:.67rem">${p.color}</span></span>
-      </td>
-      ${cells}
-      <td class="sold-row-total">${rowTotal}</td></tr>`;
+  groupOrder.forEach(name=>{
+    const members=groups[name];
+    const isOpen=!soldCollapsed[name];
+    const groupTotal=members.reduce((s,p)=>s+usedSizes.reduce((ss,sz)=>ss+(soldCounts[skey(p.pid,sz)]||0),0),0);
+
+    // Group header — image + name + total sold
+    const htr=document.createElement('tr');
+    htr.className='group-header';
+    htr.onclick=()=>toggleSoldGroup(name);
+    htr.innerHTML=`
+      <td class="lh" colspan="${usedSizes.length+3}">
+        <div style="display:flex;align-items:center;gap:.5rem">
+          <span class="group-toggle ${isOpen?'open':''}">▶</span>
+          <img src="${members[0].image}" alt="" style="width:36px;height:36px;border-radius:4px;object-fit:cover;flex-shrink:0">
+          ${name}
+          <span class="group-meta">${members.length} color${members.length>1?'s':''} · ${groupTotal} sold</span>
+        </div>
+      </td>`;
+    tbody.appendChild(htr);
+
+    // One row per color variant — always shown, 0 if nothing sold yet
+    members.forEach(p=>{
+      let rowTotal=0;
+      const cells=usedSizes.map(sz=>{
+        const cnt=soldCounts[skey(p.pid,sz)]||0;
+        rowTotal+=cnt;
+        colTotals[sz]=(colTotals[sz]||0)+cnt;
+        return cnt>0
+          ? `<td class="sold-count">${cnt}</td>`
+          : `<td class="sold-zero">0</td>`;
+      }).join('');
+      grandTotal+=rowTotal;
+
+      const tr=document.createElement('tr');
+      tr.dataset.soldGroup=name;
+      if(!isOpen) tr.style.display='none';
+      tr.innerHTML=`
+        <td class="lh"></td>
+        <td class="lh" style="padding-left:1.5rem">
+          <div style="display:flex;align-items:center;gap:.4rem">
+            <span class="swatch" style="background:${p.hex}"></span>
+            <div>
+              <div style="font-size:.74rem;font-weight:500;color:var(--ink)">${p.name}</div>
+              <div style="font-size:.65rem;color:#aaa">${p.color}</div>
+            </div>
+          </div>
+        </td>
+        ${cells}
+        <td class="sold-row-total">${rowTotal}</td>`;
+      tbody.appendChild(tr);
+    });
   });
 
-  // Column totals row
-  html+=`<tr class="sold-col-total-row">
+  // Totals row
+  const ttr=document.createElement('tr');
+  ttr.className='sold-col-total-row';
+  ttr.innerHTML=`
+    <td></td>
     <td>TOTAL</td>
     ${usedSizes.map(s=>`<td>${colTotals[s]||0}</td>`).join('')}
-    <td>${grandTotal}</td>
-  </tr>`;
+    <td>${grandTotal}</td>`;
+  tbody.appendChild(ttr);
+}
 
-  html+='</tbody></table></div>';
-  area.innerHTML=html;
+function toggleSoldGroup(name){
+  soldCollapsed[name]=!soldCollapsed[name];
+  renderSoldSummary();
 }
 
 function renderLog(){
@@ -1114,22 +1265,28 @@ function renderLog(){
   ).join('');
 
   const filtered=logFilter==='all'?orderLog:orderLog.filter(e=>e.status===logFilter);
-  document.getElementById('logMeta').textContent=filtered.length+' order'+(filtered.length!==1?'s':'');
+  const logMeta=document.getElementById('logMeta');
+  if(logMeta) logMeta.textContent=filtered.length+' order'+(filtered.length!==1?'s':'');
 
   if(!filtered.length){logArea.innerHTML='<div class="no-data">No orders match this filter</div>';return;}
-  logArea.innerHTML=filtered.map(e=>{
+  logArea.innerHTML=`<div style="font-size:.67rem;color:#bbb;margin-bottom:.5rem;padding:.3rem .5rem;background:var(--sand-lt);border-radius:5px;border:1px solid var(--border)">
+    ✕ removes from log only &nbsp;·&nbsp; ↩ removes <em>and</em> restores stock &nbsp;·&nbsp; ⇄ adjust for refund or exchange
+  </div>`+filtered.map(e=>{
     const sc=statusClass(e.status);
     const itemStr=(e.items||[]).map(i=>`${i.qty}× ${i.name} (${toDisplayShort(i.cm)||i.cm})`).join(', ');
     const profNum=parseFloat(e.profit||0);
-    return `<div class="log-entry ${sc}">
+    const isRefunded=e.status==='Refunded';
+    return `<div class="log-entry ${sc} ${isRefunded?'refunded':''}" id="logentry-${e.id}">
       <div class="log-top">
         <div>
           <div class="log-name">${e.name||'(no name)'}</div>
           <div class="log-date">${e.date||''}</div>
         </div>
-        <div style="display:flex;align-items:center;gap:.35rem">
-          <span class="log-status-badge ${sc}">${e.status}</span>
-          <button class="log-del" onclick="deleteLog(${e.id})" title="Delete">✕</button>
+        <div style="display:flex;align-items:center;gap:.35rem;flex-wrap:wrap;justify-content:flex-end">
+          <span class="log-status-badge ${sc} ${isRefunded?'refunded':''}">${e.status}</span>
+          <button class="btn sm" onclick="toggleAdjust(${e.id})" style="font-size:.65rem;padding:.18rem .4rem" ${isRefunded?'disabled':''}>⇄ Adjust</button>
+          <button class="log-del" onclick="deleteLog(${e.id},false)" title="Remove from log only">✕</button>
+          <button class="log-del" onclick="deleteLog(${e.id},true)" title="Remove + reverse inventory & sold" style="color:#e8c4c4;font-size:.62rem;padding:0 .2rem">↩</button>
         </div>
       </div>
       <div class="log-items">${itemStr}</div>
@@ -1139,21 +1296,58 @@ function renderLog(){
           onchange="updateLogField(${e.id},'tracking',this.value)">
         <select style="border:1px solid var(--border);border-radius:4px;padding:.22rem .35rem;font-size:.7rem;font-family:'DM Sans',sans-serif;background:var(--mist);color:var(--ink)"
           onchange="updateLogField(${e.id},'status',this.value);renderLog()">
-          ${['Paid','Packed','Packed & Shipped','Picked Up'].map(s=>`<option ${e.status===s?'selected':''}>${s}</option>`).join('')}
+          ${['Paid','Packed','Packed & Shipped','Picked Up','Refunded'].map(s=>`<option ${e.status===s?'selected':''}>${s}</option>`).join('')}
         </select>
       </div>
       <div class="log-bottom">
         <span class="log-numbers">${fmt(parseFloat(e.revenue))} rev · ${fmt(parseFloat(e.cost))} cost · ${(e.items||[]).reduce((s,i)=>s+i.qty,0)} items</span>
         <span class="log-profit ${profNum>=0?'pos':'neg'}">${fmt(profNum)}</span>
       </div>
+      <div class="adjust-panel" id="adjust-${e.id}">
+        <div class="adjust-modes">
+          <button class="amode" onclick="setAdjustMode(${e.id},'full')">Full Refund</button>
+          <button class="amode" onclick="setAdjustMode(${e.id},'partial')">Partial Return</button>
+          <button class="amode" onclick="setAdjustMode(${e.id},'exchange')">Exchange</button>
+        </div>
+        <div id="adjust-body-${e.id}">
+          <p style="font-size:.72rem;color:#aaa">Select a mode above.</p>
+        </div>
+      </div>
     </div>`;
   }).join('');
 }
 
 function setLogFilter(f){ logFilter=f; renderLog(); }
-function deleteLog(id){
-  if(!confirm('Remove this order from the log?')) return;
-  orderLog=orderLog.filter(e=>e.id!==id); saveLog(); renderSold();
+
+function deleteLog(id, reverse=false){
+  const entry=orderLog.find(e=>e.id===id);
+  if(!entry) return;
+
+  const itemStr=(entry.items||[]).map(i=>`${i.qty}× ${i.name} (${toDisplayShort(i.cm)||i.cm})`).join('\n');
+  const msg=reverse
+    ? `↩ UNDO this order?\n\nThis will:\n• Remove it from the log\n• Add stock back to Inventory\n• Subtract from Sold counts\n\nItems:\n${itemStr}`
+    : `Remove this order from the log?\n\nInventory and sold counts will NOT be changed.\n\nItems:\n${itemStr}`;
+
+  if(!confirm(msg)) return;
+
+  if(reverse){
+    // Restore inventory and sold counts
+    (entry.items||[]).forEach(i=>{
+      const k=skey(i.pid, i.cm);
+      stock[k]=(stock[k]||0)+i.qty;
+      soldCounts[k]=Math.max(0,(soldCounts[k]||0)-i.qty);
+    });
+    saveStock();
+    saveSold();
+    pushStock(); // sync to sheet
+  }
+
+  orderLog=orderLog.filter(e=>e.id!==id);
+  saveLog();
+  renderLog();
+  renderSoldSummary();
+  renderTable(); // refresh stock in order builder
+  showToast(reverse ? '↩ Order undone — stock & sold counts restored' : '✓ Entry removed from log');
 }
 function statusClass(s){
   return (s||'').toLowerCase().replace(/[^a-z]/g,'-').replace(/-+/g,'-').replace(/-$/,'');
@@ -1169,6 +1363,176 @@ function updateUspsLink(){
   const link=document.getElementById('uspsLink');
   if(addr){ link.style.display='inline-block'; }
   else { link.style.display='none'; }
+}
+
+/* ═══════════════════════════════════════════════
+   ADJUST / REFUND / EXCHANGE
+═══════════════════════════════════════════════ */
+function toggleAdjust(id){
+  const panel=document.getElementById('adjust-'+id);
+  if(!panel) return;
+  panel.classList.toggle('open');
+}
+
+function setAdjustMode(id, mode){
+  const entry=orderLog.find(e=>e.id===id);
+  if(!entry) return;
+  // highlight active mode button
+  const panel=document.getElementById('adjust-'+id);
+  panel.querySelectorAll('.amode').forEach(b=>b.classList.remove('active'));
+  panel.querySelectorAll('.amode')[['full','partial','exchange'].indexOf(mode)].classList.add('active');
+
+  const body=document.getElementById('adjust-body-'+id);
+  const items=entry.items||[];
+
+  if(mode==='full'){
+    body.innerHTML=`
+      <p style="font-size:.73rem;color:#666;margin-bottom:.5rem">Customer returns all items. Stock will be restored, sold counts reduced, order marked <strong>Refunded</strong>.</p>
+      <div style="font-size:.72rem;color:#888;margin-bottom:.5rem">${items.map(i=>`${i.qty}× ${i.name} (${toDisplayShort(i.cm)||i.cm})`).join('<br>')}</div>
+      <div class="adjust-footer">
+        <button class="btn" onclick="toggleAdjust(${id})">Cancel</button>
+        <button class="btn primary" onclick="applyFullRefund(${id})">✓ Apply Full Refund</button>
+      </div>`;
+  }
+
+  if(mode==='partial'){
+    body.innerHTML=`
+      <p style="font-size:.73rem;color:#666;margin-bottom:.45rem">Check the items being returned:</p>
+      ${items.map((i,idx)=>`
+        <div class="adjust-item-row">
+          <input type="checkbox" id="pret-${id}-${idx}">
+          <label for="pret-${id}-${idx}" class="adjust-item-label">
+            ${i.name}
+            <span class="adjust-item-sub">${i.color||''} · ${toDisplayShort(i.cm)||i.cm} · qty ${i.qty}</span>
+          </label>
+          <input type="number" min="1" max="${i.qty}" value="1" id="pretqty-${id}-${idx}"
+            style="width:42px;border:1px solid var(--border);border-radius:4px;padding:.2rem;font-size:.72rem;text-align:center;font-family:'DM Sans',sans-serif;background:var(--mist)">
+        </div>`).join('')}
+      <div class="adjust-footer">
+        <button class="btn" onclick="toggleAdjust(${id})">Cancel</button>
+        <button class="btn primary" onclick="applyPartialReturn(${id})">✓ Apply Return</button>
+      </div>`;
+  }
+
+  if(mode==='exchange'){
+    // Build product+size options from catalog
+    const productOptions=products.map(p=>
+      p.sizes.map(cm=>`<option value="${p.pid}|${cm}">${p.name} — ${p.color} · ${toDisplayShort(cm)} (${cm})</option>`).join('')
+    ).join('');
+
+    body.innerHTML=`
+      <p style="font-size:.73rem;color:#666;margin-bottom:.45rem">Select the item being <strong>returned</strong>, then the <strong>replacement</strong>:</p>
+      <div class="field" style="margin-bottom:.4rem">
+        <label>Returning (from this order)</label>
+        <select class="exchange-select" id="exFrom-${id}" style="width:100%">
+          ${items.map((i,idx)=>`<option value="${idx}">${i.qty}× ${i.name} — ${i.color||''} · ${toDisplayShort(i.cm)||i.cm}</option>`).join('')}
+        </select>
+      </div>
+      <div class="field" style="margin-bottom:.4rem">
+        <label>Qty being exchanged</label>
+        <input type="number" id="exQty-${id}" min="1" value="1"
+          style="width:60px;border:1px solid var(--border);border-radius:4px;padding:.25rem;font-size:.75rem;font-family:'DM Sans',sans-serif;background:var(--mist)">
+      </div>
+      <div class="field" style="margin-bottom:.45rem">
+        <label>Replacement item (size or color)</label>
+        <select class="exchange-select" id="exTo-${id}" style="width:100%">
+          ${productOptions}
+        </select>
+      </div>
+      <div class="adjust-footer">
+        <button class="btn" onclick="toggleAdjust(${id})">Cancel</button>
+        <button class="btn primary" onclick="applyExchange(${id})">⇄ Apply Exchange</button>
+      </div>`;
+  }
+}
+
+function applyFullRefund(id){
+  const entry=orderLog.find(e=>e.id===id);
+  if(!entry) return;
+  if(!confirm(`Full refund for ${entry.name||'this order'}?\n\nAll stock will be restored and sold counts reduced.`)) return;
+  (entry.items||[]).forEach(i=>{
+    const k=skey(i.pid,i.cm);
+    stock[k]=(stock[k]||0)+i.qty;
+    soldCounts[k]=Math.max(0,(soldCounts[k]||0)-i.qty);
+  });
+  entry.status='Refunded';
+  saveStock(); saveSold(); saveLog();
+  pushStock();
+  renderLog(); renderSoldSummary(); renderTable();
+  showToast('✓ Full refund applied — stock restored');
+}
+
+function applyPartialReturn(id){
+  const entry=orderLog.find(e=>e.id===id);
+  if(!entry) return;
+  const items=entry.items||[];
+  const returning=[];
+  items.forEach((i,idx)=>{
+    const cb=document.getElementById(`pret-${id}-${idx}`);
+    const qtyEl=document.getElementById(`pretqty-${id}-${idx}`);
+    if(cb&&cb.checked){
+      const qty=Math.min(parseInt(qtyEl?.value)||1, i.qty);
+      returning.push({...i, qty});
+    }
+  });
+  if(!returning.length){alert('Please check at least one item to return.');return;}
+  const summary=returning.map(i=>`${i.qty}× ${i.name} (${toDisplayShort(i.cm)||i.cm})`).join('\n');
+  if(!confirm(`Return these items?\n\n${summary}\n\nStock will be restored for these items.`)) return;
+  returning.forEach(i=>{
+    const k=skey(i.pid,i.cm);
+    stock[k]=(stock[k]||0)+i.qty;
+    soldCounts[k]=Math.max(0,(soldCounts[k]||0)-i.qty);
+    // reduce qty in order entry
+    const orig=entry.items.find(oi=>oi.pid===i.pid&&oi.cm===i.cm);
+    if(orig){ orig.qty=Math.max(0,orig.qty-i.qty); }
+  });
+  // remove fully returned items
+  entry.items=entry.items.filter(i=>i.qty>0);
+  if(!entry.items.length) entry.status='Refunded';
+  saveStock(); saveSold(); saveLog(); pushStock();
+  renderLog(); renderSoldSummary(); renderTable();
+  showToast('✓ Partial return applied');
+}
+
+function applyExchange(id){
+  const entry=orderLog.find(e=>e.id===id);
+  if(!entry) return;
+  const fromIdx=parseInt(document.getElementById(`exFrom-${id}`)?.value)||0;
+  const toVal=document.getElementById(`exTo-${id}`)?.value||'';
+  const qty=parseInt(document.getElementById(`exQty-${id}`)?.value)||1;
+  const [toPidStr,toCm]=toVal.split('|');
+  const toPid=parseInt(toPidStr);
+  const toProduct=products.find(p=>p.pid===toPid);
+  const fromItem=entry.items[fromIdx];
+  if(!fromItem||!toProduct||!toCm){alert('Please select both items.');return;}
+  if(fromItem.pid===toPid&&fromItem.cm===toCm){alert('Return and replacement are the same item.');return;}
+  const actualQty=Math.min(qty,fromItem.qty);
+  const summary=`Return: ${actualQty}× ${fromItem.name} (${toDisplayShort(fromItem.cm)||fromItem.cm})\nReplace with: ${actualQty}× ${toProduct.name} — ${toProduct.color} (${toDisplayShort(toCm)||toCm})`;
+  if(!confirm(`Apply exchange?\n\n${summary}`)) return;
+
+  // Return old item → add stock back, subtract from sold
+  const fromKey=skey(fromItem.pid,fromItem.cm);
+  stock[fromKey]=(stock[fromKey]||0)+actualQty;
+  soldCounts[fromKey]=Math.max(0,(soldCounts[fromKey]||0)-actualQty);
+  fromItem.qty=Math.max(0,fromItem.qty-actualQty);
+
+  // Send new item → deduct stock, add to sold
+  const toKey=skey(toPid,toCm);
+  stock[toKey]=Math.max(0,(stock[toKey]||0)-actualQty);
+  soldCounts[toKey]=(soldCounts[toKey]||0)+actualQty;
+
+  // Update order entry — add replacement item or increase qty
+  const existing=entry.items.find(i=>i.pid===toPid&&i.cm===toCm);
+  if(existing){ existing.qty+=actualQty; }
+  else { entry.items.push({pid:toPid,name:toProduct.name,color:toProduct.color,cm:toCm,qty:actualQty,sp:toProduct.price}); }
+
+  // Remove fully exchanged items
+  entry.items=entry.items.filter(i=>i.qty>0);
+  entry.status='Packed & Shipped';
+
+  saveStock(); saveSold(); saveLog(); pushStock();
+  renderLog(); renderSoldSummary(); renderTable();
+  showToast('⇄ Exchange applied — stock updated');
 }
 
 /* ═══════════════════════════════════════════════
