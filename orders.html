@@ -51,10 +51,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--mist);color:var(--ink);fo
 .view.active{display:block}
 
 /* ── SHARED TABLE STYLES ── */
-.tbl-wrap{background:var(--white);border-radius:8px;overflow:hidden;box-shadow:var(--shadow)}
+.tbl-wrap{background:var(--white);border-radius:8px;overflow:visible;box-shadow:var(--shadow)}
 .tbl{width:100%;border-collapse:collapse}
 .tbl thead tr{background:var(--sand-lt)}
-.tbl th{padding:.48rem .65rem;font-size:.63rem;font-weight:600;color:#aaa;text-transform:uppercase;letter-spacing:.08em;text-align:left;border-bottom:1px solid var(--border);white-space:nowrap}
+.tbl th{padding:.48rem .65rem;font-size:.63rem;font-weight:600;color:#aaa;text-transform:uppercase;letter-spacing:.08em;text-align:left;border-bottom:1px solid var(--border);white-space:nowrap;position:sticky;top:0;z-index:10;background:var(--sand-lt)}
 .tbl td{padding:.38rem .65rem;border-bottom:1px solid #f2ede8;vertical-align:middle}
 .tbl tr:last-child td{border-bottom:none}
 .tbl tr:hover td{background:#faf6f2}
@@ -92,7 +92,24 @@ body{font-family:'DM Sans',sans-serif;background:var(--mist);color:var(--ink);fo
 ════════════════════════════ */
 .order-layout{display:grid;grid-template-columns:1fr var(--panel);height:calc(100vh - var(--top))}
 .table-area{overflow-y:auto;padding:1rem 1.25rem}
-.toolbar{display:flex;align-items:center;gap:.5rem;margin-bottom:.7rem;flex-wrap:wrap}
+.toolbar{display:flex;align-items:center;gap:.5rem;margin-bottom:.7rem;flex-wrap:wrap;position:sticky;top:0;z-index:20;background:var(--mist);padding:.5rem 0;}
+
+/* category section header — sits below toolbar, above column headers */
+.cat-section-hdr td{
+  background:var(--bark)!important;
+  color:var(--white)!important;
+  font-size:.68rem!important;
+  font-weight:700!important;
+  text-transform:uppercase!important;
+  letter-spacing:.1em!important;
+  padding:.4rem .75rem!important;
+  position:sticky;
+  top:46px; /* toolbar height */
+  z-index:9;
+}
+/* column headers sit just below category headers */
+.tbl th{ top:0; }
+.ptable th{ top:0; }
 
 .ptable th:nth-child(6),.ptable th:nth-child(7){text-align:center}
 .ptable td:nth-child(6),.ptable td:nth-child(7){text-align:center}
@@ -104,6 +121,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--mist);color:var(--ink);fo
 .qn.on{color:var(--bark)}
 .line-ttl{font-size:.78rem;font-weight:600;white-space:nowrap}
 .line-ttl.bundle{color:var(--bark)}
+.sale-badge{display:inline-block;background:var(--red);color:#fff;font-size:.6rem;font-weight:700;padding:.1rem .35rem;border-radius:3px;margin-left:.3rem;vertical-align:middle;letter-spacing:.03em}
+.price-strike{text-decoration:line-through;color:#ccc;font-size:.72rem;margin-right:.2rem}
 .in-order{background:#fdf9f5!important}
 
 /* ── GROUP COLLAPSE ── */
@@ -147,11 +166,11 @@ body{font-family:'DM Sans',sans-serif;background:var(--mist);color:var(--ink);fo
    Product sections → color rows × size columns
 ════════════════════════════ */
 .inv-wrap{padding:1rem 1.25rem;overflow-x:auto;height:calc(100vh - var(--top));display:flex;flex-direction:column}
-.inv-toolbar{display:flex;align-items:center;gap:.6rem;margin-bottom:.7rem;flex-shrink:0}
+.inv-toolbar{display:flex;align-items:center;gap:.6rem;margin-bottom:.7rem;flex-shrink:0;position:sticky;top:0;z-index:20;background:var(--mist);padding:.5rem 0;}
 .inv-scroll{overflow-x:auto;flex:1;overflow-y:auto}
 
-.inv-tbl{border-collapse:collapse;background:var(--white);border-radius:8px;overflow:hidden;box-shadow:var(--shadow);min-width:100%}
-.inv-tbl th{background:var(--sand-lt);font-size:.62rem;font-weight:600;color:#aaa;text-transform:uppercase;letter-spacing:.07em;padding:.42rem .6rem;border-bottom:1px solid var(--border);border-right:1px solid var(--border);white-space:nowrap;text-align:center}
+.inv-tbl{border-collapse:collapse;background:var(--white);border-radius:8px;overflow:visible;box-shadow:var(--shadow);min-width:100%}
+.inv-tbl th{background:var(--sand-lt);font-size:.62rem;font-weight:600;color:#aaa;text-transform:uppercase;letter-spacing:.07em;padding:.42rem .6rem;border-bottom:1px solid var(--border);border-right:1px solid var(--border);white-space:nowrap;text-align:center;position:sticky;top:0;z-index:10}
 .inv-tbl th.lh{text-align:left}
 .inv-tbl td{padding:.3rem .6rem;border-bottom:1px solid #f2ede8;border-right:1px solid #f2ede8;text-align:center;vertical-align:middle}
 .inv-tbl td.lh{text-align:left}
@@ -160,6 +179,17 @@ body{font-family:'DM Sans',sans-serif;background:var(--mist);color:var(--ink);fo
 /* product section header row */
 .inv-tbl tr.prod-header td{background:var(--sand-lt);font-weight:600;font-size:.78rem;color:var(--bark);padding:.45rem .6rem;border-bottom:1px solid var(--border)}
 .inv-tbl tr.prod-header td:first-child{display:flex;align-items:center;gap:.4rem}
+
+/* category section headers for all tables */
+tr.cat-section-hdr td{
+  background:var(--bark)!important;
+  color:var(--white)!important;
+  font-size:.68rem!important;
+  font-weight:700!important;
+  text-transform:uppercase!important;
+  letter-spacing:.1em!important;
+  padding:.4rem .75rem!important;
+}
 
 .inv-input{width:48px;text-align:center;border:1px solid var(--border);border-radius:4px;padding:.2rem;font-size:.76rem;font-family:'DM Sans',sans-serif;background:var(--mist);color:var(--ink);transition:border-color .15s}
 .inv-input:focus{outline:none;border-color:var(--bark)}
@@ -182,8 +212,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--mist);color:var(--ink);fo
 .sold-scroll{overflow-y:auto;flex:1;padding-bottom:1rem}
 
 /* sold summary table — matches Google Sheet style */
-.sold-tbl{border-collapse:collapse;background:var(--white);border-radius:8px;box-shadow:var(--shadow);min-width:100%;overflow:hidden}
-.sold-tbl th{background:var(--sand-lt);font-size:.62rem;font-weight:600;color:#aaa;text-transform:uppercase;letter-spacing:.07em;padding:.42rem .55rem;border-bottom:1px solid var(--border);border-right:1px solid var(--border);text-align:center;white-space:nowrap}
+.sold-tbl{border-collapse:collapse;background:var(--white);border-radius:8px;box-shadow:var(--shadow);min-width:100%;overflow:visible}
+.sold-tbl th{background:var(--sand-lt);font-size:.62rem;font-weight:600;color:#aaa;text-transform:uppercase;letter-spacing:.07em;padding:.42rem .55rem;border-bottom:1px solid var(--border);border-right:1px solid var(--border);text-align:center;white-space:nowrap;position:sticky;top:0;z-index:10}
 .sold-tbl th:first-child,.sold-tbl th:nth-child(2){text-align:left}
 .sold-tbl td{padding:.3rem .55rem;border-bottom:1px solid #f2ede8;border-right:1px solid #f2ede8;text-align:center;font-size:.76rem}
 .sold-tbl td:first-child{text-align:left;font-weight:500;font-size:.75rem;color:var(--ink)}
@@ -786,8 +816,8 @@ async function pullInventory(){
 
 // Push products to sheet
 async function pushProducts(){
-  const rows=[['pid','name','color','hex','sizes','price','bundlePrice','cost','image','material']];
-  products.forEach(p=>rows.push([p.pid,p.name,p.color,p.hex,p.sizes.join(','),p.price,p.bundlePrice,p.cost,p.image,p.material||'']));
+  const rows=[['pid','name','color','hex','sizes','price','bundlePrice','cost','image','material','saleDiscount','category']];
+  products.forEach(p=>rows.push([p.pid,p.name,p.color,p.hex,p.sizes.join(','),p.price,p.bundlePrice,p.cost,p.image,typeof p.material==='string'?p.material:'',p.saleDiscount||0,p.category||'Uncategorized']));
   await sheetWrite('Products', rows);
 }
 
@@ -841,9 +871,30 @@ function showToast(msg, dur=3000){
   toastTimer=setTimeout(()=>toast.classList.remove('show'), dur);
 }
 
-/* ═══════════════════════════════════════════════
-   VIEW SWITCHER
-═══════════════════════════════════════════════ */
+const CAT_ORDER=['Tops','Bottoms','Rompers & Overalls','Sets','Outerwear','Cardigans & Knitwear','Uncategorized'];
+
+function getCategory(p){ return p.category||'Uncategorized'; }
+
+// Returns array of {cat, productNames[]} sorted by CAT_ORDER
+function groupByCategory(productList){
+  const cats={};
+  productList.forEach(p=>{
+    const c=getCategory(p);
+    if(!cats[c]) cats[c]=new Set();
+    cats[c].add(p.name);
+  });
+  return CAT_ORDER
+    .filter(c=>cats[c]&&cats[c].size>0)
+    .map(c=>({cat:c, names:[...cats[c]]}));
+}
+
+// Add category section header row to a tbody
+function appendCatHeader(tbody, cat, colspan){
+  const tr=document.createElement('tr');
+  tr.className='cat-section-hdr';
+  tr.innerHTML=`<td colspan="${colspan}">${cat}</td>`;
+  tbody.appendChild(tr);
+}
 document.getElementById('fDate').valueAsDate=new Date();
 if(!sheetUrl) document.getElementById('setupModal').classList.remove('hidden');
 else document.getElementById('setupModal').classList.add('hidden');
@@ -880,7 +931,6 @@ function renderTable(){
   tbody.innerHTML='';
   const bundle=isBundle();
 
-  // Group products by name
   const groups={};
   products.forEach(p=>{
     if(!groups[p.name]) groups[p.name]=[];
@@ -893,97 +943,195 @@ function renderTable(){
 
   const groupNames=Object.keys(groups).filter(n=>groups[n].length>0);
   if(!groupNames.length){
-    tbody.innerHTML='<tr><td colspan="10" style="text-align:center;padding:2rem;color:#ccc;font-size:.78rem">No products found</td></tr>';
+    const tr=document.createElement('tr');
+    const tdEl=document.createElement('td');
+    tdEl.setAttribute('colspan','10');
+    tdEl.style.cssText='text-align:center;padding:2rem;color:#ccc;font-size:.78rem';
+    tdEl.textContent='No products found';
+    tr.appendChild(tdEl);
+    tbody.appendChild(tr);
     return;
   }
 
-  groupNames.forEach(name=>{
-    const rows=groups[name];
-    const isOpen=!orderCollapsed[name];
-    const totalStock=rows.reduce((s,{p,cm})=>s+getStock(p.pid,cm),0);
-    const orderQty=rows.reduce((s,{p,cm})=>s+(order[skey(p.pid,cm)]||0),0);
-    const p0=rows[0].p;
+  const catGroups=groupByCategory(products.filter(p=>groupNames.includes(p.name)));
+  let lastCat=null;
 
-    // Count distinct color variants for this group
-    const distinctPids=new Set(rows.map(({p})=>p.pid));
-    const multiVariant=distinctPids.size>1;
+  catGroups.forEach(function(catObj){
+    var cat=catObj.cat, names=catObj.names;
+    names.forEach(function(name){
+      const rows=groups[name];
+      if(!rows||!rows.length) return;
 
-    if(multiVariant){
-      // Group header row — collapsible
-      const htr=document.createElement('tr');
-      htr.className='group-header';
-      htr.onclick=()=>toggleOrderGroup(name);
-      htr.innerHTML=`
-        <td colspan="2">
-          <div style="display:flex;align-items:center">
-            <span class="group-toggle ${isOpen?'open':''}">▶</span>
-            <img src="${p0.image}" alt="" style="width:100px;height:100px;border-radius:6px;object-fit:cover;margin-right:.5rem">
-            ${name}
-            <span class="group-meta">${distinctPids.size} colors · ${totalStock} in stock${orderQty>0?' · <span style="color:var(--bark)">'+orderQty+' in order</span>':''}</span>
-          </div>
-        </td>
-        <td colspan="8" style="color:#bbb;font-size:.7rem;text-align:right;padding-right:.8rem">
-          ${fmt(p0.price)} reg · ${fmt(p0.bundlePrice)} bundle
-        </td>`;
-      tbody.appendChild(htr);
-    }
+      if(cat!==lastCat){ appendCatHeader(tbody,cat,10); lastCat=cat; }
 
-    // Variant rows (one per size)
-    rows.forEach(({p,cm})=>{
-      const k=skey(p.pid,cm);
-      const qty=order[k]||0;
-      const inStock=getStock(p.pid,cm);
-      const sp=bundle?p.bundlePrice:p.price;
-      const line=sp*qty;
-      let sCls='stock-ok',sLbl=inStock+' left';
-      if(inStock===0){sCls='stock-zero';sLbl='Out';}
-      else if(inStock<=2){sCls='stock-low';}
-      const tr=document.createElement('tr');
+      const isOpen=!orderCollapsed[name];
+      const totalStock=rows.reduce((s,r)=>s+getStock(r.p.pid,r.cm),0);
+      const orderQty=rows.reduce((s,r)=>s+(order[skey(r.p.pid,r.cm)]||0),0);
+      const p0=rows[0].p;
+      const distinctPids=new Set(rows.map(r=>r.p.pid));
+      const multiVariant=distinctPids.size>1||rows.length>1;
 
       if(multiVariant){
-        // Collapsible child row — no image
-        tr.className='variant-row'+(qty>0?' in-order':'');
-        tr.dataset.group=name;
-        if(!isOpen) tr.style.display='none';
-        tr.innerHTML=`
-          <td colspan="2" style="font-size:.76rem;color:#333;min-width:140px;line-height:1.3;padding-left:2rem">${p.name}</td>
-          <td><span style="display:flex;align-items:center;gap:.3rem;font-size:.73rem;color:#555">
-            <span class="swatch" style="background:${p.hex}"></span>${p.color}</span></td>
-          <td><span class="spill">${toDisplay(cm)}</span></td>
-          <td><span class="${sCls}">${sLbl}</span></td>
-          <td style="font-size:.76rem;${!bundle?'font-weight:600':'color:#ccc'}">${fmt(p.price)}</td>
-          <td style="font-size:.76rem;${bundle?'font-weight:600;color:var(--bark)':'color:#ccc'}">${fmt(p.bundlePrice)}</td>
-          <td style="font-size:.72rem;color:#bbb">${fmt(p.cost)}</td>
-          <td><div class="qty-ctrl">
-            <button class="qb" onclick="event.stopPropagation();changeQty(${p.pid},'${cm}',-1)">−</button>
-            <span class="qn ${qty>0?'on':''}" id="qn-${k}">${qty}</span>
-            <button class="qb" onclick="event.stopPropagation();changeQty(${p.pid},'${cm}',1)">+</button>
-          </div></td>
-          <td class="line-ttl ${bundle&&qty>0?'bundle':''}">${qty>0?fmt(line):'—'}</td>`;
-      } else {
-        // Single variant — flat row with image, no indent
-        tr.className='variant-row'+(qty>0?' in-order':'');
-        tr.innerHTML=`
-          <td><img class="thumb" src="${p.image}" alt="" loading="lazy"></td>
-          <td style="font-size:.76rem;color:#333;min-width:140px;line-height:1.3">${p.name}</td>
-          <td><span style="display:flex;align-items:center;gap:.3rem;font-size:.73rem;color:#555">
-            <span class="swatch" style="background:${p.hex}"></span>${p.color}</span></td>
-          <td><span class="spill">${toDisplay(cm)}</span></td>
-          <td><span class="${sCls}">${sLbl}</span></td>
-          <td style="font-size:.76rem;${!bundle?'font-weight:600':'color:#ccc'}">${fmt(p.price)}</td>
-          <td style="font-size:.76rem;${bundle?'font-weight:600;color:var(--bark)':'color:#ccc'}">${fmt(p.bundlePrice)}</td>
-          <td style="font-size:.72rem;color:#bbb">${fmt(p.cost)}</td>
-          <td><div class="qty-ctrl">
-            <button class="qb" onclick="changeQty(${p.pid},'${cm}',-1)">−</button>
-            <span class="qn ${qty>0?'on':''}" id="qn-${k}">${qty}</span>
-            <button class="qb" onclick="changeQty(${p.pid},'${cm}',1)">+</button>
-          </div></td>
-          <td class="line-ttl ${bundle&&qty>0?'bundle':''}">${qty>0?fmt(line):'—'}</td>`;
+        const htr=document.createElement('tr');
+        htr.className='group-header';
+        htr.onclick=function(){ toggleOrderGroup(name); };
+        const td1=document.createElement('td');
+        td1.style.cssText='width:110px;padding-right:0';
+        const arrow=document.createElement('span');
+        arrow.className='group-toggle'+(isOpen?' open':'');
+        arrow.innerHTML='&#9654;';
+        const img=document.createElement('img');
+        img.src=p0.image; img.alt='';
+        img.style.cssText='width:100px;height:100px;border-radius:6px;object-fit:cover;flex-shrink:0;margin-top:4px';
+        const wrap=document.createElement('div');
+        wrap.style.cssText='display:flex;flex-direction:column;align-items:flex-start;gap:.2rem';
+        wrap.appendChild(arrow); wrap.appendChild(img);
+        td1.appendChild(wrap);
+        const td2=document.createElement('td');
+        const nameDiv=document.createElement('div');
+        nameDiv.style.cssText='font-size:.8rem;font-weight:600;color:#2a2420';
+        nameDiv.textContent=name;
+        const metaDiv=document.createElement('div');
+        metaDiv.style.cssText='font-size:.68rem;color:#aaa;margin-top:.2rem';
+        var metaTxt=(distinctPids.size>1?distinctPids.size+' colors ': '')+totalStock+' in stock';
+        if(orderQty>0) metaTxt+=' / '+orderQty+' in order';
+        metaDiv.textContent=metaTxt;
+        const priceDiv=document.createElement('div');
+        priceDiv.style.cssText='font-size:.7rem;color:#bbb;margin-top:.1rem';
+        priceDiv.textContent=fmt(p0.price)+' reg / '+fmt(p0.bundlePrice)+' bundle';
+        td2.appendChild(nameDiv); td2.appendChild(metaDiv); td2.appendChild(priceDiv);
+        const td3=document.createElement('td');
+        td3.setAttribute('colspan','8');
+        htr.appendChild(td1); htr.appendChild(td2); htr.appendChild(td3);
+        tbody.appendChild(htr);
       }
-      tbody.appendChild(tr);
+
+      rows.forEach(function(rowObj){
+        var p=rowObj.p, cm=rowObj.cm;
+        const k=skey(p.pid,cm);
+        const qty=order[k]||0;
+        const inStock=getStock(p.pid,cm);
+        const sale=p.saleDiscount||0;
+        const basePrice=sale>0?p.price-sale:p.price;
+        const baseBundlePrice=sale>0?p.bundlePrice-sale:p.bundlePrice;
+        const sp=bundle?baseBundlePrice:basePrice;
+        const line=sp*qty;
+        const inStockCls=inStock===0?'stock-zero':inStock<=2?'stock-low':'stock-ok';
+        const inStockLbl=inStock===0?'Out':inStock+' left';
+        const tr=document.createElement('tr');
+        tr.className='variant-row'+(qty>0?' in-order':'');
+
+        if(multiVariant){
+          if(!isOpen) tr.style.display='none';
+          tr.dataset.group=name;
+          const tdName=document.createElement('td');
+          tdName.setAttribute('colspan','2');
+          tdName.style.cssText='font-size:.76rem;color:#333;padding-left:1.8rem;line-height:1.4';
+          const sw=document.createElement('span');
+          sw.className='swatch';
+          sw.style.cssText='background:'+p.hex+';display:inline-block;vertical-align:middle';
+          tdName.appendChild(document.createTextNode(p.name+' '));
+          tdName.appendChild(sw);
+          tdName.appendChild(document.createTextNode(' '+p.color));
+          tr.appendChild(tdName);
+          tr.appendChild(document.createElement('td'));
+        } else {
+          const tdImg=document.createElement('td');
+          tdImg.style.cssText='width:110px;padding-right:0';
+          const imgWrap=document.createElement('div');
+          imgWrap.style.cssText='display:flex;align-items:center;gap:.35rem';
+          const spacer=document.createElement('span');
+          spacer.style.cssText='width:18px;flex-shrink:0;display:inline-block';
+          const img2=document.createElement('img');
+          img2.className='thumb'; img2.src=p.image; img2.alt=''; img2.loading='lazy';
+          imgWrap.appendChild(spacer); imgWrap.appendChild(img2);
+          tdImg.appendChild(imgWrap);
+          tr.appendChild(tdImg);
+          const tdName=document.createElement('td');
+          tdName.style.cssText='font-size:.76rem;color:#333;min-width:140px;line-height:1.3';
+          tdName.textContent=p.name;
+          if(sale>0){
+            const badge=document.createElement('span');
+            badge.className='sale-badge';
+            badge.textContent='SALE -$'+sale;
+            tdName.appendChild(document.createTextNode(' '));
+            tdName.appendChild(badge);
+          }
+          tr.appendChild(tdName);
+          const tdCol=document.createElement('td');
+          const colWrap=document.createElement('span');
+          colWrap.style.cssText='display:flex;align-items:center;gap:.3rem;font-size:.73rem;color:#555';
+          const sw2=document.createElement('span');
+          sw2.className='swatch'; sw2.style.background=p.hex;
+          colWrap.appendChild(sw2);
+          colWrap.appendChild(document.createTextNode(p.color));
+          tdCol.appendChild(colWrap);
+          tr.appendChild(tdCol);
+        }
+
+        const tdSz=document.createElement('td');
+        const szSpan=document.createElement('span');
+        szSpan.className='spill'; szSpan.textContent=toDisplay(cm);
+        tdSz.appendChild(szSpan); tr.appendChild(tdSz);
+
+        const tdSt=document.createElement('td');
+        const stSpan=document.createElement('span');
+        stSpan.className=inStockCls; stSpan.textContent=inStockLbl;
+        tdSt.appendChild(stSpan); tr.appendChild(tdSt);
+
+        const tdReg=document.createElement('td');
+        tdReg.style.fontSize='.76rem';
+        if(sale>0){
+          tdReg.innerHTML='<s style="color:#ccc">'+fmt(p.price)+'</s> <b style="color:#b84040">'+fmt(basePrice)+'</b>';
+        } else {
+          tdReg.style.fontWeight=bundle?'':'600';
+          tdReg.style.color=bundle?'#ccc':'';
+          tdReg.textContent=fmt(p.price);
+        }
+        tr.appendChild(tdReg);
+
+        const tdBun=document.createElement('td');
+        tdBun.style.fontSize='.76rem';
+        if(sale>0){
+          tdBun.innerHTML='<s style="color:#ccc">'+fmt(p.bundlePrice)+'</s> <b style="color:#b84040">'+fmt(baseBundlePrice)+'</b>';
+        } else {
+          tdBun.style.fontWeight=bundle?'600':'';
+          tdBun.style.color=bundle?'#8b7355':'#ccc';
+          tdBun.textContent=fmt(p.bundlePrice);
+        }
+        tr.appendChild(tdBun);
+
+        const tdCost=document.createElement('td');
+        tdCost.style.cssText='font-size:.72rem;color:#bbb';
+        tdCost.textContent=fmt(p.cost);
+        tr.appendChild(tdCost);
+
+        const tdQty=document.createElement('td');
+        const qDiv=document.createElement('div');
+        qDiv.className='qty-ctrl';
+        const bMinus=document.createElement('button');
+        bMinus.className='qb'; bMinus.textContent='-';
+        bMinus.onclick=(function(pid,cm){ return function(e){ e.stopPropagation(); changeQty(pid,cm,-1); }; })(p.pid,cm);
+        const qSpan=document.createElement('span');
+        qSpan.className='qn'+(qty>0?' on':'');
+        qSpan.id='qn-'+k; qSpan.textContent=qty;
+        const bPlus=document.createElement('button');
+        bPlus.className='qb'; bPlus.textContent='+';
+        bPlus.onclick=(function(pid,cm){ return function(e){ e.stopPropagation(); changeQty(pid,cm,1); }; })(p.pid,cm);
+        qDiv.appendChild(bMinus); qDiv.appendChild(qSpan); qDiv.appendChild(bPlus);
+        tdQty.appendChild(qDiv); tr.appendChild(tdQty);
+
+        const tdLine=document.createElement('td');
+        tdLine.className='line-ttl'+(bundle&&qty>0?' bundle':'');
+        tdLine.textContent=qty>0?fmt(line):'--';
+        tr.appendChild(tdLine);
+
+        tbody.appendChild(tr);
+      });
     });
   });
 }
+
 
 function toggleOrderGroup(name){
   orderCollapsed[name]=!orderCollapsed[name];
@@ -1005,7 +1153,9 @@ function updatePanel(){
     const[pidStr,cm]=k.split('_');
     const p=products.find(p=>p.pid===parseInt(pidStr));
     if(!p) return;
-    revenue+=(bundle?p.bundlePrice:p.price)*qty;
+    const sale=p.saleDiscount||0;
+    const effectivePrice=bundle?(p.bundlePrice-sale):(p.price-sale);
+    revenue+=effectivePrice*qty;
     cost+=p.cost*qty; tqty+=qty;
   });
   const shipIn=parseFloat(document.getElementById('fShipIn').value)||0;
@@ -1054,7 +1204,8 @@ async function copyAndSave(){
     const[pidStr,cm]=k.split('_');
     const p=products.find(p=>p.pid===parseInt(pidStr));
     if(!p) return;
-    const sp=bundle?p.bundlePrice:p.price;
+    const sale=p.saleDiscount||0;
+    const sp=bundle?(p.bundlePrice-sale):(p.price-sale);
     revenue+=sp*qty; cost+=p.cost*qty; tqty+=qty;
     itemDetails.push({pid:p.pid,name:p.name,color:p.color,cm,qty,sp});
   });
@@ -1153,8 +1304,19 @@ function renderInventory(){
     groups[p.name].push(p);
   });
 
-  groupOrder.forEach(name=>{
-    const members=groups[name];
+  const catGroups=groupByCategory(filtered);
+  let lastCat=null;
+
+  catGroups.forEach(({cat,names})=>{
+    names.forEach(name=>{
+      const members=groups[name];
+      if(!members||!members.length) return;
+
+      if(cat!==lastCat){
+        appendCatHeader(tbody, cat, usedSizes.length+2);
+        lastCat=cat;
+      }
+
     const isOpen=!invCollapsed[name];
     const groupTotal=members.reduce((s,p)=>s+usedSizes.reduce((ss,cm)=>ss+(p.sizes.includes(cm)?(stock[skey(p.pid,cm)]||0):0),0),0);
     const multiVariant=members.length>1;
@@ -1223,7 +1385,8 @@ function renderInventory(){
       }
       tbody.appendChild(tr);
     });
-  });
+    }); // end names.forEach
+  }); // end catGroups.forEach
 }
 
 function toggleInvGroup(name){
@@ -1765,10 +1928,22 @@ function buildGroupForm(name, siblings){
       <div class="field"><label>Regular Price ($)</label><input type="number" id="epPrice" value="${p0.price}" step="0.01" min="0"></div>
       <div class="field"><label>Bundle Price ($)</label><input type="number" id="epBundle" value="${p0.bundlePrice}" step="0.01" min="0"></div>
     </div>
-    <div class="field" style="margin-bottom:.75rem"><label>Your Cost ($)</label><input type="number" id="epCost" value="${p0.cost}" step="0.01" min="0"></div>
+    <div class="two-col">
+      <div class="field"><label>Your Cost ($)</label><input type="number" id="epCost" value="${p0.cost}" step="0.01" min="0"></div>
+      <div class="field"><label>Sale Discount ($) <span style="color:var(--red);font-size:.65rem">0 = no sale</span></label>
+        <input type="number" id="epSale" value="${p0.saleDiscount||0}" step="0.01" min="0"
+          style="${(p0.saleDiscount||0)>0?'border-color:var(--red);background:#fff8f8;font-weight:600;color:var(--red)':''}"
+          oninput="this.style.borderColor=parseFloat(this.value)>0?'var(--red)':'';this.style.background=parseFloat(this.value)>0?'#fff8f8':'';this.style.color=parseFloat(this.value)>0?'var(--red)':'';this.style.fontWeight=parseFloat(this.value)>0?'600':''">
+      </div>
+    </div>
     <div class="field" style="margin-bottom:.75rem"><label>Material</label><input type="text" id="epMaterial" value="${escHtml(p0.material||'')}" placeholder="e.g. 100% Cotton, Cotton Linen…"></div>
-
-    <div style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#bbb;margin-bottom:.4rem">Color Variants</div>
+    <div class="field" style="margin-bottom:.75rem"><label>Category</label>
+      <select id="epCategory">
+        ${['Uncategorized','Tops','Bottoms','Rompers & Overalls','Sets','Outerwear','Cardigans & Knitwear'].map(c=>
+          `<option ${(p0.category||'Uncategorized')===c?'selected':''}>${c}</option>`
+        ).join('')}
+      </select>
+    </div>font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#bbb;margin-bottom:.4rem">Color Variants</div>
     <div id="variantSections">${variantSections||buildVariantSection(null,0)}</div>
     <button class="add-variant-btn" onclick="addVariantSection()">＋ Add Color Variant</button>
 
@@ -1848,7 +2023,9 @@ async function saveGroupProduct(){
   const price=parseFloat(document.getElementById('epPrice').value)||0;
   const bundlePrice=parseFloat(document.getElementById('epBundle').value)||0;
   const cost=parseFloat(document.getElementById('epCost').value)||0;
+  const saleDiscount=parseFloat(document.getElementById('epSale').value)||0;
   const material=document.getElementById('epMaterial').value.trim();
+  const category=document.getElementById('epCategory').value||'Uncategorized';
   if(!name){alert('Please enter a product name.');return;}
 
   const sections=[...document.querySelectorAll('.variant-section')];
@@ -1870,12 +2047,12 @@ async function saveGroupProduct(){
       const pid=parseInt(existingPid);
       survivingPids.add(pid);
       const ex=products.find(p=>p.pid===pid);
-      if(ex) Object.assign(ex,{name,image,color,hex,sizes,price,bundlePrice,cost,material});
+      if(ex) Object.assign(ex,{name,image,color,hex,sizes,price,bundlePrice,cost,material,saleDiscount,category});
     } else {
       // Create new
       const pid=nextPid();
       survivingPids.add(pid);
-      products.push({pid,name,image,color,hex,sizes,price,bundlePrice,cost,material});
+      products.push({pid,name,image,color,hex,sizes,price,bundlePrice,cost,material,saleDiscount,category});
     }
   });
 
