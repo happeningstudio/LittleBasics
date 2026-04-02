@@ -80,7 +80,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--mist);color:var(--ink);fo
 
 /* misc */
 .swatch{width:13px;height:13px;border-radius:3px;border:1px solid rgba(0,0,0,.12);display:inline-block;flex-shrink:0}
-.thumb{width:32px;height:32px;border-radius:4px;object-fit:cover;display:block}
+.thumb{width:64px;height:64px;border-radius:6px;object-fit:cover;display:block}
 .spill{font-size:.67rem;background:var(--sand-lt);padding:.1rem .38rem;border-radius:10px;color:#777;white-space:nowrap}
 .na{color:#ddd;font-size:.7rem;text-align:center}
 .stock-ok{color:var(--green);font-weight:500;font-size:.73rem}
@@ -197,16 +197,16 @@ body{font-family:'DM Sans',sans-serif;background:var(--mist);color:var(--ink);fo
 .log-entry:hover{box-shadow:var(--shadow-md)}
 .log-entry.pending{border-color:var(--amber)}
 .log-entry.paid{border-color:var(--green)}
-.log-entry.shipped{border-color:var(--blue)}
-.log-entry.delivered{border-color:var(--green)}
-.log-entry.cancelled{border-color:var(--red);opacity:.6}
+.log-entry.packed{border-color:var(--amber)}
+.log-entry.packed-shipped{border-color:var(--blue)}
+.log-entry.picked-up{border-color:var(--green)}
 .log-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:.28rem}
 .log-name{font-weight:600;font-size:.8rem}
 .log-date{font-size:.68rem;color:#bbb}
 .log-status-badge{font-size:.62rem;font-weight:600;text-transform:uppercase;letter-spacing:.07em;padding:.12rem .4rem;border-radius:10px;background:var(--sand-lt);color:var(--bark)}
-.log-status-badge.paid,.log-status-badge.delivered{background:#edf7f0;color:var(--green)}
-.log-status-badge.shipped{background:#edf0f7;color:var(--blue)}
-.log-status-badge.cancelled{background:#fdf0f0;color:var(--red)}
+.log-status-badge.paid,.log-status-badge.picked-up{background:#edf7f0;color:var(--green)}
+.log-status-badge.packed-shipped{background:#edf0f7;color:var(--blue)}
+.log-status-badge.packed{background:#fff8f0;color:var(--amber)}
 .log-items{font-size:.7rem;color:#888;margin-bottom:.28rem;line-height:1.4}
 .log-bottom{display:flex;justify-content:space-between;align-items:center}
 .log-numbers{font-size:.7rem;color:#bbb}
@@ -430,7 +430,11 @@ function doPost(e) {
         <div class="psec-title">Order Details</div>
         <div class="field"><label>Date</label><input type="date" id="fDate"></div>
         <div class="field"><label>Customer Name</label><input type="text" id="fName" placeholder="Full name"></div>
-        <div class="field"><label>Address</label><textarea id="fAddress" placeholder="Street, City, State ZIP"></textarea></div>
+        <div class="field">
+          <label>Address</label>
+          <textarea id="fAddress" placeholder="Street, City, State ZIP" oninput="updateUspsLink()"></textarea>
+          <a id="uspsLink" href="https://cns.usps.com" target="_blank" style="display:none;font-size:.68rem;color:var(--bark);text-decoration:none;margin-top:.2rem">📮 Open USPS Click-N-Ship →</a>
+        </div>
         <div class="field"><label>Tracking #</label><input type="text" id="fTracking"></div>
         <div class="two-col">
           <div class="field"><label>Ship Collected ($)</label><input type="number" id="fShipIn" step="0.01" oninput="updatePanel()"></div>
@@ -443,7 +447,7 @@ function doPost(e) {
           </div>
         </div>
         <div class="field"><label>Status</label>
-          <select id="fStatus"><option>Pending</option><option>Paid</option><option>Shipped</option><option>Delivered</option><option>Cancelled</option></select>
+          <select id="fStatus"><option>Paid</option><option>Packed</option><option>Packed &amp; Shipped</option><option>Picked Up</option></select>
         </div>
         <div class="field"><label>Notes</label><textarea id="fNotes" placeholder="Optional…"></textarea></div>
       </div>
@@ -952,7 +956,7 @@ function clearOrder(){
   Object.keys(order).forEach(k=>delete order[k]);
   ['fName','fAddress','fTracking','fShipIn','fShipOut','fFee','fNotes'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('fDate').valueAsDate=new Date();
-  document.getElementById('fStatus').value='Pending';
+  document.getElementById('fStatus').value='Paid';
   document.getElementById('fPayment').value='Venmo';
   renderTable(); updatePanel();
 }
@@ -1104,7 +1108,7 @@ function renderLog(){
     <div class="stat-card">Revenue: <strong>${fmt(totalRevenue)}</strong></div>
     <div class="stat-card">Profit: <strong>${fmt(totalProfit)}</strong></div>`:'';
 
-  const statuses=['all','Pending','Paid','Shipped','Delivered','Cancelled'];
+  const statuses=['all','Paid','Packed','Packed & Shipped','Picked Up'];
   document.getElementById('logFilters').innerHTML=statuses.map(s=>
     `<button class="chip ${logFilter===s?'active':''}" style="font-size:.67rem" onclick="setLogFilter('${s}')">${s==='all'?'All':s}</button>`
   ).join('');
@@ -1114,14 +1118,14 @@ function renderLog(){
 
   if(!filtered.length){logArea.innerHTML='<div class="no-data">No orders match this filter</div>';return;}
   logArea.innerHTML=filtered.map(e=>{
-    const sc=(e.status||'').toLowerCase();
+    const sc=statusClass(e.status);
     const itemStr=(e.items||[]).map(i=>`${i.qty}× ${i.name} (${toDisplayShort(i.cm)||i.cm})`).join(', ');
     const profNum=parseFloat(e.profit||0);
     return `<div class="log-entry ${sc}">
       <div class="log-top">
         <div>
           <div class="log-name">${e.name||'(no name)'}</div>
-          <div class="log-date">${e.date||''} ${e.tracking?'· #'+e.tracking:''}</div>
+          <div class="log-date">${e.date||''}</div>
         </div>
         <div style="display:flex;align-items:center;gap:.35rem">
           <span class="log-status-badge ${sc}">${e.status}</span>
@@ -1129,6 +1133,15 @@ function renderLog(){
         </div>
       </div>
       <div class="log-items">${itemStr}</div>
+      <div style="display:flex;gap:.4rem;margin-bottom:.28rem;align-items:center">
+        <input type="text" value="${e.tracking||''}" placeholder="Add tracking #…"
+          style="flex:1;border:1px solid var(--border);border-radius:4px;padding:.22rem .4rem;font-size:.7rem;font-family:'DM Sans',sans-serif;background:var(--mist);color:var(--ink)"
+          onchange="updateLogField(${e.id},'tracking',this.value)">
+        <select style="border:1px solid var(--border);border-radius:4px;padding:.22rem .35rem;font-size:.7rem;font-family:'DM Sans',sans-serif;background:var(--mist);color:var(--ink)"
+          onchange="updateLogField(${e.id},'status',this.value);renderLog()">
+          ${['Paid','Packed','Packed & Shipped','Picked Up'].map(s=>`<option ${e.status===s?'selected':''}>${s}</option>`).join('')}
+        </select>
+      </div>
       <div class="log-bottom">
         <span class="log-numbers">${fmt(parseFloat(e.revenue))} rev · ${fmt(parseFloat(e.cost))} cost · ${(e.items||[]).reduce((s,i)=>s+i.qty,0)} items</span>
         <span class="log-profit ${profNum>=0?'pos':'neg'}">${fmt(profNum)}</span>
@@ -1141,6 +1154,21 @@ function setLogFilter(f){ logFilter=f; renderLog(); }
 function deleteLog(id){
   if(!confirm('Remove this order from the log?')) return;
   orderLog=orderLog.filter(e=>e.id!==id); saveLog(); renderSold();
+}
+function statusClass(s){
+  return (s||'').toLowerCase().replace(/[^a-z]/g,'-').replace(/-+/g,'-').replace(/-$/,'');
+}
+function updateLogField(id, field, val){
+  const entry=orderLog.find(e=>e.id===id);
+  if(!entry) return;
+  entry[field]=val;
+  saveLog();
+}
+function updateUspsLink(){
+  const addr=document.getElementById('fAddress').value.trim();
+  const link=document.getElementById('uspsLink');
+  if(addr){ link.style.display='inline-block'; }
+  else { link.style.display='none'; }
 }
 
 /* ═══════════════════════════════════════════════
