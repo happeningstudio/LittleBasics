@@ -197,7 +197,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--mist);color:var(--ink);fo
 .sold-row-total{font-weight:700;background:var(--sand-lt)!important;color:var(--bark)}
 .sold-col-total-row td{background:var(--sand-lt)!important;font-weight:700;color:var(--bark-dk);font-size:.73rem}
 
-/* ── ADJUST PANEL ── */
+/* ── TOAST ── */
+.toast{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--white);padding:.55rem 1.1rem;border-radius:20px;font-size:.78rem;font-weight:500;z-index:9999;opacity:0;transition:opacity .2s;pointer-events:none;white-space:nowrap}
+.toast.show{opacity:1}
+@keyframes flashRed{0%,100%{background:inherit}40%{background:#fde8e8}}
 .adjust-panel{background:var(--mist);border:1px solid var(--border);border-radius:6px;padding:.65rem;margin-top:.45rem;display:none}
 .adjust-panel.open{display:block}
 .adjust-modes{display:flex;gap:.35rem;margin-bottom:.6rem}
@@ -563,6 +566,8 @@ function doPost(e) {
   </div>
 </div>
 
+<div class="toast" id="globalToast"></div>
+
 <script>
 /* ═══════════════════════════════════════════════
    SIZE MAPPING
@@ -772,9 +777,17 @@ function totalQty(){ return Object.values(order).reduce((s,v)=>s+v,0); }
 function isBundle(){ return totalQty()>=5; }
 function nextPid(){ return products.length?Math.max(...products.map(p=>p.pid))+1:1; }
 function fmt(n){ return '$'+parseFloat(n||0).toFixed(2); }
-function showToast(msg,dur=3000){
-  const el=document.getElementById('copyConfirm');
-  if(el){el.textContent=msg;setTimeout(()=>el.textContent='',dur);}
+let toastTimer=null;
+function showToast(msg, dur=3000){
+  // Also update copyConfirm if visible
+  const cc=document.getElementById('copyConfirm');
+  if(cc) { cc.textContent=msg; setTimeout(()=>cc.textContent='', dur); }
+  // Global toast visible on any tab
+  const toast=document.getElementById('globalToast');
+  toast.textContent=msg;
+  toast.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>toast.classList.remove('show'), dur);
 }
 
 /* ═══════════════════════════════════════════════
@@ -1284,9 +1297,9 @@ function renderLog(){
         </div>
         <div style="display:flex;align-items:center;gap:.35rem;flex-wrap:wrap;justify-content:flex-end">
           <span class="log-status-badge ${sc} ${isRefunded?'refunded':''}">${e.status}</span>
-          <button class="btn sm" onclick="toggleAdjust(${e.id})" style="font-size:.65rem;padding:.18rem .4rem" ${isRefunded?'disabled':''}>⇄ Adjust</button>
-          <button class="log-del" onclick="deleteLog(${e.id},false)" title="Remove from log only">✕</button>
-          <button class="log-del" onclick="deleteLog(${e.id},true)" title="Remove + reverse inventory & sold" style="color:#e8c4c4;font-size:.62rem;padding:0 .2rem">↩</button>
+          <button class="btn sm" onclick="toggleAdjust(this)" data-id="${e.id}" style="font-size:.65rem;padding:.18rem .4rem" ${isRefunded?'disabled':''}>⇄ Adjust</button>
+          <button class="log-del" onclick="deleteLog(this,false)" data-id="${e.id}" title="Remove from log only">✕</button>
+          <button class="log-del" onclick="deleteLog(this,true)" data-id="${e.id}" title="Remove + reverse inventory & sold" style="color:#e8c4c4;font-size:.62rem;padding:0 .2rem">↩</button>
         </div>
       </div>
       <div class="log-items">${itemStr}</div>
@@ -1305,9 +1318,9 @@ function renderLog(){
       </div>
       <div class="adjust-panel" id="adjust-${e.id}">
         <div class="adjust-modes">
-          <button class="amode" onclick="setAdjustMode(${e.id},'full')">Full Refund</button>
-          <button class="amode" onclick="setAdjustMode(${e.id},'partial')">Partial Return</button>
-          <button class="amode" onclick="setAdjustMode(${e.id},'exchange')">Exchange</button>
+          <button class="amode" onclick="setAdjustMode(this,'full')" data-id="${e.id}">Full Refund</button>
+          <button class="amode" onclick="setAdjustMode(this,'partial')" data-id="${e.id}">Partial Return</button>
+          <button class="amode" onclick="setAdjustMode(this,'exchange')" data-id="${e.id}">Exchange</button>
         </div>
         <div id="adjust-body-${e.id}">
           <p style="font-size:.72rem;color:#aaa">Select a mode above.</p>
@@ -1368,19 +1381,20 @@ function updateUspsLink(){
 /* ═══════════════════════════════════════════════
    ADJUST / REFUND / EXCHANGE
 ═══════════════════════════════════════════════ */
-function toggleAdjust(id){
+function toggleAdjust(btn){
+  const id=btn.dataset.id;
   const panel=document.getElementById('adjust-'+id);
   if(!panel) return;
   panel.classList.toggle('open');
 }
 
-function setAdjustMode(id, mode){
-  const entry=orderLog.find(e=>e.id===id);
+function setAdjustMode(btn, mode){
+  const id=btn.dataset.id;
+  const entry=orderLog.find(e=>String(e.id)===String(id));
   if(!entry) return;
-  // highlight active mode button
   const panel=document.getElementById('adjust-'+id);
   panel.querySelectorAll('.amode').forEach(b=>b.classList.remove('active'));
-  panel.querySelectorAll('.amode')[['full','partial','exchange'].indexOf(mode)].classList.add('active');
+  btn.classList.add('active');
 
   const body=document.getElementById('adjust-body-'+id);
   const items=entry.items||[];
@@ -1390,8 +1404,8 @@ function setAdjustMode(id, mode){
       <p style="font-size:.73rem;color:#666;margin-bottom:.5rem">Customer returns all items. Stock will be restored, sold counts reduced, order marked <strong>Refunded</strong>.</p>
       <div style="font-size:.72rem;color:#888;margin-bottom:.5rem">${items.map(i=>`${i.qty}× ${i.name} (${toDisplayShort(i.cm)||i.cm})`).join('<br>')}</div>
       <div class="adjust-footer">
-        <button class="btn" onclick="toggleAdjust(${id})">Cancel</button>
-        <button class="btn primary" onclick="applyFullRefund(${id})">✓ Apply Full Refund</button>
+        <button class="btn" onclick="document.getElementById('adjust-${id}').classList.remove('open')">Cancel</button>
+        <button class="btn primary" data-id="${id}" onclick="applyFullRefund(this)">✓ Apply Full Refund</button>
       </div>`;
   }
 
@@ -1409,17 +1423,15 @@ function setAdjustMode(id, mode){
             style="width:42px;border:1px solid var(--border);border-radius:4px;padding:.2rem;font-size:.72rem;text-align:center;font-family:'DM Sans',sans-serif;background:var(--mist)">
         </div>`).join('')}
       <div class="adjust-footer">
-        <button class="btn" onclick="toggleAdjust(${id})">Cancel</button>
-        <button class="btn primary" onclick="applyPartialReturn(${id})">✓ Apply Return</button>
+        <button class="btn" onclick="document.getElementById('adjust-${id}').classList.remove('open')">Cancel</button>
+        <button class="btn primary" data-id="${id}" onclick="applyPartialReturn(this)">✓ Apply Return</button>
       </div>`;
   }
 
   if(mode==='exchange'){
-    // Build product+size options from catalog
     const productOptions=products.map(p=>
       p.sizes.map(cm=>`<option value="${p.pid}|${cm}">${p.name} — ${p.color} · ${toDisplayShort(cm)} (${cm})</option>`).join('')
     ).join('');
-
     body.innerHTML=`
       <p style="font-size:.73rem;color:#666;margin-bottom:.45rem">Select the item being <strong>returned</strong>, then the <strong>replacement</strong>:</p>
       <div class="field" style="margin-bottom:.4rem">
@@ -1434,20 +1446,56 @@ function setAdjustMode(id, mode){
           style="width:60px;border:1px solid var(--border);border-radius:4px;padding:.25rem;font-size:.75rem;font-family:'DM Sans',sans-serif;background:var(--mist)">
       </div>
       <div class="field" style="margin-bottom:.45rem">
-        <label>Replacement item (size or color)</label>
+        <label>Replacement item</label>
         <select class="exchange-select" id="exTo-${id}" style="width:100%">
           ${productOptions}
         </select>
       </div>
       <div class="adjust-footer">
-        <button class="btn" onclick="toggleAdjust(${id})">Cancel</button>
-        <button class="btn primary" onclick="applyExchange(${id})">⇄ Apply Exchange</button>
+        <button class="btn" onclick="document.getElementById('adjust-${id}').classList.remove('open')">Cancel</button>
+        <button class="btn primary" data-id="${id}" onclick="applyExchange(this)">⇄ Apply Exchange</button>
       </div>`;
   }
 }
 
-function applyFullRefund(id){
-  const entry=orderLog.find(e=>e.id===id);
+function deleteLog(btn, reverse=false){
+  const id=btn.dataset.id;
+  const entry=orderLog.find(e=>String(e.id)===String(id));
+  if(!entry) return;
+
+  const itemStr=(entry.items||[]).map(i=>`${i.qty}× ${i.name} (${toDisplayShort(i.cm)||i.cm})`).join('\n');
+  const msg=reverse
+    ? `↩ Remove & reverse stock?\n\nThis will add back to Inventory and reduce Sold counts for:\n\n${itemStr}`
+    : `✕ Remove from log only?\n\nInventory and sold counts will NOT change.\n\n${itemStr}`;
+
+  if(!confirm(msg)) return;
+
+  // Flash the entry red then fade out before removing
+  const entryEl=document.getElementById('logentry-'+id);
+  if(entryEl){
+    entryEl.style.transition='opacity .4s, background .3s';
+    entryEl.style.background='#fde8e8';
+    entryEl.style.opacity='0.4';
+  }
+
+  setTimeout(()=>{
+    if(reverse){
+      (entry.items||[]).forEach(i=>{
+        const k=skey(i.pid,i.cm);
+        stock[k]=(stock[k]||0)+i.qty;
+        soldCounts[k]=Math.max(0,(soldCounts[k]||0)-i.qty);
+      });
+      saveStock(); saveSold(); pushStock();
+    }
+    orderLog=orderLog.filter(e=>String(e.id)!==String(id));
+    saveLog(); renderLog(); renderSoldSummary(); renderTable();
+    showToast(reverse ? '↩ Removed & stock restored ✓' : '✕ Order removed from log ✓');
+  }, 400);
+}
+
+function applyFullRefund(btn){
+  const id=btn.dataset.id;
+  const entry=orderLog.find(e=>String(e.id)===String(id));
   if(!entry) return;
   if(!confirm(`Full refund for ${entry.name||'this order'}?\n\nAll stock will be restored and sold counts reduced.`)) return;
   (entry.items||[]).forEach(i=>{
@@ -1456,14 +1504,14 @@ function applyFullRefund(id){
     soldCounts[k]=Math.max(0,(soldCounts[k]||0)-i.qty);
   });
   entry.status='Refunded';
-  saveStock(); saveSold(); saveLog();
-  pushStock();
+  saveStock(); saveSold(); saveLog(); pushStock();
   renderLog(); renderSoldSummary(); renderTable();
   showToast('✓ Full refund applied — stock restored');
 }
 
-function applyPartialReturn(id){
-  const entry=orderLog.find(e=>e.id===id);
+function applyPartialReturn(btn){
+  const id=btn.dataset.id;
+  const entry=orderLog.find(e=>String(e.id)===String(id));
   if(!entry) return;
   const items=entry.items||[];
   const returning=[];
@@ -1482,11 +1530,9 @@ function applyPartialReturn(id){
     const k=skey(i.pid,i.cm);
     stock[k]=(stock[k]||0)+i.qty;
     soldCounts[k]=Math.max(0,(soldCounts[k]||0)-i.qty);
-    // reduce qty in order entry
     const orig=entry.items.find(oi=>oi.pid===i.pid&&oi.cm===i.cm);
-    if(orig){ orig.qty=Math.max(0,orig.qty-i.qty); }
+    if(orig) orig.qty=Math.max(0,orig.qty-i.qty);
   });
-  // remove fully returned items
   entry.items=entry.items.filter(i=>i.qty>0);
   if(!entry.items.length) entry.status='Refunded';
   saveStock(); saveSold(); saveLog(); pushStock();
@@ -1494,8 +1540,9 @@ function applyPartialReturn(id){
   showToast('✓ Partial return applied');
 }
 
-function applyExchange(id){
-  const entry=orderLog.find(e=>e.id===id);
+function applyExchange(btn){
+  const id=btn.dataset.id;
+  const entry=orderLog.find(e=>String(e.id)===String(id));
   if(!entry) return;
   const fromIdx=parseInt(document.getElementById(`exFrom-${id}`)?.value)||0;
   const toVal=document.getElementById(`exTo-${id}`)?.value||'';
@@ -1507,29 +1554,19 @@ function applyExchange(id){
   if(!fromItem||!toProduct||!toCm){alert('Please select both items.');return;}
   if(fromItem.pid===toPid&&fromItem.cm===toCm){alert('Return and replacement are the same item.');return;}
   const actualQty=Math.min(qty,fromItem.qty);
-  const summary=`Return: ${actualQty}× ${fromItem.name} (${toDisplayShort(fromItem.cm)||fromItem.cm})\nReplace with: ${actualQty}× ${toProduct.name} — ${toProduct.color} (${toDisplayShort(toCm)||toCm})`;
+  const summary=`Return: ${actualQty}× ${fromItem.name} (${toDisplayShort(fromItem.cm)||fromItem.cm})\nReplace: ${actualQty}× ${toProduct.name} — ${toProduct.color} (${toDisplayShort(toCm)||toCm})`;
   if(!confirm(`Apply exchange?\n\n${summary}`)) return;
-
-  // Return old item → add stock back, subtract from sold
   const fromKey=skey(fromItem.pid,fromItem.cm);
   stock[fromKey]=(stock[fromKey]||0)+actualQty;
   soldCounts[fromKey]=Math.max(0,(soldCounts[fromKey]||0)-actualQty);
   fromItem.qty=Math.max(0,fromItem.qty-actualQty);
-
-  // Send new item → deduct stock, add to sold
   const toKey=skey(toPid,toCm);
   stock[toKey]=Math.max(0,(stock[toKey]||0)-actualQty);
   soldCounts[toKey]=(soldCounts[toKey]||0)+actualQty;
-
-  // Update order entry — add replacement item or increase qty
   const existing=entry.items.find(i=>i.pid===toPid&&i.cm===toCm);
   if(existing){ existing.qty+=actualQty; }
   else { entry.items.push({pid:toPid,name:toProduct.name,color:toProduct.color,cm:toCm,qty:actualQty,sp:toProduct.price}); }
-
-  // Remove fully exchanged items
   entry.items=entry.items.filter(i=>i.qty>0);
-  entry.status='Packed & Shipped';
-
   saveStock(); saveSold(); saveLog(); pushStock();
   renderLog(); renderSoldSummary(); renderTable();
   showToast('⇄ Exchange applied — stock updated');
