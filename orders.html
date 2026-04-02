@@ -1,1067 +1,1256 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Little Basics — Order Tracker</title>
-    <style>
-* { margin: 0; padding: 0; box-sizing: border-box; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Little Basics — Store Manager</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 
-body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    background: #f5f5f5;
-    color: #2c2c2c;
-    font-size: 13px;
+:root{
+  --sand:#e8ddd0;--sand-lt:#f5f0ea;--sand-dk:#c8b89e;
+  --bark:#8b7355;--bark-dk:#6e5c42;--bark-lt:#b09070;
+  --ink:#2a2420;--mist:#f7f4f1;--white:#fff;
+  --border:#e2dbd2;--border-dk:#cdc3b8;
+  --green:#3d7a52;--red:#b84040;--amber:#c97c35;--blue:#3d5fa0;
+  --panel:290px;--top:50px;
+  --shadow:0 1px 8px rgba(42,36,32,.07);
+  --shadow-md:0 3px 16px rgba(42,36,32,.10);
 }
+
+body{font-family:'DM Sans',sans-serif;background:var(--mist);color:var(--ink);font-size:13px;line-height:1.5}
 
 /* ── TOPBAR ── */
-.topbar {
-    background: #fff;
-    border-bottom: 1px solid #ddd;
-    padding: 0.6rem 1.25rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    position: sticky;
-    top: 0;
-    z-index: 300;
-}
+.topbar{height:var(--top);background:var(--white);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 1.25rem;position:sticky;top:0;z-index:400;gap:1rem}
+.topbar-logo{height:28px;display:block}
+.tab-rail{display:flex;background:var(--mist);border:1px solid var(--border);border-radius:6px;overflow:hidden}
+.tab-btn{padding:.34rem .85rem;font-family:'DM Sans',sans-serif;font-size:.73rem;font-weight:500;border:none;background:transparent;cursor:pointer;color:#999;transition:all .15s;white-space:nowrap}
+.tab-btn:hover{color:var(--bark);background:var(--sand-lt)}
+.tab-btn.active{background:var(--bark);color:var(--white)}
+.topbar-right{display:flex;align-items:center;gap:.5rem}
+.badge{font-size:.7rem;color:var(--bark);background:var(--sand-lt);padding:.18rem .55rem;border-radius:20px;border:1px solid var(--sand-dk)}
+.btn{padding:.32rem .75rem;font-family:'DM Sans',sans-serif;font-size:.73rem;font-weight:500;border-radius:5px;border:1px solid var(--border);background:var(--white);cursor:pointer;color:#666;transition:all .15s;white-space:nowrap}
+.btn:hover{border-color:var(--bark);color:var(--bark)}
+.btn.primary{background:var(--bark);color:var(--white);border-color:var(--bark)}
+.btn.primary:hover{background:var(--bark-dk)}
+.btn.danger{color:var(--red);border-color:var(--red)}
+.btn.danger:hover{background:var(--red);color:var(--white)}
+.btn.sm{padding:.22rem .55rem;font-size:.68rem}
 
-.topbar img { height: 34px; }
-
-.topbar-center {
-    display: flex;
-    gap: 0;
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    overflow: hidden;
-}
-
-.tab-btn {
-    padding: 0.4rem 1.1rem;
-    font-size: 0.78rem;
-    font-weight: 500;
-    background: #fff;
-    border: none;
-    cursor: pointer;
-    color: #888;
-    font-family: inherit;
-    transition: background 0.15s;
-}
-
-.tab-btn.active { background: #8b7355; color: #fff; }
-.tab-btn:not(.active):hover { background: #f5f1ed; }
-
-.topbar-actions { display: flex; gap: 0.5rem; align-items: center; }
-
-.btn {
-    padding: 0.38rem 0.85rem;
-    font-size: 0.78rem;
-    border-radius: 5px;
-    border: 1px solid #ddd;
-    background: #fff;
-    cursor: pointer;
-    font-family: inherit;
-    color: #555;
-    white-space: nowrap;
-}
-
-.btn:hover { border-color: #8b7355; color: #8b7355; }
-.btn.primary { background: #8b7355; color: #fff; border-color: #8b7355; }
-.btn.primary:hover { background: #7a6348; }
+/* sync status */
+.sync-dot{width:7px;height:7px;border-radius:50%;background:#ccc;display:inline-block;margin-right:3px;transition:background .3s}
+.sync-dot.ok{background:var(--green)}
+.sync-dot.err{background:var(--red)}
+.sync-dot.busy{background:var(--amber);animation:pulse .8s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.sync-label{font-size:.68rem;color:#aaa}
 
 /* ── VIEWS ── */
-.view { display: none; }
-.view.active { display: block; }
+.view{display:none}
+.view.active{display:block}
 
-/* ── ORDER VIEW LAYOUT ── */
-.order-layout {
-    display: grid;
-    grid-template-columns: 1fr 320px;
-    height: calc(100vh - 53px);
-}
+/* ── SHARED TABLE STYLES ── */
+.tbl-wrap{background:var(--white);border-radius:8px;overflow:hidden;box-shadow:var(--shadow)}
+.tbl{width:100%;border-collapse:collapse}
+.tbl thead tr{background:var(--sand-lt)}
+.tbl th{padding:.48rem .65rem;font-size:.63rem;font-weight:600;color:#aaa;text-transform:uppercase;letter-spacing:.08em;text-align:left;border-bottom:1px solid var(--border);white-space:nowrap}
+.tbl td{padding:.38rem .65rem;border-bottom:1px solid #f2ede8;vertical-align:middle}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr:hover td{background:#faf6f2}
 
-/* ── LEFT: TABLE AREA ── */
-.table-area {
-    overflow-y: auto;
-    padding: 1rem 1.25rem;
-}
+/* form basics */
+.field{margin-bottom:.42rem}
+.field label{display:block;font-size:.6rem;color:#bbb;text-transform:uppercase;letter-spacing:.07em;margin-bottom:.15rem}
+.field input,.field select,.field textarea{width:100%;border:1px solid var(--border);border-radius:5px;padding:.3rem .48rem;font-size:.78rem;font-family:'DM Sans',sans-serif;color:var(--ink);background:var(--mist);transition:border-color .15s}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--bark)}
+.field textarea{resize:vertical;min-height:42px}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:.38rem}
 
-.toolbar {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    margin-bottom: 0.75rem;
-}
+/* chips */
+.chip{padding:.26rem .6rem;border:1px solid var(--border);border-radius:20px;font-size:.7rem;font-weight:500;background:var(--white);cursor:pointer;color:#888;transition:all .15s;font-family:'DM Sans',sans-serif}
+.chip:hover{border-color:var(--bark);color:var(--bark)}
+.chip.active{background:var(--bark);color:var(--white);border-color:var(--bark)}
 
-.search-input {
-    padding: 0.38rem 0.7rem;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    font-size: 0.82rem;
-    width: 220px;
-    font-family: inherit;
-    background: #fff;
-}
+/* search */
+.search-wrap{position:relative}
+.search-wrap svg{position:absolute;left:8px;top:50%;transform:translateY(-50%);color:#ccc;pointer-events:none}
+.search-input{padding:.34rem .65rem .34rem 1.8rem;border:1px solid var(--border);border-radius:6px;font-size:.78rem;font-family:'DM Sans',sans-serif;width:190px;background:var(--white);color:var(--ink);transition:border-color .15s}
+.search-input:focus{outline:none;border-color:var(--bark)}
 
-.search-input:focus { outline: none; border-color: #8b7355; }
+/* misc */
+.swatch{width:13px;height:13px;border-radius:3px;border:1px solid rgba(0,0,0,.12);display:inline-block;flex-shrink:0}
+.thumb{width:32px;height:32px;border-radius:4px;object-fit:cover;display:block}
+.spill{font-size:.67rem;background:var(--sand-lt);padding:.1rem .38rem;border-radius:10px;color:#777;white-space:nowrap}
+.na{color:#ddd;font-size:.7rem;text-align:center}
+.stock-ok{color:var(--green);font-weight:500;font-size:.73rem}
+.stock-low{color:var(--amber);font-weight:500;font-size:.73rem}
+.stock-zero{color:var(--red);font-weight:500;font-size:.73rem}
 
-.filter-chip {
-    padding: 0.3rem 0.7rem;
-    border: 1px solid #ddd;
-    border-radius: 12px;
-    font-size: 0.75rem;
-    background: #fff;
-    cursor: pointer;
-    color: #666;
-}
+/* ════════════════════════════
+   ORDER BUILDER
+════════════════════════════ */
+.order-layout{display:grid;grid-template-columns:1fr var(--panel);height:calc(100vh - var(--top))}
+.table-area{overflow-y:auto;padding:1rem 1.25rem}
+.toolbar{display:flex;align-items:center;gap:.5rem;margin-bottom:.7rem;flex-wrap:wrap}
 
-.filter-chip.active { background: #8b7355; color: #fff; border-color: #8b7355; }
+.ptable th:nth-child(6),.ptable th:nth-child(7){text-align:center}
+.ptable td:nth-child(6),.ptable td:nth-child(7){text-align:center}
 
-/* Product table */
-.product-table {
-    width: 100%;
-    border-collapse: collapse;
-    background: #fff;
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-}
+.qty-ctrl{display:flex;align-items:center;gap:.28rem}
+.qb{width:21px;height:21px;border:1px solid var(--border);background:var(--white);border-radius:4px;cursor:pointer;font-size:.9rem;display:flex;align-items:center;justify-content:center;color:#888;transition:all .12s;line-height:1}
+.qb:hover{border-color:var(--bark);color:var(--bark)}
+.qn{font-size:.8rem;font-weight:600;min-width:16px;text-align:center}
+.qn.on{color:var(--bark)}
+.line-ttl{font-size:.78rem;font-weight:600;white-space:nowrap}
+.line-ttl.bundle{color:var(--bark)}
+.in-order{background:#fdf9f5!important}
 
-.product-table th {
-    background: #faf8f5;
-    font-size: 0.68rem;
-    font-weight: 600;
-    color: #999;
-    text-transform: uppercase;
-    letter-spacing: 0.07em;
-    padding: 0.55rem 0.75rem;
-    text-align: left;
-    border-bottom: 1px solid #eee;
-    white-space: nowrap;
-}
+/* PANEL */
+.panel{background:var(--white);border-left:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto}
+.psec{padding:.85rem;border-bottom:1px solid #f0ece8}
+.psec:last-child{border-bottom:none}
+.psec-title{font-size:.6rem;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:#ccc;margin-bottom:.6rem}
+.order-list{list-style:none}
+.order-item{display:flex;justify-content:space-between;align-items:flex-start;padding:.26rem 0;border-bottom:1px dashed #f0ece8;gap:.4rem}
+.order-item:last-child{border:none}
+.oi-name{font-size:.73rem;color:#555;flex:1;line-height:1.3}
+.oi-sub{font-size:.66rem;color:var(--bark-lt)}
+.oi-val{font-size:.73rem;font-weight:600;white-space:nowrap}
+.empty-hint{font-size:.73rem;color:#ccc;text-align:center;padding:.4rem 0}
+.bundle-pill{display:none;background:var(--sand-lt);color:var(--bark);font-size:.68rem;font-weight:600;padding:.22rem .5rem;border-radius:4px;margin-bottom:.45rem;text-align:center;border:1px solid var(--sand-dk)}
+.bundle-pill.on{display:block}
+.sum-row{display:flex;justify-content:space-between;font-size:.76rem;padding:.2rem 0;border-bottom:1px solid #f5f2ee}
+.sum-row:last-child{border:none}
+.sum-lbl{color:#999}
+.sum-val{font-weight:500}
+.sum-row.total-row{border-top:2px solid var(--border);margin-top:.28rem;padding-top:.38rem;border-bottom:none}
+.sum-row.total-row .sum-lbl{font-weight:600;color:var(--ink)}
+.profit{color:var(--green);font-weight:700;font-size:.88rem}
+.loss{color:var(--red);font-weight:700;font-size:.88rem}
+.copy-btn{width:100%;background:var(--bark);color:var(--white);border:none;border-radius:6px;padding:.52rem;font-size:.78rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;margin-top:.3rem;transition:background .15s}
+.copy-btn:hover{background:var(--bark-dk)}
+.copy-confirm{text-align:center;font-size:.68rem;color:var(--green);margin-top:.28rem;min-height:1em}
 
-.product-table td {
-    padding: 0.45rem 0.75rem;
-    border-bottom: 1px solid #f0f0f0;
-    vertical-align: middle;
-}
+/* ════════════════════════════
+   INVENTORY VIEW
+   Product sections → color rows × size columns
+════════════════════════════ */
+.inv-wrap{padding:1rem 1.25rem;overflow-x:auto;height:calc(100vh - var(--top));display:flex;flex-direction:column}
+.inv-toolbar{display:flex;align-items:center;gap:.6rem;margin-bottom:.7rem;flex-shrink:0}
+.inv-scroll{overflow-x:auto;flex:1;overflow-y:auto}
 
-.product-table tr:last-child td { border-bottom: none; }
+.inv-tbl{border-collapse:collapse;background:var(--white);border-radius:8px;overflow:hidden;box-shadow:var(--shadow);min-width:100%}
+.inv-tbl th{background:var(--sand-lt);font-size:.62rem;font-weight:600;color:#aaa;text-transform:uppercase;letter-spacing:.07em;padding:.42rem .6rem;border-bottom:1px solid var(--border);border-right:1px solid var(--border);white-space:nowrap;text-align:center}
+.inv-tbl th.lh{text-align:left}
+.inv-tbl td{padding:.3rem .6rem;border-bottom:1px solid #f2ede8;border-right:1px solid #f2ede8;text-align:center;vertical-align:middle}
+.inv-tbl td.lh{text-align:left}
+.inv-tbl tr:last-child td{border-bottom:none}
 
-.product-table tr.product-group-header td {
-    background: #faf8f5;
-    font-weight: 600;
-    font-size: 0.78rem;
-    color: #555;
-    padding: 0.5rem 0.75rem 0.3rem;
-    border-bottom: none;
-}
+/* product section header row */
+.inv-tbl tr.prod-header td{background:var(--sand-lt);font-weight:600;font-size:.78rem;color:var(--bark);padding:.45rem .6rem;border-bottom:1px solid var(--border)}
+.inv-tbl tr.prod-header td:first-child{display:flex;align-items:center;gap:.4rem}
 
-.product-table tr.variant-row:hover { background: #fdfcfb; }
-.product-table tr.variant-row.in-order { background: #fdf8f3; }
+.inv-input{width:48px;text-align:center;border:1px solid var(--border);border-radius:4px;padding:.2rem;font-size:.76rem;font-family:'DM Sans',sans-serif;background:var(--mist);color:var(--ink);transition:border-color .15s}
+.inv-input:focus{outline:none;border-color:var(--bark)}
+.inv-input.zero{background:#fff0f0;border-color:var(--red)}
+.inv-input.low{background:#fff8f0;border-color:var(--amber)}
+.row-total{font-weight:600;color:var(--bark);font-size:.78rem}
 
-/* Thumbnail */
-.thumb {
-    width: 36px;
-    height: 36px;
-    object-fit: cover;
-    border-radius: 4px;
-    display: block;
-}
+.sticky-bar{background:var(--white);border-top:1px solid var(--border);padding:.6rem 1.25rem;display:flex;justify-content:flex-end;gap:.5rem;flex-shrink:0}
 
-/* Color swatch */
-.swatch {
-    width: 18px;
-    height: 18px;
-    border-radius: 3px;
-    border: 1px solid rgba(0,0,0,0.12);
-    display: inline-block;
-    flex-shrink: 0;
-}
+/* ════════════════════════════
+   SOLD RECORDS
+════════════════════════════ */
+.sold-wrap{display:grid;grid-template-columns:1fr 1fr;height:calc(100vh - var(--top));overflow:hidden}
+.sold-col{display:flex;flex-direction:column;padding:1rem 1rem 0;overflow:hidden}
+.sold-col:first-child{border-right:1px solid var(--border);padding-left:1.25rem}
+.sold-col:last-child{padding-right:1.25rem}
+.sold-col-hdr{display:flex;align-items:baseline;gap:.5rem;margin-bottom:.6rem;flex-shrink:0}
+.sold-col-hdr h3{font-family:'Playfair Display',serif;font-size:.95rem;color:var(--bark)}
+.sold-col-hdr span{font-size:.68rem;color:#bbb}
+.sold-scroll{overflow-y:auto;flex:1;padding-bottom:1rem}
 
-.variant-label {
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-    font-size: 0.8rem;
-    color: #444;
-}
+/* sold summary table — matches Google Sheet style */
+.sold-tbl{border-collapse:collapse;background:var(--white);border-radius:8px;box-shadow:var(--shadow);min-width:100%;overflow:hidden}
+.sold-tbl th{background:var(--sand-lt);font-size:.62rem;font-weight:600;color:#aaa;text-transform:uppercase;letter-spacing:.07em;padding:.42rem .55rem;border-bottom:1px solid var(--border);border-right:1px solid var(--border);text-align:center;white-space:nowrap}
+.sold-tbl th:first-child,.sold-tbl th:nth-child(2){text-align:left}
+.sold-tbl td{padding:.3rem .55rem;border-bottom:1px solid #f2ede8;border-right:1px solid #f2ede8;text-align:center;font-size:.76rem}
+.sold-tbl td:first-child{text-align:left;font-weight:500;font-size:.75rem;color:var(--ink)}
+.sold-tbl td:nth-child(2){text-align:left}
+.sold-tbl tr:last-child td{border-bottom:none}
+/* product section header */
+.sold-tbl tr.prod-hdr td{background:var(--bark);color:var(--white);font-weight:600;font-size:.73rem;padding:.4rem .55rem}
+.sold-tbl tr.prod-hdr td:first-child{display:flex;align-items:center;gap:.35rem}
+.sold-count{font-weight:700;color:var(--bark)}
+.sold-zero{color:#ddd;font-size:.68rem}
+.sold-row-total{font-weight:700;background:var(--sand-lt)!important;color:var(--bark)}
+.sold-col-total-row td{background:var(--sand-lt)!important;font-weight:700;color:var(--bark-dk);font-size:.73rem}
 
-.size-pill {
-    font-size: 0.68rem;
-    background: #f0ede9;
-    padding: 0.15rem 0.45rem;
-    border-radius: 10px;
-    color: #666;
-    white-space: nowrap;
-}
+/* order log */
+.log-stats{display:flex;gap:.4rem;margin-bottom:.5rem;flex-wrap:wrap;flex-shrink:0}
+.stat-card{background:var(--white);border:1px solid var(--border);border-radius:6px;padding:.32rem .6rem;font-size:.7rem;box-shadow:var(--shadow)}
+.stat-card strong{color:var(--bark)}
+.log-filters{display:flex;gap:.35rem;margin-bottom:.5rem;flex-wrap:wrap;flex-shrink:0}
 
-/* Stock indicator */
-.stock-cell {
-    font-size: 0.78rem;
-    font-weight: 500;
-    white-space: nowrap;
-}
+.log-entry{background:var(--white);border-radius:7px;box-shadow:var(--shadow);padding:.65rem .75rem;margin-bottom:.45rem;border-left:3px solid var(--sand-dk);transition:box-shadow .15s}
+.log-entry:hover{box-shadow:var(--shadow-md)}
+.log-entry.pending{border-color:var(--amber)}
+.log-entry.paid{border-color:var(--green)}
+.log-entry.shipped{border-color:var(--blue)}
+.log-entry.delivered{border-color:var(--green)}
+.log-entry.cancelled{border-color:var(--red);opacity:.6}
+.log-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:.28rem}
+.log-name{font-weight:600;font-size:.8rem}
+.log-date{font-size:.68rem;color:#bbb}
+.log-status-badge{font-size:.62rem;font-weight:600;text-transform:uppercase;letter-spacing:.07em;padding:.12rem .4rem;border-radius:10px;background:var(--sand-lt);color:var(--bark)}
+.log-status-badge.paid,.log-status-badge.delivered{background:#edf7f0;color:var(--green)}
+.log-status-badge.shipped{background:#edf0f7;color:var(--blue)}
+.log-status-badge.cancelled{background:#fdf0f0;color:var(--red)}
+.log-items{font-size:.7rem;color:#888;margin-bottom:.28rem;line-height:1.4}
+.log-bottom{display:flex;justify-content:space-between;align-items:center}
+.log-numbers{font-size:.7rem;color:#bbb}
+.log-profit{font-weight:700;font-size:.76rem}
+.log-profit.pos{color:var(--green)}
+.log-profit.neg{color:var(--red)}
+.log-del{background:none;border:none;cursor:pointer;color:#e0d8d0;font-size:.65rem;padding:0 0 0 .4rem;transition:color .15s;line-height:1}
+.log-del:hover{color:var(--red)}
+.no-data{text-align:center;color:#ccc;font-size:.78rem;padding:2rem}
 
-.stock-cell.ok { color: #4a7c59; }
-.stock-cell.low { color: #e07b3a; }
-.stock-cell.zero { color: #c0392b; }
+/* ════════════════════════════
+   PRODUCT MANAGER
+════════════════════════════ */
+.mgr-layout{display:grid;grid-template-columns:1fr 320px;height:calc(100vh - var(--top))}
+.mgr-list{overflow-y:auto;padding:1rem 1.25rem}
+.mgr-toolbar{display:flex;align-items:center;gap:.5rem;margin-bottom:.7rem}
+.mgr-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:.65rem}
+.mgr-card{background:var(--white);border-radius:8px;box-shadow:var(--shadow);overflow:hidden;cursor:pointer;border:2px solid transparent;transition:all .15s}
+.mgr-card:hover{border-color:var(--sand-dk);box-shadow:var(--shadow-md)}
+.mgr-card.sel{border-color:var(--bark)}
+.mgr-card img{width:100%;height:120px;object-fit:cover;display:block}
+.mgr-card-body{padding:.48rem .55rem}
+.mgr-card-name{font-size:.75rem;font-weight:500;color:var(--ink);margin-bottom:.18rem;line-height:1.3}
+.mgr-card-meta{display:flex;justify-content:space-between;font-size:.65rem;color:#aaa}
+.mgr-card-price{color:var(--bark);font-weight:600}
 
-/* Qty controls */
-.qty-ctrl {
-    display: flex;
-    align-items: center;
-    gap: 0.3rem;
-}
+.mgr-form{background:var(--white);border-left:1px solid var(--border);overflow-y:auto;padding:.9rem}
+.mgr-form h3{font-family:'Playfair Display',serif;font-size:1rem;color:var(--bark);margin-bottom:.65rem;padding-bottom:.45rem;border-bottom:1px solid var(--border)}
+.mgr-thumb{width:100%;height:140px;object-fit:cover;border-radius:6px;margin-bottom:.65rem;display:block}
+.mgr-thumb-ph{width:100%;height:140px;border-radius:6px;margin-bottom:.65rem;background:var(--sand-lt);display:flex;align-items:center;justify-content:center;color:#ccc;font-size:.75rem}
+.size-toggles{display:flex;flex-wrap:wrap;gap:.28rem;margin-top:.28rem}
+.stog{padding:.18rem .45rem;border:1px solid var(--border);border-radius:4px;font-size:.7rem;cursor:pointer;background:var(--mist);color:#888;font-family:'DM Sans',sans-serif;transition:all .12s}
+.stog.on{background:var(--bark);color:var(--white);border-color:var(--bark)}
+.hex-row{display:flex;align-items:center;gap:.4rem}
+.hex-swatch{width:20px;height:20px;border-radius:4px;border:1px solid var(--border);flex-shrink:0}
+.mgr-actions{display:flex;gap:.38rem;margin-top:.65rem}
+.mgr-hint{font-size:.72rem;color:#ccc;text-align:center;padding:2rem 1rem;line-height:1.6}
+.save-confirm{text-align:center;font-size:.68rem;color:var(--green);margin-top:.35rem;min-height:1em}
 
-.qb {
-    width: 22px;
-    height: 22px;
-    border: 1px solid #ddd;
-    background: #fff;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 0.9rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #555;
-    flex-shrink: 0;
-    line-height: 1;
-}
-
-.qb:hover { border-color: #8b7355; color: #8b7355; }
-
-.qn {
-    font-size: 0.82rem;
-    font-weight: 600;
-    min-width: 18px;
-    text-align: center;
-    color: #2c2c2c;
-}
-
-.qn.active { color: #8b7355; }
-
-.line-total {
-    font-size: 0.82rem;
-    color: #2c2c2c;
-    font-weight: 500;
-    white-space: nowrap;
-}
-
-.line-total.bundle { color: #8b7355; }
-
-/* ── RIGHT: FLOATING PANEL ── */
-.summary-panel {
-    background: #fff;
-    border-left: 1px solid #ddd;
-    display: flex;
-    flex-direction: column;
-    overflow-y: auto;
-}
-
-.panel-section {
-    padding: 1rem;
-    border-bottom: 1px solid #eee;
-}
-
-.panel-section:last-child { border-bottom: none; }
-
-.panel-section h4 {
-    font-size: 0.68rem;
-    font-weight: 600;
-    color: #aaa;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    margin-bottom: 0.75rem;
-}
-
-/* Order items list */
-.order-item-list { list-style: none; }
-
-.order-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    padding: 0.3rem 0;
-    border-bottom: 1px solid #f5f5f5;
-    gap: 0.5rem;
-}
-
-.order-item:last-child { border-bottom: none; }
-
-.oi-name {
-    font-size: 0.75rem;
-    color: #444;
-    flex: 1;
-    line-height: 1.3;
-}
-
-.oi-detail {
-    font-size: 0.72rem;
-    color: #888;
-    white-space: nowrap;
-}
-
-.empty-msg {
-    font-size: 0.78rem;
-    color: #ccc;
-    text-align: center;
-    padding: 0.5rem 0;
-}
-
-.bundle-badge {
-    display: none;
-    background: #f5f1ed;
-    color: #8b7355;
-    font-size: 0.72rem;
-    font-weight: 600;
-    padding: 0.3rem 0.6rem;
-    border-radius: 4px;
-    margin-bottom: 0.6rem;
-    text-align: center;
-}
-
-.bundle-badge.on { display: block; }
-
-/* Summary rows */
-.sum-row {
-    display: flex;
-    justify-content: space-between;
-    font-size: 0.8rem;
-    padding: 0.28rem 0;
-    border-bottom: 1px solid #f5f5f5;
-}
-
-.sum-row:last-child { border-bottom: none; }
-.sum-label { color: #888; }
-.sum-val { font-weight: 500; }
-.sum-row.total { padding-top: 0.5rem; margin-top: 0.3rem; border-top: 2px solid #eee; border-bottom: none; }
-.sum-row.total .sum-label { font-weight: 600; color: #2c2c2c; }
-.sum-val.profit { color: #4a7c59; font-size: 0.95rem; font-weight: 700; }
-.sum-val.loss { color: #c0392b; font-size: 0.95rem; font-weight: 700; }
-
-/* Form fields */
-.field { margin-bottom: 0.55rem; }
-
-.field label {
-    display: block;
-    font-size: 0.68rem;
-    color: #aaa;
-    margin-bottom: 0.2rem;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-}
-
-.field input,
-.field select,
-.field textarea {
-    width: 100%;
-    border: 1px solid #e5e5e5;
-    border-radius: 5px;
-    padding: 0.38rem 0.55rem;
-    font-size: 0.8rem;
-    color: #2c2c2c;
-    background: #fafafa;
-    font-family: inherit;
-}
-
-.field input:focus,
-.field select:focus,
-.field textarea:focus { outline: none; border-color: #8b7355; }
-
-.field textarea { resize: vertical; min-height: 48px; }
-
-.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 0.4rem; }
-
-/* Copy button */
-.copy-btn {
-    width: 100%;
-    background: #8b7355;
-    color: #fff;
-    border: none;
-    border-radius: 6px;
-    padding: 0.6rem;
-    font-size: 0.82rem;
-    font-weight: 600;
-    cursor: pointer;
-    font-family: inherit;
-    margin-top: 0.4rem;
-}
-
-.copy-btn:hover { background: #7a6348; }
-
-.copy-confirm {
-    text-align: center;
-    font-size: 0.72rem;
-    color: #4a7c59;
-    margin-top: 0.3rem;
-    min-height: 1em;
-}
-
-/* ── INVENTORY VIEW ── */
-.inv-area {
-    padding: 1.25rem;
-    overflow-x: auto;
-}
-
-.inv-toolbar {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    margin-bottom: 1rem;
-}
-
-.inv-table {
-    border-collapse: collapse;
-    background: #fff;
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-    min-width: 100%;
-}
-
-.inv-table th {
-    background: #faf8f5;
-    font-size: 0.68rem;
-    font-weight: 600;
-    color: #999;
-    text-transform: uppercase;
-    letter-spacing: 0.07em;
-    padding: 0.5rem 0.75rem;
-    text-align: center;
-    border-bottom: 1px solid #eee;
-    border-right: 1px solid #eee;
-    white-space: nowrap;
-}
-
-.inv-table th.product-col { text-align: left; min-width: 200px; }
-.inv-table th.color-col { min-width: 100px; }
-
-.inv-table td {
-    padding: 0.4rem 0.75rem;
-    border-bottom: 1px solid #f0f0f0;
-    border-right: 1px solid #f0f0f0;
-    vertical-align: middle;
-    text-align: center;
-}
-
-.inv-table td.product-col { text-align: left; }
-.inv-table td.color-col { text-align: left; }
-
-.inv-table tr:last-child td { border-bottom: none; }
-
-.inv-input {
-    width: 52px;
-    text-align: center;
-    border: 1px solid #e5e5e5;
-    border-radius: 4px;
-    padding: 0.25rem;
-    font-size: 0.8rem;
-    background: #fafafa;
-    font-family: inherit;
-}
-
-.inv-input:focus { outline: none; border-color: #8b7355; }
-.inv-input.low { background: #fff8f0; border-color: #e07b3a; }
-.inv-input.zero { background: #fff0f0; border-color: #c0392b; }
-
-.na-cell { color: #ddd; font-size: 0.75rem; }
-
-.color-cell {
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-    font-size: 0.78rem;
-    color: #444;
-}
-
-.save-stock-bar {
-    position: sticky;
-    bottom: 0;
-    background: #fff;
-    border-top: 1px solid #ddd;
-    padding: 0.75rem 1.25rem;
-    display: flex;
-    justify-content: flex-end;
-    gap: 0.5rem;
-}
-    </style>
+/* ════════════════════════════
+   SETUP MODAL
+════════════════════════════ */
+.modal-overlay{position:fixed;inset:0;background:rgba(42,36,32,.45);z-index:900;display:flex;align-items:center;justify-content:center;padding:1rem}
+.modal-overlay.hidden{display:none}
+.modal{background:var(--white);border-radius:10px;box-shadow:0 8px 40px rgba(0,0,0,.2);max-width:560px;width:100%;max-height:90vh;overflow-y:auto;padding:1.75rem}
+.modal h2{font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--bark);margin-bottom:.3rem}
+.modal p{font-size:.8rem;color:#777;margin-bottom:1.1rem;line-height:1.6}
+.step{display:flex;gap:.75rem;margin-bottom:1rem}
+.step-num{width:22px;height:22px;border-radius:50%;background:var(--bark);color:var(--white);font-size:.68rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:.15rem}
+.step-body{flex:1}
+.step-body strong{font-size:.8rem;color:var(--ink);display:block;margin-bottom:.3rem}
+.step-body p{font-size:.75rem;margin-bottom:.4rem}
+.code-block{background:var(--mist);border:1px solid var(--border);border-radius:5px;padding:.6rem .75rem;font-family:monospace;font-size:.72rem;color:#555;word-break:break-all;line-height:1.5;margin-bottom:.4rem}
+.url-input{width:100%;border:1px solid var(--border);border-radius:5px;padding:.38rem .55rem;font-size:.78rem;font-family:'DM Sans',sans-serif;color:var(--ink);background:var(--mist)}
+.url-input:focus{outline:none;border-color:var(--bark)}
+.modal-actions{display:flex;gap:.5rem;justify-content:flex-end;margin-top:1.25rem}
+.modal-skip{font-size:.72rem;color:#bbb;cursor:pointer;align-self:center;text-decoration:underline}
+.modal-skip:hover{color:var(--bark)}
+</style>
 </head>
 <body>
 
+<!-- SETUP MODAL -->
+<div class="modal-overlay" id="setupModal">
+  <div class="modal">
+    <h2>Connect to Google Sheets</h2>
+    <p>This is a one-time setup. It takes about 5 minutes and requires no coding — just copy and paste. Once done, your inventory, sold records, and products sync across all your devices.</p>
+
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <strong>Create a new Google Sheet</strong>
+        <p>Go to <a href="https://sheets.new" target="_blank" style="color:var(--bark)">sheets.new</a> and create a blank spreadsheet. Name it <em>Little Basics Store</em>.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <strong>Open Apps Script</strong>
+        <p>In your sheet, click <strong>Extensions → Apps Script</strong>. Delete any existing code and paste this entire script:</p>
+        <div class="code-block" id="scriptCode">// Little Basics Store Manager — Backend Script
+const SHEET_ID = SpreadsheetApp.getActiveSpreadsheet().getId();
+
+function doGet(e) {
+  const action = e.parameter.action;
+  const ss = SpreadsheetApp.openById(SHEET_ID);
+
+  if (action === 'read') {
+    const sheet = ss.getSheetByName(e.parameter.tab) || ss.insertSheet(e.parameter.tab);
+    const data = sheet.getDataRange().getValues();
+    return ContentService.createTextOutput(JSON.stringify(data)).setMimeType(ContentService.MimeType.JSON);
+  }
+  return ContentService.createTextOutput(JSON.stringify({ok:false})).setMimeType(ContentService.MimeType.JSON);
+}
+
+function doPost(e) {
+  const payload = JSON.parse(e.postData.contents);
+  const ss = SpreadsheetApp.openById(SHEET_ID);
+  const action = payload.action;
+
+  if (action === 'write') {
+    let sheet = ss.getSheetByName(payload.tab);
+    if (!sheet) sheet = ss.insertSheet(payload.tab);
+    sheet.clearContents();
+    if (payload.data && payload.data.length > 0) sheet.getRange(1,1,payload.data.length,payload.data[0].length).setValues(payload.data);
+    return ContentService.createTextOutput(JSON.stringify({ok:true})).setMimeType(ContentService.MimeType.JSON);
+  }
+
+  if (action === 'append') {
+    let sheet = ss.getSheetByName(payload.tab);
+    if (!sheet) sheet = ss.insertSheet(payload.tab);
+    sheet.appendRow(payload.row);
+    return ContentService.createTextOutput(JSON.stringify({ok:true})).setMimeType(ContentService.MimeType.JSON);
+  }
+
+  return ContentService.createTextOutput(JSON.stringify({ok:false})).setMimeType(ContentService.MimeType.JSON);
+}</div>
+        <button class="btn sm" onclick="copyScript()">Copy Script</button>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <strong>Deploy as a Web App</strong>
+        <p>Click <strong>Deploy → New deployment</strong>. Set type to <em>Web app</em>. Set <em>Execute as: Me</em> and <em>Who has access: Anyone</em>. Click Deploy and authorize when asked.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-body">
+        <strong>Paste your Web App URL below</strong>
+        <p>After deploying, copy the Web App URL (looks like <code style="font-size:.7rem;background:var(--mist);padding:.1rem .3rem;border-radius:3px">https://script.google.com/macros/s/…/exec</code>) and paste it here:</p>
+        <input class="url-input" id="sheetUrlInput" type="text" placeholder="https://script.google.com/macros/s/…/exec">
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <span class="modal-skip" onclick="skipSetup()">Skip for now (use local storage)</span>
+      <button class="btn primary" onclick="saveSheetUrl()">Connect & Start →</button>
+    </div>
+  </div>
+</div>
+
 <!-- TOPBAR -->
 <div class="topbar">
-    <img src="https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/LittleBasics.png" alt="Little Basics">
-    <div class="topbar-center">
-        <button class="tab-btn active" onclick="switchView('order')">📋 Order Builder</button>
-        <button class="tab-btn" onclick="switchView('inventory')">📦 Inventory</button>
-    </div>
-    <div class="topbar-actions">
-        <span id="topbarOrderCount" style="font-size:0.75rem;color:#888;"></span>
-        <button class="btn" onclick="clearOrder()">Clear Order</button>
-    </div>
+  <img src="https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/LittleBasics.png" alt="Little Basics" class="topbar-logo">
+  <div class="tab-rail">
+    <button class="tab-btn active" onclick="switchView('order')">📋 Orders</button>
+    <button class="tab-btn" onclick="switchView('inventory')">📦 Inventory</button>
+    <button class="tab-btn" onclick="switchView('sold')">📊 Sold</button>
+    <button class="tab-btn" onclick="switchView('mgr')">⚙️ Products</button>
+  </div>
+  <div class="topbar-right">
+    <span class="badge" id="topBadge" style="display:none"></span>
+    <span><span class="sync-dot" id="syncDot"></span><span class="sync-label" id="syncLabel">local</span></span>
+    <button class="btn sm" onclick="showSetup()">⚙ Sync</button>
+    <button class="btn sm" onclick="clearOrder()">Clear</button>
+  </div>
 </div>
 
-<!-- ORDER VIEW -->
+<!-- ══ ORDER BUILDER ══ -->
 <div class="view active" id="view-order">
-    <div class="order-layout">
-
-        <!-- LEFT: Product Table -->
-        <div class="table-area">
-            <div class="toolbar">
-                <input class="search-input" type="text" id="searchInput" placeholder="🔍 Search products..." oninput="renderTable()">
-                <button class="filter-chip active" data-size="all" onclick="setFilter(this)">All</button>
-                <button class="filter-chip" data-size="3-6M" onclick="setFilter(this)">3-6M</button>
-                <button class="filter-chip" data-size="6-12M" onclick="setFilter(this)">6-12M</button>
-                <button class="filter-chip" data-size="12-24M" onclick="setFilter(this)">12-24M</button>
-                <button class="filter-chip" data-size="2T" onclick="setFilter(this)">2T</button>
-                <button class="filter-chip" data-size="3T" onclick="setFilter(this)">3T</button>
-                <button class="filter-chip" data-size="4T" onclick="setFilter(this)">4T</button>
-                <button class="filter-chip" data-size="5T" onclick="setFilter(this)">5T</button>
-            </div>
-
-            <table class="product-table" id="productTable">
-                <thead>
-                    <tr>
-                        <th style="width:44px"></th>
-                        <th>Product</th>
-                        <th>Color / Pattern</th>
-                        <th>Size</th>
-                        <th>Stock</th>
-                        <th>Regular</th>
-                        <th>Bundle <span style="font-size:0.6rem;color:#8b7355">(5+)</span></th>
-                        <th>Your Cost</th>
-                        <th>Qty</th>
-                        <th>Line Total</th>
-                    </tr>
-                </thead>
-                <tbody id="productTbody"></tbody>
-            </table>
+  <div class="order-layout">
+    <div class="table-area">
+      <div class="toolbar">
+        <div class="search-wrap">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+          <input class="search-input" type="text" id="searchInput" placeholder="Search products…" oninput="renderTable()">
         </div>
-
-        <!-- RIGHT: Summary Panel -->
-        <div class="summary-panel">
-
-            <!-- Order Items -->
-            <div class="panel-section">
-                <h4>This Order</h4>
-                <div class="bundle-badge" id="bundleBadge">🎉 Bundle price active (5+ items)</div>
-                <ul class="order-item-list" id="orderItemList">
-                    <li class="empty-msg">No items added yet</li>
-                </ul>
-            </div>
-
-            <!-- Financials -->
-            <div class="panel-section">
-                <h4>Financials</h4>
-                <div class="sum-row">
-                    <span class="sum-label">Items</span>
-                    <span class="sum-val" id="sItems">0</span>
-                </div>
-                <div class="sum-row">
-                    <span class="sum-label">Gross Earning</span>
-                    <span class="sum-val" id="sRevenue">$0.00</span>
-                </div>
-                <div class="sum-row">
-                    <span class="sum-label">Purchase Price</span>
-                    <span class="sum-val" id="sCost">$0.00</span>
-                </div>
-                <div class="sum-row">
-                    <span class="sum-label">Shipping Collected</span>
-                    <span class="sum-val" id="sShipIn">$0.00</span>
-                </div>
-                <div class="sum-row">
-                    <span class="sum-label">Shipping Paid Out</span>
-                    <span class="sum-val" id="sShipOut">$0.00</span>
-                </div>
-                <div class="sum-row">
-                    <span class="sum-label">PayPal / Venmo Fee</span>
-                    <span class="sum-val" id="sFee">$0.00</span>
-                </div>
-                <div class="sum-row total">
-                    <span class="sum-label">Est. Profit</span>
-                    <span class="sum-val profit" id="sProfit">$0.00</span>
-                </div>
-                <div class="sum-row">
-                    <span class="sum-label">Margin</span>
-                    <span class="sum-val" id="sMargin">—</span>
-                </div>
-            </div>
-
-            <!-- Order Details -->
-            <div class="panel-section">
-                <h4>Order Details</h4>
-                <div class="field">
-                    <label>Date</label>
-                    <input type="date" id="fDate">
-                </div>
-                <div class="field">
-                    <label>Customer Name</label>
-                    <input type="text" id="fName" placeholder="Full name">
-                </div>
-                <div class="field">
-                    <label>Address</label>
-                    <textarea id="fAddress" placeholder="Street, City, State ZIP"></textarea>
-                </div>
-                <div class="field">
-                    <label>Tracking</label>
-                    <input type="text" id="fTracking" placeholder="Tracking number">
-                </div>
-                <div class="two-col">
-                    <div class="field">
-                        <label>Shipping In ($)</label>
-                        <input type="number" id="fShipIn" placeholder="0.00" step="0.01" oninput="updatePanel()">
-                    </div>
-                    <div class="field">
-                        <label>Shipping Out ($)</label>
-                        <input type="number" id="fShipOut" placeholder="0.00" step="0.01" oninput="updatePanel()">
-                    </div>
-                </div>
-                <div class="two-col">
-                    <div class="field">
-                        <label>Fee ($)</label>
-                        <input type="number" id="fFee" placeholder="0.00" step="0.01" oninput="updatePanel()">
-                    </div>
-                    <div class="field">
-                        <label>Payment</label>
-                        <select id="fPayment">
-                            <option>Venmo</option>
-                            <option>PayPal</option>
-                            <option>Zelle</option>
-                            <option>Cash</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="field">
-                    <label>Status</label>
-                    <select id="fStatus">
-                        <option>Pending</option>
-                        <option>Paid</option>
-                        <option>Shipped</option>
-                        <option>Delivered</option>
-                        <option>Cancelled</option>
-                    </select>
-                </div>
-                <div class="field">
-                    <label>Notes</label>
-                    <textarea id="fNotes" placeholder="Notes..."></textarea>
-                </div>
-            </div>
-
-            <!-- Export -->
-            <div class="panel-section">
-                <h4>Export</h4>
-                <p style="font-size:0.72rem;color:#aaa;margin-bottom:0.5rem;">Copies tab-separated row for Google Sheet. Also deducts qty from inventory.</p>
-                <button class="copy-btn" onclick="copyAndDeduct()">📋 Copy Row + Save to Inventory</button>
-                <div class="copy-confirm" id="copyConfirm"></div>
-            </div>
-
-        </div>
+        <button class="chip active" data-sz="all" onclick="setFilter(this,'sz')">All</button>
+        <button class="chip" data-sz="60"  onclick="setFilter(this,'sz')">60</button>
+        <button class="chip" data-sz="70"  onclick="setFilter(this,'sz')">70</button>
+        <button class="chip" data-sz="80"  onclick="setFilter(this,'sz')">80</button>
+        <button class="chip" data-sz="90"  onclick="setFilter(this,'sz')">90</button>
+        <button class="chip" data-sz="100" onclick="setFilter(this,'sz')">100</button>
+        <button class="chip" data-sz="110" onclick="setFilter(this,'sz')">110</button>
+        <button class="chip" data-sz="120" onclick="setFilter(this,'sz')">120</button>
+        <button class="chip" data-sz="130" onclick="setFilter(this,'sz')">130</button>
+      </div>
+      <div class="tbl-wrap">
+        <table class="tbl ptable" id="productTable">
+          <thead><tr>
+            <th style="width:38px"></th>
+            <th>Product</th>
+            <th>Color</th>
+            <th>Size</th>
+            <th>Stock</th>
+            <th>Regular</th>
+            <th>Bundle<span style="color:var(--bark);font-size:.6rem"> 5+</span></th>
+            <th>Cost</th>
+            <th>Qty</th>
+            <th>Line</th>
+          </tr></thead>
+          <tbody id="productTbody"></tbody>
+        </table>
+      </div>
     </div>
+
+    <!-- PANEL -->
+    <div class="panel">
+      <div class="psec">
+        <div class="psec-title">This Order</div>
+        <div class="bundle-pill" id="bundlePill">🎉 Bundle pricing — 5+ items</div>
+        <ul class="order-list" id="orderList"><li class="empty-hint">No items yet</li></ul>
+      </div>
+      <div class="psec">
+        <div class="psec-title">Financials</div>
+        <div class="sum-row"><span class="sum-lbl">Items</span><span class="sum-val" id="sItems">0</span></div>
+        <div class="sum-row"><span class="sum-lbl">Gross Earning</span><span class="sum-val" id="sRevenue">$0.00</span></div>
+        <div class="sum-row"><span class="sum-lbl">Purchase Cost</span><span class="sum-val" id="sCost">$0.00</span></div>
+        <div class="sum-row"><span class="sum-lbl">Shipping In</span><span class="sum-val" id="sShipIn">$0.00</span></div>
+        <div class="sum-row"><span class="sum-lbl">Shipping Out</span><span class="sum-val" id="sShipOut">$0.00</span></div>
+        <div class="sum-row"><span class="sum-lbl">PayPal/Venmo Fee</span><span class="sum-val" id="sFee">$0.00</span></div>
+        <div class="sum-row total-row"><span class="sum-lbl">Est. Profit</span><span class="sum-val profit" id="sProfit">$0.00</span></div>
+        <div class="sum-row"><span class="sum-lbl">Margin</span><span class="sum-val" id="sMargin">—</span></div>
+      </div>
+      <div class="psec">
+        <div class="psec-title">Order Details</div>
+        <div class="field"><label>Date</label><input type="date" id="fDate"></div>
+        <div class="field"><label>Customer Name</label><input type="text" id="fName" placeholder="Full name"></div>
+        <div class="field"><label>Address</label><textarea id="fAddress" placeholder="Street, City, State ZIP"></textarea></div>
+        <div class="field"><label>Tracking #</label><input type="text" id="fTracking"></div>
+        <div class="two-col">
+          <div class="field"><label>Ship Collected ($)</label><input type="number" id="fShipIn" step="0.01" oninput="updatePanel()"></div>
+          <div class="field"><label>Ship Paid Out ($)</label><input type="number" id="fShipOut" step="0.01" oninput="updatePanel()"></div>
+        </div>
+        <div class="two-col">
+          <div class="field"><label>Fee ($)</label><input type="number" id="fFee" step="0.01" oninput="updatePanel()"></div>
+          <div class="field"><label>Payment</label>
+            <select id="fPayment"><option>Venmo</option><option>PayPal</option><option>Zelle</option><option>Cash</option></select>
+          </div>
+        </div>
+        <div class="field"><label>Status</label>
+          <select id="fStatus"><option>Pending</option><option>Paid</option><option>Shipped</option><option>Delivered</option><option>Cancelled</option></select>
+        </div>
+        <div class="field"><label>Notes</label><textarea id="fNotes" placeholder="Optional…"></textarea></div>
+      </div>
+      <div class="psec">
+        <div class="psec-title">Export</div>
+        <p style="font-size:.68rem;color:#bbb;margin-bottom:.45rem">Copies a tab-separated row for your Google Sheet log, deducts inventory, and saves to Sold Records.</p>
+        <button class="copy-btn" onclick="copyAndSave()">📋 Copy Row + Save to Records</button>
+        <div class="copy-confirm" id="copyConfirm"></div>
+      </div>
+    </div>
+  </div>
 </div>
 
-<!-- INVENTORY VIEW -->
+<!-- ══ INVENTORY ══ -->
 <div class="view" id="view-inventory">
-    <div class="inv-area">
-        <div class="inv-toolbar">
-            <input class="search-input" type="text" id="invSearch" placeholder="🔍 Search products..." oninput="renderInventory()">
-            <span style="font-size:0.75rem;color:#aaa;">Edit stock counts below. Red = 0, Orange = ≤2.</span>
+  <div class="inv-wrap">
+    <div class="inv-toolbar">
+      <div class="search-wrap">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        <input class="search-input" type="text" id="invSearch" placeholder="Search…" oninput="renderInventory()">
+      </div>
+      <span style="font-size:.7rem;color:#bbb">🔴 out  🟠 ≤2 left</span>
+      <button class="btn sm" onclick="pullInventory()" style="margin-left:auto">↓ Pull from Sheet</button>
+    </div>
+    <div class="inv-scroll">
+      <table class="inv-tbl" id="invTable">
+        <thead id="invThead"></thead>
+        <tbody id="invTbody"></tbody>
+      </table>
+    </div>
+    <div class="sticky-bar">
+      <button class="btn" onclick="renderInventory()">Reset</button>
+      <button class="btn primary" onclick="saveInventory()">💾 Save Stock</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SOLD RECORDS ══ -->
+<div class="view" id="view-sold">
+  <div class="sold-wrap">
+    <!-- LEFT: Summary table -->
+    <div class="sold-col">
+      <div class="sold-col-hdr">
+        <h3>Units Sold</h3>
+        <span id="soldMeta"></span>
+      </div>
+      <div class="sold-scroll" id="soldSummaryArea">
+        <div class="no-data">No sales recorded yet</div>
+      </div>
+    </div>
+    <!-- RIGHT: Order log -->
+    <div class="sold-col">
+      <div class="sold-col-hdr">
+        <h3>Order Log</h3>
+        <span id="logMeta"></span>
+      </div>
+      <div class="log-stats" id="logStats"></div>
+      <div class="log-filters" id="logFilters"></div>
+      <div class="sold-scroll" id="logArea">
+        <div class="no-data">No orders recorded yet</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PRODUCT MANAGER ══ -->
+<div class="view" id="view-mgr">
+  <div class="mgr-layout">
+    <div class="mgr-list">
+      <div class="mgr-toolbar">
+        <div class="search-wrap">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+          <input class="search-input" type="text" id="mgrSearch" placeholder="Search…" oninput="renderMgr()">
         </div>
-        <table class="inv-table" id="invTable">
-            <thead id="invThead"></thead>
-            <tbody id="invTbody"></tbody>
-        </table>
+        <button class="btn primary sm" onclick="startNew()">+ Add Product</button>
+        <span style="font-size:.7rem;color:#bbb;margin-left:auto" id="mgrCount"></span>
+      </div>
+      <div class="mgr-grid" id="mgrGrid"></div>
     </div>
-    <div class="save-stock-bar">
-        <button class="btn" onclick="renderInventory()">Reset</button>
-        <button class="btn primary" onclick="saveInventory()">💾 Save Stock</button>
+    <div class="mgr-form" id="mgrForm">
+      <div class="mgr-hint">← Click a product to edit<br>or add a new one</div>
     </div>
+  </div>
 </div>
 
 <script>
-// ─────────────────────────────────────────
-// PRODUCT DATA
-// Each variant: { pid, name, image, color (label), hex, size, price, bundlePrice, cost }
-// ─────────────────────────────────────────
-const ALL_SIZES = ["3-6M","6-12M","12-24M","2T","3T","4T","5T"];
+/* ═══════════════════════════════════════════════
+   SIZE MAPPING
+   Display (order builder) → Backend (60-130)
+═══════════════════════════════════════════════ */
+const SIZE_DISPLAY = ["3-6M","6-12M","12-24M","2T","3T","4T","5T"];
+const SIZE_CM      = ["60","70","80","90","100","110","120","130"];
+// Some products only cover a subset; we store as CM
+const ALL_CM = SIZE_CM;
 
-const products = [
-  { pid:1,  name:"Cotton Waffle Overall",                    image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/6.jpg",   color:"Natural", hex:"#e8ddd0", sizes:["6-12M"],                              price:14, bundlePrice:12, cost:100 },
-  { pid:2,  name:"Cotton Linen Kimono Overall",              image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/28.jpg",  color:"Natural", hex:"#e8ddd0", sizes:["6-12M","12-24M","2T"],               price:12, bundlePrice:10, cost:100 },
-  { pid:3,  name:"Ruffle Cotton Romper",                     image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/11.jpg",  color:"White",   hex:"#f5f5f5", sizes:["2T"],                                price:12, bundlePrice:10, cost:100 },
-  { pid:5,  name:"Embroidered Cotton Floral Romper",         image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/19.jpg",  color:"Floral",  hex:"#f0e6f0", sizes:["3-6M","12-24M","2T"],               price:18, bundlePrice:16, cost:100 },
-  { pid:6,  name:"Cotton Muslin Romper",                     image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/18.jpg",  color:"Natural", hex:"#e8ddd0", sizes:["6-12M","12-24M"],                    price:14, bundlePrice:12, cost:100 },
-  { pid:7,  name:"Lightweight Cotton Terry Romper",          image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/27.jpg",  color:"Natural", hex:"#e8ddd0", sizes:["3-6M","6-12M"],                      price:12, bundlePrice:10, cost:100 },
-  { pid:8,  name:"Smile Cotton L/S Shirt Stripes",           image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/2.jpg",   color:"Stripe",  hex:"#c8d8e8", sizes:["6-12M","12-24M","2T","3T","4T","5T"], price:10, bundlePrice:9,  cost:100 },
-  { pid:9,  name:"Solid Cotton Long Sleeve (A)",             image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/3.jpg",   color:"White",   hex:"#f5f5f5", sizes:["6-12M","12-24M","3T","4T","5T"],     price:10, bundlePrice:9,  cost:100 },
-  { pid:10, name:"Solid Cotton Long Sleeve (B)",             image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/12.jpg",  color:"Natural", hex:"#e8ddd0", sizes:["6-12M","12-24M","2T","3T","4T"],     price:12, bundlePrice:10, cost:100 },
-  { pid:11, name:"Striped Cotton L/S Shirt w/ Buttons",     image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/9.jpg",   color:"Stripe",  hex:"#c8d8e8", sizes:["6-12M"],                              price:14, bundlePrice:12, cost:100 },
-  { pid:12, name:"Cotton Long Sleeve Bear Shirt",            image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/17.jpg",  color:"White",   hex:"#f5f5f5", sizes:["6-12M","12-24M"],                    price:11, bundlePrice:9,  cost:100 },
-  { pid:13, name:"Striped Cotton Sweatshirt",                image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/16.jpg",  color:"Stripe",  hex:"#c8d8e8", sizes:["6-12M","12-24M","2T","3T","4T","5T"], price:18, bundlePrice:16, cost:100 },
-  { pid:14, name:"Scalloped Cotton Knitted Cardigan",        image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/7.jpg",   color:"Natural", hex:"#e8ddd0", sizes:["3-6M","6-12M"],                      price:24, bundlePrice:22, cost:100 },
-  { pid:15, name:"Ruffled Cotton Muslin Pants",              image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/1.jpg",   color:"Natural", hex:"#e8ddd0", sizes:["3-6M","6-12M","12-24M","2T","3T"],   price:12, bundlePrice:10, cost:100 },
-  { pid:16, name:"Cotton Fleece Pants with Pocket",          image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/5.jpg",   color:"Natural", hex:"#e8ddd0", sizes:["3-6M","6-12M","4T","5T"],            price:14, bundlePrice:12, cost:100 },
-  { pid:17, name:"Cotton Fleece Leggings",                   image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/14.jpg",  color:"Natural", hex:"#e8ddd0", sizes:["6-12M","12-24M","2T","3T","4T","5T"], price:12, bundlePrice:10, cost:100 },
-  { pid:18, name:"Striped Pants (6-12M–12-24M)",            image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/13.jpg",  color:"Stripe",  hex:"#c8d8e8", sizes:["6-12M","12-24M"],                    price:14, bundlePrice:12, cost:100 },
-  { pid:19, name:"Open Back Cotton Lace Set",                image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/4.jpg",   color:"White",   hex:"#f5f5f5", sizes:["12-24M","2T"],                       price:18, bundlePrice:16, cost:100 },
-  { pid:20, name:"Embroidered Cotton Fleece Suit",           image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/8.jpg",   color:"Natural", hex:"#e8ddd0", sizes:["6-12M","12-24M","2T","4T"],          price:24, bundlePrice:22, cost:100 },
-  { pid:21, name:"Solid Cotton Track Suit",                  image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/10.jpg",  color:"Natural", hex:"#e8ddd0", sizes:["3-6M","6-12M","12-24M","2T","3T","4T"], price:24, bundlePrice:22, cost:100 },
-  { pid:22, name:"Striped Pants (2T–5T)",                   image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/26.jpg", color:"Stripe", hex:"#c8d8e8", sizes:["2T","3T","4T","5T"],        price:14, bundlePrice:12, cost:100 },
-  { pid:23, name:"Solid Cotton Knit Sweater",                image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/25.jpg", color:"Natural", hex:"#e8ddd0", sizes:["2T","3T","4T","5T"],      price:22, bundlePrice:20, cost:100 },
-  { pid:24, name:"Cropped Striped Pants",                    image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/21.jpg", color:"Stripe", hex:"#c8d8e8", sizes:["5T"],                      price:16, bundlePrice:14, cost:100 },
-  { pid:25, name:"Cotton Solid Sweatshirt",                  image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/23.jpg", color:"Natural", hex:"#e8ddd0", sizes:["12-24M","2T","3T","4T","5T"], price:18, bundlePrice:16, cost:100 },
-  { pid:26, name:"Cotton Solid Pants",                       image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/22.jpg", color:"Natural", hex:"#e8ddd0", sizes:["2T","3T","4T","5T"],      price:18, bundlePrice:16, cost:100 },
-  { pid:27, name:"Striped Cotton Fleeced Sweatshirt",        image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/32.jpg", color:"Stripe", hex:"#c8d8e8", sizes:["12-24M","2T","3T","4T","5T"], price:22, bundlePrice:20, cost:100 },
-  { pid:28, name:"Cotton Light Fleeced Leggings",            image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/33.jpg", color:"Natural", hex:"#e8ddd0", sizes:["2T","3T","5T"],           price:10, bundlePrice:9,  cost:100 },
-  { pid:29, name:"Cotton Knot Leggings",                     image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/34.jpg", color:"Natural", hex:"#e8ddd0", sizes:["3-6M","6-12M","12-24M"],  price:9,  bundlePrice:8,  cost:100 },
-  { pid:30, name:"Cotton Sleeveless Romper",                 image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/35.jpg", color:"Natural", hex:"#e8ddd0", sizes:["3-6M"],                   price:12, bundlePrice:10, cost:100 },
-  { pid:31, name:"Cotton Romper Shirt Set",                  image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/36.jpg", color:"Natural", hex:"#e8ddd0", sizes:["3-6M"],                   price:11, bundlePrice:9,  cost:100 },
-  { pid:33, name:"Solid Cotton Muslin Pants",                image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/38.jpg", color:"Natural", hex:"#e8ddd0", sizes:["6-12M","12-24M"],         price:12, bundlePrice:10, cost:100 },
-  { pid:35, name:"Cotton Knit Animal Cardigan",              image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/66.jpg", color:"Natural", hex:"#e8ddd0", sizes:["3-6M","6-12M"],           price:24, bundlePrice:22, cost:100 },
-  { pid:36, name:"Cotton Rainbow Suit",                      image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/43.jpg", color:"Rainbow", hex:"#f0d0e0", sizes:["6-12M","12-24M","2T","3T"], price:16, bundlePrice:14, cost:100 },
-  { pid:37, name:"Cotton Embroidered Floral Romper",         image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/60.jpg", color:"Floral",  hex:"#f0e6f0", sizes:["3-6M","6-12M","12-24M","2T"], price:18, bundlePrice:15, cost:100 },
-  { pid:38, name:"Cotton Embroidered Floral Romper (Linen)", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/40.jpg", color:"Floral",  hex:"#f0e6f0", sizes:["3-6M"],                   price:18, bundlePrice:16, cost:100 },
-  { pid:41, name:"Cotton Quilt Padded Pants",                image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/47.jpg", color:"Natural", hex:"#e8ddd0", sizes:["12-24M","2T","3T","5T"],  price:18, bundlePrice:16, cost:100 },
-  { pid:43, name:"Cotton Stripes Shirt w/ Elbow Patches",   image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/51.jpg", color:"Stripe",  hex:"#c8d8e8", sizes:["6-12M"],                   price:10, bundlePrice:8,  cost:100 },
-  { pid:44, name:"Cotton Citrus Suit",                       image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/46.jpg", color:"Yellow",  hex:"#f5e6b0", sizes:["2T","3T"],                price:18, bundlePrice:16, cost:100 },
-  { pid:45, name:"Cotton Quilt Padded Floral Pants",         image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/53.jpg", color:"Floral",  hex:"#f0e6f0", sizes:["12-24M"],                 price:16, bundlePrice:14, cost:100 },
-  { pid:46, name:"Cotton Knit Solid Sweater",                image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/52.jpg", color:"Natural", hex:"#e8ddd0", sizes:["6-12M"],                   price:20, bundlePrice:18, cost:100 },
-  { pid:47, name:"Cotton Padded Reversible Sweatshirt",      image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/49.jpg", color:"Natural", hex:"#e8ddd0", sizes:["12-24M","2T"],             price:22, bundlePrice:20, cost:100 },
-  { pid:48, name:"Cotton Striped Leggings w/ Knee Patch",   image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/50.jpg", color:"Stripe",  hex:"#c8d8e8", sizes:["3-6M","6-12M"],           price:10, bundlePrice:8,  cost:100 },
-  { pid:49, name:"Quilt Padded Pants",                       image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/55.jpg", color:"Natural", hex:"#e8ddd0", sizes:["2T","4T"],                price:12, bundlePrice:10, cost:100 },
-  { pid:51, name:"Cotton Muslin Romper",                     image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/44.jpg", color:"Natural", hex:"#e8ddd0", sizes:["6-12M"],                   price:14, bundlePrice:12, cost:100 },
-  { pid:53, name:"Cotton Solid Pants with Footies",          image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/41.jpg", color:"Natural", hex:"#e8ddd0", sizes:["3-6M","6-12M"],           price:8,  bundlePrice:6,  cost:100 },
-  { pid:54, name:"Cotton Striped Smile Shirt",               image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/45.jpg", color:"Stripe",  hex:"#c8d8e8", sizes:["12-24M","2T","3T","4T","5T"], price:7, bundlePrice:6,  cost:100 },
-  { pid:55, name:"Cotton Muslin Solid Pants",                image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/62.jpg", color:"Natural", hex:"#e8ddd0", sizes:["2T","3T","4T","5T"],      price:12, bundlePrice:10, cost:100 },
-  { pid:57, name:"Cotton Knit Set",                          image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/64.jpg", color:"Natural", hex:"#e8ddd0", sizes:["12-24M"],                  price:22, bundlePrice:20, cost:100 },
-  { pid:58, name:"Cotton Knit Sprinkle Sweater",             image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/65.jpg", color:"Natural", hex:"#e8ddd0", sizes:["6-12M"],                   price:18, bundlePrice:16, cost:100 },
-  { pid:59, name:"Cotton Quilted Sweatshirt",                image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/39.jpg", color:"Natural", hex:"#e8ddd0", sizes:["12-24M","2T","3T","4T","5T"], price:24, bundlePrice:22, cost:100 },
-  { pid:60, name:"Pattern Cotton Muslin Pants",              image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/70.jpg", color:"Pattern", hex:"#d8e8d8", sizes:["6-12M","12-24M","2T","3T","4T","5T"], price:12, bundlePrice:10, cost:100 },
-  { pid:61, name:"Solid Cotton Shirt",                       image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/69.jpg", color:"Natural", hex:"#e8ddd0", sizes:["2T","3T","4T","5T"],      price:12, bundlePrice:10, cost:100 },
-  { pid:64, name:"Cotton Striped Short Sleeve Shirt",        image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/58.jpg", color:"Stripe",  hex:"#c8d8e8", sizes:["3-6M","6-12M","12-24M","2T"], price:8, bundlePrice:6,  cost:100 },
-  { pid:65, name:"Cotton Embroidered Floral Set",            image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/72.jpg", color:"Floral",  hex:"#f0e6f0", sizes:["12-24M"],                  price:17, bundlePrice:15, cost:100 },
-  { pid:66, name:"Cotton Animal Short Sleeve Shirt",         image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/73.jpg", color:"Natural", hex:"#e8ddd0", sizes:["6-12M","3T","4T","5T"],   price:10, bundlePrice:8,  cost:100 }
+// Convert display size → cm key (for storage)
+function toCm(sz){
+  const map={"3-6M":"60","6-12M":"70","12-24M":"80","2T":"90","3T":"100","4T":"110","5T":"120"};
+  return map[sz] || sz; // if already cm, pass through
+}
+// Convert cm → display label (for order builder UI)
+function toDisplay(cm){
+  const map={"60":"3-6M (60)","70":"6-12M (70)","80":"12-24M (80)","90":"2T (90)","100":"3T (100)","110":"4T (110)","120":"5T (120)","130":"130"};
+  return map[cm] || cm;
+}
+function toDisplayShort(cm){
+  const map={"60":"3-6M","70":"6-12M","80":"12-24M","90":"2T","100":"3T","110":"4T","120":"5T","130":"130"};
+  return map[cm] || cm;
+}
+
+/* ═══════════════════════════════════════════════
+   DEFAULT PRODUCTS  (sizes stored as CM strings)
+═══════════════════════════════════════════════ */
+const DEFAULT_PRODUCTS = [
+  {pid:1,  name:"Cotton Waffle Overall",                    image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/6.jpg",   color:"Natural",hex:"#e8ddd0",sizes:["70"],                              price:14,bundlePrice:12,cost:100},
+  {pid:2,  name:"Cotton Linen Kimono Overall",              image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/28.jpg",  color:"Natural",hex:"#e8ddd0",sizes:["70","80","90"],               price:12,bundlePrice:10,cost:100},
+  {pid:3,  name:"Ruffle Cotton Romper",                     image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/11.jpg",  color:"White",  hex:"#f5f5f5",sizes:["90"],                                price:12,bundlePrice:10,cost:100},
+  {pid:5,  name:"Embroidered Cotton Floral Romper",         image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/19.jpg",  color:"Floral", hex:"#f0e6f0",sizes:["60","80","90"],               price:18,bundlePrice:16,cost:100},
+  {pid:6,  name:"Cotton Muslin Romper",                     image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/18.jpg",  color:"Natural",hex:"#e8ddd0",sizes:["70","80"],                    price:14,bundlePrice:12,cost:100},
+  {pid:7,  name:"Lightweight Cotton Terry Romper",          image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/27.jpg",  color:"Natural",hex:"#e8ddd0",sizes:["60","70"],                      price:12,bundlePrice:10,cost:100},
+  {pid:8,  name:"Smile Cotton L/S Shirt Stripes",           image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/2.jpg",   color:"Stripe", hex:"#c8d8e8",sizes:["70","80","90","100","110","120"],price:10,bundlePrice:9, cost:100},
+  {pid:9,  name:"Solid Cotton Long Sleeve (A)",             image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/3.jpg",   color:"White",  hex:"#f5f5f5",sizes:["70","80","100","110","120"],     price:10,bundlePrice:9, cost:100},
+  {pid:10, name:"Solid Cotton Long Sleeve (B)",             image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/12.jpg",  color:"Natural",hex:"#e8ddd0",sizes:["70","80","90","100","110"],     price:12,bundlePrice:10,cost:100},
+  {pid:11, name:"Striped Cotton L/S Shirt w/ Buttons",     image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/9.jpg",   color:"Stripe", hex:"#c8d8e8",sizes:["70"],                              price:14,bundlePrice:12,cost:100},
+  {pid:12, name:"Cotton Long Sleeve Bear Shirt",            image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/17.jpg",  color:"White",  hex:"#f5f5f5",sizes:["70","80"],                    price:11,bundlePrice:9, cost:100},
+  {pid:13, name:"Striped Cotton Sweatshirt",                image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/16.jpg",  color:"Stripe", hex:"#c8d8e8",sizes:["70","80","90","100","110","120"],price:18,bundlePrice:16,cost:100},
+  {pid:14, name:"Scalloped Cotton Knitted Cardigan",        image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/7.jpg",   color:"Natural",hex:"#e8ddd0",sizes:["60","70"],                      price:24,bundlePrice:22,cost:100},
+  {pid:15, name:"Ruffled Cotton Muslin Pants",              image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/1.jpg",   color:"Natural",hex:"#e8ddd0",sizes:["60","70","80","90","100"],   price:12,bundlePrice:10,cost:100},
+  {pid:16, name:"Cotton Fleece Pants with Pocket",          image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/5.jpg",   color:"Natural",hex:"#e8ddd0",sizes:["60","70","110","120"],            price:14,bundlePrice:12,cost:100},
+  {pid:17, name:"Cotton Fleece Leggings",                   image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/14.jpg",  color:"Natural",hex:"#e8ddd0",sizes:["70","80","90","100","110","120"],price:12,bundlePrice:10,cost:100},
+  {pid:18, name:"Striped Pants (70–80)",                   image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/13.jpg",  color:"Stripe", hex:"#c8d8e8",sizes:["70","80"],                    price:14,bundlePrice:12,cost:100},
+  {pid:19, name:"Open Back Cotton Lace Set",                image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/4.jpg",   color:"White",  hex:"#f5f5f5",sizes:["80","90"],                       price:18,bundlePrice:16,cost:100},
+  {pid:20, name:"Embroidered Cotton Fleece Suit",           image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/8.jpg",   color:"Natural",hex:"#e8ddd0",sizes:["70","80","90","110"],          price:24,bundlePrice:22,cost:100},
+  {pid:21, name:"Solid Cotton Track Suit",                  image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/10.jpg",  color:"Natural",hex:"#e8ddd0",sizes:["60","70","80","90","100","110"],price:24,bundlePrice:22,cost:100},
+  {pid:22, name:"Striped Pants (90–120)",                  image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/26.jpg",color:"Stripe",hex:"#c8d8e8",sizes:["90","100","110","120"],price:14,bundlePrice:12,cost:100},
+  {pid:23, name:"Solid Cotton Knit Sweater",                image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/25.jpg",color:"Natural",hex:"#e8ddd0",sizes:["90","100","110","120"],price:22,bundlePrice:20,cost:100},
+  {pid:24, name:"Cropped Striped Pants",                    image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/21.jpg",color:"Stripe",hex:"#c8d8e8",sizes:["120"],                  price:16,bundlePrice:14,cost:100},
+  {pid:25, name:"Cotton Solid Sweatshirt",                  image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/23.jpg",color:"Natural",hex:"#e8ddd0",sizes:["80","90","100","110","120"],price:18,bundlePrice:16,cost:100},
+  {pid:26, name:"Cotton Solid Pants",                       image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/22.jpg",color:"Natural",hex:"#e8ddd0",sizes:["90","100","110","120"],price:18,bundlePrice:16,cost:100},
+  {pid:27, name:"Striped Cotton Fleeced Sweatshirt",        image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/32.jpg",color:"Stripe",hex:"#c8d8e8",sizes:["80","90","100","110","120"],price:22,bundlePrice:20,cost:100},
+  {pid:28, name:"Cotton Light Fleeced Leggings",            image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/33.jpg",color:"Natural",hex:"#e8ddd0",sizes:["90","100","120"],price:10,bundlePrice:9, cost:100},
+  {pid:29, name:"Cotton Knot Leggings",                     image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/34.jpg",color:"Natural",hex:"#e8ddd0",sizes:["60","70","80"],  price:9, bundlePrice:8, cost:100},
+  {pid:30, name:"Cotton Sleeveless Romper",                 image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/35.jpg",color:"Natural",hex:"#e8ddd0",sizes:["60"],                   price:12,bundlePrice:10,cost:100},
+  {pid:31, name:"Cotton Romper Shirt Set",                  image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/36.jpg",color:"Natural",hex:"#e8ddd0",sizes:["60"],                   price:11,bundlePrice:9, cost:100},
+  {pid:33, name:"Solid Cotton Muslin Pants",                image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/38.jpg",color:"Natural",hex:"#e8ddd0",sizes:["70","80"],         price:12,bundlePrice:10,cost:100},
+  {pid:35, name:"Cotton Knit Animal Cardigan",              image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/66.jpg",color:"Natural",hex:"#e8ddd0",sizes:["60","70"],           price:24,bundlePrice:22,cost:100},
+  {pid:36, name:"Cotton Rainbow Suit",                      image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/43.jpg",color:"Rainbow",hex:"#f0d0e0",sizes:["70","80","90","100"],price:16,bundlePrice:14,cost:100},
+  {pid:37, name:"Cotton Embroidered Floral Romper",         image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/60.jpg",color:"Floral", hex:"#f0e6f0",sizes:["60","70","80","90"],price:18,bundlePrice:15,cost:100},
+  {pid:38, name:"Cotton Embroidered Floral Romper (Linen)", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/40.jpg",color:"Floral", hex:"#f0e6f0",sizes:["60"],                   price:18,bundlePrice:16,cost:100},
+  {pid:41, name:"Cotton Quilt Padded Pants",                image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/47.jpg",color:"Natural",hex:"#e8ddd0",sizes:["80","90","100","120"],price:18,bundlePrice:16,cost:100},
+  {pid:43, name:"Cotton Stripes Shirt w/ Elbow Patches",   image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/51.jpg",color:"Stripe", hex:"#c8d8e8",sizes:["70"],                   price:10,bundlePrice:8, cost:100},
+  {pid:44, name:"Cotton Citrus Suit",                       image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/46.jpg",color:"Yellow", hex:"#f5e6b0",sizes:["90","100"],             price:18,bundlePrice:16,cost:100},
+  {pid:45, name:"Cotton Quilt Padded Floral Pants",         image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/53.jpg",color:"Floral", hex:"#f0e6f0",sizes:["80"],                   price:16,bundlePrice:14,cost:100},
+  {pid:46, name:"Cotton Knit Solid Sweater",                image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/52.jpg",color:"Natural",hex:"#e8ddd0",sizes:["70"],                   price:20,bundlePrice:18,cost:100},
+  {pid:47, name:"Cotton Padded Reversible Sweatshirt",      image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/49.jpg",color:"Natural",hex:"#e8ddd0",sizes:["80","90"],               price:22,bundlePrice:20,cost:100},
+  {pid:48, name:"Cotton Striped Leggings w/ Knee Patch",   image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/50.jpg",color:"Stripe", hex:"#c8d8e8",sizes:["60","70"],           price:10,bundlePrice:8, cost:100},
+  {pid:49, name:"Quilt Padded Pants",                       image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/55.jpg",color:"Natural",hex:"#e8ddd0",sizes:["90","110"],             price:12,bundlePrice:10,cost:100},
+  {pid:51, name:"Cotton Muslin Romper",                     image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/44.jpg",color:"Natural",hex:"#e8ddd0",sizes:["70"],                   price:14,bundlePrice:12,cost:100},
+  {pid:53, name:"Cotton Solid Pants with Footies",          image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/41.jpg",color:"Natural",hex:"#e8ddd0",sizes:["60","70"],           price:8, bundlePrice:6, cost:100},
+  {pid:54, name:"Cotton Striped Smile Shirt",               image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/45.jpg",color:"Stripe", hex:"#c8d8e8",sizes:["80","90","100","110","120"],price:7,bundlePrice:6, cost:100},
+  {pid:55, name:"Cotton Muslin Solid Pants",                image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/62.jpg",color:"Natural",hex:"#e8ddd0",sizes:["90","100","110","120"],price:12,bundlePrice:10,cost:100},
+  {pid:57, name:"Cotton Knit Set",                          image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/64.jpg",color:"Natural",hex:"#e8ddd0",sizes:["80"],                   price:22,bundlePrice:20,cost:100},
+  {pid:58, name:"Cotton Knit Sprinkle Sweater",             image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/65.jpg",color:"Natural",hex:"#e8ddd0",sizes:["70"],                   price:18,bundlePrice:16,cost:100},
+  {pid:59, name:"Cotton Quilted Sweatshirt",                image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/39.jpg",color:"Natural",hex:"#e8ddd0",sizes:["80","90","100","110","120"],price:24,bundlePrice:22,cost:100},
+  {pid:60, name:"Pattern Cotton Muslin Pants",              image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/70.jpg",color:"Pattern",hex:"#d8e8d8",sizes:["70","80","90","100","110","120"],price:12,bundlePrice:10,cost:100},
+  {pid:61, name:"Solid Cotton Shirt",                       image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/69.jpg",color:"Natural",hex:"#e8ddd0",sizes:["90","100","110","120"],price:12,bundlePrice:10,cost:100},
+  {pid:64, name:"Cotton Striped Short Sleeve Shirt",        image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/58.jpg",color:"Stripe", hex:"#c8d8e8",sizes:["60","70","80","90"],price:8, bundlePrice:6, cost:100},
+  {pid:65, name:"Cotton Embroidered Floral Set",            image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/72.jpg",color:"Floral", hex:"#f0e6f0",sizes:["80"],                   price:17,bundlePrice:15,cost:100},
+  {pid:66, name:"Cotton Animal Short Sleeve Shirt",         image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/73.jpg",color:"Natural",hex:"#e8ddd0",sizes:["70","100","110","120"],price:10,bundlePrice:8, cost:100}
 ];
 
-// ── STATE ──
-let stock = JSON.parse(localStorage.getItem('lb_stock2') || '{}');
-let order = {}; // key: "pid_size" → qty
-let activeFilter = 'all';
+/* ═══════════════════════════════════════════════
+   STATE
+═══════════════════════════════════════════════ */
+let products   = loadLocal('lb_products4', DEFAULT_PRODUCTS);
+let stock      = loadLocal('lb_stock4',    {});
+let soldCounts = loadLocal('lb_sold4',     {});
+let orderLog   = loadLocal('lb_log4',      []);
+let order      = {};
+let szFilter   = 'all';
+let logFilter  = 'all';
+let editingPid = null;
+let sheetUrl   = localStorage.getItem('lb_sheetUrl') || '';
 
-function skey(pid, size) { return pid + '_' + size; }
-function getStock(pid, size) { const k = skey(pid,size); return stock[k] !== undefined ? stock[k] : 0; }
-function totalOrderQty() { return Object.values(order).reduce((s,v)=>s+v,0); }
-function isBundle() { return totalOrderQty() >= 5; }
+/* ═══════════════════════════════════════════════
+   LOCAL STORAGE HELPERS
+═══════════════════════════════════════════════ */
+function loadLocal(key, def){
+  try{ const v=localStorage.getItem(key); return v?JSON.parse(v):JSON.parse(JSON.stringify(def)); }catch(e){ return JSON.parse(JSON.stringify(def)); }
+}
+function saveLocal(key, val){ localStorage.setItem(key, JSON.stringify(val)); }
+function saveProducts(){ saveLocal('lb_products4', products); }
+function saveStock(){    saveLocal('lb_stock4',    stock);    }
+function saveSold(){     saveLocal('lb_sold4',     soldCounts);}
+function saveLog(){      saveLocal('lb_log4',      orderLog); }
 
-// Init date
-document.getElementById('fDate').valueAsDate = new Date();
-
-// ── VIEW SWITCHER ──
-function switchView(v) {
-    document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
-    document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-    document.getElementById('view-' + v).classList.add('active');
-    document.querySelector(`.tab-btn[onclick="switchView('${v}')"]`).classList.add('active');
-    if (v === 'inventory') renderInventory();
+/* ═══════════════════════════════════════════════
+   GOOGLE SHEETS SYNC
+═══════════════════════════════════════════════ */
+function setSyncStatus(state, label){
+  document.getElementById('syncDot').className='sync-dot '+state;
+  document.getElementById('syncLabel').textContent=label;
 }
 
-// ── SIZE FILTER ──
-function setFilter(el) {
-    document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
-    el.classList.add('active');
-    activeFilter = el.dataset.size;
-    renderTable();
+async function sheetRead(tab){
+  if(!sheetUrl) return null;
+  setSyncStatus('busy','reading…');
+  try{
+    const r=await fetch(sheetUrl+'?action=read&tab='+encodeURIComponent(tab));
+    const data=await r.json();
+    setSyncStatus('ok','synced');
+    return data;
+  }catch(e){ setSyncStatus('err','error'); return null; }
 }
 
-// ── RENDER ORDER TABLE ──
-function renderTable() {
-    const search = document.getElementById('searchInput').value.toLowerCase();
-    const tbody = document.getElementById('productTbody');
-    tbody.innerHTML = '';
-    const bundle = isBundle();
+async function sheetWrite(tab, data){
+  if(!sheetUrl) return;
+  setSyncStatus('busy','saving…');
+  try{
+    await fetch(sheetUrl,{method:'POST',body:JSON.stringify({action:'write',tab,data})});
+    setSyncStatus('ok','synced');
+  }catch(e){ setSyncStatus('err','error'); }
+}
 
-    // Build flat variant rows: one row per product+size
-    const variants = [];
-    products.forEach(p => {
-        p.sizes.forEach(size => {
-            if (activeFilter !== 'all' && size !== activeFilter) return;
-            if (search && !p.name.toLowerCase().includes(search) && !p.color.toLowerCase().includes(search)) return;
-            variants.push({ p, size });
-        });
+async function sheetAppend(tab, row){
+  if(!sheetUrl) return;
+  setSyncStatus('busy','saving…');
+  try{
+    await fetch(sheetUrl,{method:'POST',body:JSON.stringify({action:'append',tab,row})});
+    setSyncStatus('ok','synced');
+  }catch(e){ setSyncStatus('err','error'); }
+}
+
+// Push stock to sheet (format: pid_cm → qty)
+async function pushStock(){
+  const rows=[['key','qty']];
+  Object.entries(stock).forEach(([k,v])=>rows.push([k,v]));
+  await sheetWrite('Stock', rows);
+}
+
+// Pull stock from sheet
+async function pullInventory(){
+  const data=await sheetRead('Stock');
+  if(!data||data.length<2){showToast('No stock data in sheet yet.');return;}
+  data.slice(1).forEach(([k,v])=>{ stock[k]=parseInt(v)||0; });
+  saveStock();
+  renderInventory();
+  showToast('Inventory pulled from Sheet ✓');
+}
+
+// Push products to sheet
+async function pushProducts(){
+  const rows=[['pid','name','color','hex','sizes','price','bundlePrice','cost','image']];
+  products.forEach(p=>rows.push([p.pid,p.name,p.color,p.hex,p.sizes.join(','),p.price,p.bundlePrice,p.cost,p.image]));
+  await sheetWrite('Products', rows);
+}
+
+/* ═══════════════════════════════════════════════
+   SETUP MODAL
+═══════════════════════════════════════════════ */
+function showSetup(){
+  document.getElementById('sheetUrlInput').value=sheetUrl;
+  document.getElementById('setupModal').classList.remove('hidden');
+}
+function skipSetup(){
+  document.getElementById('setupModal').classList.add('hidden');
+  setSyncStatus('','local');
+}
+function saveSheetUrl(){
+  const url=document.getElementById('sheetUrlInput').value.trim();
+  if(!url){alert('Please paste your Web App URL first.');return;}
+  sheetUrl=url;
+  localStorage.setItem('lb_sheetUrl',url);
+  document.getElementById('setupModal').classList.add('hidden');
+  setSyncStatus('ok','connected');
+  // Initial push of products and stock
+  pushProducts();
+  pushStock();
+  showToast('Connected! Products and stock pushed to Sheet ✓');
+}
+function copyScript(){
+  const text=document.getElementById('scriptCode').textContent;
+  navigator.clipboard.writeText(text).then(()=>showToast('Script copied!')).catch(()=>{});
+}
+
+/* ═══════════════════════════════════════════════
+   HELPERS
+═══════════════════════════════════════════════ */
+function skey(pid,cm){ return pid+'_'+cm; }
+function getStock(pid,cm){ const k=skey(pid,cm); return stock[k]!==undefined?stock[k]:0; }
+function totalQty(){ return Object.values(order).reduce((s,v)=>s+v,0); }
+function isBundle(){ return totalQty()>=5; }
+function nextPid(){ return products.length?Math.max(...products.map(p=>p.pid))+1:1; }
+function fmt(n){ return '$'+parseFloat(n||0).toFixed(2); }
+function showToast(msg,dur=3000){
+  const el=document.getElementById('copyConfirm');
+  if(el){el.textContent=msg;setTimeout(()=>el.textContent='',dur);}
+}
+
+/* ═══════════════════════════════════════════════
+   VIEW SWITCHER
+═══════════════════════════════════════════════ */
+document.getElementById('fDate').valueAsDate=new Date();
+if(!sheetUrl) document.getElementById('setupModal').classList.remove('hidden');
+else document.getElementById('setupModal').classList.add('hidden');
+setSyncStatus(sheetUrl?'ok':'','sheetUrl'?'connected':'local');
+
+function switchView(v){
+  document.querySelectorAll('.view').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(el=>el.classList.remove('active'));
+  document.getElementById('view-'+v).classList.add('active');
+  document.querySelector(`.tab-btn[onclick="switchView('${v}')"]`).classList.add('active');
+  if(v==='inventory') renderInventory();
+  if(v==='sold')      renderSold();
+  if(v==='mgr')       renderMgr();
+}
+
+function setFilter(el,type){
+  document.querySelectorAll(`.chip[data-sz]`).forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  szFilter=el.dataset.sz;
+  renderTable();
+}
+
+/* ═══════════════════════════════════════════════
+   ORDER BUILDER
+═══════════════════════════════════════════════ */
+function renderTable(){
+  const search=document.getElementById('searchInput').value.toLowerCase();
+  const tbody=document.getElementById('productTbody');
+  tbody.innerHTML='';
+  const bundle=isBundle();
+
+  const rows=[];
+  products.forEach(p=>{
+    p.sizes.forEach(cm=>{
+      if(szFilter!=='all'&&cm!==szFilter) return;
+      if(search&&!p.name.toLowerCase().includes(search)&&!p.color.toLowerCase().includes(search)) return;
+      rows.push({p,cm});
     });
+  });
 
-    if (variants.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:2rem;color:#ccc;">No products found</td></tr>';
-        return;
-    }
+  if(!rows.length){
+    tbody.innerHTML='<tr><td colspan="10" style="text-align:center;padding:2rem;color:#ccc;font-size:.78rem">No products found</td></tr>';
+    return;
+  }
 
-    variants.forEach(({ p, size }) => {
-        const k = skey(p.pid, size);
-        const qty = order[k] || 0;
-        const inStock = getStock(p.pid, size);
-        const sellPrice = bundle ? p.bundlePrice : p.price;
-        const lineTotal = sellPrice * qty;
-
-        let stockClass = 'ok', stockLabel = inStock + ' left';
-        if (inStock === 0) { stockClass = 'zero'; stockLabel = '0 left'; }
-        else if (inStock <= 2) { stockClass = 'low'; }
-
-        const tr = document.createElement('tr');
-        tr.className = 'variant-row' + (qty > 0 ? ' in-order' : '');
-        tr.id = 'row-' + k;
-
-        tr.innerHTML = `
-            <td><img class="thumb" src="${p.image}" alt="" loading="lazy"></td>
-            <td style="font-size:0.8rem;color:#333;min-width:160px;line-height:1.3">${p.name}</td>
-            <td>
-                <div class="variant-label">
-                    <span class="swatch" style="background:${p.hex}"></span>
-                    <span>${p.color}</span>
-                </div>
-            </td>
-            <td><span class="size-pill">${size}</span></td>
-            <td><span class="stock-cell ${stockClass}">${stockLabel}</span></td>
-            <td style="font-size:0.8rem;white-space:nowrap;${!bundle ? 'font-weight:600' : 'color:#aaa'}">$${p.price}</td>
-            <td style="font-size:0.8rem;white-space:nowrap;${bundle ? 'font-weight:600;color:#8b7355' : 'color:#aaa'}">$${p.bundlePrice}</td>
-            <td style="font-size:0.8rem;white-space:nowrap;color:#aaa">$${p.cost}</td>
-            <td>
-                <div class="qty-ctrl">
-                    <button class="qb" onclick="changeQty(${p.pid},'${size}',-1)">−</button>
-                    <span class="qn ${qty>0?'active':''}" id="qn-${k}">${qty}</span>
-                    <button class="qb" onclick="changeQty(${p.pid},'${size}',1)">+</button>
-                </div>
-            </td>
-            <td class="line-total ${bundle&&qty>0?'bundle':''}">${qty > 0 ? '$'+lineTotal.toFixed(2) : '—'}</td>
-        `;
-        tbody.appendChild(tr);
-    });
+  rows.forEach(({p,cm})=>{
+    const k=skey(p.pid,cm);
+    const qty=order[k]||0;
+    const inStock=getStock(p.pid,cm);
+    const sp=bundle?p.bundlePrice:p.price;
+    const line=sp*qty;
+    let sCls='stock-ok',sLbl=inStock+' left';
+    if(inStock===0){sCls='stock-zero';sLbl='Out';}
+    else if(inStock<=2){sCls='stock-low';}
+    const tr=document.createElement('tr');
+    tr.className='variant-row'+(qty>0?' in-order':'');
+    tr.innerHTML=`
+      <td><img class="thumb" src="${p.image}" alt="" loading="lazy"></td>
+      <td style="font-size:.76rem;color:#333;min-width:140px;line-height:1.3">${p.name}</td>
+      <td><span style="display:flex;align-items:center;gap:.3rem;font-size:.73rem;color:#555">
+        <span class="swatch" style="background:${p.hex}"></span>${p.color}</span></td>
+      <td><span class="spill">${toDisplay(cm)}</span></td>
+      <td><span class="${sCls}">${sLbl}</span></td>
+      <td style="font-size:.76rem;${!bundle?'font-weight:600':'color:#ccc'}">${fmt(p.price)}</td>
+      <td style="font-size:.76rem;${bundle?'font-weight:600;color:var(--bark)':'color:#ccc'}">${fmt(p.bundlePrice)}</td>
+      <td style="font-size:.72rem;color:#bbb">${fmt(p.cost)}</td>
+      <td><div class="qty-ctrl">
+        <button class="qb" onclick="changeQty(${p.pid},'${cm}',-1)">−</button>
+        <span class="qn ${qty>0?'on':''}" id="qn-${k}">${qty}</span>
+        <button class="qb" onclick="changeQty(${p.pid},'${cm}',1)">+</button>
+      </div></td>
+      <td class="line-ttl ${bundle&&qty>0?'bundle':''}">${qty>0?fmt(line):'—'}</td>`;
+    tbody.appendChild(tr);
+  });
 }
 
-function changeQty(pid, size, delta) {
-    const k = skey(pid, size);
-    const newQty = Math.max(0, (order[k] || 0) + delta);
-    if (newQty === 0) delete order[k]; else order[k] = newQty;
-    renderTable();
-    updatePanel();
+function changeQty(pid,cm,delta){
+  const k=skey(pid,cm);
+  const nq=Math.max(0,(order[k]||0)+delta);
+  if(nq===0) delete order[k]; else order[k]=nq;
+  renderTable(); updatePanel();
 }
 
-// ── UPDATE PANEL ──
-function updatePanel() {
-    const bundle = isBundle();
-    let revenue = 0, cost = 0, totalQty = 0;
-    const entries = Object.entries(order).filter(([,q])=>q>0);
+function updatePanel(){
+  const bundle=isBundle();
+  let revenue=0,cost=0,tqty=0;
+  const entries=Object.entries(order).filter(([,q])=>q>0);
+  entries.forEach(([k,qty])=>{
+    const[pidStr,cm]=k.split('_');
+    const p=products.find(p=>p.pid===parseInt(pidStr));
+    if(!p) return;
+    revenue+=(bundle?p.bundlePrice:p.price)*qty;
+    cost+=p.cost*qty; tqty+=qty;
+  });
+  const shipIn=parseFloat(document.getElementById('fShipIn').value)||0;
+  const shipOut=parseFloat(document.getElementById('fShipOut').value)||0;
+  const fee=parseFloat(document.getElementById('fFee').value)||0;
+  const profit=revenue+shipIn-cost-shipOut-fee;
+  const margin=revenue>0?((profit/revenue)*100).toFixed(1):null;
 
-    entries.forEach(([k, qty]) => {
-        const [pidStr, ...sizeParts] = k.split('_');
-        const pid = parseInt(pidStr);
-        const size = sizeParts.join('_');
-        const p = products.find(p=>p.pid===pid);
-        if (!p) return;
-        const sp = bundle ? p.bundlePrice : p.price;
-        revenue += sp * qty;
-        cost += p.cost * qty;
-        totalQty += qty;
-    });
+  document.getElementById('sItems').textContent=tqty;
+  document.getElementById('sRevenue').textContent=fmt(revenue);
+  document.getElementById('sCost').textContent=fmt(cost);
+  document.getElementById('sShipIn').textContent=fmt(shipIn);
+  document.getElementById('sShipOut').textContent=fmt(shipOut);
+  document.getElementById('sFee').textContent=fmt(fee);
+  document.getElementById('sMargin').textContent=margin?margin+'%':'—';
+  const profEl=document.getElementById('sProfit');
+  profEl.textContent=fmt(profit);
+  profEl.className='sum-val '+(profit>=0?'profit':'loss');
+  document.getElementById('bundlePill').className='bundle-pill'+(bundle?' on':'');
 
-    const shipIn  = parseFloat(document.getElementById('fShipIn').value) || 0;
-    const shipOut = parseFloat(document.getElementById('fShipOut').value) || 0;
-    const fee     = parseFloat(document.getElementById('fFee').value) || 0;
-    const profit  = revenue + shipIn - cost - shipOut - fee;
-    const margin  = revenue > 0 ? ((profit/revenue)*100).toFixed(1) : null;
+  const badge=document.getElementById('topBadge');
+  if(tqty>0){badge.style.display='';badge.textContent=tqty+' item'+(tqty>1?'s':'')+' in order';}
+  else badge.style.display='none';
 
-    document.getElementById('sItems').textContent = totalQty;
-    document.getElementById('sRevenue').textContent = '$' + revenue.toFixed(2);
-    document.getElementById('sCost').textContent = '$' + cost.toFixed(2);
-    document.getElementById('sShipIn').textContent = '$' + shipIn.toFixed(2);
-    document.getElementById('sShipOut').textContent = '$' + shipOut.toFixed(2);
-    document.getElementById('sFee').textContent = '$' + fee.toFixed(2);
-    document.getElementById('sMargin').textContent = margin ? margin + '%' : '—';
-
-    const profitEl = document.getElementById('sProfit');
-    profitEl.textContent = '$' + profit.toFixed(2);
-    profitEl.className = 'sum-val ' + (profit >= 0 ? 'profit' : 'loss');
-
-    document.getElementById('bundleBadge').className = 'bundle-badge' + (bundle ? ' on' : '');
-
-    document.getElementById('topbarOrderCount').textContent = totalQty > 0 ? totalQty + ' item' + (totalQty>1?'s':'') + ' in order' : '';
-
-    // Order item list
-    const list = document.getElementById('orderItemList');
-    if (entries.length === 0) {
-        list.innerHTML = '<li class="empty-msg">No items added yet</li>';
-    } else {
-        list.innerHTML = entries.map(([k, qty]) => {
-            const [pidStr, ...sizeParts] = k.split('_');
-            const pid = parseInt(pidStr);
-            const size = sizeParts.join('_');
-            const p = products.find(p=>p.pid===pid);
-            if (!p) return '';
-            const sp = bundle ? p.bundlePrice : p.price;
-            return `<li class="order-item">
-                <span class="oi-name">${p.name} <span style="color:#8b7355;font-size:0.7rem">${p.color} / ${size}</span></span>
-                <span class="oi-detail">×${qty} $${(sp*qty).toFixed(2)}</span>
-            </li>`;
-        }).join('');
-    }
+  const list=document.getElementById('orderList');
+  if(!entries.length){list.innerHTML='<li class="empty-hint">No items yet</li>';return;}
+  list.innerHTML=entries.map(([k,qty])=>{
+    const[pidStr,cm]=k.split('_');
+    const p=products.find(p=>p.pid===parseInt(pidStr));
+    if(!p) return '';
+    const sp=bundle?p.bundlePrice:p.price;
+    return `<li class="order-item">
+      <span class="oi-name">${p.name}<br><span class="oi-sub">${p.color} · ${toDisplayShort(cm)} (${cm})</span></span>
+      <span class="oi-val">×${qty} ${fmt(sp*qty)}</span></li>`;
+  }).join('');
 }
 
-// ── COPY + DEDUCT ──
-function copyAndDeduct() {
-    const bundle = isBundle();
-    let revenue = 0, cost = 0, totalQty = 0;
-    const entries = Object.entries(order).filter(([,q])=>q>0);
+async function copyAndSave(){
+  const bundle=isBundle();
+  let revenue=0,cost=0,tqty=0;
+  const entries=Object.entries(order).filter(([,q])=>q>0);
+  if(!entries.length){showToast('⚠ No items in order');return;}
 
-    entries.forEach(([k, qty]) => {
-        const [pidStr, ...sizeParts] = k.split('_');
-        const p = products.find(p=>p.pid===parseInt(pidStr));
-        if (!p) return;
-        revenue += (bundle ? p.bundlePrice : p.price) * qty;
-        cost += p.cost * qty;
-        totalQty += qty;
-    });
+  const itemDetails=[];
+  entries.forEach(([k,qty])=>{
+    const[pidStr,cm]=k.split('_');
+    const p=products.find(p=>p.pid===parseInt(pidStr));
+    if(!p) return;
+    const sp=bundle?p.bundlePrice:p.price;
+    revenue+=sp*qty; cost+=p.cost*qty; tqty+=qty;
+    itemDetails.push({pid:p.pid,name:p.name,color:p.color,cm,qty,sp});
+  });
 
-    const shipIn  = parseFloat(document.getElementById('fShipIn').value) || 0;
-    const shipOut = parseFloat(document.getElementById('fShipOut').value) || 0;
-    const fee     = parseFloat(document.getElementById('fFee').value) || 0;
-    const profit  = revenue + shipIn - cost - shipOut - fee;
-    const grossEarning = (revenue + shipIn).toFixed(2);
+  const shipIn=parseFloat(document.getElementById('fShipIn').value)||0;
+  const shipOut=parseFloat(document.getElementById('fShipOut').value)||0;
+  const fee=parseFloat(document.getElementById('fFee').value)||0;
+  const profit=revenue+shipIn-cost-shipOut-fee;
+  const gross=revenue+shipIn;
+  const status=document.getElementById('fStatus').value;
+  const name=document.getElementById('fName').value;
+  const date=document.getElementById('fDate').value;
+  const itemSum=itemDetails.map(i=>`${i.qty}x ${i.name} (${toDisplayShort(i.cm)})`).join(', ');
 
-    // Build items summary for notes
-    const itemsSummary = entries.map(([k,qty]) => {
-        const [pidStr,...sizeParts] = k.split('_');
-        const p = products.find(p=>p.pid===parseInt(pidStr));
-        return p ? `${qty}x ${p.name} (${sizeParts.join('_')})` : '';
-    }).join(', ');
+  // Google Sheets row (matches your existing column order exactly)
+  const row=[
+    date, gross.toFixed(2), cost.toFixed(2), shipOut.toFixed(2),
+    fee.toFixed(2), profit.toFixed(2), status, name,
+    document.getElementById('fAddress').value.replace(/\n/g,' '),
+    document.getElementById('fTracking').value, tqty,
+    document.getElementById('fNotes').value||itemSum
+  ];
 
-    const row = [
-        document.getElementById('fDate').value,
-        grossEarning,
-        cost.toFixed(2),
-        shipOut.toFixed(2),
-        fee.toFixed(2),
-        profit.toFixed(2),
-        document.getElementById('fStatus').value,
-        document.getElementById('fName').value,
-        document.getElementById('fAddress').value.replace(/\n/g,' '),
-        document.getElementById('fTracking').value,
-        totalQty,
-        document.getElementById('fNotes').value || itemsSummary
-    ].join('\t');
+  // Tab-separated for clipboard paste into Google Sheets
+  const tsv=row.join('\t');
 
-    // Always deduct stock first — regardless of clipboard
-    entries.forEach(([k, qty]) => {
-        const cur = stock[k] !== undefined ? stock[k] : 0;
-        stock[k] = Math.max(0, cur - qty);
-    });
-    localStorage.setItem('lb_stock2', JSON.stringify(stock));
-    renderTable(); // refresh stock counts in table immediately
+  // 1. Deduct inventory
+  entries.forEach(([k,qty])=>{ stock[k]=Math.max(0,(stock[k]||0)-qty); });
+  saveStock();
 
-    // Then try clipboard
-    const el = document.getElementById('copyConfirm');
-    try {
-        navigator.clipboard.writeText(row).then(() => {
-            el.textContent = '✓ Copied & stock updated!';
-            setTimeout(() => el.textContent = '', 3000);
-        }).catch(() => {
-            // Fallback for browsers that block clipboard
-            const ta = document.createElement('textarea');
-            ta.value = row;
-            document.body.appendChild(ta);
-            ta.select();
-            document.execCommand('copy');
-            document.body.removeChild(ta);
-            el.textContent = '✓ Stock updated! Row copied (fallback).';
-            setTimeout(() => el.textContent = '', 3000);
-        });
-    } catch(e) {
-        el.textContent = '✓ Stock updated! (Copy manually above)';
-        setTimeout(() => el.textContent = '', 3000);
-    }
+  // 2. Update sold counts
+  itemDetails.forEach(i=>{ const k=skey(i.pid,i.cm); soldCounts[k]=(soldCounts[k]||0)+i.qty; });
+  saveSold();
+
+  // 3. Log order
+  const entry={id:Date.now(),date,name,status,items:itemDetails,bundle,
+    revenue:revenue.toFixed(2),cost:cost.toFixed(2),
+    shipIn:shipIn.toFixed(2),shipOut:shipOut.toFixed(2),
+    fee:fee.toFixed(2),profit:profit.toFixed(2),
+    notes:document.getElementById('fNotes').value,
+    tracking:document.getElementById('fTracking').value};
+  orderLog.unshift(entry);
+  saveLog();
+
+  // 4. Sync to Google Sheets
+  sheetAppend('Orders', row);
+  pushStock();
+
+  // 5. Copy to clipboard
+  renderTable();
+  try{
+    await navigator.clipboard.writeText(tsv);
+    showToast('✓ Copied to clipboard + saved to records!');
+  }catch(e){
+    const ta=document.createElement('textarea');ta.value=tsv;document.body.appendChild(ta);ta.select();
+    try{document.execCommand('copy');}catch(e2){}
+    document.body.removeChild(ta);
+    showToast('✓ Records saved! (clipboard fallback used)');
+  }
 }
 
-// ── CLEAR ORDER ──
-function clearOrder() {
-    Object.keys(order).forEach(k => delete order[k]);
-    ['fName','fAddress','fTracking','fShipIn','fShipOut','fFee','fNotes'].forEach(id => {
-        document.getElementById(id).value = '';
-    });
-    document.getElementById('fDate').valueAsDate = new Date();
-    document.getElementById('fStatus').value = 'Pending';
-    document.getElementById('fPayment').value = 'Venmo';
-    renderTable();
-    updatePanel();
+function clearOrder(){
+  Object.keys(order).forEach(k=>delete order[k]);
+  ['fName','fAddress','fTracking','fShipIn','fShipOut','fFee','fNotes'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('fDate').valueAsDate=new Date();
+  document.getElementById('fStatus').value='Pending';
+  document.getElementById('fPayment').value='Venmo';
+  renderTable(); updatePanel();
 }
 
-// ── INVENTORY VIEW ──
-function renderInventory() {
-    const search = document.getElementById('invSearch').value.toLowerCase();
-    const filtered = products.filter(p =>
-        !search || p.name.toLowerCase().includes(search) || p.color.toLowerCase().includes(search)
-    );
+/* ═══════════════════════════════════════════════
+   INVENTORY — Product sections × size columns
+═══════════════════════════════════════════════ */
+function renderInventory(){
+  const search=document.getElementById('invSearch').value.toLowerCase();
+  const filtered=products.filter(p=>!search||p.name.toLowerCase().includes(search)||p.color.toLowerCase().includes(search));
 
-    // Build thead: Product | Color | 3-6M | 6-12M | ... | 5T
-    const thead = document.getElementById('invThead');
-    thead.innerHTML = `<tr>
-        <th class="product-col">Product</th>
-        <th class="color-col">Color</th>
-        ${ALL_SIZES.map(s=>`<th>${s}</th>`).join('')}
-    </tr>`;
+  // Which CM sizes are actually used?
+  const usedSizes=ALL_CM.filter(cm=>filtered.some(p=>p.sizes.includes(cm)));
 
-    const tbody = document.getElementById('invTbody');
-    tbody.innerHTML = '';
+  const thead=document.getElementById('invThead');
+  thead.innerHTML=`<tr>
+    <th class="lh" style="min-width:200px">Product / Color</th>
+    ${usedSizes.map(cm=>`<th>${cm}</th>`).join('')}
+    <th>Total</th>
+  </tr>`;
 
-    filtered.forEach(p => {
-        const tr = document.createElement('tr');
-        const sizeCells = ALL_SIZES.map(size => {
-            if (!p.sizes.includes(size)) {
-                return `<td class="na-cell">—</td>`;
-            }
-            const k = skey(p.pid, size);
-            const val = stock[k] !== undefined ? stock[k] : 0;
-            let cls = '';
-            if (val === 0) cls = 'zero';
-            else if (val <= 2) cls = 'low';
-            return `<td><input class="inv-input ${cls}" type="number" min="0" value="${val}" data-key="${k}" oninput="highlightInvInput(this)"></td>`;
-        }).join('');
+  const tbody=document.getElementById('invTbody');
+  tbody.innerHTML='';
 
-        tr.innerHTML = `
-            <td class="product-col" style="font-size:0.8rem;color:#333">${p.name}</td>
-            <td class="color-col">
-                <div class="color-cell">
-                    <span class="swatch" style="background:${p.hex}"></span>
-                    ${p.color}
-                </div>
-            </td>
-            ${sizeCells}
-        `;
-        tbody.appendChild(tr);
-    });
+  // Group by product name (for section headers)
+  // Each product is one row (name + color)
+  filtered.forEach(p=>{
+    const tr=document.createElement('tr');
+    let rowTotal=0;
+    const cells=usedSizes.map(cm=>{
+      if(!p.sizes.includes(cm)) return `<td class="na">—</td>`;
+      const k=skey(p.pid,cm);
+      const val=stock[k]!==undefined?stock[k]:0;
+      rowTotal+=val;
+      const cls=val===0?'zero':val<=2?'low':'';
+      return `<td><input class="inv-input ${cls}" type="number" min="0" value="${val}" data-key="${k}" oninput="hiInv(this)"></td>`;
+    }).join('');
+
+    tr.innerHTML=`
+      <td class="lh">
+        <div style="display:flex;align-items:center;gap:.4rem">
+          <span class="swatch" style="background:${p.hex}"></span>
+          <div>
+            <div style="font-size:.76rem;font-weight:500;color:var(--ink)">${p.name}</div>
+            <div style="font-size:.67rem;color:#aaa">${p.color}</div>
+          </div>
+        </div>
+      </td>
+      ${cells}
+      <td class="row-total">${rowTotal}</td>`;
+    tbody.appendChild(tr);
+  });
 }
 
-function highlightInvInput(input) {
-    const val = parseInt(input.value) || 0;
-    input.classList.remove('low','zero');
-    if (val === 0) input.classList.add('zero');
-    else if (val <= 2) input.classList.add('low');
+function hiInv(input){
+  const val=parseInt(input.value)||0;
+  input.classList.remove('low','zero');
+  if(val===0) input.classList.add('zero');
+  else if(val<=2) input.classList.add('low');
+  // update row total live
+  const row=input.closest('tr');
+  const inputs=[...row.querySelectorAll('.inv-input')];
+  const total=inputs.reduce((s,i)=>s+(parseInt(i.value)||0),0);
+  const totalCell=row.querySelector('.row-total');
+  if(totalCell) totalCell.textContent=total;
 }
 
-function saveInventory() {
-    document.querySelectorAll('.inv-input').forEach(input => {
-        stock[input.dataset.key] = parseInt(input.value) || 0;
-    });
-    localStorage.setItem('lb_stock2', JSON.stringify(stock));
-    renderTable(); // refresh stock indicators in order view too
-    const bar = document.querySelector('.save-stock-bar');
-    const orig = bar.querySelector('.btn.primary').textContent;
-    bar.querySelector('.btn.primary').textContent = '✓ Saved!';
-    setTimeout(() => { bar.querySelector('.btn.primary').textContent = orig; }, 2000);
+async function saveInventory(){
+  document.querySelectorAll('.inv-input').forEach(input=>{
+    stock[input.dataset.key]=parseInt(input.value)||0;
+  });
+  saveStock();
+  await pushStock();
+  renderTable();
+  const btn=document.querySelector('.sticky-bar .btn.primary');
+  const orig=btn.textContent;
+  btn.textContent='✓ Saved!';
+  setTimeout(()=>btn.textContent=orig,2000);
 }
 
-// Init
-renderTable();
-updatePanel();
+/* ═══════════════════════════════════════════════
+   SOLD RECORDS
+═══════════════════════════════════════════════ */
+function renderSold(){ renderSoldSummary(); renderLog(); }
+
+function renderSoldSummary(){
+  const area=document.getElementById('soldSummaryArea');
+  const keys=Object.keys(soldCounts).filter(k=>soldCounts[k]>0);
+  if(!keys.length){area.innerHTML='<div class="no-data">No sales recorded yet</div>';document.getElementById('soldMeta').textContent='';return;}
+
+  // Which pids and sizes have sales?
+  const pidSet=new Set(keys.map(k=>parseInt(k.split('_')[0])));
+  const sizeSet=new Set(keys.map(k=>k.split('_')[1]));
+  const usedSizes=ALL_CM.filter(s=>sizeSet.has(s));
+  const pidList=[...pidSet].sort((a,b)=>a-b);
+
+  let totalUnits=keys.reduce((s,k)=>s+(soldCounts[k]||0),0);
+  document.getElementById('soldMeta').textContent=totalUnits+' units';
+
+  let colTotals={};
+  usedSizes.forEach(s=>colTotals[s]=0);
+  let grandTotal=0;
+
+  // Group by product name prefix to create visual sections (like your Google Sheet)
+  let html=`<div style="overflow-x:auto"><table class="sold-tbl">
+    <thead><tr>
+      <th style="text-align:left;min-width:180px">Product / Color</th>
+      ${usedSizes.map(s=>`<th>${s}</th>`).join('')}
+      <th>Total</th>
+    </tr></thead><tbody>`;
+
+  pidList.forEach(pid=>{
+    const p=products.find(pp=>pp.pid===pid);
+    if(!p) return;
+    let rowTotal=0;
+    const cells=usedSizes.map(sz=>{
+      const cnt=soldCounts[skey(pid,sz)]||0;
+      rowTotal+=cnt; colTotals[sz]=(colTotals[sz]||0)+cnt;
+      return cnt>0?`<td class="sold-count">${cnt}</td>`:`<td class="sold-zero">—</td>`;
+    }).join('');
+    grandTotal+=rowTotal;
+    if(!rowTotal) return;
+    html+=`<tr>
+      <td style="display:flex;align-items:center;gap:.35rem;font-size:.74rem">
+        <span class="swatch" style="background:${p.hex}"></span>
+        <span><strong style="color:var(--ink)">${p.name}</strong><br><span style="color:#aaa;font-size:.67rem">${p.color}</span></span>
+      </td>
+      ${cells}
+      <td class="sold-row-total">${rowTotal}</td></tr>`;
+  });
+
+  // Column totals row
+  html+=`<tr class="sold-col-total-row">
+    <td>TOTAL</td>
+    ${usedSizes.map(s=>`<td>${colTotals[s]||0}</td>`).join('')}
+    <td>${grandTotal}</td>
+  </tr>`;
+
+  html+='</tbody></table></div>';
+  area.innerHTML=html;
+}
+
+function renderLog(){
+  const logArea=document.getElementById('logArea');
+  const totalRevenue=orderLog.reduce((s,e)=>s+parseFloat(e.revenue||0),0);
+  const totalProfit=orderLog.reduce((s,e)=>s+parseFloat(e.profit||0),0);
+  document.getElementById('logStats').innerHTML=orderLog.length?`
+    <div class="stat-card">Orders: <strong>${orderLog.length}</strong></div>
+    <div class="stat-card">Revenue: <strong>${fmt(totalRevenue)}</strong></div>
+    <div class="stat-card">Profit: <strong>${fmt(totalProfit)}</strong></div>`:'';
+
+  const statuses=['all','Pending','Paid','Shipped','Delivered','Cancelled'];
+  document.getElementById('logFilters').innerHTML=statuses.map(s=>
+    `<button class="chip ${logFilter===s?'active':''}" style="font-size:.67rem" onclick="setLogFilter('${s}')">${s==='all'?'All':s}</button>`
+  ).join('');
+
+  const filtered=logFilter==='all'?orderLog:orderLog.filter(e=>e.status===logFilter);
+  document.getElementById('logMeta').textContent=filtered.length+' order'+(filtered.length!==1?'s':'');
+
+  if(!filtered.length){logArea.innerHTML='<div class="no-data">No orders match this filter</div>';return;}
+  logArea.innerHTML=filtered.map(e=>{
+    const sc=(e.status||'').toLowerCase();
+    const itemStr=(e.items||[]).map(i=>`${i.qty}× ${i.name} (${toDisplayShort(i.cm)||i.cm})`).join(', ');
+    const profNum=parseFloat(e.profit||0);
+    return `<div class="log-entry ${sc}">
+      <div class="log-top">
+        <div>
+          <div class="log-name">${e.name||'(no name)'}</div>
+          <div class="log-date">${e.date||''} ${e.tracking?'· #'+e.tracking:''}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:.35rem">
+          <span class="log-status-badge ${sc}">${e.status}</span>
+          <button class="log-del" onclick="deleteLog(${e.id})" title="Delete">✕</button>
+        </div>
+      </div>
+      <div class="log-items">${itemStr}</div>
+      <div class="log-bottom">
+        <span class="log-numbers">${fmt(parseFloat(e.revenue))} rev · ${fmt(parseFloat(e.cost))} cost · ${(e.items||[]).reduce((s,i)=>s+i.qty,0)} items</span>
+        <span class="log-profit ${profNum>=0?'pos':'neg'}">${fmt(profNum)}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function setLogFilter(f){ logFilter=f; renderLog(); }
+function deleteLog(id){
+  if(!confirm('Remove this order from the log?')) return;
+  orderLog=orderLog.filter(e=>e.id!==id); saveLog(); renderSold();
+}
+
+/* ═══════════════════════════════════════════════
+   PRODUCT MANAGER
+═══════════════════════════════════════════════ */
+function renderMgr(){
+  const search=document.getElementById('mgrSearch').value.toLowerCase();
+  const filtered=products.filter(p=>!search||p.name.toLowerCase().includes(search)||p.color.toLowerCase().includes(search));
+  document.getElementById('mgrCount').textContent=filtered.length+' of '+products.length+' products';
+  document.getElementById('mgrGrid').innerHTML=filtered.map(p=>`
+    <div class="mgr-card ${editingPid===p.pid?'sel':''}" onclick="editProduct(${p.pid})">
+      <img src="${p.image}" alt="${p.name}" loading="lazy">
+      <div class="mgr-card-body">
+        <div class="mgr-card-name">${p.name}</div>
+        <div class="mgr-card-meta">
+          <span style="display:flex;align-items:center;gap:.25rem"><span class="swatch" style="background:${p.hex}"></span>${p.color}</span>
+          <span class="mgr-card-price">${fmt(p.price)}</span>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function editProduct(pid){
+  editingPid=pid;
+  const p=products.find(pp=>pp.pid===pid);
+  renderMgr();
+  document.getElementById('mgrForm').innerHTML=buildForm(p);
+  syncHex();
+}
+
+function startNew(){
+  editingPid=null; renderMgr();
+  const p={pid:nextPid(),name:'',image:'',color:'Natural',hex:'#e8ddd0',sizes:[],price:0,bundlePrice:0,cost:100};
+  document.getElementById('mgrForm').innerHTML=buildForm(p,true);
+  syncHex();
+}
+
+function buildForm(p,isNew=false){
+  const sizeToggles=ALL_CM.map(cm=>
+    `<button type="button" class="stog ${p.sizes.includes(cm)?'on':''}" onclick="this.classList.toggle('on')">${cm}</button>`
+  ).join('');
+  return `
+    <h3>${isNew?'New Product':'Edit Product'}</h3>
+    ${p.image?`<img class="mgr-thumb" id="mgrThumb" src="${p.image}" alt="">`:`<div class="mgr-thumb-ph" id="mgrThumb">No image</div>`}
+    <input type="hidden" id="epPid" value="${p.pid}">
+    <div class="field"><label>Product Name</label><input type="text" id="epName" value="${escHtml(p.name)}" placeholder="e.g. Cotton Waffle Overall"></div>
+    <div class="field"><label>Image URL</label><input type="text" id="epImage" value="${escHtml(p.image)}" placeholder="https://…" oninput="updateThumb()"></div>
+    <div class="field"><label>Color / Pattern</label><input type="text" id="epColor" value="${escHtml(p.color)}" placeholder="Natural, Stripe, Floral…"></div>
+    <div class="field"><label>Color Hex</label>
+      <div class="hex-row">
+        <span class="hex-swatch" id="hexSwatch" style="background:${p.hex}"></span>
+        <input type="text" id="epHex" value="${p.hex}" placeholder="#e8ddd0" oninput="syncHex()" style="flex:1">
+      </div>
+    </div>
+    <div class="field"><label>Sizes (cm)</label><div class="size-toggles" id="stogs">${sizeToggles}</div></div>
+    <div class="two-col">
+      <div class="field"><label>Regular Price ($)</label><input type="number" id="epPrice" value="${p.price}" step="0.01" min="0"></div>
+      <div class="field"><label>Bundle Price ($)</label><input type="number" id="epBundle" value="${p.bundlePrice}" step="0.01" min="0"></div>
+    </div>
+    <div class="field"><label>Your Cost ($)</label><input type="number" id="epCost" value="${p.cost}" step="0.01" min="0"></div>
+    <div class="mgr-actions">
+      <button class="btn primary" style="flex:1" onclick="saveProduct()">💾 Save</button>
+      ${!isNew?`<button class="btn danger" onclick="deleteProduct(${p.pid})">Delete</button>`:''}
+    </div>
+    <div class="save-confirm" id="mgrConfirm"></div>`;
+}
+
+function escHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
+function syncHex(){ const h=document.getElementById('epHex')?.value; const sw=document.getElementById('hexSwatch'); if(sw&&h) sw.style.background=h; }
+function updateThumb(){
+  const url=document.getElementById('epImage')?.value;
+  const el=document.getElementById('mgrThumb'); if(!el) return;
+  if(url) el.outerHTML=`<img class="mgr-thumb" id="mgrThumb" src="${url}" onerror="this.outerHTML='<div class=mgr-thumb-ph id=mgrThumb>Invalid URL</div>'">`;
+}
+
+async function saveProduct(){
+  const pid=parseInt(document.getElementById('epPid').value);
+  const name=document.getElementById('epName').value.trim();
+  const image=document.getElementById('epImage').value.trim();
+  const color=document.getElementById('epColor').value.trim();
+  const hex=document.getElementById('epHex').value.trim();
+  const price=parseFloat(document.getElementById('epPrice').value)||0;
+  const bundlePrice=parseFloat(document.getElementById('epBundle').value)||0;
+  const cost=parseFloat(document.getElementById('epCost').value)||0;
+  const sizes=[...document.querySelectorAll('.stog.on')].map(b=>b.textContent.trim());
+  if(!name){alert('Please enter a product name.');return;}
+  const ex=products.find(p=>p.pid===pid);
+  if(ex) Object.assign(ex,{name,image,color,hex,sizes,price,bundlePrice,cost});
+  else products.push({pid,name,image,color,hex,sizes,price,bundlePrice,cost});
+  saveProducts();
+  editingPid=pid;
+  await pushProducts();
+  renderMgr(); renderTable();
+  const c=document.getElementById('mgrConfirm');
+  if(c){c.textContent='✓ Saved & synced!';setTimeout(()=>c.textContent='',2500);}
+}
+
+async function deleteProduct(pid){
+  if(!confirm('Delete this product?')) return;
+  products=products.filter(p=>p.pid!==pid);
+  saveProducts(); editingPid=null;
+  await pushProducts();
+  renderMgr(); renderTable();
+  document.getElementById('mgrForm').innerHTML='<div class="mgr-hint">← Click a product to edit<br>or add a new one</div>';
+}
+
+/* ── BOOT ── */
+renderTable(); updatePanel();
+if(sheetUrl) setSyncStatus('ok','connected');
+else setSyncStatus('','local');
 </script>
 </body>
 </html>
