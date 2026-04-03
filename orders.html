@@ -161,6 +161,19 @@ body{font-family:'DM Sans',sans-serif;background:var(--mist);color:var(--ink);fo
 .copy-btn:hover{background:var(--bark-dk)}
 .copy-confirm{text-align:center;font-size:.68rem;color:var(--green);margin-top:.28rem;min-height:1em}
 
+/* customer message */
+.customer-msg-box{
+  background:var(--sand-lt);
+  border:1px solid var(--sand-dk);
+  border-radius:6px;
+  padding:.6rem .7rem;
+  font-size:.75rem;
+  color:var(--ink);
+  line-height:1.6;
+  white-space:pre-wrap;
+  min-height:3rem;
+}
+
 /* ════════════════════════════
    INVENTORY VIEW
    Product sections → color rows × size columns
@@ -507,6 +520,9 @@ function doPost(e) {
         <div class="sum-row total-row"><span class="sum-lbl">Est. Profit</span><span class="sum-val profit" id="sProfit">$0.00</span></div>
         <div class="sum-row"><span class="sum-lbl">Margin</span><span class="sum-val" id="sMargin">—</span></div>
       </div>
+      <div class="psec" id="orderPhraseSec" style="display:none">
+        <p id="orderPhrase" style="font-size:.78rem;line-height:1.6;color:#555;background:var(--sand-lt);border:1px solid var(--sand-dk);border-radius:6px;padding:.6rem .75rem;font-style:italic"></p>
+      </div>
       <div class="psec">
         <div class="psec-title">Order Details</div>
         <div class="field"><label>Date</label><input type="date" id="fDate"></div>
@@ -532,6 +548,17 @@ function doPost(e) {
         </div>
         <div class="field"><label>Notes</label><textarea id="fNotes" placeholder="Optional…"></textarea></div>
       </div>
+
+      <!-- CUSTOMER MESSAGE -->
+      <div class="psec">
+        <div class="psec-title">Customer Message</div>
+        <div class="customer-msg-box" id="customerMsgBox">
+          <span style="font-size:.73rem;color:#ccc">Add items to see the message</span>
+        </div>
+        <button class="btn sm" id="copyMsgBtn" onclick="copyCustomerMsg()" style="width:100%;margin-top:.4rem;display:none">📋 Copy Message</button>
+        <div style="font-size:.68rem;color:var(--green);text-align:center;margin-top:.25rem;min-height:1em" id="msgCopyConfirm"></div>
+      </div>
+
       <div class="psec">
         <div class="psec-title">Export</div>
         <p style="font-size:.68rem;color:#bbb;margin-bottom:.45rem">Copies a tab-separated row for your Google Sheet log, deducts inventory, and saves to Sold Records.</p>
@@ -575,12 +602,16 @@ function doPost(e) {
         <input class="search-input" type="text" id="soldSearch" placeholder="Search…" oninput="renderSoldSummary()">
       </div>
       <span style="font-size:.7rem;color:#bbb" id="soldMeta"></span>
+      <span style="font-size:.7rem;color:var(--bark);margin-left:.5rem">← Type in the Archived column to enter pre-app totals</span>
     </div>
     <div class="inv-scroll">
       <table class="inv-tbl" id="soldTable">
         <thead id="soldThead"></thead>
         <tbody id="soldTbody"></tbody>
       </table>
+    </div>
+    <div class="sticky-bar">
+      <button class="btn primary" onclick="saveArchivedCounts()">💾 Save Archived</button>
     </div>
   </div>
 </div>
@@ -743,6 +774,7 @@ let products   = loadLocal('lb_products4', DEFAULT_PRODUCTS);
 let stock      = loadLocal('lb_stock4',    {});
 let soldCounts = loadLocal('lb_sold4',     {});
 let orderLog   = loadLocal('lb_log4',      []);
+let archived   = loadLocal('lb_archived',  {});  // pre-app sold totals per pid
 let order      = {};
 let szFilter   = 'all';
 let logFilter  = 'all';
@@ -759,6 +791,7 @@ function saveLocal(key, val){ localStorage.setItem(key, JSON.stringify(val)); }
 function saveProducts(){ saveLocal('lb_products4', products); }
 function saveStock(){    saveLocal('lb_stock4',    stock);    }
 function saveSold(){     saveLocal('lb_sold4',     soldCounts);}
+function saveArchived(){ saveLocal('lb_archived',  archived); }
 function saveLog(){      saveLocal('lb_log4',      orderLog); }
 
 /* ═══════════════════════════════════════════════
@@ -1181,6 +1214,11 @@ function changeQty(pid,cm,delta){
   renderTable(); updatePanel();
 }
 
+function removeOrderItem(k){
+  delete order[k];
+  renderTable(); updatePanel();
+}
+
 function updatePanel(){
   const bundle=isBundle();
   let revenue=0,cost=0,tqty=0;
@@ -1225,8 +1263,31 @@ function updatePanel(){
     const sp=bundle?p.bundlePrice:p.price;
     return `<li class="order-item">
       <span class="oi-name">${p.name}<br><span class="oi-sub">${p.color} · ${toDisplayShort(cm)} (${cm})</span></span>
-      <span class="oi-val">×${qty} ${fmt(sp*qty)}</span></li>`;
+      <span class="oi-val">×${qty} ${fmt(sp*qty)}</span>
+      <button onclick="removeOrderItem('${k}')" style="background:none;border:none;cursor:pointer;color:#ddd;font-size:.75rem;padding:0 0 0 .4rem;line-height:1;flex-shrink:0" title="Remove">✕</button>
+    </li>`;
   }).join('');
+
+  // ── Generated phrase ──
+  const phraseSec=document.getElementById('orderPhraseSec');
+  const phraseEl=document.getElementById('orderPhrase');
+  if(tqty>0&&phraseEl){
+    const totalForCustomer=revenue+shipIn;
+    // Savings = regular price total minus what they actually pay (captures bundle + sale discounts)
+    let regularTotal=0;
+    entries.forEach(([k,qty])=>{
+      const[pidStr]=k.split('_');
+      const p=products.find(p=>p.pid===parseInt(pidStr));
+      if(p) regularTotal+=p.price*qty;
+    });
+    const saved=regularTotal-revenue;
+    let phrase='The total is '+fmt(totalForCustomer)+' including shipping.';
+    if(saved>0.009) phrase+=' You saved '+fmt(saved)+'!';
+    phraseEl.textContent=phrase;
+    phraseSec.style.display='';
+  } else if(phraseSec){
+    phraseSec.style.display='none';
+  }
 }
 
 async function copyAndSave(){
@@ -1505,11 +1566,13 @@ function renderSoldSummary(){
     <th class="lh" style="width:44px"></th>
     <th class="lh" style="min-width:200px">Product / Color</th>
     ${usedSizes.map(s=>`<th>${s}</th>`).join('')}
+    <th style="color:#8b7355;border-left:2px solid var(--border)">Archived</th>
     <th>Total</th>
   </tr>`;
 
   const totalUnits=Object.values(soldCounts).reduce((s,v)=>s+v,0);
-  document.getElementById('soldMeta').textContent=totalUnits+' units sold';
+  const totalArchived=Object.values(archived).reduce((s,v)=>s+(parseInt(v)||0),0);
+  document.getElementById('soldMeta').textContent=(totalUnits+totalArchived)+' units sold ('+(totalArchived)+' archived)';
 
   // Group by product name
   const groups={};
@@ -1581,7 +1644,12 @@ function renderSoldSummary(){
             </div>
           </td>
           ${cells}
-          <td class="sold-row-total">${rowTotal}</td>`;
+          <td style="border-left:2px solid var(--border);text-align:center">
+            <input type="number" min="0" value="${archived[p.pid]||0}" data-apid="${p.pid}"
+              style="width:52px;text-align:center;border:1px solid var(--border);border-radius:4px;padding:.2rem;font-size:.76rem;font-family:'DM Sans',sans-serif;background:var(--mist)"
+              oninput="archived[parseInt(this.dataset.apid)]=parseInt(this.value)||0;renderSoldSummary()">
+          </td>
+          <td class="sold-row-total">${rowTotal+(archived[p.pid]||0)}</td>`;
       } else {
         // Single variant — flat row with image
         tr.innerHTML=`
@@ -1598,7 +1666,12 @@ function renderSoldSummary(){
             </div>
           </td>
           ${cells}
-          <td class="sold-row-total">${rowTotal}</td>`;
+          <td style="border-left:2px solid var(--border);text-align:center">
+            <input type="number" min="0" value="${archived[p.pid]||0}" data-apid="${p.pid}"
+              style="width:52px;text-align:center;border:1px solid var(--border);border-radius:4px;padding:.2rem;font-size:.76rem;font-family:'DM Sans',sans-serif;background:var(--mist)"
+              oninput="archived[parseInt(this.dataset.apid)]=parseInt(this.value)||0;renderSoldSummary()">
+          </td>
+          <td class="sold-row-total">${rowTotal+(archived[p.pid]||0)}</td>`;
       }
       tbody.appendChild(tr);
     });
@@ -1606,19 +1679,34 @@ function renderSoldSummary(){
   }); // end soldCatGroups.forEach
 
   // Totals row
+  const archivedGrandTotal=products.reduce((s,p)=>s+(archived[p.pid]||0),0);
   const ttr=document.createElement('tr');
   ttr.className='sold-col-total-row';
   ttr.innerHTML=`
     <td></td>
     <td>TOTAL</td>
     ${usedSizes.map(s=>`<td>${colTotals[s]||0}</td>`).join('')}
-    <td>${grandTotal}</td>`;
+    <td style="border-left:2px solid var(--border);font-weight:700;color:#8b7355">${archivedGrandTotal}</td>
+    <td>${grandTotal+archivedGrandTotal}</td>`;
   tbody.appendChild(ttr);
 }
 
 function toggleSoldGroup(name){
   soldCollapsed[name]=!soldCollapsed[name];
   renderSoldSummary();
+}
+
+function saveArchivedCounts(){
+  // Read all archived inputs from the current DOM
+  document.querySelectorAll('[data-apid]').forEach(input=>{
+    const pid=parseInt(input.dataset.apid);
+    const val=parseInt(input.value)||0;
+    if(val>0) archived[pid]=val;
+    else delete archived[pid];
+  });
+  saveArchived();
+  renderSoldSummary();
+  showToast('✓ Archived counts saved!');
 }
 
 function renderLog(){
