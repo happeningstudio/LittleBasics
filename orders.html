@@ -315,6 +315,32 @@ tr.cat-section-hdr td{
 .hex-swatch{width:20px;height:20px;border-radius:4px;border:1px solid var(--border);flex-shrink:0}
 .mgr-actions{display:flex;gap:.38rem;margin-top:.65rem}
 .mgr-hint{font-size:.72rem;color:#ccc;text-align:center;padding:2rem 1rem;line-height:1.6}
+/* ════════════════════════════
+   SHIPMENTS VIEW
+════════════════════════════ */
+.ship-wrap{padding:1rem 1.25rem;height:calc(100vh - var(--top));display:flex;flex-direction:column;overflow:hidden}
+.ship-toolbar{display:flex;align-items:center;gap:.6rem;margin-bottom:.75rem;flex-shrink:0}
+.ship-scroll{overflow-y:auto;flex:1}
+.ship-card{background:var(--white);border-radius:8px;box-shadow:var(--shadow);margin-bottom:.75rem;overflow:hidden;border:1px solid var(--border)}
+.ship-card-head{display:flex;align-items:center;justify-content:space-between;padding:.65rem .85rem;background:var(--sand-lt);border-bottom:1px solid var(--border)}
+.ship-card-name{font-weight:600;font-size:.82rem;color:var(--ink)}
+.ship-card-meta{font-size:.7rem;color:#aaa;margin-top:.1rem}
+.ship-card-actions{display:flex;gap:.4rem;align-items:center}
+.ship-item-row{display:flex;align-items:center;gap:.5rem;padding:.35rem .85rem;border-bottom:1px solid #f5f0ea;font-size:.76rem}
+.ship-item-row:last-child{border-bottom:none}
+.ship-item-name{flex:1;color:var(--ink)}
+.ship-item-size{font-size:.7rem;background:var(--sand-lt);padding:.1rem .4rem;border-radius:10px;color:#666;white-space:nowrap}
+.ship-item-qty{font-weight:600;color:var(--bark);min-width:28px;text-align:center}
+.ship-item-del{background:none;border:none;cursor:pointer;color:#ddd;font-size:.7rem;padding:0;transition:color .15s}
+.ship-item-del:hover{color:var(--red)}
+.ship-received{opacity:.55;border-color:var(--green)}
+.ship-received .ship-card-head{background:#edf7f0}
+.add-ship-form{background:var(--white);border-radius:8px;box-shadow:var(--shadow);padding:.85rem;margin-bottom:.75rem;border:1px dashed var(--sand-dk)}
+.add-ship-form h4{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#bbb;margin-bottom:.6rem}
+.ship-item-picker{display:flex;gap:.4rem;align-items:flex-end;flex-wrap:wrap;margin-bottom:.4rem}
+.ship-item-picker select,.ship-item-picker input{border:1px solid var(--border);border-radius:5px;padding:.3rem .48rem;font-size:.76rem;font-family:"DM Sans",sans-serif;background:var(--mist);color:var(--ink)}
+.ship-item-picker select:focus,.ship-item-picker input:focus{outline:none;border-color:var(--bark)}
+
 .save-confirm{text-align:center;font-size:.68rem;color:var(--green);margin-top:.35rem;min-height:1em}
 
 /* ── VARIANT SECTIONS ── */
@@ -454,6 +480,7 @@ function doPost(e) {
     <button class="tab-btn" onclick="switchView('inventory')">📦 Inventory</button>
     <button class="tab-btn" onclick="switchView('sold')">📊 Sold</button>
     <button class="tab-btn" onclick="switchView('log')">🗒 Order Log</button>
+    <button class="tab-btn" onclick="switchView('ship')">🚚 Shipments</button>
     <button class="tab-btn" onclick="switchView('mgr')">⚙️ Products</button>
   </div>
   <div class="topbar-right">
@@ -625,6 +652,19 @@ function doPost(e) {
     <div class="log-filters" id="logFilters" style="flex-shrink:0;margin-bottom:.5rem"></div>
     <div style="overflow-y:auto;flex:1" id="logArea">
       <div class="no-data">No orders recorded yet</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SHIPMENTS ══ -->
+<div class="view" id="view-ship">
+  <div class="ship-wrap">
+    <div class="ship-toolbar">
+      <button class="btn primary sm" onclick="openNewShipment()">+ New Shipment</button>
+      <span style="font-size:.72rem;color:#aaa">Track incoming stock. Hit Receive when your box arrives.</span>
+    </div>
+    <div class="ship-scroll" id="shipList">
+      <div class="no-data">No shipments yet — create one to start tracking incoming stock</div>
     </div>
   </div>
 </div>
@@ -974,6 +1014,7 @@ function switchView(v){
   if(v==='inventory') renderInventory();
   if(v==='sold')      renderSold();
   if(v==='log')       renderLog();
+  if(v==='ship')      renderShipments();
   if(v==='mgr')       renderMgr();
 }
 
@@ -2314,6 +2355,166 @@ function updateThumb(){}
 function editProduct(pid){ const p=products.find(pp=>pp.pid===pid); if(p) editProductGroup(p.name); }
 function saveProduct(){ saveGroupProduct(); }
 function duplicateAsVariant(){}
+
+
+/* ═══════════════════════════════════════════════
+   SHIPMENTS
+   shipments = [{id, name, date, items:[{pid,cm,qty}], received:bool, receivedDate}]
+═══════════════════════════════════════════════ */
+let shipments = loadLocal('lb_shipments', []);
+function saveShipments(){ saveLocal('lb_shipments', shipments); }
+
+function renderShipments(){
+  const area=document.getElementById('shipList');
+  if(!shipments.length){
+    area.innerHTML='<div class="no-data">No shipments yet — create one to start tracking incoming stock</div>';
+    return;
+  }
+  // Sort: pending first, received last
+  const sorted=[...shipments].sort((a,b)=>{
+    if(a.received===b.received) return new Date(b.date)-new Date(a.date);
+    return a.received?1:-1;
+  });
+  area.innerHTML='';
+  sorted.forEach(s=>{
+    const totalQty=s.items.reduce((t,i)=>t+i.qty,0);
+    const card=document.createElement('div');
+    card.className='ship-card'+(s.received?' ship-received':'');
+    const itemRows=s.items.map((item,idx)=>{
+      const p=products.find(pp=>pp.pid===item.pid);
+      if(!p) return '';
+      return `<div class="ship-item-row">
+        <img src="${p.image}" alt="" style="width:32px;height:32px;border-radius:4px;object-fit:cover;flex-shrink:0">
+        <span class="ship-item-name">${p.name} <span style="color:#aaa;font-size:.68rem">${p.color}</span></span>
+        <span class="ship-item-size">${toDisplay(item.cm)}</span>
+        <span class="ship-item-qty">×${item.qty}</span>
+        ${!s.received?`<button class="ship-item-del" onclick="removeShipmentItem('${s.id}',${idx})">✕</button>`:''}
+      </div>`;
+    }).join('');
+    card.innerHTML=`
+      <div class="ship-card-head">
+        <div>
+          <div class="ship-card-name">${s.name} ${s.received?'<span style="color:var(--green);font-size:.68rem">✓ Received '+s.receivedDate+'</span>':''}</div>
+          <div class="ship-card-meta">${s.date} · ${s.items.length} item${s.items.length!==1?'s':''} · ${totalQty} units total</div>
+        </div>
+        <div class="ship-card-actions">
+          ${!s.received?`
+            <button class="btn sm" onclick="addItemToShipment('${s.id}')">+ Add Item</button>
+            <button class="btn primary sm" onclick="receiveShipment('${s.id}')">📦 Receive All</button>
+          `:''}
+          <button class="btn danger sm" onclick="deleteShipment('${s.id}')">Delete</button>
+        </div>
+      </div>
+      <div>${itemRows||'<div style="padding:.6rem .85rem;font-size:.75rem;color:#ccc">No items yet — click + Add Item</div>'}</div>`;
+    area.appendChild(card);
+  });
+}
+
+function openNewShipment(){
+  const name=prompt('Shipment name (e.g. "Spring Restock April"):');
+  if(!name) return;
+  const s={id:'ship_'+Date.now(), name, date:new Date().toLocaleDateString(), items:[], received:false, receivedDate:''};
+  shipments.unshift(s);
+  saveShipments();
+  renderShipments();
+  // Immediately open add-item for this shipment
+  addItemToShipment(s.id);
+}
+
+function addItemToShipment(sid){
+  const s=shipments.find(s=>s.id===sid);
+  if(!s||s.received) return;
+
+  // Build product options
+  const prodOptions=products.map(p=>`<option value="${p.pid}">${p.name} — ${p.color}</option>`).join('');
+  const sizeOptions=ALL_CM.map(cm=>`<option value="${cm}">${toDisplay(cm)}</option>`).join('');
+
+  // Create inline form at top of ship list area
+  const existing=document.getElementById('addItemForm');
+  if(existing) existing.remove();
+
+  const form=document.createElement('div');
+  form.className='add-ship-form';
+  form.id='addItemForm';
+  form.innerHTML=`
+    <h4>Add item to "${s.name}"</h4>
+    <div class="ship-item-picker">
+      <div class="field" style="margin:0;flex:2">
+        <label>Product</label>
+        <select id="aifProduct" style="width:100%">${prodOptions}</select>
+      </div>
+      <div class="field" style="margin:0">
+        <label>Size</label>
+        <select id="aifSize">${sizeOptions}</select>
+      </div>
+      <div class="field" style="margin:0">
+        <label>Qty</label>
+        <input type="number" id="aifQty" value="1" min="1" style="width:60px">
+      </div>
+    </div>
+    <div style="display:flex;gap:.4rem;margin-top:.4rem">
+      <button class="btn primary sm" onclick="confirmAddItem('${sid}')">+ Add</button>
+      <button class="btn sm" onclick="document.getElementById('addItemForm').remove()">Cancel</button>
+    </div>`;
+  const area=document.getElementById('shipList');
+  area.insertBefore(form, area.firstChild);
+}
+
+function confirmAddItem(sid){
+  const pid=parseInt(document.getElementById('aifProduct').value);
+  const cm=document.getElementById('aifSize').value;
+  const qty=parseInt(document.getElementById('aifQty').value)||1;
+  const s=shipments.find(s=>s.id===sid);
+  if(!s) return;
+  // Merge if same pid+cm already exists
+  const existing=s.items.find(i=>i.pid===pid&&i.cm===cm);
+  if(existing) existing.qty+=qty;
+  else s.items.push({pid,cm,qty});
+  saveShipments();
+  document.getElementById('addItemForm')?.remove();
+  renderShipments();
+  // Re-open form to keep adding
+  addItemToShipment(sid);
+}
+
+function removeShipmentItem(sid, idx){
+  const s=shipments.find(s=>s.id===sid);
+  if(!s) return;
+  s.items.splice(idx,1);
+  saveShipments();
+  renderShipments();
+}
+
+function receiveShipment(sid){
+  const s=shipments.find(s=>s.id===sid);
+  if(!s) return;
+  if(!s.items.length){showToast('No items in this shipment.');return;}
+  const summary=s.items.map(i=>{
+    const p=products.find(pp=>pp.pid===i.pid);
+    return (p?p.name:'?')+' '+toDisplayShort(i.cm)+' x'+i.qty;
+  }).join(', ');
+  if(!confirm('Receive shipment "'+s.name+'"?\n\nThis will add to inventory:\n'+summary)) return;
+  s.items.forEach(i=>{
+    const k=skey(i.pid,i.cm);
+    stock[k]=(stock[k]||0)+i.qty;
+  });
+  s.received=true;
+  s.receivedDate=new Date().toLocaleDateString();
+  saveStock();
+  saveShipments();
+  pushStock();
+  renderShipments();
+  renderInventory();
+  renderTable();
+  showToast('📦 Shipment received — '+s.items.reduce((t,i)=>t+i.qty,0)+' units added to inventory!');
+}
+
+function deleteShipment(sid){
+  if(!confirm('Delete this shipment? This will NOT affect inventory.')) return;
+  shipments=shipments.filter(s=>s.id!==sid);
+  saveShipments();
+  renderShipments();
+}
 
 /* ── BOOT ── */
 renderTable(); updatePanel();
