@@ -937,7 +937,7 @@ function showToast(msg, dur=3000){
   toastTimer=setTimeout(()=>toast.classList.remove('show'), dur);
 }
 
-const CAT_ORDER=['Tops','Bottoms','Rompers & Overalls','Sets','Outerwear','Cardigans & Knitwear','Uncategorized'];
+const CAT_ORDER=['Tops','Bottoms','Rompers & Overalls','Sets','Outerwear','Cardigans & Knitwear','Uncategorized','Sold Out'];
 
 function getCategory(p){ return p.category||'Uncategorized'; }
 
@@ -999,6 +999,7 @@ function renderTable(){
 
   const groups={};
   products.forEach(p=>{
+    if(getCategory(p)==='Sold Out') return; // hide from order builder
     if(!groups[p.name]) groups[p.name]=[];
     p.sizes.forEach(cm=>{
       if(szFilter!=='all'&&cm!==szFilter) return;
@@ -2100,7 +2101,7 @@ function buildGroupForm(name, siblings){
     <div class="field" style="margin-bottom:.75rem"><label>Material</label><input type="text" id="epMaterial" value="${escHtml(p0.material||'')}" placeholder="e.g. 100% Cotton, Cotton Linen…"></div>
     <div class="field" style="margin-bottom:.75rem"><label>Category</label>
       <select id="epCategory">
-        ${['Uncategorized','Tops','Bottoms','Rompers & Overalls','Sets','Outerwear','Cardigans & Knitwear'].map(c=>
+        ${['Uncategorized','Tops','Bottoms','Rompers & Overalls','Sets','Outerwear','Cardigans & Knitwear','Sold Out'].map(c=>
           `<option ${(p0.category||'Uncategorized')===c?'selected':''}>${c}</option>`
         ).join('')}
       </select>
