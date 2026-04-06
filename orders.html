@@ -316,6 +316,32 @@ tr.cat-section-hdr td{
 .mgr-actions{display:flex;gap:.38rem;margin-top:.65rem}
 .mgr-hint{font-size:.72rem;color:#ccc;text-align:center;padding:2rem 1rem;line-height:1.6}
 /* ════════════════════════════
+   ANALYTICS
+════════════════════════════ */
+.analytics-wrap{padding:1rem 1.5rem;height:calc(100vh - var(--top));overflow-y:auto}
+.analytics-toolbar{display:flex;align-items:center;gap:.6rem;margin-bottom:1rem;flex-wrap:wrap;position:sticky;top:0;background:var(--mist);padding:.5rem 0;z-index:20}
+.analytics-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem}
+.analytics-grid.full{grid-template-columns:1fr}
+.analytics-card{background:var(--white);border-radius:10px;box-shadow:var(--shadow);padding:1rem 1.1rem}
+.analytics-card h4{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#bbb;margin-bottom:.75rem}
+.analytics-stat-row{display:flex;justify-content:space-between;align-items:center;padding:.28rem 0;border-bottom:1px solid #f5f2ee;font-size:.78rem}
+.analytics-stat-row:last-child{border:none}
+.analytics-stat-name{color:var(--ink);flex:1}
+.analytics-stat-sub{font-size:.67rem;color:#aaa;margin-top:.05rem}
+.analytics-stat-val{font-weight:700;color:var(--bark);min-width:36px;text-align:right}
+.analytics-bar-wrap{margin:.2rem 0}
+.analytics-bar-label{display:flex;justify-content:space-between;font-size:.72rem;color:#888;margin-bottom:.18rem}
+.analytics-bar-track{background:#f0ebe5;border-radius:4px;height:10px;overflow:hidden}
+.analytics-bar-fill{height:100%;border-radius:4px;background:var(--bark);transition:width .4s}
+.analytics-bar-fill.green{background:var(--green)}
+.analytics-bar-fill.blue{background:var(--blue)}
+.analytics-hero{display:flex;gap:1rem;margin-bottom:1rem;flex-wrap:wrap}
+.analytics-hero-card{background:var(--white);border-radius:10px;box-shadow:var(--shadow);padding:.85rem 1.1rem;flex:1;min-width:140px}
+.analytics-hero-val{font-size:1.8rem;font-weight:700;color:var(--bark);line-height:1}
+.analytics-hero-lbl{font-size:.68rem;color:#aaa;margin-top:.25rem;text-transform:uppercase;letter-spacing:.07em}
+.analytics-empty{text-align:center;color:#ccc;font-size:.78rem;padding:2rem}
+
+/* ════════════════════════════
    SHIPMENTS VIEW
 ════════════════════════════ */
 .ship-wrap{padding:1rem 1.25rem;height:calc(100vh - var(--top));display:flex;flex-direction:column;overflow:hidden}
@@ -480,6 +506,7 @@ function doPost(e) {
     <button class="tab-btn" onclick="switchView('inventory')">📦 Inventory</button>
     <button class="tab-btn" onclick="switchView('sold')">📊 Sold</button>
     <button class="tab-btn" onclick="switchView('log')">🗒 Order Log</button>
+    <button class="tab-btn" onclick="switchView('analytics')">📈 Analytics</button>
     <button class="tab-btn" onclick="switchView('ship')">🚚 Shipments</button>
     <button class="tab-btn" onclick="switchView('mgr')">⚙️ Products</button>
   </div>
@@ -656,6 +683,21 @@ function doPost(e) {
   </div>
 </div>
 
+<!-- ══ ANALYTICS ══ -->
+<div class="view" id="view-analytics">
+  <div class="analytics-wrap">
+    <div class="analytics-toolbar">
+      <span style="font-size:.72rem;font-weight:600;color:var(--bark)">📈 Analytics</span>
+      <select id="analyticsYear" onchange="renderAnalytics()" style="border:1px solid var(--border);border-radius:5px;padding:.28rem .5rem;font-size:.75rem;font-family:'DM Sans',sans-serif;background:var(--white);color:var(--ink)">
+        <option value="all">All Time</option>
+      </select>
+      <span id="analyticsMeta" style="font-size:.7rem;color:#aaa;margin-left:.25rem"></span>
+    </div>
+    <div class="analytics-hero" id="analyticsHero"></div>
+    <div class="analytics-grid" id="analyticsGrid"></div>
+  </div>
+</div>
+
 <!-- ══ SHIPMENTS ══ -->
 <div class="view" id="view-ship">
   <div class="ship-wrap">
@@ -804,46 +846,13 @@ const DEFAULT_PRODUCTS = [
   {pid:61, name:"Solid Cotton Shirt",                       image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/69.jpg",color:"Natural",hex:"#e8ddd0",sizes:["90","100","110","120"],price:12,bundlePrice:10,cost:100},
   {pid:64, name:"Cotton Striped Short Sleeve Shirt",        image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/58.jpg",color:"Stripe", hex:"#c8d8e8",sizes:["60","70","80","90"],price:8, bundlePrice:6, cost:100},
   {pid:65, name:"Cotton Embroidered Floral Set",            image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/72.jpg",color:"Floral", hex:"#f0e6f0",sizes:["80"],                   price:17,bundlePrice:15,cost:100},
-  {pid:66, name:"Cotton Animal Short Sleeve Shirt",         image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/73.jpg",color:"Natural",hex:"#e8ddd0",sizes:["70","100","110","120"],price:10,bundlePrice:8, cost:100},
-  {pid:67, name:"New Product (74)",                          image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/74.jpg", color:"Natural",hex:"#e8ddd0",sizes:["80","90","100"],             price:12,bundlePrice:10,cost:100},
-  {pid:68, name:"New Product (75)",                          image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/75.jpg", color:"Natural",hex:"#e8ddd0",sizes:["80","90","100"],             price:12,bundlePrice:10,cost:100},
-  {pid:69, name:"New Product (76)",                          image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/76.jpg", color:"Natural",hex:"#e8ddd0",sizes:["80","90","100"],             price:12,bundlePrice:10,cost:100},
-  {pid:70, name:"New Product (77)",                          image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/77.jpg", color:"Natural",hex:"#e8ddd0",sizes:["80","90","100"],             price:12,bundlePrice:10,cost:100},
-  {pid:71, name:"New Product (78)",                          image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/78.jpg", color:"Natural",hex:"#e8ddd0",sizes:["80","90","100"],             price:12,bundlePrice:10,cost:100},
-  {pid:72, name:"New Product (79)",                          image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/79.jpg", color:"Natural",hex:"#e8ddd0",sizes:["80","90","100"],             price:12,bundlePrice:10,cost:100},
-  {pid:73, name:"New Product (80)",                          image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/80.jpg", color:"Natural",hex:"#e8ddd0",sizes:["80","90","100"],             price:12,bundlePrice:10,cost:100},
-  {pid:74, name:"New Product (81)",                          image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/81.jpg", color:"Natural",hex:"#e8ddd0",sizes:["80","90","100"],             price:12,bundlePrice:10,cost:100},
-  {pid:75, name:"New Product (82)",                          image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/82.jpg", color:"Natural",hex:"#e8ddd0",sizes:["80","90","100"],             price:12,bundlePrice:10,cost:100},
-  {pid:76, name:"New Product (83)",                          image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/83.jpg", color:"Natural",hex:"#e8ddd0",sizes:["80","90","100"],             price:12,bundlePrice:10,cost:100},
-  {pid:77, name:"New Product (84)",                          image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/84.jpg", color:"Natural",hex:"#e8ddd0",sizes:["80","90","100"],             price:12,bundlePrice:10,cost:100},
-  {pid:78, name:"New Product (85)",                          image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/85.jpg", color:"Natural",hex:"#e8ddd0",sizes:["80","90","100"],             price:12,bundlePrice:10,cost:100},
-  {pid:79, name:"New Product (86)",                          image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/86.jpg", color:"Natural",hex:"#e8ddd0",sizes:["80","90","100"],             price:12,bundlePrice:10,cost:100},
-  {pid:80, name:"New Product (87)",                          image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/87.jpg", color:"Natural",hex:"#e8ddd0",sizes:["80","90","100"],             price:12,bundlePrice:10,cost:100},
-  {pid:81, name:"New Product (89)",                          image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/89.jpg", color:"Natural",hex:"#e8ddd0",sizes:["80","90","100"],             price:12,bundlePrice:10,cost:100},
-  {pid:82, name:"New Product (90)",                          image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/90.jpg", color:"Natural",hex:"#e8ddd0",sizes:["80","90","100"],             price:12,bundlePrice:10,cost:100},
-  {pid:83, name:"New Product (91)",                          image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/91.jpg", color:"Natural",hex:"#e8ddd0",sizes:["80","90","100"],             price:12,bundlePrice:10,cost:100},
-  {pid:84, name:"New Product (92)",                          image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/92.jpg", color:"Natural",hex:"#e8ddd0",sizes:["80","90","100"],             price:12,bundlePrice:10,cost:100},
-  {pid:85, name:"New Product (93)",                          image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/93.jpg", color:"Natural",hex:"#e8ddd0",sizes:["80","90","100"],             price:12,bundlePrice:10,cost:100},
-  {pid:86, name:"New Product (94)",                          image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/94.jpg", color:"Natural",hex:"#e8ddd0",sizes:["80","90","100"],             price:12,bundlePrice:10,cost:100},
-  {pid:87, name:"New Product (20)",                          image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/20.jpg", color:"Natural",hex:"#e8ddd0",sizes:["80","90","100"],             price:12,bundlePrice:10,cost:100},
-  {pid:88, name:"New Product (42)",                          image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/42.jpg", color:"Natural",hex:"#e8ddd0",sizes:["80","90","100"],             price:12,bundlePrice:10,cost:100},
-  {pid:89, name:"New Product (54)",                          image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/54.jpg", color:"Natural",hex:"#e8ddd0",sizes:["80","90","100"],             price:12,bundlePrice:10,cost:100},
-  {pid:90, name:"New Product (56)",                          image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/56.jpg", color:"Natural",hex:"#e8ddd0",sizes:["80","90","100"],             price:12,bundlePrice:10,cost:100},
-  {pid:91, name:"New Product (63)",                          image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/63.jpg", color:"Natural",hex:"#e8ddd0",sizes:["80","90","100"],             price:12,bundlePrice:10,cost:100},
-  {pid:92, name:"New Product (68)",                          image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/68.jpg", color:"Natural",hex:"#e8ddd0",sizes:["80","90","100"],             price:12,bundlePrice:10,cost:100},
-  {pid:93, name:"New Product (71)",                          image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/71.jpg", color:"Natural",hex:"#e8ddd0",sizes:["80","90","100"],             price:12,bundlePrice:10,cost:100}
+  {pid:66, name:"Cotton Animal Short Sleeve Shirt",         image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/73.jpg",color:"Natural",hex:"#e8ddd0",sizes:["70","100","110","120"],price:10,bundlePrice:8, cost:100}
 ];
 
 /* ═══════════════════════════════════════════════
    STATE
 ═══════════════════════════════════════════════ */
 let products   = loadLocal('lb_products4', DEFAULT_PRODUCTS);
-// Merge any DEFAULT_PRODUCTS that aren't already in localStorage (by pid)
-(function mergeDefaults(){
-  const existingPids=new Set(products.map(p=>p.pid));
-  const toAdd=DEFAULT_PRODUCTS.filter(p=>!existingPids.has(p.pid));
-  if(toAdd.length){ products=products.concat(toAdd); saveProducts(); }
-})();
 let stock      = loadLocal('lb_stock4',    {});
 let soldCounts = loadLocal('lb_sold4',     {});
 let orderLog   = loadLocal('lb_log4',      []);
@@ -1047,6 +1056,7 @@ function switchView(v){
   if(v==='inventory') renderInventory();
   if(v==='sold')      renderSold();
   if(v==='log')       renderLog();
+  if(v==='analytics') renderAnalytics();
   if(v==='ship')      renderShipments();
   if(v==='mgr')       renderMgr();
 }
@@ -2574,6 +2584,147 @@ function deleteShipment(sid){
   shipments=shipments.filter(s=>s.id!==sid);
   saveShipments();
   renderShipments();
+}
+
+
+/* ═══════════════════════════════════════════════
+   ANALYTICS
+═══════════════════════════════════════════════ */
+function renderAnalytics(){
+  // Populate year filter from orderLog dates
+  const yearSel=document.getElementById('analyticsYear');
+  const years=new Set();
+  orderLog.forEach(e=>{ if(e.date) years.add(e.date.substring(0,4)); });
+  const currentOpts=new Set([...yearSel.options].map(o=>o.value));
+  [...years].sort().reverse().forEach(y=>{
+    if(!currentOpts.has(y)){
+      const opt=document.createElement('option'); opt.value=y; opt.textContent=y;
+      yearSel.insertBefore(opt, yearSel.options[1]);
+    }
+  });
+
+  const selYear=yearSel.value;
+  const filtered=selYear==='all'?orderLog:orderLog.filter(e=>e.date&&e.date.startsWith(selYear));
+  document.getElementById('analyticsMeta').textContent=filtered.length+' orders';
+
+  if(!filtered.length){
+    document.getElementById('analyticsHero').innerHTML='';
+    document.getElementById('analyticsGrid').innerHTML='<div class="analytics-empty">No order data yet for this period.<br>Orders you record will appear here.</div>';
+    return;
+  }
+
+  // ── Aggregate ──
+  const totalOrders=filtered.length;
+  const totalRevenue=filtered.reduce((s,e)=>s+parseFloat(e.revenue||0),0);
+  const totalProfit=filtered.reduce((s,e)=>s+parseFloat(e.profit||0),0);
+  const totalUnits=filtered.reduce((s,e)=>s+(e.items||[]).reduce((ss,i)=>ss+i.qty,0),0);
+
+  // Per-item, per-size, per-color, per-category counts
+  const byItem={}, bySize={}, byColor={}, byCat={}, revByCat={};
+  filtered.forEach(e=>{
+    (e.items||[]).forEach(i=>{
+      const p=products.find(pp=>pp.pid===i.pid);
+      const name=i.name||'Unknown';
+      const color=i.color||'Unknown';
+      const size=toDisplayShort(i.cm)||i.cm||'?';
+      const cat=p?getCategory(p):'Uncategorized';
+      const rev=(i.sp||0)*i.qty;
+
+      byItem[name]=(byItem[name]||0)+i.qty;
+      bySize[size]=(bySize[size]||0)+i.qty;
+      byColor[color]=(byColor[color]||0)+i.qty;
+      byCat[cat]=(byCat[cat]||0)+i.qty;
+      revByCat[cat]=(revByCat[cat]||0)+rev;
+    });
+  });
+
+  // ── Hero stats ──
+  document.getElementById('analyticsHero').innerHTML=`
+    <div class="analytics-hero-card">
+      <div class="analytics-hero-val">${totalOrders}</div>
+      <div class="analytics-hero-lbl">Orders</div>
+    </div>
+    <div class="analytics-hero-card">
+      <div class="analytics-hero-val">${totalUnits}</div>
+      <div class="analytics-hero-lbl">Units Sold</div>
+    </div>
+    <div class="analytics-hero-card">
+      <div class="analytics-hero-val">${fmt(totalRevenue)}</div>
+      <div class="analytics-hero-lbl">Revenue</div>
+    </div>
+    <div class="analytics-hero-card">
+      <div class="analytics-hero-val" style="color:${totalProfit>=0?'var(--green)':'var(--red)'}">${fmt(totalProfit)}</div>
+      <div class="analytics-hero-lbl">Profit</div>
+    </div>`;
+
+  // ── Helper: render a bar chart card ──
+  function barCard(title, data, colorClass=''){
+    const sorted=Object.entries(data).sort((a,b)=>b[1]-a[1]);
+    const max=sorted[0]?sorted[0][1]:1;
+    if(!sorted.length) return `<div class="analytics-card"><h4>${title}</h4><div class="analytics-empty" style="padding:1rem">No data</div></div>`;
+    return `<div class="analytics-card">
+      <h4>${title}</h4>
+      ${sorted.map(([name,qty])=>`
+        <div class="analytics-bar-wrap">
+          <div class="analytics-bar-label"><span>${name}</span><span style="font-weight:700;color:var(--bark)">${qty}</span></div>
+          <div class="analytics-bar-track"><div class="analytics-bar-fill ${colorClass}" style="width:${Math.round(qty/max*100)}%"></div></div>
+        </div>`).join('')}
+    </div>`;
+  }
+
+  // ── Helper: ranked list card ──
+  function rankCard(title, data, suffix='units', showPct=true){
+    const sorted=Object.entries(data).sort((a,b)=>b[1]-a[1]).slice(0,15);
+    const total=Object.values(data).reduce((s,v)=>s+v,0)||1;
+    if(!sorted.length) return `<div class="analytics-card"><h4>${title}</h4><div class="analytics-empty" style="padding:1rem">No data</div></div>`;
+    return `<div class="analytics-card">
+      <h4>${title}</h4>
+      ${sorted.map(([name,val],i)=>`
+        <div class="analytics-stat-row">
+          <span class="analytics-stat-name">
+            <span style="font-size:.65rem;color:#ccc;margin-right:.3rem">#${i+1}</span>${name}
+          </span>
+          <span class="analytics-stat-val">${val} <span style="font-size:.65rem;color:#bbb">${showPct?'('+Math.round(val/total*100)+'%)':''}</span></span>
+        </div>`).join('')}
+    </div>`;
+  }
+
+  // ── Revenue by category card ──
+  function revCatCard(){
+    const sorted=Object.entries(revByCat).sort((a,b)=>b[1]-a[1]);
+    const max=sorted[0]?sorted[0][1]:1;
+    if(!sorted.length) return `<div class="analytics-card"><h4>Revenue by Category</h4><div class="analytics-empty" style="padding:1rem">No data</div></div>`;
+    return `<div class="analytics-card">
+      <h4>Revenue by Category</h4>
+      ${sorted.map(([cat,rev])=>`
+        <div class="analytics-bar-wrap">
+          <div class="analytics-bar-label">
+            <span>${cat}</span>
+            <span style="font-weight:700;color:var(--green)">${fmt(rev)} <span style="font-size:.65rem;color:#bbb">(${byCat[cat]||0} units)</span></span>
+          </div>
+          <div class="analytics-bar-track"><div class="analytics-bar-fill green" style="width:${Math.round(rev/max*100)}%"></div></div>
+        </div>`).join('')}
+    </div>`;
+  }
+
+  // ── Render grid ──
+  const grid=document.getElementById('analyticsGrid');
+  grid.innerHTML='';
+  grid.className='analytics-grid';
+
+  // Row 1: size + color bars
+  grid.innerHTML+=barCard('Size Popularity', bySize, 'blue');
+  grid.innerHTML+=barCard('Color Popularity', byColor);
+
+  // Row 2: category units + revenue
+  grid.innerHTML+=barCard('Units by Category', byCat, 'green');
+  grid.innerHTML+=revCatCard();
+
+  // Row 3: top items — full width
+  const fullRow=document.createElement('div');
+  fullRow.style.cssText='grid-column:1/-1';
+  fullRow.innerHTML=rankCard('Top Items by Units Sold', byItem, 'units', true);
+  grid.appendChild(fullRow);
 }
 
 /* ── BOOT ── */
