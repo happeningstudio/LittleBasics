@@ -504,16 +504,16 @@ function renderProducts() {
         const sale = product.saleDiscount || 0;
         const salePrice = sale > 0 ? parseFloat(product.price) - sale : null;
         const priceHtml = sale > 0
-            ? `<div class="sale-badge-card">🏷 SAVE $${sale}</div>
-               <div class="product-price"><span class="price-was">$${product.price}</span><span class="price-now">$${salePrice.toFixed(2)}</span></div>`
+            ? `<div class="product-price"><span class="price-was">$${product.price}</span><span class="price-now">$${salePrice.toFixed(2)}</span></div>`
             : `<div class="product-price">$${product.price}</div>`;
+        const bundleHtml = sale > 0 ? '' : `<div class="bundle-price">Bundle Price: $${product.bundlePrice}</div>`;
 
         card.innerHTML = `
             <img src="${product.image}" alt="${product.name}" class="product-image" loading="lazy">
             <div class="product-details">
                 <div class="product-name">${product.name}</div>
                 ${priceHtml}
-                <div class="bundle-price">Bundle Price: $${product.bundlePrice}</div>
+                ${bundleHtml}
                 ${product.material ? `<div class="product-material">Material: ${product.material}</div>` : ''}
                 <div class="sizes-label">Size Available</div>
                 <div class="sizes-container">${sizeBadges}</div>
