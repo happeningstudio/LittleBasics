@@ -1371,8 +1371,8 @@ function updatePanel(){
       if(p) regularTotal+=p.price*qty;
     });
     const saved=regularTotal-revenue;
-    let phrase='The total is '+fmt(totalForCustomer)+' including shipping.';
-    if(saved>0.009) phrase+=' You saved '+fmt(saved)+'!';
+    let phrase='The total is '+fmt(totalForCustomer)+' including shipping and tracking.';
+    if(saved>0.009&&bundle) phrase+=' You saved '+fmt(saved)+' with the bundle discount!';
     phraseEl.textContent=phrase;
     phraseSec.style.display='';
   } else if(phraseSec){
