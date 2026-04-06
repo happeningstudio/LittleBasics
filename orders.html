@@ -2411,7 +2411,21 @@ function duplicateAsVariant(){}
    shipments = [{id, name, date, items:[{pid,cm,qty}], received:bool, receivedDate}]
 ═══════════════════════════════════════════════ */
 let shipments = loadLocal('lb_shipments', []);
-function saveShipments(){ saveLocal('lb_shipments', shipments); }
+function saveShipments(){ saveLocal('lb_shipments', shipments); pushPending(); }
+
+async function pushPending(){
+  // Write all un-received shipment items to a Pending tab in the sheet
+  const rows=[['key','qty']];
+  const pending={};
+  shipments.filter(s=>!s.received).forEach(s=>{
+    s.items.forEach(i=>{
+      const k=skey(i.pid,i.cm);
+      pending[k]=(pending[k]||0)+i.qty;
+    });
+  });
+  Object.entries(pending).forEach(([k,qty])=>rows.push([k,qty]));
+  await sheetWrite('Pending', rows);
+}
 
 function renderShipments(){
   const area=document.getElementById('shipList');
