@@ -376,7 +376,25 @@ async function loadFromSheet() {
         prodRows.slice(1).forEach(row => {
             const [pid, name, color, hex, sizesRaw, price, bundlePrice, cost, image, material, saleDiscount, category, bin, unit] = row;
             if (!pid || !name) return;
-            const sizesCm = String(sizesRaw||'').split(/[,\s]+/).map(s=>s.trim()).filter(Boolean);
+            // Parse sizes — handle comma, space, or concatenated (e.g. "70100110")
+            const KNOWN_CM = ['130','120','110','100','90','80','70','60']; // longest first to avoid partial matches
+            let rawSizes = String(sizesRaw||'');
+            let sizesCm = [];
+            if (rawSizes.includes(',')) {
+                // comma separated
+                sizesCm = rawSizes.split(',').map(s=>s.trim()).filter(Boolean);
+            } else if (/^\d+$/.test(rawSizes.replace(/\s/g,''))) {
+                // pure digits — try splitting into known cm values greedily
+                let remaining = rawSizes.replace(/\s/g,'');
+                while (remaining.length > 0) {
+                    const match = KNOWN_CM.find(cm => remaining.startsWith(cm));
+                    if (match) { sizesCm.push(match); remaining = remaining.slice(match.length); }
+                    else { remaining = remaining.slice(1); } // skip unknown char
+                }
+            } else {
+                // space or mixed separator
+                sizesCm = rawSizes.split(/\s+/).map(s=>s.trim()).filter(Boolean);
+            }
             const sizesDisplay = sizesCm.map(cm => CM_TO_LABEL[cm] || cm);
             sheetProducts.push({
                 id: parseInt(pid),
@@ -514,7 +532,7 @@ function renderProducts() {
         const salePrice = sale > 0 ? parseFloat(product.price) - sale : null;
         const priceHtml = sale > 0
             ? `<div class="product-price"><span class="price-was">$${product.price}${unitLabel}</span><span class="price-now">$${salePrice.toFixed(2)}${unitLabel}</span></div>`
-            : `<div class="product-price">$${product.price}<span style="font-size:.85em;font-weight:400;color:#8b7060;margin-left:2px">${unitLabel}</span></div>`;
+            : `<div class="product-price">$${product.price}<span style="font-size:1em;font-weight:500;color:#423727;margin-left:1px">${unitLabel}</span></div>`;
         const bundleHtml = sale > 0 ? '' : `<div class="bundle-price">Bundle: $${product.bundlePrice}${unitLabel}</div>`;
 
         card.innerHTML = `
