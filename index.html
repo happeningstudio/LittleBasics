@@ -371,10 +371,10 @@ async function loadFromSheet() {
         }
 
         // Parse products from Sheet
-        // Columns: pid, name, color, hex, sizes(comma-sep cm), price, bundlePrice, cost, image, material, saleDiscount, category, bin
+        // Columns: pid, name, color, hex, sizes, price, bundlePrice, cost, image, material, saleDiscount, category, bin, unit
         const sheetProducts = [];
         prodRows.slice(1).forEach(row => {
-            const [pid, name, color, hex, sizesRaw, price, bundlePrice, cost, image, material, saleDiscount, category, bin] = row;
+            const [pid, name, color, hex, sizesRaw, price, bundlePrice, cost, image, material, saleDiscount, category, bin, unit] = row;
             if (!pid || !name) return;
             const sizesCm = String(sizesRaw||'').split(/[,\s]+/).map(s=>s.trim()).filter(Boolean);
             const sizesDisplay = sizesCm.map(cm => CM_TO_LABEL[cm] || cm);
@@ -389,6 +389,7 @@ async function loadFromSheet() {
                 material: String(material||''),
                 saleDiscount: parseFloat(saleDiscount)||0,
                 category: String(category||'Uncategorized'),
+                unit: String(unit||'ea'),
                 image: String(image||'')
             });
         });
@@ -508,11 +509,13 @@ function renderProducts() {
         }).join('');
 
         const sale = product.saleDiscount || 0;
+        const unit = product.unit || 'ea';
+        const unitLabel = unit === 'ea' ? '/ea' : '/set';
         const salePrice = sale > 0 ? parseFloat(product.price) - sale : null;
         const priceHtml = sale > 0
-            ? `<div class="product-price"><span class="price-was">$${product.price}</span><span class="price-now">$${salePrice.toFixed(2)}</span></div>`
-            : `<div class="product-price">$${product.price}</div>`;
-        const bundleHtml = sale > 0 ? '' : `<div class="bundle-price">Bundle Price: $${product.bundlePrice}</div>`;
+            ? `<div class="product-price"><span class="price-was">$${product.price}${unitLabel}</span><span class="price-now">$${salePrice.toFixed(2)}${unitLabel}</span></div>`
+            : `<div class="product-price">$${product.price}<span style="font-size:.85em;font-weight:400;color:#8b7060;margin-left:2px">${unitLabel}</span></div>`;
+        const bundleHtml = sale > 0 ? '' : `<div class="bundle-price">Bundle: $${product.bundlePrice}${unitLabel}</div>`;
 
         card.innerHTML = `
             <img src="${product.image}" alt="${product.name}" class="product-image" loading="lazy">
