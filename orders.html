@@ -1434,7 +1434,8 @@ async function copyAndSave(){
     shipIn:shipIn.toFixed(2),shipOut:shipOut.toFixed(2),
     fee:fee.toFixed(2),profit:profit.toFixed(2),
     notes:document.getElementById('fNotes').value,
-    tracking:document.getElementById('fTracking').value};
+    tracking:document.getElementById('fTracking').value,
+    address:document.getElementById('fAddress').value};
   orderLog.unshift(entry);
   saveLog();
 
@@ -1840,6 +1841,7 @@ function renderLog(){
         </div>
       </div>
       <div class="log-items">${itemStr}</div>
+      ${e.address ? `<div style="font-size:.7rem;color:#aaa;margin-bottom:.28rem;line-height:1.5">📍 ${e.address.replace(/\n/g,' · ')}</div>` : ''}
       <div style="display:flex;gap:.4rem;margin-bottom:.28rem;align-items:center">
         <input type="text" value="${e.tracking||''}" placeholder="Add tracking #…"
           style="flex:1;border:1px solid var(--border);border-radius:4px;padding:.22rem .4rem;font-size:.7rem;font-family:'DM Sans',sans-serif;background:var(--mist);color:var(--ink)"
@@ -1850,7 +1852,15 @@ function renderLog(){
         </select>
       </div>
       <div class="log-bottom">
-        <span class="log-numbers">${fmt(parseFloat(e.revenue))} rev · ${fmt(parseFloat(e.cost))} cost · ${(e.items||[]).reduce((s,i)=>s+i.qty,0)} items</span>
+        <span class="log-numbers">
+          <span title="Gross (items + shipping collected)">📥 ${fmt(parseFloat(e.revenue)+(parseFloat(e.shipIn)||0))}</span>
+          <span style="margin:0 .3rem;color:#e0d8d0">·</span>
+          <span title="Purchase cost">🏷 ${fmt(parseFloat(e.cost))}</span>
+          <span style="margin:0 .3rem;color:#e0d8d0">·</span>
+          <span title="Shipping paid out">📦 ${fmt(parseFloat(e.shipOut)||0)}</span>
+          <span style="margin:0 .3rem;color:#e0d8d0">·</span>
+          <span style="color:#bbb">${(e.items||[]).reduce((s,i)=>s+i.qty,0)} items</span>
+        </span>
         <span class="log-profit ${profNum>=0?'pos':'neg'}">${fmt(profNum)}</span>
       </div>
       <div class="adjust-panel" id="adjust-${e.id}">
