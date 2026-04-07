@@ -939,7 +939,7 @@ async function pullProducts(){
   // Columns: pid, name, color, hex, sizes, price, bundlePrice, cost, image, material, saleDiscount, category, bin
   const pulled=[];
   data.slice(1).forEach(row=>{
-    const [pid,name,color,hex,sizesRaw,price,bundlePrice,cost,image,material,saleDiscount,category,bin]=row;
+    const [pid,name,color,hex,sizesRaw,price,bundlePrice,cost,image,material,saleDiscount,category,bin,unit]=row;
     if(!pid||!name) return;
     pulled.push({
       pid:       parseInt(pid),
@@ -954,7 +954,8 @@ async function pullProducts(){
       material:  String(material||''),
       saleDiscount: parseFloat(saleDiscount)||0,
       category:  String(category||'Uncategorized'),
-      bin:       String(bin||'')
+      bin:       String(bin||''),
+      unit:      String(unit||'ea')
     });
   });
   if(!pulled.length){showToast('No valid products found in sheet.');return;}
@@ -967,8 +968,8 @@ async function pullProducts(){
 
 // Push products to sheet
 async function pushProducts(){
-  const rows=[['pid','name','color','hex','sizes','price','bundlePrice','cost','image','material','saleDiscount','category','bin']];
-  products.forEach(p=>rows.push([p.pid,p.name,p.color,p.hex,p.sizes.join(','),p.price,p.bundlePrice,p.cost,p.image,typeof p.material==='string'?p.material:'',p.saleDiscount||0,p.category||'Uncategorized',p.bin||'']));
+  const rows=[['pid','name','color','hex','sizes','price','bundlePrice','cost','image','material','saleDiscount','category','bin','unit']];
+  products.forEach(p=>rows.push([p.pid,p.name,p.color,p.hex,p.sizes.join(','),p.price,p.bundlePrice,p.cost,p.image,typeof p.material==='string'?p.material:'',p.saleDiscount||0,p.category||'Uncategorized',p.bin||'',p.unit||'ea']));
   await sheetWrite('Products', rows);
 }
 
@@ -2210,6 +2211,12 @@ function buildGroupForm(name, siblings){
       </select>
     </div>
     <div class="field" style="margin-bottom:.75rem"><label>Bin / Storage Location</label><input type="text" id="epBin" value="${escHtml(p0.bin||'')}" placeholder="e.g. Bin A3, Shelf 2…"></div>
+    <div class="field" style="margin-bottom:.75rem"><label>Sold As</label>
+      <select id="epUnit">
+        <option value="ea" ${(p0.unit||'ea')==='ea'?'selected':''}>ea (each)</option>
+        <option value="set" ${(p0.unit||'')==='set'?'selected':''}>set</option>
+      </select>
+    </div>
     <div style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#bbb;margin-bottom:.4rem">Color Variants</div>
     <div id="variantSections">${variantSections||buildVariantSection(null,0)}</div>
     <button class="add-variant-btn" onclick="addVariantSection()">＋ Add Color Variant</button>
@@ -2294,6 +2301,7 @@ async function saveGroupProduct(){
   const material=document.getElementById('epMaterial').value.trim();
   const category=document.getElementById('epCategory').value||'Uncategorized';
   const bin=document.getElementById('epBin').value.trim();
+  const unit=document.getElementById('epUnit').value||'ea';
   if(!name){alert('Please enter a product name.');return;}
 
   const sections=[...document.querySelectorAll('.variant-section')];
@@ -2315,12 +2323,12 @@ async function saveGroupProduct(){
       const pid=parseInt(existingPid);
       survivingPids.add(pid);
       const ex=products.find(p=>p.pid===pid);
-      if(ex) Object.assign(ex,{name,image,color,hex,sizes,price,bundlePrice,cost,material,saleDiscount,category,bin});
+      if(ex) Object.assign(ex,{name,image,color,hex,sizes,price,bundlePrice,cost,material,saleDiscount,category,bin,unit});
     } else {
       // Create new
       const pid=nextPid();
       survivingPids.add(pid);
-      products.push({pid,name,image,color,hex,sizes,price,bundlePrice,cost,material,saleDiscount,category,bin});
+      products.push({pid,name,image,color,hex,sizes,price,bundlePrice,cost,material,saleDiscount,category,bin,unit});
     }
   });
 
