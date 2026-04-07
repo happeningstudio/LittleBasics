@@ -688,10 +688,13 @@ function doPost(e) {
   <div class="analytics-wrap">
     <div class="analytics-toolbar">
       <span style="font-size:.72rem;font-weight:600;color:var(--bark)">📈 Analytics</span>
-      <select id="analyticsYear" onchange="renderAnalytics()" style="border:1px solid var(--border);border-radius:5px;padding:.28rem .5rem;font-size:.75rem;font-family:'DM Sans',sans-serif;background:var(--white);color:var(--ink)">
-        <option value="all">All Time</option>
-      </select>
-      <span id="analyticsMeta" style="font-size:.7rem;color:#aaa;margin-left:.25rem"></span>
+      <div style="display:flex;gap:.35rem;flex-wrap:wrap;align-items:center" id="analyticsChips"></div>
+      <div id="analyticsCustomRange" style="display:none;align-items:center;gap:.35rem">
+        <input type="date" id="analyticsFrom" onchange="renderAnalytics()" style="border:1px solid var(--border);border-radius:5px;padding:.25rem .4rem;font-size:.72rem;font-family:'DM Sans',sans-serif;background:var(--white);color:var(--ink)">
+        <span style="font-size:.7rem;color:#bbb">to</span>
+        <input type="date" id="analyticsTo" onchange="renderAnalytics()" style="border:1px solid var(--border);border-radius:5px;padding:.25rem .4rem;font-size:.72rem;font-family:'DM Sans',sans-serif;background:var(--white);color:var(--ink)">
+      </div>
+      <span id="analyticsMeta" style="font-size:.7rem;color:#aaa;margin-left:auto"></span>
     </div>
     <div class="analytics-hero" id="analyticsHero"></div>
     <div class="analytics-grid" id="analyticsGrid"></div>
@@ -2614,22 +2617,70 @@ function deleteShipment(sid){
 /* ═══════════════════════════════════════════════
    ANALYTICS
 ═══════════════════════════════════════════════ */
+let analyticsFilter='all'; // 'all' | 'YYYY' | 'this-month' | 'last-month' | 'custom'
+
+function setAnalyticsFilter(f){
+  analyticsFilter=f;
+  const customRange=document.getElementById('analyticsCustomRange');
+  customRange.style.display=f==='custom'?'flex':'none';
+  renderAnalytics();
+}
+
 function renderAnalytics(){
-  // Populate year filter from orderLog dates
-  const yearSel=document.getElementById('analyticsYear');
+  const now=new Date();
+  const thisYear=now.getFullYear();
+  const thisMonth=now.getMonth();
+
+  // Build chips — All Time, years from data, This Month, Last Month, Custom
   const years=new Set();
   orderLog.forEach(e=>{ if(e.date) years.add(e.date.substring(0,4)); });
-  const currentOpts=new Set([...yearSel.options].map(o=>o.value));
-  [...years].sort().reverse().forEach(y=>{
-    if(!currentOpts.has(y)){
-      const opt=document.createElement('option'); opt.value=y; opt.textContent=y;
-      yearSel.insertBefore(opt, yearSel.options[1]);
-    }
-  });
+  const yearsSorted=[...years].sort().reverse();
 
-  const selYear=yearSel.value;
-  const filtered=selYear==='all'?orderLog:orderLog.filter(e=>e.date&&e.date.startsWith(selYear));
-  document.getElementById('analyticsMeta').textContent=filtered.length+' orders';
+  const chips=document.getElementById('analyticsChips');
+  const modes=[
+    {key:'all', label:'All Time'},
+    ...yearsSorted.map(y=>({key:y, label:y})),
+    {key:'this-month', label:'This Month'},
+    {key:'last-month', label:'Last Month'},
+    {key:'custom', label:'Custom Range'},
+  ];
+  chips.innerHTML=modes.map(m=>
+    `<button class="chip ${analyticsFilter===m.key?'active':''}" style="font-size:.67rem" onclick="setAnalyticsFilter('${m.key}')">${m.label}</button>`
+  ).join('');
+
+  // Filter orderLog by selected period
+  let filtered;
+  if(analyticsFilter==='all'){
+    filtered=orderLog;
+  } else if(analyticsFilter==='this-month'){
+    filtered=orderLog.filter(e=>{
+      if(!e.date) return false;
+      const d=new Date(e.date);
+      return d.getFullYear()===thisYear && d.getMonth()===thisMonth;
+    });
+  } else if(analyticsFilter==='last-month'){
+    const lmYear=thisMonth===0?thisYear-1:thisYear;
+    const lmMonth=thisMonth===0?11:thisMonth-1;
+    filtered=orderLog.filter(e=>{
+      if(!e.date) return false;
+      const d=new Date(e.date);
+      return d.getFullYear()===lmYear && d.getMonth()===lmMonth;
+    });
+  } else if(analyticsFilter==='custom'){
+    const from=document.getElementById('analyticsFrom')?.value;
+    const to=document.getElementById('analyticsTo')?.value;
+    filtered=orderLog.filter(e=>{
+      if(!e.date) return false;
+      if(from && e.date < from) return false;
+      if(to && e.date > to) return false;
+      return true;
+    });
+  } else {
+    // Year filter
+    filtered=orderLog.filter(e=>e.date&&e.date.startsWith(analyticsFilter));
+  }
+
+  document.getElementById('analyticsMeta').textContent=filtered.length+' order'+(filtered.length!==1?'s':'');
 
   if(!filtered.length){
     document.getElementById('analyticsHero').innerHTML='';
