@@ -376,7 +376,7 @@ async function loadFromSheet() {
         prodRows.slice(1).forEach(row => {
             const [pid, name, color, hex, sizesRaw, price, bundlePrice, cost, image, material, saleDiscount, category, bin] = row;
             if (!pid || !name) return;
-            const sizesCm = String(sizesRaw||'').split(',').map(s=>s.trim()).filter(Boolean);
+            const sizesCm = String(sizesRaw||'').split(/[,\s]+/).map(s=>s.trim()).filter(Boolean);
             const sizesDisplay = sizesCm.map(cm => CM_TO_LABEL[cm] || cm);
             sheetProducts.push({
                 id: parseInt(pid),
@@ -412,11 +412,17 @@ async function loadFromSheet() {
                     grouped[p.name].pids.push(p.id);
                 }
             });
-            catalogProducts = Object.values(grouped).map(g => ({
-                ...g,
-                sizes: g.allSizes,
-                sizesCm: g.allSizesCm,
-            }));
+            catalogProducts = Object.values(grouped).map(g => {
+                // Sort sizes by cm order
+                const CM_ORDER=['60','70','80','90','100','110','120','130'];
+                const pairs=g.allSizes.map((s,i)=>({label:s,cm:g.allSizesCm[i]}));
+                pairs.sort((a,b)=>CM_ORDER.indexOf(a.cm)-CM_ORDER.indexOf(b.cm));
+                return {
+                    ...g,
+                    sizes: pairs.map(p=>p.label),
+                    sizesCm: pairs.map(p=>p.cm),
+                };
+            });
         } else {
             useFallback();
         }
