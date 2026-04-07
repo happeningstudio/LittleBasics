@@ -941,21 +941,36 @@ async function pullProducts(){
   data.slice(1).forEach(row=>{
     const [pid,name,color,hex,sizesRaw,price,bundlePrice,cost,image,material,saleDiscount,category,bin,unit]=row;
     if(!pid||!name) return;
+    const KNOWN_CM_P=['130','120','110','100','90','80','70','60'];
+    let rawSzStr=String(sizesRaw||'');
+    let parsedSizes=[];
+    if(rawSzStr.includes(',')){
+      parsedSizes=rawSzStr.split(',').map(s=>s.trim()).filter(Boolean);
+    } else if(/^\d+$/.test(rawSzStr.replace(/\s/g,''))){
+      let rem=rawSzStr.replace(/\s/g,'');
+      while(rem.length>0){
+        const m=KNOWN_CM_P.find(cm=>rem.startsWith(cm));
+        if(m){parsedSizes.push(m);rem=rem.slice(m.length);}
+        else rem=rem.slice(1);
+      }
+    } else {
+      parsedSizes=rawSzStr.split(/\s+/).map(s=>s.trim()).filter(Boolean);
+    }
     pulled.push({
-      pid:       parseInt(pid),
-      name:      String(name),
-      color:     String(color||''),
-      hex:       String(hex||'#e8ddd0'),
-      sizes:     String(sizesRaw||'').split(/[,\s]+/).map(s=>s.trim()).filter(Boolean),
-      price:     parseFloat(price)||0,
+      pid:         parseInt(pid),
+      name:        String(name),
+      color:       String(color||''),
+      hex:         String(hex||'#e8ddd0'),
+      sizes:       parsedSizes,
+      price:       parseFloat(price)||0,
       bundlePrice: parseFloat(bundlePrice)||0,
-      cost:      parseFloat(cost)||0,
-      image:     String(image||''),
-      material:  String(material||''),
-      saleDiscount: parseFloat(saleDiscount)||0,
-      category:  String(category||'Uncategorized'),
-      bin:       String(bin||''),
-      unit:      String(unit||'ea')
+      cost:        parseFloat(cost)||0,
+      image:       String(image||''),
+      material:    String(material||''),
+      saleDiscount:parseFloat(saleDiscount)||0,
+      category:    String(category||'Uncategorized'),
+      bin:         String(bin||''),
+      unit:        String(unit||'ea')
     });
   });
   if(!pulled.length){showToast('No valid products found in sheet.');return;}
