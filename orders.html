@@ -946,7 +946,7 @@ async function pullProducts(){
       name:      String(name),
       color:     String(color||''),
       hex:       String(hex||'#e8ddd0'),
-      sizes:     String(sizesRaw||'').split(',').map(s=>s.trim()).filter(Boolean),
+      sizes:     String(sizesRaw||'').split(/[,\s]+/).map(s=>s.trim()).filter(Boolean),
       price:     parseFloat(price)||0,
       bundlePrice: parseFloat(bundlePrice)||0,
       cost:      parseFloat(cost)||0,
