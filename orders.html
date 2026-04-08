@@ -410,6 +410,118 @@ tr.cat-section-hdr td{
 .modal-actions{display:flex;gap:.5rem;justify-content:flex-end;margin-top:1.25rem}
 .modal-skip{font-size:.72rem;color:#bbb;cursor:pointer;align-self:center;text-decoration:underline}
 .modal-skip:hover{color:var(--bark)}
+
+/* ════════════════════════════
+   MOBILE — max 768px
+════════════════════════════ */
+@media (max-width: 768px) {
+
+  :root { --top: 50px; --panel: 100%; }
+
+  /* ── Topbar: logo + right only, tabs move below ── */
+  .topbar {
+    padding: 0 .75rem;
+    gap: .5rem;
+    flex-wrap: wrap;
+    height: auto;
+    min-height: var(--top);
+  }
+  .topbar-logo { height: 22px; }
+  .tab-rail {
+    order: 3;
+    width: 100%;
+    overflow-x: auto;
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+    border-top: none;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .tab-rail::-webkit-scrollbar { display: none; }
+  .tab-btn { padding: .38rem .65rem; font-size: .68rem; flex-shrink: 0; }
+  .topbar-right { gap: .3rem; }
+  .sync-label { display: none; }
+
+  /* ── Order Builder: stack table + panel ── */
+  .order-layout {
+    display: flex;
+    flex-direction: column;
+    height: auto;
+    min-height: calc(100vh - var(--top));
+  }
+  .table-area { padding: .6rem .75rem; overflow-y: visible; }
+  .toolbar { flex-wrap: wrap; gap: .35rem; padding: .4rem 0; }
+  .search-input { width: 140px; }
+
+  /* hide cost column on mobile */
+  .ptable th:nth-child(8),
+  .ptable td:nth-child(8) { display: none; }
+
+  .panel {
+    border-left: none;
+    border-top: 1px solid var(--border);
+    overflow-y: visible;
+  }
+
+  /* ── Inventory ── */
+  .inv-wrap { padding: .6rem .75rem; height: auto; }
+  .inv-toolbar { flex-wrap: wrap; }
+  .inv-scroll { overflow-x: auto; }
+
+  /* ── Sold ── */
+  .sold-wrap { display: block; }
+  .sold-col { padding: .6rem .75rem; }
+  .sold-col:first-child { border-right: none; border-bottom: 1px solid var(--border); }
+
+  /* ── Order Log ── */
+  #view-log > div { height: auto; min-height: calc(100vh - var(--top)); padding: .6rem .75rem; }
+  .log-entry { padding: .5rem .6rem; }
+  .log-top { flex-wrap: wrap; gap: .3rem; }
+  .log-top > div:last-child { flex-wrap: wrap; }
+
+  /* ── Analytics ── */
+  .analytics-wrap { padding: .6rem .75rem; height: auto; }
+  .analytics-grid { grid-template-columns: 1fr !important; }
+  .analytics-hero { gap: .5rem; }
+  .analytics-hero-card { min-width: 0; padding: .65rem .75rem; }
+  .analytics-hero-val { font-size: 1.4rem; }
+
+  /* ── Shipments ── */
+  .ship-wrap { padding: .6rem .75rem; height: auto; }
+  .ship-card-head { flex-direction: column; align-items: flex-start; gap: .4rem; }
+  .ship-card-actions { width: 100%; justify-content: flex-end; }
+
+  /* ── Product Manager ── */
+  .mgr-layout {
+    display: flex;
+    flex-direction: column;
+    height: auto;
+  }
+  .mgr-list { padding: .6rem .75rem; }
+  .mgr-form {
+    border-left: none;
+    border-top: 1px solid var(--border);
+    padding: .75rem;
+  }
+  .mgr-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+
+  /* ── Modals ── */
+  .modal { padding: 1.1rem; }
+  .bulk-modal { width: calc(100vw - 2rem); max-height: 85vh; }
+
+  /* ── Tables: allow horizontal scroll ── */
+  .tbl-wrap { overflow-x: auto; }
+
+  /* ── Sticky bar ── */
+  .sticky-bar { position: sticky; bottom: 0; z-index: 50; }
+
+  /* ── Category headers don't need to be sticky on mobile ── */
+  .cat-section-hdr td { position: static !important; }
+
+  /* ── Thumb size reduce slightly ── */
+  .thumb { width: 72px !important; height: 72px !important; }
+}
 </style>
 </head>
 <body>
@@ -1707,6 +1819,8 @@ function renderSoldSummary(){
     if(!members||!members.length) return;
     const isOpen=!soldCollapsed[name];
     const groupTotal=members.reduce((s,p)=>s+usedSizes.reduce((ss,sz)=>ss+(soldCounts[skey(p.pid,sz)]||0),0),0);
+    const groupArchived=members.reduce((s,p)=>s+(archived[p.pid]||0),0);
+    const groupTotalAll=groupTotal+groupArchived;
     const multiVariant=members.length>1;
 
     if(multiVariant){
@@ -1720,7 +1834,7 @@ function renderSoldSummary(){
             <img src="${members[0].image}" alt="" style="width:100px;height:100px;border-radius:6px;object-fit:cover;display:block;flex-shrink:0">
             <div>
               <div style="font-size:.78rem;font-weight:600;color:#2a2420">${name}</div>
-              <div class="group-meta" style="margin-top:.15rem">${members.length} colors &middot; ${groupTotal} sold</div>
+              <div class="group-meta" style="margin-top:.15rem">${members.length} color${members.length>1?'s':''} &middot; ${groupTotalAll} sold${groupArchived>0?' ('+groupArchived+' archived)':''}</div>
               <span class="group-toggle ${isOpen?'open':''}" style="font-size:.75rem;color:#8b7355;display:inline-block;margin-top:.3rem">&#9654;</span>
             </div>
           </div>
