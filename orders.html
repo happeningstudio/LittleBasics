@@ -733,6 +733,18 @@ function doPost(e) {
         <div style="font-size:.68rem;color:var(--green);text-align:center;margin-top:.25rem;min-height:1em" id="msgCopyConfirm"></div>
       </div>
 
+      <!-- CUSTOM / ONE-OFF ITEMS -->
+      <div class="psec">
+        <div class="psec-title">Custom Items <span style="font-size:.62rem;color:#bbb;font-weight:400;text-transform:none;letter-spacing:0">— for in-person or unlisted sales</span></div>
+        <div id="customItemsList"></div>
+        <div style="display:grid;grid-template-columns:1fr 60px 62px auto;gap:.3rem;align-items:end;margin-top:.35rem">
+          <div class="field" style="margin:0"><label>Item Name</label><input type="text" id="ciName" placeholder="e.g. Hair clip, Socks…"></div>
+          <div class="field" style="margin:0"><label>Price ($)</label><input type="number" id="ciPrice" step="0.01" min="0" placeholder="0.00"></div>
+          <div class="field" style="margin:0"><label>Qty</label><input type="number" id="ciQty" min="1" value="1" placeholder="1"></div>
+          <button class="btn primary sm" onclick="addCustomItem()" style="margin-bottom:0;align-self:end;padding:.3rem .55rem">+</button>
+        </div>
+      </div>
+
       <div class="psec">
         <div class="psec-title">Export</div>
         <p style="font-size:.68rem;color:#bbb;margin-bottom:.45rem">Copies a tab-separated row for your Google Sheet log, deducts inventory, and saves to Sold Records.</p>
@@ -998,6 +1010,7 @@ let soldCounts = loadLocal('lb_sold4',     {});
 let orderLog   = loadLocal('lb_log4',      []);
 let archived   = loadLocal('lb_archived',  {});  // pre-app sold totals per pid
 let order      = {};
+let customItems = []; // [{name, price, qty}]
 let szFilter   = 'all';
 let logFilter  = 'all';
 let editingPid = null;
@@ -1464,6 +1477,37 @@ function removeOrderItem(k){
   renderTable(); updatePanel();
 }
 
+function addCustomItem(){
+  const name=document.getElementById('ciName').value.trim();
+  const price=parseFloat(document.getElementById('ciPrice').value)||0;
+  const qty=parseInt(document.getElementById('ciQty').value)||1;
+  if(!name){document.getElementById('ciName').focus();return;}
+  customItems.push({name,price,qty});
+  document.getElementById('ciName').value='';
+  document.getElementById('ciPrice').value='';
+  document.getElementById('ciQty').value='1';
+  renderCustomItems();
+  updatePanel();
+}
+
+function removeCustomItem(idx){
+  customItems.splice(idx,1);
+  renderCustomItems();
+  updatePanel();
+}
+
+function renderCustomItems(){
+  const list=document.getElementById('customItemsList');
+  if(!list) return;
+  if(!customItems.length){list.innerHTML='';return;}
+  list.innerHTML=customItems.map((ci,i)=>`
+    <div class="order-item" style="padding:.3rem 0">
+      <span class="oi-name">${ci.name}<br><span class="oi-sub">×${ci.qty} @ $${ci.price.toFixed(2)} ea</span></span>
+      <span class="oi-val">${fmt(ci.price*ci.qty)}</span>
+      <button onclick="removeCustomItem(${i})" style="background:none;border:none;cursor:pointer;color:#ddd;font-size:.75rem;padding:0 0 0 .4rem;line-height:1;flex-shrink:0" title="Remove">✕</button>
+    </div>`).join('');
+}
+
 function updatePanel(){
   const bundle=isBundle();
   let revenue=0,cost=0,tqty=0;
@@ -1478,6 +1522,8 @@ function updatePanel(){
     revenue+=effectivePrice*qty;
     cost+=p.cost*qty; tqty+=qty;
   });
+  // Include custom one-off items in revenue + qty (no cost tracked)
+  customItems.forEach(ci=>{ revenue+=ci.price*ci.qty; tqty+=ci.qty; });
   const shipIn=parseFloat(document.getElementById('fShipIn').value)||0;
   const shipOut=parseFloat(document.getElementById('fShipOut').value)||0;
   const fee=parseFloat(document.getElementById('fFee').value)||0;
@@ -1501,7 +1547,7 @@ function updatePanel(){
   else badge.style.display='none';
 
   const list=document.getElementById('orderList');
-  if(!entries.length){list.innerHTML='<li class="empty-hint">No items yet</li>';return;}
+  if(!entries.length && !customItems.length){list.innerHTML='<li class="empty-hint">No items yet</li>';return;}
   list.innerHTML=entries.map(([k,qty])=>{
     const[pidStr,cm]=k.split('_');
     const p=products.find(p=>p.pid===parseInt(pidStr));
@@ -1512,7 +1558,12 @@ function updatePanel(){
       <span class="oi-val">×${qty} ${fmt(sp*qty)}</span>
       <button onclick="removeOrderItem('${k}')" style="background:none;border:none;cursor:pointer;color:#ddd;font-size:.75rem;padding:0 0 0 .4rem;line-height:1;flex-shrink:0" title="Remove">✕</button>
     </li>`;
-  }).join('');
+  }).join('')
+  + customItems.map((ci,i)=>`<li class="order-item">
+      <span class="oi-name">${ci.name} <span class="oi-sub" style="color:#aaa;font-size:.63rem">custom</span><br><span class="oi-sub">×${ci.qty}</span></span>
+      <span class="oi-val">${fmt(ci.price*ci.qty)}</span>
+      <button onclick="removeCustomItem(${i})" style="background:none;border:none;cursor:pointer;color:#ddd;font-size:.75rem;padding:0 0 0 .4rem;line-height:1;flex-shrink:0" title="Remove">✕</button>
+    </li>`).join('');
 
   // ── Generated phrase ──
   const phraseSec=document.getElementById('orderPhraseSec');
@@ -1553,6 +1604,11 @@ async function copyAndSave(){
     revenue+=sp*qty; cost+=p.cost*qty; tqty+=qty;
     itemDetails.push({pid:p.pid,name:p.name,color:p.color,cm,qty,sp});
   });
+  // Add custom one-off items
+  customItems.forEach(ci=>{
+    revenue+=ci.price*ci.qty; tqty+=ci.qty;
+    itemDetails.push({pid:null,name:ci.name,color:'custom',cm:'',qty:ci.qty,sp:ci.price});
+  });
 
   const shipIn=parseFloat(document.getElementById('fShipIn').value)||0;
   const shipOut=parseFloat(document.getElementById('fShipOut').value)||0;
@@ -1562,7 +1618,7 @@ async function copyAndSave(){
   const status=document.getElementById('fStatus').value;
   const name=document.getElementById('fName').value;
   const date=document.getElementById('fDate').value;
-  const itemSum=itemDetails.map(i=>`${i.qty}x ${i.name} (${toDisplayShort(i.cm)})`).join(', ');
+  const itemSum=itemDetails.map(i=>i.color==='custom'?`${i.qty}x ${i.name} (custom)`:`${i.qty}x ${i.name} (${toDisplayShort(i.cm)})`).join(', ');
 
   // Google Sheets row (matches your existing column order exactly)
   const row=[
@@ -1600,6 +1656,9 @@ async function copyAndSave(){
   pushStock();
 
   // 5. Copy to clipboard
+  // Clear custom items after save
+  customItems=[];
+  renderCustomItems();
   renderTable();
   try{
     await navigator.clipboard.writeText(tsv);
@@ -1614,6 +1673,8 @@ async function copyAndSave(){
 
 function clearOrder(){
   Object.keys(order).forEach(k=>delete order[k]);
+  customItems=[];
+  renderCustomItems();
   ['fName','fAddress','fTracking','fShipIn','fShipOut','fFee','fNotes'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('fDate').valueAsDate=new Date();
   document.getElementById('fStatus').value='Paid';
@@ -2066,10 +2127,29 @@ function renderLog(){
     tdCost.textContent=fmt(parseFloat(e.cost||0));
     tr.appendChild(tdCost);
 
-    // Ship out
+    // Ship out — editable
     const tdShip=document.createElement('td');
-    tdShip.style.cssText='text-align:right;font-size:.74rem;color:#aaa';
-    tdShip.textContent=fmt(parseFloat(e.shipOut||0));
+    tdShip.style.cssText='text-align:right';
+    const inpShip=document.createElement('input');
+    inpShip.className='log-cell-edit';
+    inpShip.type='number';
+    inpShip.step='0.01';
+    inpShip.min='0';
+    inpShip.value=parseFloat(e.shipOut||0).toFixed(2);
+    inpShip.placeholder='0.00';
+    inpShip.style.cssText='font-size:.74rem;color:#aaa;text-align:right;width:62px';
+    inpShip.onchange=function(){
+      updateLogField(e.id,'shipOut',parseFloat(this.value)||0);
+      // Recalculate profit
+      const entry2=orderLog.find(x=>x.id===e.id);
+      if(entry2){
+        const p2=parseFloat(entry2.revenue||0)+parseFloat(entry2.shipIn||0)-parseFloat(entry2.cost||0)-parseFloat(this.value||0)-parseFloat(entry2.fee||0);
+        entry2.profit=p2.toFixed(2);
+        saveLog();
+        renderLog();
+      }
+    };
+    tdShip.appendChild(inpShip);
     tr.appendChild(tdShip);
 
     // Profit
