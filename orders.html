@@ -280,7 +280,7 @@ tr.cat-section-hdr td{
 .log-tbl{width:100%;border-collapse:collapse;background:var(--white);min-width:960px}
 .log-tbl thead th{padding:.45rem .65rem;font-size:.62rem;font-weight:600;color:#aaa;text-transform:uppercase;letter-spacing:.08em;text-align:left;border-bottom:2px solid var(--border);white-space:nowrap;position:sticky;top:0;z-index:10;background:var(--sand-lt)}
 .log-tbl td{padding:.38rem .55rem;border-bottom:1px solid #f2ede8;vertical-align:middle;font-size:.76rem;color:var(--ink)}
-.log-tbl tbody tr:hover td{background:#faf6f2}
+.log-tbl tbody tr:hover td{filter:brightness(.96)}
 .log-tbl tbody tr.is-refunded td{opacity:.55}
 .log-tbl tbody tr.expanded-row td{background:var(--sand-lt);border-bottom:none;padding:0}
 .log-cell-edit{width:100%;border:none;background:transparent;font-size:.76rem;font-family:'DM Sans',sans-serif;color:var(--ink);padding:.1rem .2rem;border-radius:3px;transition:background .15s}
@@ -290,6 +290,13 @@ tr.cat-section-hdr td{
 .log-expand-btn{background:none;border:none;cursor:pointer;color:#bbb;font-size:.72rem;padding:.15rem .3rem;border-radius:3px;transition:all .15s;line-height:1}
 .log-expand-btn:hover{background:var(--sand-lt);color:var(--bark)}
 .log-expand-panel{padding:.65rem .85rem;border-top:1px dashed var(--border)}
+.log-tbl tbody tr.status-paid td{background:#f0faf4}
+.log-tbl tbody tr.status-packed td{background:#fffbf0}
+.log-tbl tbody tr.status-packed-shipped td{background:#f0f4fb}
+.log-tbl tbody tr.status-picked-up td{background:#f0faf4}
+.log-tbl tbody tr.status-pending-shipment td{background:#fdf6ff}
+.log-tbl tbody tr.status-refunded td{background:#fdf4f4}
+.log-tbl tbody tr.status-pending-shipment td:first-child{border-left:3px solid #9b59b6}
 .log-tbl tbody tr.status-paid td:first-child{border-left:3px solid var(--green)}
 .log-tbl tbody tr.status-packed td:first-child{border-left:3px solid var(--amber)}
 .log-tbl tbody tr.status-packed-shipped td:first-child{border-left:3px solid var(--blue)}
@@ -718,7 +725,7 @@ function doPost(e) {
           </div>
         </div>
         <div class="field"><label>Status</label>
-          <select id="fStatus"><option>Paid</option><option>Packed</option><option>Packed &amp; Shipped</option><option>Picked Up</option></select>
+          <select id="fStatus"><option>Paid</option><option>Pending Shipment</option><option>Packed</option><option>Packed &amp; Shipped</option><option>Picked Up</option></select>
         </div>
         <div class="field"><label>Notes</label><textarea id="fNotes" placeholder="Optional…"></textarea></div>
       </div>
@@ -731,18 +738,6 @@ function doPost(e) {
         </div>
         <button class="btn sm" id="copyMsgBtn" onclick="copyCustomerMsg()" style="width:100%;margin-top:.4rem;display:none">📋 Copy Message</button>
         <div style="font-size:.68rem;color:var(--green);text-align:center;margin-top:.25rem;min-height:1em" id="msgCopyConfirm"></div>
-      </div>
-
-      <!-- CUSTOM / ONE-OFF ITEMS -->
-      <div class="psec">
-        <div class="psec-title">Custom Items <span style="font-size:.62rem;color:#bbb;font-weight:400;text-transform:none;letter-spacing:0">— for in-person or unlisted sales</span></div>
-        <div id="customItemsList"></div>
-        <div style="display:grid;grid-template-columns:1fr 60px 62px auto;gap:.3rem;align-items:end;margin-top:.35rem">
-          <div class="field" style="margin:0"><label>Item Name</label><input type="text" id="ciName" placeholder="e.g. Hair clip, Socks…"></div>
-          <div class="field" style="margin:0"><label>Price ($)</label><input type="number" id="ciPrice" step="0.01" min="0" placeholder="0.00"></div>
-          <div class="field" style="margin:0"><label>Qty</label><input type="number" id="ciQty" min="1" value="1" placeholder="1"></div>
-          <button class="btn primary sm" onclick="addCustomItem()" style="margin-bottom:0;align-self:end;padding:.3rem .55rem">+</button>
-        </div>
       </div>
 
       <div class="psec">
@@ -1010,7 +1005,6 @@ let soldCounts = loadLocal('lb_sold4',     {});
 let orderLog   = loadLocal('lb_log4',      []);
 let archived   = loadLocal('lb_archived',  {});  // pre-app sold totals per pid
 let order      = {};
-let customItems = []; // [{name, price, qty}]
 let szFilter   = 'all';
 let logFilter  = 'all';
 let editingPid = null;
@@ -1477,37 +1471,6 @@ function removeOrderItem(k){
   renderTable(); updatePanel();
 }
 
-function addCustomItem(){
-  const name=document.getElementById('ciName').value.trim();
-  const price=parseFloat(document.getElementById('ciPrice').value)||0;
-  const qty=parseInt(document.getElementById('ciQty').value)||1;
-  if(!name){document.getElementById('ciName').focus();return;}
-  customItems.push({name,price,qty});
-  document.getElementById('ciName').value='';
-  document.getElementById('ciPrice').value='';
-  document.getElementById('ciQty').value='1';
-  renderCustomItems();
-  updatePanel();
-}
-
-function removeCustomItem(idx){
-  customItems.splice(idx,1);
-  renderCustomItems();
-  updatePanel();
-}
-
-function renderCustomItems(){
-  const list=document.getElementById('customItemsList');
-  if(!list) return;
-  if(!customItems.length){list.innerHTML='';return;}
-  list.innerHTML=customItems.map((ci,i)=>`
-    <div class="order-item" style="padding:.3rem 0">
-      <span class="oi-name">${ci.name}<br><span class="oi-sub">×${ci.qty} @ $${ci.price.toFixed(2)} ea</span></span>
-      <span class="oi-val">${fmt(ci.price*ci.qty)}</span>
-      <button onclick="removeCustomItem(${i})" style="background:none;border:none;cursor:pointer;color:#ddd;font-size:.75rem;padding:0 0 0 .4rem;line-height:1;flex-shrink:0" title="Remove">✕</button>
-    </div>`).join('');
-}
-
 function updatePanel(){
   const bundle=isBundle();
   let revenue=0,cost=0,tqty=0;
@@ -1522,8 +1485,6 @@ function updatePanel(){
     revenue+=effectivePrice*qty;
     cost+=p.cost*qty; tqty+=qty;
   });
-  // Include custom one-off items in revenue + qty (no cost tracked)
-  customItems.forEach(ci=>{ revenue+=ci.price*ci.qty; tqty+=ci.qty; });
   const shipIn=parseFloat(document.getElementById('fShipIn').value)||0;
   const shipOut=parseFloat(document.getElementById('fShipOut').value)||0;
   const fee=parseFloat(document.getElementById('fFee').value)||0;
@@ -1547,23 +1508,20 @@ function updatePanel(){
   else badge.style.display='none';
 
   const list=document.getElementById('orderList');
-  if(!entries.length && !customItems.length){list.innerHTML='<li class="empty-hint">No items yet</li>';return;}
+  if(!entries.length){list.innerHTML='<li class="empty-hint">No items yet</li>';return;}
   list.innerHTML=entries.map(([k,qty])=>{
     const[pidStr,cm]=k.split('_');
     const p=products.find(p=>p.pid===parseInt(pidStr));
     if(!p) return '';
-    const sp=bundle?p.bundlePrice:p.price;
+    const sale=p.saleDiscount||0;
+    const effectiveBundleItem=bundle&&sale===0;
+    const sp=effectiveBundleItem?p.bundlePrice:(sale>0?p.price-sale:p.price);
     return `<li class="order-item">
       <span class="oi-name">${p.name}<br><span class="oi-sub">${p.color} · ${toDisplayShort(cm)} (${cm})</span></span>
       <span class="oi-val">×${qty} ${fmt(sp*qty)}</span>
       <button onclick="removeOrderItem('${k}')" style="background:none;border:none;cursor:pointer;color:#ddd;font-size:.75rem;padding:0 0 0 .4rem;line-height:1;flex-shrink:0" title="Remove">✕</button>
     </li>`;
-  }).join('')
-  + customItems.map((ci,i)=>`<li class="order-item">
-      <span class="oi-name">${ci.name} <span class="oi-sub" style="color:#aaa;font-size:.63rem">custom</span><br><span class="oi-sub">×${ci.qty}</span></span>
-      <span class="oi-val">${fmt(ci.price*ci.qty)}</span>
-      <button onclick="removeCustomItem(${i})" style="background:none;border:none;cursor:pointer;color:#ddd;font-size:.75rem;padding:0 0 0 .4rem;line-height:1;flex-shrink:0" title="Remove">✕</button>
-    </li>`).join('');
+  }).join('');
 
   // ── Generated phrase ──
   const phraseSec=document.getElementById('orderPhraseSec');
@@ -1604,11 +1562,6 @@ async function copyAndSave(){
     revenue+=sp*qty; cost+=p.cost*qty; tqty+=qty;
     itemDetails.push({pid:p.pid,name:p.name,color:p.color,cm,qty,sp});
   });
-  // Add custom one-off items
-  customItems.forEach(ci=>{
-    revenue+=ci.price*ci.qty; tqty+=ci.qty;
-    itemDetails.push({pid:null,name:ci.name,color:'custom',cm:'',qty:ci.qty,sp:ci.price});
-  });
 
   const shipIn=parseFloat(document.getElementById('fShipIn').value)||0;
   const shipOut=parseFloat(document.getElementById('fShipOut').value)||0;
@@ -1618,7 +1571,7 @@ async function copyAndSave(){
   const status=document.getElementById('fStatus').value;
   const name=document.getElementById('fName').value;
   const date=document.getElementById('fDate').value;
-  const itemSum=itemDetails.map(i=>i.color==='custom'?`${i.qty}x ${i.name} (custom)`:`${i.qty}x ${i.name} (${toDisplayShort(i.cm)})`).join(', ');
+  const itemSum=itemDetails.map(i=>`${i.qty}x ${i.name} (${toDisplayShort(i.cm)})`).join(', ');
 
   // Google Sheets row (matches your existing column order exactly)
   const row=[
@@ -1656,9 +1609,6 @@ async function copyAndSave(){
   pushStock();
 
   // 5. Copy to clipboard
-  // Clear custom items after save
-  customItems=[];
-  renderCustomItems();
   renderTable();
   try{
     await navigator.clipboard.writeText(tsv);
@@ -1673,8 +1623,6 @@ async function copyAndSave(){
 
 function clearOrder(){
   Object.keys(order).forEach(k=>delete order[k]);
-  customItems=[];
-  renderCustomItems();
   ['fName','fAddress','fTracking','fShipIn','fShipOut','fFee','fNotes'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('fDate').valueAsDate=new Date();
   document.getElementById('fStatus').value='Paid';
@@ -2029,12 +1977,19 @@ function renderLog(){
     <div class="stat-card">Gross: <strong>${fmt(totalRevenue+totalShipIn)}</strong></div>
     <div class="stat-card">Profit: <strong>${fmt(totalProfit)}</strong></div>`:'';
 
-  const statuses=['all','Paid','Packed','Packed & Shipped','Picked Up','Refunded'];
+  const statuses=['all','Paid','Pending Shipment','Packed','Packed & Shipped','Picked Up','Refunded'];
   document.getElementById('logFilters').innerHTML=statuses.map(s=>
     `<button class="chip ${logFilter===s?'active':''}" style="font-size:.67rem" onclick="setLogFilter('${s}')">${s==='all'?'All':s}</button>`
   ).join('');
 
-  const filtered=logFilter==='all'?orderLog:orderLog.filter(e=>e.status===logFilter);
+  // Sort by date descending (most recent first), stable sort keeps same-date order
+  const sortedLog=[...orderLog].sort((a,b)=>{
+    const da=a.date||'';
+    const db=b.date||'';
+    if(db!==da) return db.localeCompare(da);
+    return b.id-a.id; // tiebreak: newer entry first
+  });
+  const filtered=logFilter==='all'?sortedLog:sortedLog.filter(e=>e.status===logFilter);
   const tbody=document.getElementById('logTbody');
   if(!tbody) return;
 
@@ -2105,7 +2060,7 @@ function renderLog(){
     const tdStatus=document.createElement('td');
     const selStatus=document.createElement('select');
     selStatus.className='log-cell-select';
-    ['Paid','Packed','Packed & Shipped','Picked Up','Refunded'].forEach(s=>{
+    ['Paid','Pending Shipment','Packed','Packed & Shipped','Picked Up','Refunded'].forEach(s=>{
       const opt=document.createElement('option');
       opt.value=s; opt.textContent=s;
       if(e.status===s) opt.selected=true;
@@ -2127,29 +2082,10 @@ function renderLog(){
     tdCost.textContent=fmt(parseFloat(e.cost||0));
     tr.appendChild(tdCost);
 
-    // Ship out — editable
+    // Ship out
     const tdShip=document.createElement('td');
-    tdShip.style.cssText='text-align:right';
-    const inpShip=document.createElement('input');
-    inpShip.className='log-cell-edit';
-    inpShip.type='number';
-    inpShip.step='0.01';
-    inpShip.min='0';
-    inpShip.value=parseFloat(e.shipOut||0).toFixed(2);
-    inpShip.placeholder='0.00';
-    inpShip.style.cssText='font-size:.74rem;color:#aaa;text-align:right;width:62px';
-    inpShip.onchange=function(){
-      updateLogField(e.id,'shipOut',parseFloat(this.value)||0);
-      // Recalculate profit
-      const entry2=orderLog.find(x=>x.id===e.id);
-      if(entry2){
-        const p2=parseFloat(entry2.revenue||0)+parseFloat(entry2.shipIn||0)-parseFloat(entry2.cost||0)-parseFloat(this.value||0)-parseFloat(entry2.fee||0);
-        entry2.profit=p2.toFixed(2);
-        saveLog();
-        renderLog();
-      }
-    };
-    tdShip.appendChild(inpShip);
+    tdShip.style.cssText='text-align:right;font-size:.74rem;color:#aaa';
+    tdShip.textContent=fmt(parseFloat(e.shipOut||0));
     tr.appendChild(tdShip);
 
     // Profit
