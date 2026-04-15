@@ -265,7 +265,8 @@ tr.cat-section-hdr td{
 .log-filters{display:flex;gap:.35rem;margin-bottom:.5rem;flex-wrap:wrap;flex-shrink:0}
 
 .log-status-badge{font-size:.62rem;font-weight:600;text-transform:uppercase;letter-spacing:.07em;padding:.12rem .4rem;border-radius:10px;background:var(--sand-lt);color:var(--bark);white-space:nowrap}
-.log-status-badge.paid,.log-status-badge.picked-up{background:#edf7f0;color:var(--green)}
+.log-status-badge.paid{background:#edf7f0;color:var(--green)}
+.log-status-badge.picked-up{background:#f5eef6;color:#9b59b6}
 .log-status-badge.packed-shipped{background:#edf0f7;color:var(--blue)}
 .log-status-badge.packed{background:#fff8f0;color:var(--amber)}
 .log-status-badge.refunded{background:#fdf0f0;color:var(--red)}
@@ -293,14 +294,12 @@ tr.cat-section-hdr td{
 .log-tbl tbody tr.status-paid td{background:#f0faf4}
 .log-tbl tbody tr.status-packed td{background:#fffbf0}
 .log-tbl tbody tr.status-packed-shipped td{background:#f0f4fb}
-.log-tbl tbody tr.status-picked-up td{background:#f0faf4}
-.log-tbl tbody tr.status-pending-shipment td{background:#fdf6ff}
+.log-tbl tbody tr.status-picked-up td{background:#f5eef6}
 .log-tbl tbody tr.status-refunded td{background:#fdf4f4}
-.log-tbl tbody tr.status-pending-shipment td:first-child{border-left:3px solid #9b59b6}
 .log-tbl tbody tr.status-paid td:first-child{border-left:3px solid var(--green)}
 .log-tbl tbody tr.status-packed td:first-child{border-left:3px solid var(--amber)}
 .log-tbl tbody tr.status-packed-shipped td:first-child{border-left:3px solid var(--blue)}
-.log-tbl tbody tr.status-picked-up td:first-child{border-left:3px solid var(--green)}
+.log-tbl tbody tr.status-picked-up td:first-child{border-left:3px solid #cdb2ce}
 .log-tbl tbody tr.status-refunded td:first-child{border-left:3px solid var(--red)}
 
 /* ════════════════════════════
@@ -725,7 +724,7 @@ function doPost(e) {
           </div>
         </div>
         <div class="field"><label>Status</label>
-          <select id="fStatus"><option>Paid</option><option>Pending Shipment</option><option>Packed</option><option>Packed &amp; Shipped</option><option>Picked Up</option></select>
+          <select id="fStatus"><option>Paid</option><option>Packed</option><option>Packed &amp; Shipped</option><option>Picked Up</option></select>
         </div>
         <div class="field"><label>Notes</label><textarea id="fNotes" placeholder="Optional…"></textarea></div>
       </div>
@@ -1513,9 +1512,7 @@ function updatePanel(){
     const[pidStr,cm]=k.split('_');
     const p=products.find(p=>p.pid===parseInt(pidStr));
     if(!p) return '';
-    const sale=p.saleDiscount||0;
-    const effectiveBundleItem=bundle&&sale===0;
-    const sp=effectiveBundleItem?p.bundlePrice:(sale>0?p.price-sale:p.price);
+    const sp=bundle?p.bundlePrice:p.price;
     return `<li class="order-item">
       <span class="oi-name">${p.name}<br><span class="oi-sub">${p.color} · ${toDisplayShort(cm)} (${cm})</span></span>
       <span class="oi-val">×${qty} ${fmt(sp*qty)}</span>
@@ -1977,19 +1974,12 @@ function renderLog(){
     <div class="stat-card">Gross: <strong>${fmt(totalRevenue+totalShipIn)}</strong></div>
     <div class="stat-card">Profit: <strong>${fmt(totalProfit)}</strong></div>`:'';
 
-  const statuses=['all','Paid','Pending Shipment','Packed','Packed & Shipped','Picked Up','Refunded'];
+  const statuses=['all','Paid','Packed','Packed & Shipped','Picked Up','Refunded'];
   document.getElementById('logFilters').innerHTML=statuses.map(s=>
     `<button class="chip ${logFilter===s?'active':''}" style="font-size:.67rem" onclick="setLogFilter('${s}')">${s==='all'?'All':s}</button>`
   ).join('');
 
-  // Sort by date descending (most recent first), stable sort keeps same-date order
-  const sortedLog=[...orderLog].sort((a,b)=>{
-    const da=a.date||'';
-    const db=b.date||'';
-    if(db!==da) return db.localeCompare(da);
-    return b.id-a.id; // tiebreak: newer entry first
-  });
-  const filtered=logFilter==='all'?sortedLog:sortedLog.filter(e=>e.status===logFilter);
+  const filtered=logFilter==='all'?orderLog:orderLog.filter(e=>e.status===logFilter);
   const tbody=document.getElementById('logTbody');
   if(!tbody) return;
 
@@ -2060,7 +2050,7 @@ function renderLog(){
     const tdStatus=document.createElement('td');
     const selStatus=document.createElement('select');
     selStatus.className='log-cell-select';
-    ['Paid','Pending Shipment','Packed','Packed & Shipped','Picked Up','Refunded'].forEach(s=>{
+    ['Paid','Packed','Packed & Shipped','Picked Up','Refunded'].forEach(s=>{
       const opt=document.createElement('option');
       opt.value=s; opt.textContent=s;
       if(e.status===s) opt.selected=true;
@@ -2082,10 +2072,35 @@ function renderLog(){
     tdCost.textContent=fmt(parseFloat(e.cost||0));
     tr.appendChild(tdCost);
 
-    // Ship out
+    // Ship out — editable
     const tdShip=document.createElement('td');
-    tdShip.style.cssText='text-align:right;font-size:.74rem;color:#aaa';
-    tdShip.textContent=fmt(parseFloat(e.shipOut||0));
+    tdShip.style.cssText='text-align:right';
+    const inpShip=document.createElement('input');
+    inpShip.type='number';
+    inpShip.min='0';
+    inpShip.step='0.01';
+    inpShip.value=parseFloat(e.shipOut||0).toFixed(2);
+    inpShip.className='log-cell-edit';
+    inpShip.style.cssText='font-size:.74rem;color:#888;text-align:right;width:62px';
+    inpShip.title='Edit shipping paid out';
+    inpShip.onchange=function(){
+      const entry=orderLog.find(en=>en.id===e.id);
+      if(!entry) return;
+      const oldShip=parseFloat(entry.shipOut||0);
+      const newShip=parseFloat(this.value)||0;
+      entry.shipOut=newShip.toFixed(2);
+      // Recalculate profit: remove old ship cost, add new
+      entry.profit=(parseFloat(entry.profit||0)+oldShip-newShip).toFixed(2);
+      saveLog();
+      // Update profit cell live
+      const profCell=tr.querySelector('.log-profit');
+      if(profCell){
+        const np=parseFloat(entry.profit);
+        profCell.textContent=fmt(np);
+        profCell.className='log-profit '+(np>=0?'pos':'neg');
+      }
+    };
+    tdShip.appendChild(inpShip);
     tr.appendChild(tdShip);
 
     // Profit
