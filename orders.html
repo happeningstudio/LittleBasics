@@ -161,6 +161,16 @@ body{font-family:'DM Sans',sans-serif;background:var(--mist);color:var(--ink);fo
 .copy-btn:hover{background:var(--bark-dk)}
 .copy-confirm{text-align:center;font-size:.68rem;color:var(--green);margin-top:.28rem;min-height:1em}
 
+/* ── CUSTOM ITEMS ── */
+.custom-item-row{display:flex;align-items:center;gap:.35rem;margin-bottom:.28rem}
+.custom-item-row input[type=text]{flex:1;border:1px solid var(--border);border-radius:4px;padding:.25rem .4rem;font-size:.74rem;font-family:'DM Sans',sans-serif;background:var(--mist);color:var(--ink)}
+.custom-item-row input[type=number]{width:54px;border:1px solid var(--border);border-radius:4px;padding:.25rem .4rem;font-size:.74rem;font-family:'DM Sans',sans-serif;background:var(--mist);color:var(--ink);text-align:center}
+.custom-item-row input:focus{outline:none;border-color:var(--bark)}
+.custom-item-del{background:none;border:none;cursor:pointer;color:#ccc;font-size:.8rem;padding:0;line-height:1;transition:color .15s;flex-shrink:0}
+.custom-item-del:hover{color:var(--red)}
+.add-custom-btn{width:100%;border:1px dashed var(--sand-dk);background:transparent;border-radius:5px;padding:.3rem;font-size:.72rem;color:var(--bark-lt);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s;margin-top:.15rem}
+.add-custom-btn:hover{border-color:var(--bark);color:var(--bark);background:var(--sand-lt)}
+
 /* customer message */
 .customer-msg-box{
   background:var(--sand-lt);
@@ -683,6 +693,13 @@ function doPost(e) {
         <div class="bundle-pill" id="bundlePill">🎉 Bundle pricing — 5+ items</div>
         <ul class="order-list" id="orderList"><li class="empty-hint">No items yet</li></ul>
       </div>
+      <!-- CUSTOM / ONE-OFF ITEMS -->
+      <div class="psec">
+        <div class="psec-title">Custom / One-Off Items</div>
+        <div id="customItemsList"></div>
+        <button class="add-custom-btn" onclick="addCustomItem()">＋ Add custom item</button>
+      </div>
+
       <div class="psec">
         <div class="psec-title">Financials</div>
         <div class="sum-row"><span class="sum-lbl">Items</span><span class="sum-val" id="sItems">0</span></div>
@@ -998,6 +1015,7 @@ let soldCounts = loadLocal('lb_sold4',     {});
 let orderLog   = loadLocal('lb_log4',      []);
 let archived   = loadLocal('lb_archived',  {});  // pre-app sold totals per pid
 let order      = {};
+let customItems = []; // [{id, name, price, qty}]
 let szFilter   = 'all';
 let logFilter  = 'all';
 let editingPid = null;
@@ -1244,7 +1262,6 @@ function renderTable(){
     p.sizes.forEach(cm=>{
       if(szFilter!=='all'&&cm!==szFilter) return;
       if(search&&!p.name.toLowerCase().includes(search)&&!p.color.toLowerCase().includes(search)) return;
-      if(getStock(p.pid,cm)===0) return; // hide out-of-stock sizes from catalog
       groups[p.name].push({p,cm});
     });
   });
@@ -1465,6 +1482,41 @@ function removeOrderItem(k){
   renderTable(); updatePanel();
 }
 
+/* ═══════════════════════════════════════════════
+   CUSTOM / ONE-OFF ITEMS
+═══════════════════════════════════════════════ */
+function renderCustomItems(){
+  const el=document.getElementById('customItemsList');
+  if(!el) return;
+  if(!customItems.length){el.innerHTML='';return;}
+  el.innerHTML=customItems.map((c,i)=>`
+    <div class="custom-item-row">
+      <input type="text" value="${c.name.replace(/"/g,'&quot;')}" placeholder="Item name"
+        onchange="customItems[${i}].name=this.value;updatePanel()">
+      <span style="font-size:.68rem;color:#bbb;flex-shrink:0">$</span>
+      <input type="number" value="${c.price}" min="0" step="0.01" placeholder="0.00"
+        onchange="customItems[${i}].price=parseFloat(this.value)||0;updatePanel()" style="width:58px">
+      <span style="font-size:.68rem;color:#bbb;flex-shrink:0">×</span>
+      <input type="number" value="${c.qty}" min="1" step="1"
+        onchange="customItems[${i}].qty=parseInt(this.value)||1;updatePanel()" style="width:40px">
+      <button class="custom-item-del" onclick="removeCustomItem(${i})" title="Remove">✕</button>
+    </div>`).join('');
+}
+
+function addCustomItem(){
+  customItems.push({id:'c_'+Date.now(),name:'',price:0,qty:1});
+  renderCustomItems();
+  // focus name field of new row
+  const rows=document.querySelectorAll('.custom-item-row');
+  if(rows.length) rows[rows.length-1].querySelector('input[type=text]').focus();
+}
+
+function removeCustomItem(i){
+  customItems.splice(i,1);
+  renderCustomItems();
+  updatePanel();
+}
+
 function updatePanel(){
   const bundle=isBundle();
   let revenue=0,cost=0,tqty=0;
@@ -1479,6 +1531,9 @@ function updatePanel(){
     revenue+=effectivePrice*qty;
     cost+=p.cost*qty; tqty+=qty;
   });
+  // Add custom items to revenue + qty (no cost tracked for custom items)
+  customItems.forEach(c=>{ revenue+=c.price*c.qty; tqty+=c.qty; });
+
   const shipIn=parseFloat(document.getElementById('fShipIn').value)||0;
   const shipOut=parseFloat(document.getElementById('fShipOut').value)||0;
   const fee=parseFloat(document.getElementById('fFee').value)||0;
@@ -1515,6 +1570,19 @@ function updatePanel(){
     </li>`;
   }).join('');
 
+  // Append custom items to the order list
+  if(customItems.length){
+    const allItems=document.getElementById('orderList');
+    customItems.filter(c=>c.qty>0).forEach(c=>{
+      const li=document.createElement('li');
+      li.className='order-item';
+      li.innerHTML=`<span class="oi-name">${c.name||'Custom item'}<br><span class="oi-sub" style="color:#9b7ec8">custom · one-off</span></span>
+        <span class="oi-val">×${c.qty} ${fmt(c.price*c.qty)}</span>`;
+      allItems.appendChild(li);
+    });
+  }
+  renderCustomItems();
+
   // ── Generated phrase ──
   const phraseSec=document.getElementById('orderPhraseSec');
   const phraseEl=document.getElementById('orderPhrase');
@@ -1541,7 +1609,7 @@ async function copyAndSave(){
   const bundle=isBundle();
   let revenue=0,cost=0,tqty=0;
   const entries=Object.entries(order).filter(([,q])=>q>0);
-  if(!entries.length){showToast('⚠ No items in order');return;}
+  if(!entries.length&&!customItems.filter(c=>c.qty>0).length){showToast('⚠ No items in order');return;}
 
   const itemDetails=[];
   entries.forEach(([k,qty])=>{
@@ -1553,6 +1621,12 @@ async function copyAndSave(){
     const sp=effectiveBundle?p.bundlePrice:(sale>0?p.price-sale:p.price);
     revenue+=sp*qty; cost+=p.cost*qty; tqty+=qty;
     itemDetails.push({pid:p.pid,name:p.name,color:p.color,cm,qty,sp});
+  });
+
+  // Include custom items
+  customItems.filter(c=>c.qty>0).forEach(c=>{
+    revenue+=c.price*c.qty; tqty+=c.qty;
+    itemDetails.push({pid:null,name:c.name||'Custom item',color:'',cm:'',qty:c.qty,sp:c.price,isCustom:true});
   });
 
   const shipIn=parseFloat(document.getElementById('fShipIn').value)||0;
@@ -1615,6 +1689,8 @@ async function copyAndSave(){
 
 function clearOrder(){
   Object.keys(order).forEach(k=>delete order[k]);
+  customItems=[];
+  renderCustomItems();
   ['fName','fAddress','fTracking','fShipIn','fShipOut','fFee','fNotes'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('fDate').valueAsDate=new Date();
   document.getElementById('fStatus').value='Paid';
