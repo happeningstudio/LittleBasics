@@ -207,7 +207,6 @@ body {
 const SHEET_URL = 'https://script.google.com/macros/s/AKfycbzolrTY0hQLzMLZI6vfjl2Y6rMoB28QnLQ2JGIsVfZyoUxLqT4ttwt4sDB_GH01pPer/exec';
 // ─────────────────────────────────────────────────────────────
 
-// Size label (catalog) ↔ cm key (orders.html)
 const SIZE_LABEL_TO_CM = {
     '3-6M':   '60',
     '6-12M':  '70',
@@ -218,7 +217,6 @@ const SIZE_LABEL_TO_CM = {
     '5T':     '120',
     '130':    '130'
 };
-// cm → display label
 const CM_TO_LABEL = {
     '60':  '3-6M',
     '70':  '6-12M',
@@ -230,8 +228,6 @@ const CM_TO_LABEL = {
     '130': '130'
 };
 
-// Fallback product list — used if Sheet is unreachable
-// This is your existing catalog data so the page always works
 const FALLBACK_PRODUCTS = [
     { id:1,  name:"Cotton Waffle Overall",                              price:14,       bundlePrice:12,      sizes:["6-12M"],                                    material:"95% Cotton",              image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/6.jpg" },
     { id:2,  name:"Cotton Linen Kimono Overall",                        price:12,       bundlePrice:10,      sizes:["6-12M","12-24M","2T"],                       material:"Cotton Linen",             image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/28.jpg" },
@@ -312,15 +308,29 @@ const FALLBACK_PRODUCTS = [
 // ── STATE ──
 let currentSizeFilter = 'all';
 let isMinimized = false;
-let catalogProducts = [];  // populated from Sheet or fallback
+let catalogProducts = [];
 let stockData = {};
-let pendingStock = {};        // { "pid_cm": qty }
+let pendingStock = {};
+
+// ── HELPERS ──
+// Get total stock for a specific size label across all pids of a product
+function getSizeStock(product, label) {
+    const cm = product.sizesCm
+        ? product.sizesCm[product.sizes.indexOf(label)]
+        : SIZE_LABEL_TO_CM[label];
+    if (!cm || !product.pids) return null; // no data
+    const hasAnyKey = product.pids.some(pid => (pid + '_' + cm) in stockData);
+    if (!hasAnyKey) return null; // no stock data loaded yet
+    return product.pids.reduce((sum, pid) => {
+        const k = pid + '_' + cm;
+        return k in stockData ? sum + stockData[k] : sum;
+    }, 0);
+}
 
 // ── INIT ──
 window.scrollTo(0, 0);
 window.addEventListener('load', () => window.scrollTo(0, 0));
 
-// Scroll minimise
 const header = document.getElementById('header');
 let ticking = false;
 window.addEventListener('scroll', () => {
@@ -335,7 +345,6 @@ window.addEventListener('scroll', () => {
     }
 }, { passive: true });
 
-// Filter buttons
 document.getElementById('filterButtons').addEventListener('click', e => {
     const btn = e.target.closest('.filter-btn');
     if (!btn) return;
@@ -347,7 +356,6 @@ document.getElementById('filterButtons').addEventListener('click', e => {
 // ── LOAD FROM SHEET ──
 async function loadFromSheet() {
     try {
-        // Fetch products and stock in parallel
         const [prodRes, stockRes, pendingRes] = await Promise.all([
             fetch(SHEET_URL + '?action=read&tab=Products'),
             fetch(SHEET_URL + '?action=read&tab=Stock'),
@@ -357,42 +365,34 @@ async function loadFromSheet() {
         const stockRows   = await stockRes.json();
         const pendingRows = await pendingRes.json();
 
-        // Parse stock: rows = [["key","qty"], ["1_70", 3], ...]
         stockData = {};
-        pendingStock = {}; // pid_cm keys with pending qty
+        pendingStock = {};
         stockRows.slice(1).forEach(([key, qty]) => {
             stockData[String(key)] = parseInt(qty) || 0;
         });
-        // Parse pending: same key format, marks items on order but not yet received
         if (pendingRows && pendingRows.length > 1) {
             pendingRows.slice(1).forEach(([key, qty]) => {
                 if (key && parseInt(qty) > 0) pendingStock[String(key)] = parseInt(qty);
             });
         }
 
-        // Parse products from Sheet
-        // Columns: pid, name, color, hex, sizes, price, bundlePrice, cost, image, material, saleDiscount, category, bin, unit
+        const KNOWN_CM = ['130','120','110','100','90','80','70','60'];
         const sheetProducts = [];
         prodRows.slice(1).forEach(row => {
             const [pid, name, color, hex, sizesRaw, price, bundlePrice, cost, image, material, saleDiscount, category, bin, unit] = row;
             if (!pid || !name) return;
-            // Parse sizes — handle comma, space, or concatenated (e.g. "70100110")
-            const KNOWN_CM = ['130','120','110','100','90','80','70','60']; // longest first to avoid partial matches
             let rawSizes = String(sizesRaw||'');
             let sizesCm = [];
             if (rawSizes.includes(',')) {
-                // comma separated
                 sizesCm = rawSizes.split(',').map(s=>s.trim()).filter(Boolean);
             } else if (/^\d+$/.test(rawSizes.replace(/\s/g,''))) {
-                // pure digits — try splitting into known cm values greedily
                 let remaining = rawSizes.replace(/\s/g,'');
                 while (remaining.length > 0) {
                     const match = KNOWN_CM.find(cm => remaining.startsWith(cm));
                     if (match) { sizesCm.push(match); remaining = remaining.slice(match.length); }
-                    else { remaining = remaining.slice(1); } // skip unknown char
+                    else { remaining = remaining.slice(1); }
                 }
             } else {
-                // space or mixed separator
                 sizesCm = rawSizes.split(/\s+/).map(s=>s.trim()).filter(Boolean);
             }
             const sizesDisplay = sizesCm.map(cm => CM_TO_LABEL[cm] || cm);
@@ -412,16 +412,13 @@ async function loadFromSheet() {
             });
         });
 
-        // If we got valid products from the sheet, use them; otherwise fall back
         if (sheetProducts.length > 0) {
-            // Group by name — show one card per product name, listing all color variants' sizes combined
             const grouped = {};
             sheetProducts.forEach(p => {
-                if (p.category === 'Sold Out') return; // hide sold out from catalog
+                if (p.category === 'Sold Out') return;
                 if (!grouped[p.name]) {
                     grouped[p.name] = { ...p, allSizes: [...p.sizes], allSizesCm: [...p.sizesCm], pids: [p.id] };
                 } else {
-                    // Merge sizes from other color variants
                     p.sizes.forEach((s, i) => {
                         if (!grouped[p.name].allSizes.includes(s)) {
                             grouped[p.name].allSizes.push(s);
@@ -431,16 +428,11 @@ async function loadFromSheet() {
                     grouped[p.name].pids.push(p.id);
                 }
             });
+            const CM_ORDER = ['60','70','80','90','100','110','120','130'];
             catalogProducts = Object.values(grouped).map(g => {
-                // Sort sizes by cm order
-                const CM_ORDER=['60','70','80','90','100','110','120','130'];
-                const pairs=g.allSizes.map((s,i)=>({label:s,cm:g.allSizesCm[i]}));
-                pairs.sort((a,b)=>CM_ORDER.indexOf(a.cm)-CM_ORDER.indexOf(b.cm));
-                return {
-                    ...g,
-                    sizes: pairs.map(p=>p.label),
-                    sizesCm: pairs.map(p=>p.cm),
-                };
+                const pairs = g.allSizes.map((s,i) => ({label:s, cm:g.allSizesCm[i]}));
+                pairs.sort((a,b) => CM_ORDER.indexOf(a.cm) - CM_ORDER.indexOf(b.cm));
+                return { ...g, sizes: pairs.map(p=>p.label), sizesCm: pairs.map(p=>p.cm) };
             });
         } else {
             useFallback();
@@ -452,7 +444,6 @@ async function loadFromSheet() {
 }
 
 function useFallback() {
-    // Use the hardcoded list, convert size labels to cm for stock lookup
     catalogProducts = FALLBACK_PRODUCTS.map(p => ({
         ...p,
         pids: [p.id],
@@ -465,28 +456,29 @@ function renderProducts() {
     const grid = document.getElementById('productGrid');
     grid.innerHTML = '';
 
-    // Size label filter
-    let filtered = currentSizeFilter === 'all'
-        ? catalogProducts
-        : catalogProducts.filter(p => p.sizes.includes(currentSizeFilter));
+    let filtered = catalogProducts.filter(p => p.sizes && p.sizes.length > 0);
 
-    // Skip products with no sizes at all
-    filtered = filtered.filter(p => p.sizes && p.sizes.length > 0 && p.sizes.some(s => s));
-
-    // Hide products where ALL sizes are 0 stock (fully sold out)
-    filtered = filtered.filter(p => {
-        if (!p.sizesCm || !p.pids) return true; // no stock data, show it
-        const hasAnyStock = p.sizes.some((label, i) => {
-            const cm = p.sizesCm ? p.sizesCm[i] : SIZE_LABEL_TO_CM[label];
-            if (!cm) return false;
-            const hasKey = p.pids.some(pid => (pid+'_'+cm) in stockData);
-            if (!hasKey) return true; // no stock data at all — show
-            return p.pids.reduce((sum, pid) => {
-                const k = pid+'_'+cm;
-                return k in stockData ? sum + stockData[k] : sum;
-            }, 0) > 0;
+    // ── FIX: Size filter now checks stock for the specific size ──
+    // A product passes the size filter only if that size has stock > 0,
+    // OR if we have no stock data yet (show it conservatively).
+    if (currentSizeFilter !== 'all') {
+        filtered = filtered.filter(p => {
+            if (!p.sizes.includes(currentSizeFilter)) return false;
+            const stock = getSizeStock(p, currentSizeFilter);
+            // null = no stock data loaded → show the product
+            // 0   = confirmed out of stock → hide it
+            return stock === null || stock > 0;
         });
-        return hasAnyStock;
+    }
+
+    // Hide products where ALL sizes are confirmed 0 stock
+    filtered = filtered.filter(p => {
+        const hasAnyStockData = p.sizes.some((label) => getSizeStock(p, label) !== null);
+        if (!hasAnyStockData) return true; // no data yet, show it
+        return p.sizes.some(label => {
+            const s = getSizeStock(p, label);
+            return s === null || s > 0;
+        });
     });
 
     // Shuffle
@@ -496,26 +488,17 @@ function renderProducts() {
         const card = document.createElement('div');
         card.className = 'product-card';
 
-        // Build size badges with stock awareness
-        const sizeBadges = product.sizes.map((label, i) => {
+        // Build size badges
+        const sizeBadges = product.sizes.map(label => {
             if (!label) return '';
-            const cm = product.sizesCm ? product.sizesCm[i] : SIZE_LABEL_TO_CM[label];
-            // Check stock across all pids for this product group
-            let totalStock = null;
-            if (cm && product.pids) {
-                totalStock = product.pids.reduce((sum, pid) => {
-                    const k = `${pid}_${cm}`;
-                    return k in stockData ? sum + stockData[k] : sum;
-                }, 0);
-                // If no stock keys found at all, show normally (no data yet)
-                const hasAnyKey = product.pids.some(pid => `${pid}_${cm}` in stockData);
-                if (!hasAnyKey) totalStock = null;
-            }
+            const totalStock = getSizeStock(product, label);
 
             if (totalStock === null) {
                 return `<span class="size-badge">${label}</span>`;
             } else if (totalStock === 0) {
-                // Check if pending restock
+                const cm = product.sizesCm
+                    ? product.sizesCm[product.sizes.indexOf(label)]
+                    : SIZE_LABEL_TO_CM[label];
                 const isPending = cm && product.pids && product.pids.some(pid => pendingStock[pid+'_'+cm]);
                 if (isPending) {
                     return `<span class="size-badge pending-restock" title="Coming soon">${label} · Pending Restock</span>`;
