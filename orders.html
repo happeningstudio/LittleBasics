@@ -280,7 +280,7 @@ tr.cat-section-hdr td{
 .log-tbl{width:100%;border-collapse:collapse;background:var(--white);min-width:960px}
 .log-tbl thead th{padding:.45rem .65rem;font-size:.62rem;font-weight:600;color:#aaa;text-transform:uppercase;letter-spacing:.08em;text-align:left;border-bottom:2px solid var(--border);white-space:nowrap;position:sticky;top:0;z-index:10;background:var(--sand-lt)}
 .log-tbl td{padding:.38rem .55rem;border-bottom:1px solid #f2ede8;vertical-align:middle;font-size:.76rem;color:var(--ink)}
-.log-tbl tbody tr:hover td{background:#faf6f2}
+.log-tbl tbody tr:hover td{filter:brightness(.95)}
 .log-tbl tbody tr.is-refunded td{opacity:.55}
 .log-tbl tbody tr.expanded-row td{background:var(--sand-lt);border-bottom:none;padding:0}
 .log-cell-edit{width:100%;border:none;background:transparent;font-size:.76rem;font-family:'DM Sans',sans-serif;color:var(--ink);padding:.1rem .2rem;border-radius:3px;transition:background .15s}
@@ -290,10 +290,17 @@ tr.cat-section-hdr td{
 .log-expand-btn{background:none;border:none;cursor:pointer;color:#bbb;font-size:.72rem;padding:.15rem .3rem;border-radius:3px;transition:all .15s;line-height:1}
 .log-expand-btn:hover{background:var(--sand-lt);color:var(--bark)}
 .log-expand-panel{padding:.65rem .85rem;border-top:1px dashed var(--border)}
+.log-tbl tbody tr.status-paid td{background:#edf7f0}
+.log-tbl tbody tr.status-packed td{background:#fff8f0}
+.log-tbl tbody tr.status-packed-shipped td{background:#edf0f7}
+.log-tbl tbody tr.status-picked-up td{background:#f5eef6}
+.log-tbl tbody tr.status-pending-shipment td{background:#fdf6ff}
+.log-tbl tbody tr.status-refunded td{background:#fdf0f0}
 .log-tbl tbody tr.status-paid td:first-child{border-left:3px solid var(--green)}
 .log-tbl tbody tr.status-packed td:first-child{border-left:3px solid var(--amber)}
 .log-tbl tbody tr.status-packed-shipped td:first-child{border-left:3px solid var(--blue)}
-.log-tbl tbody tr.status-picked-up td:first-child{border-left:3px solid var(--green)}
+.log-tbl tbody tr.status-picked-up td:first-child{border-left:3px solid #cdb2ce}
+.log-tbl tbody tr.status-pending-shipment td:first-child{border-left:3px solid #9b59b6}
 .log-tbl tbody tr.status-refunded td:first-child{border-left:3px solid var(--red)}
 
 /* ════════════════════════════
@@ -2066,7 +2073,7 @@ function renderLog(){
     tdCost.textContent=fmt(parseFloat(e.cost||0));
     tr.appendChild(tdCost);
 
-    // Ship out — editable input
+    // Ship out — editable
     const tdShip=document.createElement('td');
     tdShip.style.cssText='text-align:right';
     const inpShip=document.createElement('input');
