@@ -1519,20 +1519,14 @@ function updatePanel(){
   const phraseEl=document.getElementById('orderPhrase');
   if(tqty>0&&phraseEl){
     const totalForCustomer=revenue+shipIn;
-    // Savings = catalog regular price vs what they pay (exclude custom items from both sides)
+    // Savings = regular price total minus what they actually pay (captures bundle + sale discounts)
     let regularTotal=0;
-    let catalogRevenue=0;
     entries.forEach(([k,qty])=>{
-      const[pidStr,cm]=k.split('_');
+      const[pidStr]=k.split('_');
       const p=products.find(p=>p.pid===parseInt(pidStr));
-      if(!p) return;
-      const sale=p.saleDiscount||0;
-      const effectiveBundle=bundle&&sale===0;
-      const effectivePrice=effectiveBundle?p.bundlePrice:(sale>0?p.price-sale:p.price);
-      regularTotal+=p.price*qty;
-      catalogRevenue+=effectivePrice*qty;
+      if(p) regularTotal+=p.price*qty;
     });
-    const saved=regularTotal-catalogRevenue;
+    const saved=regularTotal-revenue;
     let phrase='The total is '+fmt(totalForCustomer)+' including shipping and tracking.';
     if(saved>0.009&&bundle) phrase+=' You saved '+fmt(saved)+' with the bundle discount!';
     phraseEl.textContent=phrase;
@@ -2072,10 +2066,33 @@ function renderLog(){
     tdCost.textContent=fmt(parseFloat(e.cost||0));
     tr.appendChild(tdCost);
 
-    // Ship out
+    // Ship out — editable input
     const tdShip=document.createElement('td');
-    tdShip.style.cssText='text-align:right;font-size:.74rem;color:#aaa';
-    tdShip.textContent=fmt(parseFloat(e.shipOut||0));
+    tdShip.style.cssText='text-align:right';
+    const inpShip=document.createElement('input');
+    inpShip.type='number';
+    inpShip.min='0';
+    inpShip.step='0.01';
+    inpShip.value=parseFloat(e.shipOut||0).toFixed(2);
+    inpShip.className='log-cell-edit';
+    inpShip.style.cssText='font-size:.74rem;color:#888;text-align:right;width:62px';
+    inpShip.title='Edit shipping paid out';
+    inpShip.onchange=function(){
+      const entry=orderLog.find(en=>en.id===e.id);
+      if(!entry) return;
+      const oldShip=parseFloat(entry.shipOut||0);
+      const newShip=parseFloat(this.value)||0;
+      entry.shipOut=newShip.toFixed(2);
+      entry.profit=(parseFloat(entry.profit||0)+oldShip-newShip).toFixed(2);
+      saveLog();
+      const profCell=tr.querySelector('.log-profit');
+      if(profCell){
+        const np=parseFloat(entry.profit);
+        profCell.textContent=fmt(np);
+        profCell.className='log-profit '+(np>=0?'pos':'neg');
+      }
+    };
+    tdShip.appendChild(inpShip);
     tr.appendChild(tdShip);
 
     // Profit
