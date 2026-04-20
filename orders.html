@@ -814,8 +814,9 @@ function doPost(e) {
             <th style="min-width:130px">Tracking</th>
             <th style="width:80px">Status</th>
             <th style="width:70px;text-align:right">Gross</th>
-            <th style="width:65px;text-align:right">Cost</th>
-            <th style="width:65px;text-align:right">Ship</th>
+            <th style="width:60px;text-align:right">Cost</th>
+            <th style="width:60px;text-align:right">Ship In</th>
+            <th style="width:60px;text-align:right">Ship Out</th>
             <th style="width:70px;text-align:right">Profit</th>
             <th style="width:64px;text-align:center">Actions</th>
           </tr>
@@ -1984,7 +1985,7 @@ function renderLog(){
   if(!tbody) return;
 
   if(!filtered.length){
-    tbody.innerHTML=`<tr><td colspan="11" class="no-data">No orders match this filter</td></tr>`;
+    tbody.innerHTML=`<tr><td colspan="12" class="no-data">No orders match this filter</td></tr>`;
     return;
   }
 
@@ -2066,17 +2067,51 @@ function renderLog(){
     tdGross.textContent=fmt(gross);
     tr.appendChild(tdGross);
 
-    // Cost
+    // Cost — read only
     const tdCost=document.createElement('td');
     tdCost.style.cssText='text-align:right;font-size:.74rem;color:#aaa';
     tdCost.textContent=fmt(parseFloat(e.cost||0));
     tr.appendChild(tdCost);
 
-    // Ship out
-    const tdShip=document.createElement('td');
-    tdShip.style.cssText='text-align:right;font-size:.74rem;color:#aaa';
-    tdShip.textContent=fmt(parseFloat(e.shipOut||0));
-    tr.appendChild(tdShip);
+    // Ship In — editable
+    const tdShipIn=document.createElement('td');
+    tdShipIn.style.cssText='text-align:right';
+    const inpShipIn=document.createElement('input');
+    inpShipIn.type='number'; inpShipIn.step='0.01'; inpShipIn.min='0';
+    inpShipIn.className='log-cell-edit';
+    inpShipIn.value=parseFloat(e.shipIn||0).toFixed(2);
+    inpShipIn.style.cssText='font-size:.72rem;text-align:right;width:58px';
+    inpShipIn.onchange=function(){
+      const entry=orderLog.find(x=>x.id===e.id);
+      if(!entry) return;
+      entry.shipIn=parseFloat(this.value)||0;
+      entry.profit=(parseFloat(entry.revenue||0)+entry.shipIn-parseFloat(entry.cost||0)-parseFloat(entry.shipOut||0)-parseFloat(entry.fee||0)).toFixed(2);
+      saveLog(); renderLog();
+      const row=document.getElementById('logexpand-'+e.id);
+      if(row&&row.style.display!=='none') row.style.display='';
+    };
+    tdShipIn.appendChild(inpShipIn);
+    tr.appendChild(tdShipIn);
+
+    // Ship Out — editable
+    const tdShipOut=document.createElement('td');
+    tdShipOut.style.cssText='text-align:right';
+    const inpShipOut=document.createElement('input');
+    inpShipOut.type='number'; inpShipOut.step='0.01'; inpShipOut.min='0';
+    inpShipOut.className='log-cell-edit';
+    inpShipOut.value=parseFloat(e.shipOut||0).toFixed(2);
+    inpShipOut.style.cssText='font-size:.72rem;text-align:right;width:58px';
+    inpShipOut.onchange=function(){
+      const entry=orderLog.find(x=>x.id===e.id);
+      if(!entry) return;
+      entry.shipOut=parseFloat(this.value)||0;
+      entry.profit=(parseFloat(entry.revenue||0)+parseFloat(entry.shipIn||0)-parseFloat(entry.cost||0)-entry.shipOut-parseFloat(entry.fee||0)).toFixed(2);
+      saveLog(); renderLog();
+      const row=document.getElementById('logexpand-'+e.id);
+      if(row&&row.style.display!=='none') row.style.display='';
+    };
+    tdShipOut.appendChild(inpShipOut);
+    tr.appendChild(tdShipOut);
 
     // Profit
     const tdProfit=document.createElement('td');
@@ -2101,7 +2136,7 @@ function renderLog(){
     trExp.className='expanded-row';
     trExp.style.display='none';
     const tdExp=document.createElement('td');
-    tdExp.setAttribute('colspan','11');
+    tdExp.setAttribute('colspan','12');
     tdExp.style.padding='0';
 
     // Build item editor rows
