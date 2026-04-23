@@ -812,7 +812,7 @@ function doPost(e) {
             <th style="min-width:140px">Address</th>
             <th style="min-width:160px">Items</th>
             <th style="min-width:130px">Tracking</th>
-            <th style="width:80px">Status</th>
+            <th style="width:100px">Status</th>
             <th style="width:70px;text-align:right">Gross</th>
             <th style="width:60px;text-align:right">Cost</th>
             <th style="width:60px;text-align:right">Ship In</th>
@@ -2088,13 +2088,21 @@ function renderLog(){
     const tdStatus=document.createElement('td');
     const selStatus=document.createElement('select');
     selStatus.className='log-cell-select';
-    ['Paid','Packed','Packed & Shipped','Picked Up','Refunded'].forEach(s=>{
+    selStatus.onchange=function(){ updateLogField(e.id,'status',this.value); renderLog(); };
+    // Use short labels in the select but store full value
+    const statusOpts=[
+      {val:'Paid',         lbl:'Paid'},
+      {val:'Packed',       lbl:'Packed'},
+      {val:'Packed & Shipped', lbl:'Shipped'},
+      {val:'Picked Up',    lbl:'Picked Up'},
+      {val:'Refunded',     lbl:'Refunded'},
+    ];
+    statusOpts.forEach(s=>{
       const opt=document.createElement('option');
-      opt.value=s; opt.textContent=s;
-      if(e.status===s) opt.selected=true;
+      opt.value=s.val; opt.textContent=s.lbl;
+      if(e.status===s.val) opt.selected=true;
       selStatus.appendChild(opt);
     });
-    selStatus.onchange=function(){ updateLogField(e.id,'status',this.value); renderLog(); };
     tdStatus.appendChild(selStatus);
     tr.appendChild(tdStatus);
 
