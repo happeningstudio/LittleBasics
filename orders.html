@@ -1541,6 +1541,43 @@ function updatePanel(){
   } else if(phraseSec){
     phraseSec.style.display='none';
   }
+
+  // ── Customer message box ──
+  const msgBox=document.getElementById('customerMsgBox');
+  const copyMsgBtn=document.getElementById('copyMsgBtn');
+  if(msgBox){
+    if(!entries.length){
+      msgBox.innerHTML='<span style="font-size:.73rem;color:#ccc">Add items to see the message</span>';
+      if(copyMsgBtn) copyMsgBtn.style.display='none';
+    } else {
+      const itemLines=entries.map(([k,qty])=>{
+        const[pidStr,cm]=k.split('_');
+        const p=products.find(p=>p.pid===parseInt(pidStr));
+        if(!p) return '';
+        return p.name+' ('+toDisplayShort(cm)+') x'+qty;
+      }).filter(Boolean).join('\n');
+      const shipIn=parseFloat(document.getElementById('fShipIn').value)||0;
+      const totalForCustomer=revenue+shipIn;
+      let msg=itemLines+'\n\nThe total is '+fmt(totalForCustomer)+' including shipping and tracking.';
+      if(saved>0.009&&bundle) msg+=' You saved '+fmt(saved)+' with the bundle discount!';
+      msgBox.style.whiteSpace='pre-wrap';
+      msgBox.textContent=msg;
+      if(copyMsgBtn) copyMsgBtn.style.display='';
+    }
+  }
+}
+
+function copyCustomerMsg(){
+  const msgBox=document.getElementById('customerMsgBox');
+  if(!msgBox) return;
+  const text=msgBox.textContent;
+  navigator.clipboard.writeText(text).catch(()=>{
+    const ta=document.createElement('textarea');ta.value=text;document.body.appendChild(ta);ta.select();
+    try{document.execCommand('copy');}catch(e){}
+    document.body.removeChild(ta);
+  });
+  const confirm=document.getElementById('msgCopyConfirm');
+  if(confirm){confirm.textContent='✓ Copied!';setTimeout(()=>confirm.textContent='',2000);}
 }
 
 async function copyAndSave(){
@@ -2073,6 +2110,10 @@ function renderLog(){
     tdCost.textContent=fmt(parseFloat(e.cost||0));
     tr.appendChild(tdCost);
 
+    // ⚠️ IMPORTANT: Ship In and Ship Out MUST remain editable inputs.
+    // Do NOT replace with static text in future updates.
+    // These are critical for correcting shipping costs after the fact.
+
     // Ship In — editable
     const tdShipIn=document.createElement('td');
     tdShipIn.style.cssText='text-align:right';
@@ -2192,14 +2233,31 @@ function toggleLogExpand(id){
   row.style.display=row.style.display==='none'?'':'none';
 }
 
+// Recalculate revenue & profit for a log entry based on current items
+function recalcLogEntry(entry){
+  const isBundle=(entry.items||[]).reduce((s,i)=>s+i.qty,0)>=5;
+  let revenue=0;
+  (entry.items||[]).forEach(i=>{
+    const p=products.find(pp=>pp.pid===i.pid);
+    if(!p) { revenue+=i.sp*i.qty; return; }
+    const sale=p.saleDiscount||0;
+    const effectiveBundle=isBundle&&sale===0;
+    const sp=effectiveBundle?p.bundlePrice:(sale>0?p.price-sale:p.price);
+    i.sp=sp; // update stored unit price too
+    revenue+=sp*i.qty;
+  });
+  entry.revenue=revenue.toFixed(2);
+  entry.profit=(revenue+parseFloat(entry.shipIn||0)-parseFloat(entry.cost||0)-parseFloat(entry.shipOut||0)-parseFloat(entry.fee||0)).toFixed(2);
+}
+
 function editLogItem(entryId, idx, newQty){
   const entry=orderLog.find(e=>e.id===entryId);
   if(!entry||!entry.items[idx]) return;
   if(newQty<=0){ removeLogItem(entryId, idx); return; }
   entry.items[idx].qty=newQty;
+  recalcLogEntry(entry);
   saveLog();
   renderLog();
-  // Re-open expand row
   const row=document.getElementById('logexpand-'+entryId);
   if(row) row.style.display='';
 }
@@ -2208,6 +2266,7 @@ function removeLogItem(entryId, idx){
   const entry=orderLog.find(e=>e.id===entryId);
   if(!entry) return;
   entry.items.splice(idx,1);
+  recalcLogEntry(entry);
   saveLog();
   renderLog();
   const row=document.getElementById('logexpand-'+entryId);
@@ -2222,9 +2281,12 @@ function addLogItem(entryId){
   const qty=parseInt(document.getElementById('addLogQty-'+entryId)?.value)||1;
   const p=products.find(pp=>pp.pid===pid);
   if(!p||!cm) return;
+  const sale=p.saleDiscount||0;
+  const sp=sale>0?p.price-sale:p.price;
   const existing=entry.items.find(i=>i.pid===pid&&i.cm===cm);
   if(existing){ existing.qty+=qty; }
-  else { entry.items.push({pid,name:p.name,color:p.color,cm,qty,sp:p.price}); }
+  else { entry.items.push({pid,name:p.name,color:p.color,cm,qty,sp}); }
+  recalcLogEntry(entry);
   saveLog();
   renderLog();
   const row=document.getElementById('logexpand-'+entryId);
