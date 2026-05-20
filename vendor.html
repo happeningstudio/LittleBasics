@@ -168,6 +168,26 @@ textarea.form-input{resize:vertical;min-height:52px}
 .select-mode .card-check-wrap{display:block}
 .tbl-check{accent-color:var(--bark);cursor:pointer;width:14px;height:14px}
 tr.selected td{background:rgba(139,115,85,.07)!important}
+
+/* ORDER PDF */
+#orderPdfModal .order-table{width:100%;border-collapse:collapse;font-size:11px}
+#orderPdfModal .order-table th{background:#f5f0ea;padding:6px 8px;text-align:left;border:1px solid #e2dbd2;font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:#8b7355}
+#orderPdfModal .order-table td{padding:6px 8px;border:1px solid #e2dbd2;vertical-align:middle}
+#orderPdfModal .order-table tr:nth-child(even) td{background:#faf8f5}
+#orderPdfModal .order-thumb{width:56px;height:56px;object-fit:cover;border-radius:3px}
+#orderPdfModal .order-input{width:60px;border:1px solid #e2dbd2;border-radius:3px;padding:3px 5px;font-size:11px;text-align:center;font-family:'DM Sans',sans-serif}
+.order-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1rem;padding-bottom:.75rem;border-bottom:2px solid #e2dbd2}
+.order-header h1{font-family:'DM Serif Display',serif;font-size:1.3rem;color:#2a2420}
+.order-header p{font-size:.72rem;color:#aaa;margin-top:.2rem}
+
+@media print {
+  body > *:not(#printArea){ display:none!important }
+  #printArea{display:block!important;position:fixed;inset:0;background:white;padding:1.5cm;z-index:99999}
+  #printArea .no-print{display:none!important}
+  #printArea .order-table{font-size:10px}
+  #printArea .order-input{border:1px solid #ccc}
+  @page{margin:1.5cm;size:A4 landscape}
+}
 ::-webkit-scrollbar{width:5px;height:5px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--sand-dk);border-radius:10px}
@@ -239,7 +259,8 @@ tr.selected td{background:rgba(139,115,85,.07)!important}
     <div class="select-bar" id="selectBar">
       <input type="checkbox" id="selectAll" style="accent-color:var(--bark);cursor:pointer" onchange="toggleSelectAll(this.checked)" title="Select all on this page">
       <span class="select-bar-count" id="selectCount">0 selected</span>
-      <button class="btn danger sm" onclick="deleteSelected()">🗑 Delete selected</button>
+      <button class="btn danger sm" onclick="deleteSelected()">🗑 Delete</button>
+      <button class="btn primary sm" onclick="exportOrderPDF()">📄 Export Order PDF</button>
       <button class="btn sm" onclick="exitSelectMode()">Cancel</button>
     </div>
     <div class="content-area" id="contentArea">
@@ -327,6 +348,30 @@ tr.selected td{background:rgba(139,115,85,.07)!important}
   </div>
 </div>
 
+
+<!-- ORDER PDF MODAL -->
+<div class="modal-backdrop" id="orderPdfModal" style="align-items:flex-start;padding:2rem 1rem;overflow-y:auto">
+  <div class="modal" style="width:860px;max-width:calc(100vw - 2rem);max-height:none">
+    <div class="modal-head no-print">
+      <h2>Order Sheet — Yiwu Yicong</h2>
+      <button class="btn ghost sm" onclick="closeModal('orderPdfModal')">✕</button>
+    </div>
+    <div class="modal-body" id="orderPdfBody" style="padding:1.25rem"></div>
+    <div class="modal-foot no-print">
+      <div style="display:flex;align-items:center;gap:.5rem;font-size:.72rem;color:#aaa;margin-right:auto">
+        <label>Store name:</label>
+        <input id="orderStoreName" class="form-input" style="width:160px;padding:.28rem .45rem" placeholder="Little Basics" value="Little Basics">
+        <label>Date:</label>
+        <input id="orderDate" class="form-input" type="date" style="width:140px;padding:.28rem .45rem">
+      </div>
+      <button class="btn sm no-print" onclick="closeModal('orderPdfModal')">Cancel</button>
+      <button class="btn primary sm no-print" onclick="printOrder()">🖨 Print / Save PDF</button>
+    </div>
+  </div>
+</div>
+
+<!-- PRINT AREA (hidden until print) -->
+<div id="printArea" style="display:none"></div>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -399,6 +444,124 @@ function deleteSelected(){
   showToast(`✓ Items deleted`);
 }
 
+
+/* ══ ORDER PDF ══ */
+function exportOrderPDF(){
+  if(!selectedIds.size){ showToast('Select items first'); return; }
+
+  // Gather selected items with their full data
+  const items = [];
+  selectedIds.forEach(k=>{
+    const [vendorId, itemId] = k.split('|');
+    const v = getVendor(vendorId); if(!v) return;
+    const it = v.items.find(i=>i.id===itemId); if(!it) return;
+    items.push({...it, _vendorName: v.name});
+  });
+
+  // Sort by category then styleNo
+  items.sort((a,b)=>{
+    if(a.category !== b.category) return a.category.localeCompare(b.category);
+    return a.styleNo.localeCompare(b.styleNo);
+  });
+
+  // Set default date
+  const today = new Date().toISOString().slice(0,10);
+  document.getElementById('orderDate').value = today;
+
+  renderOrderTable(items);
+  openModal('orderPdfModal');
+}
+
+function renderOrderTable(items){
+  const rows = items.map((it,i) => `
+    <tr>
+      <td style="text-align:center;color:#aaa;font-size:.7rem">${i+1}</td>
+      <td>${it.img ? `<img class="order-thumb" src="${it.img}">` : '<div style="width:56px;height:56px;background:#f5f0ea;border-radius:3px;display:flex;align-items:center;justify-content:center;color:#ccc">📦</div>'}</td>
+      <td><strong style="font-size:12px">${esc(it.styleNo)}</strong></td>
+      <td style="font-size:.68rem;color:#b09070">${esc(it.category||'')}</td>
+      <td style="font-size:.7rem;color:#666;max-width:120px">${esc(it.colors||'—')}</td>
+      <td style="font-size:.68rem;color:#888;max-width:160px">${esc(it.sizes||'—')}</td>
+      <td style="font-weight:600;color:#8b7355">${esc(it.price||'—')}</td>
+      <td style="text-align:center">${esc(String(it.moq||0))}</td>
+      <td><input class="order-input" type="number" min="0" value="${it.qtyOrdered||0}" placeholder="0" onchange="updateOrderQty('${it.id}', this.value)"></td>
+      <td style="font-size:.7rem;color:#888;max-width:140px">${esc(it.notes||'')}</td>
+    </tr>`).join('');
+
+  document.getElementById('orderPdfBody').innerHTML = `
+    <div class="order-header">
+      <div>
+        <h1>Purchase Order</h1>
+        <p>Vendor: <strong>Yiwu Yicong</strong> &nbsp;·&nbsp; ${items.length} items selected</p>
+      </div>
+      <div style="text-align:right;font-size:.72rem;color:#aaa">
+        <div>Store: <span id="orderStoreDisplay">Little Basics</span></div>
+        <div>Date: <span id="orderDateDisplay">${new Date().toLocaleDateString()}</span></div>
+      </div>
+    </div>
+    <table class="order-table">
+      <thead><tr>
+        <th style="width:28px">#</th>
+        <th style="width:64px">Photo</th>
+        <th style="width:80px">Style No.</th>
+        <th style="width:80px">Category</th>
+        <th>Colors</th>
+        <th>Sizes</th>
+        <th style="width:60px">Price</th>
+        <th style="width:50px">MOQ</th>
+        <th style="width:80px">Qty Order</th>
+        <th>Notes</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+      <tfoot>
+        <tr style="background:#f5f0ea">
+          <td colspan="6" style="text-align:right;font-weight:600;font-size:.75rem;color:#8b7355;padding:8px">Total items:</td>
+          <td colspan="4" style="font-weight:700;font-size:.85rem;color:#2a2420;padding:8px">${items.length} styles</td>
+        </tr>
+      </tfoot>
+    </table>
+    <div style="margin-top:1.5rem;padding-top:.75rem;border-top:1px solid #e2dbd2;font-size:.68rem;color:#ccc;display:flex;justify-content:space-between">
+      <span>Generated by Little Basics Store Manager</span>
+      <span>littlebasics.com.au</span>
+    </div>`;
+
+  // Live update store/date display
+  document.getElementById('orderStoreName').oninput = function(){
+    document.getElementById('orderStoreDisplay').textContent = this.value || 'Little Basics';
+  };
+  document.getElementById('orderDate').oninput = function(){
+    document.getElementById('orderDateDisplay').textContent = this.value ? new Date(this.value+'T00:00:00').toLocaleDateString() : '';
+  };
+}
+
+function updateOrderQty(itemId, val){
+  // Update qty in vendors data too
+  vendors.forEach(v=>{
+    const it = v.items.find(i=>i.id===itemId);
+    if(it){ it.qtyOrdered = parseInt(val)||0; }
+  });
+  save();
+}
+
+function printOrder(){
+  // Clone order content into printArea
+  const pa = document.getElementById('printArea');
+  pa.innerHTML = `<style>
+    body{font-family:'DM Sans',sans-serif}
+    table{width:100%;border-collapse:collapse;font-size:10px}
+    th{background:#f5f0ea;padding:5px 7px;text-align:left;border:1px solid #e2dbd2;font-size:9px;text-transform:uppercase;letter-spacing:.05em;color:#8b7355}
+    td{padding:5px 7px;border:1px solid #e2dbd2;vertical-align:middle}
+    tr:nth-child(even) td{background:#faf8f5}
+    img{width:52px;height:52px;object-fit:cover;border-radius:3px}
+    h1{font-size:18px;margin:0 0 4px}
+    .hdr{display:flex;justify-content:space-between;margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid #e2dbd2}
+    .hdr-r{text-align:right;font-size:10px;color:#888}
+    .footer{margin-top:12px;padding-top:8px;border-top:1px solid #e2dbd2;font-size:9px;color:#ccc;display:flex;justify-content:space-between}
+  </style>` + document.getElementById('orderPdfBody').innerHTML;
+  pa.style.display = 'block';
+  window.print();
+  pa.style.display = 'none';
+}
+
 /* ══ STORAGE ══ */
 function loadLocal(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch{return d}}
 function saveLocal(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch{}}
@@ -459,7 +622,7 @@ function filteredItems(){
     : (getVendor(activeVendorId)?.items||[]).map(it=>({...it,_vendorId:activeVendorId,_vendorName:getVendor(activeVendorId)?.name||''}));
 
   if (activeCat !== 'all') rows = rows.filter(it=>(it.category||'').trim() === activeCat.trim());
-  if (activeSeason !== 'all') rows = rows.filter(it=>(it.season||'').toLowerCase().includes(activeSeason.toLowerCase()));
+  if (activeSeason !== 'all') rows = rows.filter(it=>normSeason(it.season) === activeSeason);
   if (!document.getElementById('showHidden')?.checked) rows = rows.filter(it=>!it.hidden);
   if (searchQ) {
     const q = searchQ.toLowerCase();
@@ -473,8 +636,20 @@ function filteredItems(){
 function getCategories(){
   const s=new Set(); allItems().forEach(it=>{if(it.category)s.add(it.category);}); return [...s].sort();
 }
+function normSeason(s){
+  if(!s) return '';
+  const t = s.trim().toLowerCase();
+  if(t.includes('spring') && t.includes('autumn')) return 'Spring/Autumn';
+  if(t.includes('autumn') || t.includes('fall')) return 'Autumn';
+  if(t.includes('spring')) return 'Spring';
+  if(t.includes('summer')) return 'Summer';
+  if(t.includes('winter')) return 'Winter';
+  return s.trim();
+}
 function getSeasons(){
-  const s=new Set(); allItems().forEach(it=>{if(it.season)s.add(it.season);}); return [...s].sort();
+  const s=new Set();
+  allItems().forEach(it=>{ const n=normSeason(it.season); if(n) s.add(n); });
+  return [...s].sort();
 }
 function renderChips(){
   const cats = getCategories();
