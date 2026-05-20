@@ -7,43 +7,27 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-
 :root{
   --sand:#e8ddd0;--sand-lt:#f5f0ea;--sand-dk:#c8b89e;
   --bark:#8b7355;--bark-dk:#6e5c42;--bark-lt:#b09070;
   --ink:#2a2420;--mist:#f7f4f1;--white:#fff;
-  --border:#e2dbd2;
-  --green:#3d7a52;--red:#b84040;--amber:#c97c35;
+  --border:#e2dbd2;--green:#3d7a52;--red:#b84040;--amber:#c97c35;
   --top:52px;
   --shadow:0 1px 8px rgba(42,36,32,.07);
   --shadow-md:0 4px 20px rgba(42,36,32,.11);
 }
-
 body{font-family:'DM Sans',sans-serif;background:var(--mist);color:var(--ink);font-size:13px;line-height:1.5;min-height:100vh}
 
-/* ── TOPBAR ── */
-.topbar{
-  height:var(--top);background:var(--white);
-  border-bottom:1px solid var(--border);
-  display:flex;align-items:center;justify-content:space-between;
-  padding:0 1.25rem;position:sticky;top:0;z-index:400;gap:1rem;
-}
+/* TOPBAR */
+.topbar{height:var(--top);background:var(--white);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 1.25rem;position:sticky;top:0;z-index:400;gap:1rem}
 .topbar-left{display:flex;align-items:center;gap:.75rem}
-.topbar-logo{height:28px;display:block}
+.topbar-logo{height:28px}
 .topbar-divider{width:1px;height:20px;background:var(--border)}
-.topbar-title{font-family:'DM Serif Display',serif;font-size:.95rem;color:var(--bark);letter-spacing:.01em}
-.back-link{font-size:.72rem;color:#aaa;text-decoration:none;display:flex;align-items:center;gap:.25rem;transition:color .15s}
-.back-link:hover{color:var(--bark)}
-
+.topbar-title{font-family:'DM Serif Display',serif;font-size:.95rem;color:var(--bark)}
 .topbar-right{display:flex;align-items:center;gap:.5rem}
 
-/* ── BUTTONS ── */
-.btn{
-  padding:.32rem .75rem;font-family:'DM Sans',sans-serif;
-  font-size:.73rem;font-weight:500;border-radius:5px;
-  border:1px solid var(--border);background:var(--white);
-  cursor:pointer;color:#666;transition:all .15s;white-space:nowrap;
-}
+/* BUTTONS */
+.btn{padding:.32rem .75rem;font-family:'DM Sans',sans-serif;font-size:.73rem;font-weight:500;border-radius:5px;border:1px solid var(--border);background:var(--white);cursor:pointer;color:#666;transition:all .15s;white-space:nowrap}
 .btn:hover{border-color:var(--bark);color:var(--bark)}
 .btn.primary{background:var(--bark);color:var(--white);border-color:var(--bark)}
 .btn.primary:hover{background:var(--bark-dk)}
@@ -53,209 +37,124 @@ body{font-family:'DM Sans',sans-serif;background:var(--mist);color:var(--ink);fo
 .btn.ghost{background:transparent;border-color:transparent;color:#aaa}
 .btn.ghost:hover{color:var(--bark);border-color:var(--sand-dk);background:var(--sand-lt)}
 
-/* ── LAYOUT ── */
-.page{
-  display:grid;
-  grid-template-columns:220px 1fr;
-  height:calc(100vh - var(--top));
-  overflow:hidden;
-}
+/* LAYOUT */
+.page{display:grid;grid-template-columns:210px 1fr;height:calc(100vh - var(--top));overflow:hidden}
 
-/* ── SIDEBAR ── */
-.sidebar{
-  background:var(--white);border-right:1px solid var(--border);
-  display:flex;flex-direction:column;overflow:hidden;
-}
-.sidebar-head{
-  padding:.75rem .85rem .5rem;
-  border-bottom:1px solid var(--border);
-  flex-shrink:0;
-}
+/* SIDEBAR */
+.sidebar{background:var(--white);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
+.sidebar-head{padding:.75rem .85rem .5rem;border-bottom:1px solid var(--border);flex-shrink:0}
 .sidebar-head h3{font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:#aaa;margin-bottom:.5rem}
 .sidebar-list{flex:1;overflow-y:auto;padding:.4rem 0}
-.sidebar-item{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:.42rem .85rem;cursor:pointer;
-  font-size:.8rem;font-weight:500;color:#666;
-  border-left:2px solid transparent;
-  transition:all .12s;gap:.4rem;
-}
+.sidebar-item{display:flex;align-items:center;justify-content:space-between;padding:.42rem .85rem;cursor:pointer;font-size:.8rem;font-weight:500;color:#666;border-left:2px solid transparent;transition:all .12s;gap:.4rem}
 .sidebar-item:hover{background:var(--sand-lt);color:var(--bark)}
 .sidebar-item.active{background:var(--sand-lt);color:var(--bark);border-left-color:var(--bark);font-weight:600}
 .sidebar-item-count{font-size:.65rem;color:#bbb;background:var(--mist);padding:.1rem .35rem;border-radius:20px;flex-shrink:0}
 .sidebar-item.active .sidebar-item-count{background:var(--sand-dk);color:var(--bark-dk)}
 .sidebar-footer{padding:.6rem .85rem;border-top:1px solid var(--border);flex-shrink:0}
 
-/* ── MAIN AREA ── */
+/* MAIN */
 .main{display:flex;flex-direction:column;overflow:hidden}
 
-.toolbar{
-  display:flex;align-items:center;gap:.5rem;
-  padding:.6rem 1rem;background:var(--white);
-  border-bottom:1px solid var(--border);flex-shrink:0;flex-wrap:wrap;
-}
-
-.search-wrap{position:relative;flex:1;min-width:140px;max-width:260px}
+/* TOOLBAR */
+.toolbar{display:flex;align-items:center;gap:.5rem;padding:.55rem 1rem;background:var(--white);border-bottom:1px solid var(--border);flex-shrink:0;flex-wrap:wrap}
+.search-wrap{position:relative;flex:1;min-width:140px;max-width:240px}
 .search-wrap svg{position:absolute;left:.5rem;top:50%;transform:translateY(-50%);pointer-events:none;color:#bbb}
-.search-input{
-  width:100%;padding:.32rem .5rem .32rem 1.6rem;
-  border:1px solid var(--border);border-radius:5px;
-  font-family:'DM Sans',sans-serif;font-size:.75rem;
-  background:var(--mist);color:var(--ink);
-  transition:all .15s;
-}
+.search-input{width:100%;padding:.32rem .5rem .32rem 1.6rem;border:1px solid var(--border);border-radius:5px;font-family:'DM Sans',sans-serif;font-size:.75rem;background:var(--mist);color:var(--ink);transition:all .15s}
 .search-input:focus{outline:none;border-color:var(--bark);background:var(--white)}
 .search-input::placeholder{color:#bbb}
 
-.filter-chips{display:flex;gap:.3rem;flex-wrap:wrap}
-.chip{
-  padding:.22rem .55rem;font-family:'DM Sans',sans-serif;
-  font-size:.68rem;font-weight:500;border-radius:20px;
-  border:1px solid var(--border);background:var(--white);
-  cursor:pointer;color:#999;transition:all .12s;white-space:nowrap;
-}
+.chip{padding:.22rem .55rem;font-family:'DM Sans',sans-serif;font-size:.68rem;font-weight:500;border-radius:20px;border:1px solid var(--border);background:var(--white);cursor:pointer;color:#999;transition:all .12s;white-space:nowrap}
 .chip:hover{border-color:var(--bark);color:var(--bark)}
 .chip.on{background:var(--bark);color:var(--white);border-color:var(--bark)}
 
-.toolbar-meta{margin-left:auto;font-size:.68rem;color:#bbb;white-space:nowrap}
+/* VIEW TOGGLE */
+.view-toggle{display:flex;border:1px solid var(--border);border-radius:5px;overflow:hidden}
+.vtog{padding:.28rem .5rem;border:none;background:transparent;cursor:pointer;color:#bbb;display:flex;align-items:center;transition:all .12s}
+.vtog:hover{background:var(--sand-lt);color:var(--bark)}
+.vtog.on{background:var(--bark);color:var(--white)}
 
-/* ── TABLE AREA ── */
-.table-wrap{flex:1;overflow:auto}
+.toolbar-meta{font-size:.68rem;color:#bbb;white-space:nowrap;margin-left:auto}
 
-.vendor-table{width:100%;border-collapse:collapse;min-width:860px}
-.vendor-table thead th{
-  background:var(--sand-lt);font-size:.62rem;font-weight:600;
-  color:#aaa;text-transform:uppercase;letter-spacing:.07em;
-  padding:.4rem .6rem;border-bottom:1px solid var(--border);
-  border-right:1px solid var(--border);text-align:left;
-  white-space:nowrap;position:sticky;top:0;z-index:10;
-}
+/* CONTENT AREA */
+.content-area{flex:1;overflow-y:auto;padding:1rem}
+
+/* CARD GRID */
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:.75rem}
+
+/* CARD */
+.card{background:var(--white);border-radius:8px;box-shadow:var(--shadow);overflow:hidden;transition:box-shadow .15s;cursor:pointer;border:1px solid transparent}
+.card:hover{box-shadow:var(--shadow-md);border-color:var(--sand-dk)}
+.card.is-hidden{opacity:.4}
+.card-img{width:100%;aspect-ratio:1;object-fit:cover;background:var(--sand-lt);display:block}
+.card-img-placeholder{width:100%;aspect-ratio:1;background:var(--sand-lt);display:flex;align-items:center;justify-content:center;color:var(--sand-dk);font-size:1.5rem}
+.card-body{padding:.5rem .55rem .55rem}
+.card-style{font-size:.72rem;font-weight:700;color:var(--ink)}
+.card-cat{font-size:.62rem;color:var(--bark-lt);margin-bottom:.2rem}
+.card-colors{font-size:.65rem;color:#888;line-height:1.3;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.card-price{font-size:.78rem;font-weight:600;color:var(--bark);margin-top:.25rem}
+.card-season{display:inline-block;font-size:.58rem;font-weight:600;padding:.08rem .3rem;border-radius:3px;background:var(--sand-lt);color:var(--bark);margin-top:.2rem;text-transform:uppercase;letter-spacing:.04em}
+
+/* TABLE VIEW */
+.vendor-table{width:100%;border-collapse:collapse;min-width:800px}
+.vendor-table thead th{background:var(--sand-lt);font-size:.62rem;font-weight:600;color:#aaa;text-transform:uppercase;letter-spacing:.07em;padding:.4rem .6rem;border-bottom:1px solid var(--border);border-right:1px solid var(--border);text-align:left;white-space:nowrap;position:sticky;top:0;z-index:10}
 .vendor-table thead th:last-child{border-right:none}
-.vendor-table tbody td{
-  padding:.36rem .6rem;border-bottom:1px solid #f0ebe5;
-  border-right:1px solid #f0ebe5;font-size:.76rem;
-  vertical-align:middle;
-}
+.vendor-table tbody td{padding:.36rem .6rem;border-bottom:1px solid #f0ebe5;border-right:1px solid #f0ebe5;font-size:.76rem;vertical-align:middle}
 .vendor-table tbody td:last-child{border-right:none}
 .vendor-table tbody tr:hover td{background:var(--sand-lt)}
 .vendor-table tbody tr.is-hidden td{opacity:.35}
-.vendor-table tbody tr.is-hidden:hover td{opacity:.6}
-
-/* col widths */
-.col-style{width:90px;min-width:80px}
-.col-season{width:70px}
-.col-colors{width:110px}
-.col-sizes{width:130px}
-.col-price{width:70px}
-.col-moq{width:55px}
-.col-material{width:120px}
-.col-notes{min-width:120px}
-.col-qty{width:80px}
-.col-actions{width:70px}
-
-/* editable cell */
-.cell-edit{
-  width:100%;border:none;background:transparent;
-  font-size:.75rem;font-family:'DM Sans',sans-serif;
-  color:var(--ink);padding:.1rem .2rem;border-radius:3px;
-  resize:none;
-}
-.cell-edit:focus{
-  outline:none;background:var(--white);
-  box-shadow:0 0 0 2px var(--bark);
-}
-
-/* qty stepper */
+.tbl-thumb{width:44px;height:44px;object-fit:cover;border-radius:4px;background:var(--sand-lt)}
+.cell-edit{width:100%;border:none;background:transparent;font-size:.75rem;font-family:'DM Sans',sans-serif;color:var(--ink);padding:.1rem .2rem;border-radius:3px;resize:none}
+.cell-edit:focus{outline:none;background:var(--white);box-shadow:0 0 0 2px var(--bark)}
 .qty-stepper{display:flex;align-items:center;gap:.25rem}
-.qty-btn{
-  width:18px;height:18px;border-radius:3px;border:1px solid var(--border);
-  background:var(--white);cursor:pointer;font-size:.75rem;line-height:1;
-  color:#888;display:flex;align-items:center;justify-content:center;
-  transition:all .12s;flex-shrink:0;
-}
+.qty-btn{width:18px;height:18px;border-radius:3px;border:1px solid var(--border);background:var(--white);cursor:pointer;font-size:.75rem;color:#888;display:flex;align-items:center;justify-content:center;transition:all .12s;flex-shrink:0}
 .qty-btn:hover{border-color:var(--bark);color:var(--bark)}
 .qty-val{font-weight:600;color:var(--bark);min-width:22px;text-align:center;font-size:.8rem}
-
-/* hide toggle */
-.hide-btn{
-  padding:.15rem .35rem;border-radius:4px;border:1px solid var(--border);
-  background:transparent;cursor:pointer;font-size:.62rem;color:#bbb;
-  font-family:'DM Sans',sans-serif;transition:all .12s;white-space:nowrap;
-}
+.hide-btn{padding:.15rem .35rem;border-radius:4px;border:1px solid var(--border);background:transparent;cursor:pointer;font-size:.62rem;color:#bbb;font-family:'DM Sans',sans-serif;transition:all .12s;white-space:nowrap}
 .hide-btn:hover{border-color:var(--amber);color:var(--amber)}
 .hide-btn.is-hidden{background:var(--sand-lt);border-color:var(--sand-dk);color:#c0b0a0}
 
-.link-btn{
-  font-size:.68rem;color:var(--bark);text-decoration:none;
-  display:inline-flex;align-items:center;gap:.2rem;
-}
-.link-btn:hover{text-decoration:underline}
-
-.tag{
-  display:inline-block;padding:.1rem .35rem;border-radius:4px;
-  font-size:.62rem;font-weight:600;letter-spacing:.04em;text-transform:uppercase;
-}
-.tag-season{background:var(--sand-lt);color:var(--bark)}
-
-/* ── EMPTY STATE ── */
-.empty-state{
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  height:100%;gap:.75rem;color:#ccc;padding:3rem;text-align:center;
-}
-.empty-state svg{opacity:.3}
+/* EMPTY STATE */
+.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:.75rem;color:#ccc;padding:3rem;text-align:center}
 .empty-state h3{font-size:.9rem;font-weight:500;color:#bbb}
-.empty-state p{font-size:.75rem;color:#ccc;max-width:260px}
 
-/* ── MODAL ── */
-.modal-backdrop{
-  position:fixed;inset:0;background:rgba(42,36,32,.35);
-  z-index:900;display:flex;align-items:center;justify-content:center;
-  backdrop-filter:blur(2px);
-  opacity:0;pointer-events:none;transition:opacity .18s;
-}
+/* DETAIL MODAL */
+.modal-backdrop{position:fixed;inset:0;background:rgba(42,36,32,.4);z-index:900;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(3px);opacity:0;pointer-events:none;transition:opacity .18s}
 .modal-backdrop.open{opacity:1;pointer-events:all}
-.modal{
-  background:var(--white);border-radius:12px;box-shadow:var(--shadow-md);
-  width:480px;max-width:calc(100vw - 2rem);max-height:calc(100vh - 4rem);
-  display:flex;flex-direction:column;overflow:hidden;
-  transform:translateY(12px);transition:transform .18s;
-}
+.modal{background:var(--white);border-radius:12px;box-shadow:var(--shadow-md);width:520px;max-width:calc(100vw - 2rem);max-height:calc(100vh - 4rem);display:flex;flex-direction:column;overflow:hidden;transform:translateY(12px);transition:transform .18s}
 .modal-backdrop.open .modal{transform:translateY(0)}
-.modal-head{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:.85rem 1rem;border-bottom:1px solid var(--border);flex-shrink:0;
-}
+.modal-head{display:flex;align-items:center;justify-content:space-between;padding:.85rem 1rem;border-bottom:1px solid var(--border);flex-shrink:0}
 .modal-head h2{font-family:'DM Serif Display',serif;font-size:1.1rem;color:var(--ink)}
 .modal-body{padding:1rem;overflow-y:auto;display:flex;flex-direction:column;gap:.7rem}
-.modal-foot{
-  display:flex;align-items:center;justify-content:flex-end;gap:.5rem;
-  padding:.75rem 1rem;border-top:1px solid var(--border);flex-shrink:0;
-}
+.modal-foot{display:flex;align-items:center;justify-content:flex-end;gap:.5rem;padding:.75rem 1rem;border-top:1px solid var(--border);flex-shrink:0}
+.detail-img{width:100%;max-height:280px;object-fit:contain;border-radius:8px;background:var(--sand-lt)}
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:.6rem}
+.detail-field label{font-size:.65rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:#bbb;display:block;margin-bottom:.15rem}
+.detail-field .val{font-size:.82rem;color:var(--ink)}
+.detail-field .val.editable{border:none;background:transparent;font-family:'DM Sans',sans-serif;font-size:.82rem;color:var(--ink);width:100%;padding:.1rem .2rem;border-radius:3px}
+.detail-field .val.editable:focus{outline:none;background:var(--white);box-shadow:0 0 0 2px var(--bark)}
 
-/* form fields */
+/* VENDOR MODALS */
 .form-row{display:grid;gap:.5rem}
 .form-row.cols-2{grid-template-columns:1fr 1fr}
-.form-row.cols-3{grid-template-columns:1fr 1fr 1fr}
-label{font-size:.7rem;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:.2rem}
-.form-input{
-  width:100%;padding:.38rem .55rem;border:1px solid var(--border);
-  border-radius:5px;font-family:'DM Sans',sans-serif;font-size:.8rem;
-  color:var(--ink);background:var(--mist);transition:all .15s;
-}
+label.form-label{font-size:.7rem;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:.2rem}
+.form-input{width:100%;padding:.38rem .55rem;border:1px solid var(--border);border-radius:5px;font-family:'DM Sans',sans-serif;font-size:.8rem;color:var(--ink);background:var(--mist);transition:all .15s}
 .form-input:focus{outline:none;border-color:var(--bark);background:var(--white)}
 .form-input::placeholder{color:#ccc}
 textarea.form-input{resize:vertical;min-height:52px}
 
-/* toast */
-.toast{
-  position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(1rem);
-  background:var(--ink);color:var(--white);padding:.5rem 1rem;
-  border-radius:6px;font-size:.78rem;z-index:9999;
-  opacity:0;pointer-events:none;transition:all .2s;white-space:nowrap;
-}
+/* LOADING */
+.loading{display:flex;align-items:center;justify-content:center;height:100%;flex-direction:column;gap:.75rem;color:#bbb}
+.spinner{width:28px;height:28px;border:2px solid var(--border);border-top-color:var(--bark);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* TOAST */
+.toast{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(1rem);background:var(--ink);color:var(--white);padding:.5rem 1rem;border-radius:6px;font-size:.78rem;z-index:9999;opacity:0;pointer-events:none;transition:all .2s;white-space:nowrap}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
-/* scrollbars */
+/* PAGING */
+.pager{display:flex;align-items:center;justify-content:center;gap:.5rem;padding:.75rem;flex-shrink:0;border-top:1px solid var(--border);background:var(--white)}
+.pager span{font-size:.72rem;color:#aaa}
+
 ::-webkit-scrollbar{width:5px;height:5px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--sand-dk);border-radius:10px}
@@ -263,7 +162,6 @@ textarea.form-input{resize:vertical;min-height:52px}
 </head>
 <body>
 
-<!-- TOPBAR -->
 <div class="topbar">
   <div class="topbar-left">
     <img src="https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/LittleBasics.png" alt="Little Basics" class="topbar-logo">
@@ -277,10 +175,8 @@ textarea.form-input{resize:vertical;min-height:52px}
   </div>
 </div>
 
-<!-- PAGE LAYOUT -->
 <div class="page">
-
-  <!-- SIDEBAR: vendor list -->
+  <!-- SIDEBAR -->
   <div class="sidebar">
     <div class="sidebar-head">
       <h3>Vendors</h3>
@@ -288,25 +184,68 @@ textarea.form-input{resize:vertical;min-height:52px}
     </div>
     <div class="sidebar-list" id="sidebarList"></div>
     <div class="sidebar-footer">
-      <button class="btn ghost sm" style="width:100%" onclick="setActiveVendor('all')">📋 View all items</button>
+      <button class="btn ghost sm" style="width:100%" onclick="setActiveVendor('all')">📋 All items</button>
     </div>
   </div>
 
-  <!-- MAIN: items table -->
+  <!-- MAIN -->
   <div class="main">
     <div class="toolbar">
       <div class="search-wrap">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-        <input class="search-input" id="searchInput" type="text" placeholder="Search items…" oninput="renderTable()">
+        <input class="search-input" id="searchInput" type="text" placeholder="Search style, color, notes…" oninput="onSearch()">
       </div>
-      <div class="filter-chips" id="seasonChips"></div>
+
+      <!-- Category filter chips -->
+      <div id="catChips" style="display:flex;gap:.3rem;flex-wrap:wrap"></div>
+
+      <!-- Season filter -->
+      <div id="seasonChips" style="display:flex;gap:.3rem;flex-wrap:wrap"></div>
+
       <label style="display:flex;align-items:center;gap:.3rem;font-size:.72rem;color:#aaa;cursor:pointer;white-space:nowrap">
-        <input type="checkbox" id="showHidden" onchange="renderTable()" style="accent-color:var(--bark)"> Show hidden
+        <input type="checkbox" id="showHidden" onchange="render()" style="accent-color:var(--bark)"> Hidden
       </label>
+
       <span class="toolbar-meta" id="toolbarMeta"></span>
-      <button class="btn primary sm" onclick="openAddItem()" id="addItemBtn">+ Add Item</button>
+
+      <!-- View toggle -->
+      <div class="view-toggle">
+        <button class="vtog on" id="togCards" onclick="setView('cards')" title="Card view">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        </button>
+        <button class="vtog" id="togTable" onclick="setView('table')" title="Table view">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+      </div>
+
+      <button class="btn primary sm" id="addItemBtn" onclick="openAddItem()" style="display:none">+ Add Item</button>
     </div>
-    <div class="table-wrap" id="tableWrap"></div>
+
+    <div class="content-area" id="contentArea">
+      <div class="loading"><div class="spinner"></div><span>Loading catalog…</span></div>
+    </div>
+
+    <div class="pager" id="pager" style="display:none">
+      <button class="btn sm" id="prevBtn" onclick="changePage(-1)">← Prev</button>
+      <span id="pageInfo"></span>
+      <button class="btn sm" id="nextBtn" onclick="changePage(1)">Next →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ITEM DETAIL MODAL -->
+<div class="modal-backdrop" id="detailModal">
+  <div class="modal" style="width:480px">
+    <div class="modal-head">
+      <h2 id="detailTitle">Item Detail</h2>
+      <button class="btn ghost sm" onclick="closeModal('detailModal')">✕</button>
+    </div>
+    <div class="modal-body" id="detailBody"></div>
+    <div class="modal-foot">
+      <button class="btn danger sm" id="detailDeleteBtn" onclick="deleteCurrentItem()" style="margin-right:auto">Delete</button>
+      <button class="btn sm" onclick="closeModal('detailModal')">Close</button>
+      <button class="btn primary sm" onclick="saveDetailEdits()">Save Changes</button>
+    </div>
   </div>
 </div>
 
@@ -319,28 +258,12 @@ textarea.form-input{resize:vertical;min-height:52px}
     </div>
     <div class="modal-body">
       <input type="hidden" id="vendorModalId">
-      <div class="form-row">
-        <div>
-          <label>Vendor / Brand Name *</label>
-          <input class="form-input" id="vName" placeholder="e.g. Minymo, Liewood…">
-        </div>
-      </div>
+      <div class="form-row"><div><label class="form-label">Vendor / Brand Name *</label><input class="form-input" id="vName" placeholder="e.g. Yiwu Yicong"></div></div>
       <div class="form-row cols-2">
-        <div>
-          <label>Contact / Rep</label>
-          <input class="form-input" id="vContact" placeholder="Name or email">
-        </div>
-        <div>
-          <label>Website</label>
-          <input class="form-input" id="vWebsite" placeholder="https://…">
-        </div>
+        <div><label class="form-label">Contact / Rep</label><input class="form-input" id="vContact" placeholder="Name or email"></div>
+        <div><label class="form-label">Website</label><input class="form-input" id="vWebsite" placeholder="https://…"></div>
       </div>
-      <div class="form-row">
-        <div>
-          <label>Notes</label>
-          <textarea class="form-input" id="vNotes" placeholder="Payment terms, lead time, etc."></textarea>
-        </div>
-      </div>
+      <div class="form-row"><div><label class="form-label">Notes</label><textarea class="form-input" id="vNotes" placeholder="Payment terms, lead time…"></textarea></div></div>
     </div>
     <div class="modal-foot">
       <button class="btn danger sm" id="vendorDeleteBtn" onclick="deleteVendor()" style="margin-right:auto;display:none">Delete Vendor</button>
@@ -350,7 +273,7 @@ textarea.form-input{resize:vertical;min-height:52px}
   </div>
 </div>
 
-<!-- ADD / EDIT ITEM MODAL -->
+<!-- ADD ITEM MODAL -->
 <div class="modal-backdrop" id="itemModal">
   <div class="modal">
     <div class="modal-head">
@@ -361,292 +284,369 @@ textarea.form-input{resize:vertical;min-height:52px}
       <input type="hidden" id="itemModalVendorId">
       <input type="hidden" id="itemModalItemId">
       <div class="form-row cols-2">
-        <div>
-          <label>Style / Item No. *</label>
-          <input class="form-input" id="iStyleNo" placeholder="e.g. 13100703">
-        </div>
-        <div>
-          <label>Season</label>
-          <input class="form-input" id="iSeason" placeholder="e.g. SS25, AW25">
-        </div>
+        <div><label class="form-label">Style No. *</label><input class="form-input" id="iStyleNo" placeholder="e.g. BP229"></div>
+        <div><label class="form-label">Category</label><input class="form-input" id="iCategory" placeholder="e.g. Baby Pant"></div>
       </div>
       <div class="form-row cols-2">
-        <div>
-          <label>Vendor</label>
-          <select class="form-input" id="iVendorSelect"></select>
-        </div>
-        <div>
-          <label>Price</label>
-          <input class="form-input" id="iPrice" placeholder="e.g. $18.50">
-        </div>
+        <div><label class="form-label">Season</label><input class="form-input" id="iSeason" placeholder="Summer, Winter…"></div>
+        <div><label class="form-label">Price</label><input class="form-input" id="iPrice" placeholder="$0.00"></div>
       </div>
       <div class="form-row cols-2">
-        <div>
-          <label>Colors</label>
-          <input class="form-input" id="iColors" placeholder="e.g. Navy, Sage, Cream">
-        </div>
-        <div>
-          <label>MOQ</label>
-          <input class="form-input" id="iMoq" type="number" min="0" placeholder="0">
-        </div>
+        <div><label class="form-label">Colors</label><input class="form-input" id="iColors" placeholder="beige, pink, white…"></div>
+        <div><label class="form-label">MOQ</label><input class="form-input" id="iMoq" type="number" min="0" placeholder="0"></div>
       </div>
-      <div class="form-row">
-        <div>
-          <label>Sizes</label>
-          <input class="form-input" id="iSizes" placeholder="e.g. 62, 68, 74, 80, 86, 92">
-        </div>
-      </div>
-      <div class="form-row">
-        <div>
-          <label>Material</label>
-          <input class="form-input" id="iMaterial" placeholder="e.g. 100% GOTS Cotton">
-        </div>
-      </div>
-      <div class="form-row">
-        <div>
-          <label>Link / Reference</label>
-          <input class="form-input" id="iLink" placeholder="https://…">
-        </div>
-      </div>
-      <div class="form-row">
-        <div>
-          <label>Notes</label>
-          <textarea class="form-input" id="iNotes" placeholder="Restock priority, colour notes, etc."></textarea>
-        </div>
-      </div>
+      <div class="form-row"><div><label class="form-label">Sizes</label><input class="form-input" id="iSizes" placeholder="66cm(3-6M), 73cm(6-12M)…"></div></div>
+      <div class="form-row"><div><label class="form-label">Material</label><input class="form-input" id="iMaterial" placeholder="100% Cotton…"></div></div>
+      <div class="form-row"><div><label class="form-label">Notes</label><textarea class="form-input" id="iNotes"></textarea></div></div>
     </div>
     <div class="modal-foot">
-      <button class="btn danger sm" id="itemDeleteBtn" onclick="deleteItem()" style="margin-right:auto;display:none">Delete</button>
       <button class="btn sm" onclick="closeModal('itemModal')">Cancel</button>
       <button class="btn primary sm" onclick="saveItem()">Save Item</button>
     </div>
   </div>
 </div>
 
-<!-- TOAST -->
 <div class="toast" id="toast"></div>
 
 <script>
-/* ══════════════════════════════════════════
-   DATA
-══════════════════════════════════════════ */
+/* ══ STORAGE ══ */
 function loadLocal(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch{return d}}
 function saveLocal(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch{}}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
 
-let vendors = loadLocal('lb_vendors_v2', []);
-let activeVendorId = vendors.length ? vendors[0].id : 'all';
+/* ══ STATE ══ */
+let vendors = [];
+let activeVendorId = 'all';
+let activeCat = 'all';
 let activeSeason = 'all';
+let viewMode = 'cards';  // 'cards' | 'table'
+let page = 0;
+const PAGE_SIZE = 80;
+let searchQ = '';
+let _searchTimer = null;
+let _detailItem = null; // currently open item
 
-function save(){ saveLocal('lb_vendors_v2', vendors); }
-function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+/* ══ BOOT ══ */
+window.addEventListener('DOMContentLoaded', async () => {
+  // Try localStorage first
+  const saved = loadLocal('lb_vendors_v2', null);
+  if (saved && saved.length) {
+    vendors = saved;
+    boot();
+    return;
+  }
+  // Try loading the companion JSON
+  try {
+    const r = await fetch('littlebasics-vendors.json');
+    if (r.ok) {
+      const data = await r.json();
+      if (data.vendors) { vendors = data.vendors; saveLocal('lb_vendors_v2', vendors); }
+    }
+  } catch(e) {}
+  boot();
+});
 
+function boot() {
+  if (vendors.length) activeVendorId = vendors[0].id;
+  renderSidebar();
+  renderChips();
+  render();
+}
+
+function save() { saveLocal('lb_vendors_v2', vendors); }
 function getVendor(id){ return vendors.find(v=>v.id===id); }
+
+/* ══ ALL ITEMS (flat) ══ */
 function allItems(){
   const arr=[];
   vendors.forEach(v=>v.items.forEach(it=>arr.push({...it,_vendorId:v.id,_vendorName:v.name})));
   return arr;
 }
 
-/* ══════════════════════════════════════════
-   RENDER SIDEBAR
-══════════════════════════════════════════ */
-function renderSidebar(){
-  const el=document.getElementById('sidebarList');
-  if(!vendors.length){
-    el.innerHTML='<div style="padding:.75rem .85rem;font-size:.75rem;color:#ccc">No vendors yet.</div>';
-    return;
+/* ══ FILTERED ITEMS ══ */
+function filteredItems(){
+  let rows = activeVendorId==='all' ? allItems()
+    : (getVendor(activeVendorId)?.items||[]).map(it=>({...it,_vendorId:activeVendorId,_vendorName:getVendor(activeVendorId)?.name||''}));
+
+  if (activeCat !== 'all') rows = rows.filter(it=>(it.category||'')=== activeCat);
+  if (activeSeason !== 'all') rows = rows.filter(it=>(it.season||'').toLowerCase().includes(activeSeason.toLowerCase()));
+  if (!document.getElementById('showHidden')?.checked) rows = rows.filter(it=>!it.hidden);
+  if (searchQ) {
+    const q = searchQ.toLowerCase();
+    rows = rows.filter(it=>[it.styleNo,it.colors,it.category,it.season,it.notes,it.material,it._vendorName]
+      .some(f=>(f||'').toLowerCase().includes(q)));
   }
-  el.innerHTML=vendors.map(v=>{
-    const count=v.items.filter(i=>!i.hidden).length;
-    const total=v.items.length;
-    return `<div class="sidebar-item${activeVendorId===v.id?' active':''}" onclick="setActiveVendor('${v.id}')">
-      <span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(v.name)}</span>
-      <span class="sidebar-item-count" title="${total} total">${count}</span>
-      <button class="btn ghost sm" style="padding:.1rem .3rem;font-size:.65rem" onclick="event.stopPropagation();openEditVendor('${v.id}')" title="Edit vendor">✎</button>
-    </div>`;
-  }).join('');
+  return rows;
 }
 
-/* ══════════════════════════════════════════
-   RENDER TABLE
-══════════════════════════════════════════ */
+/* ══ CHIPS ══ */
+function getCategories(){
+  const s=new Set(); allItems().forEach(it=>{if(it.category)s.add(it.category);}); return [...s].sort();
+}
 function getSeasons(){
-  const s=new Set();
-  vendors.forEach(v=>v.items.forEach(i=>{ if(i.season)s.add(i.season); }));
-  return [...s].sort();
+  const s=new Set(); allItems().forEach(it=>{if(it.season)s.add(it.season);}); return [...s].sort();
+}
+function renderChips(){
+  const cats = getCategories();
+  const seasons = getSeasons();
+  const cc = document.getElementById('catChips');
+  const sc = document.getElementById('seasonChips');
+
+  cc.innerHTML = cats.length
+    ? `<button class="chip${activeCat==='all'?' on':''}" onclick="setCat('all')">All types</button>`
+      + cats.map(c=>`<button class="chip${activeCat===c?' on':''}" onclick="setCat(${JSON.stringify(c)})">${c.replace('Baby ','')}</button>`).join('')
+    : '';
+
+  sc.innerHTML = seasons.length > 1
+    ? `<button class="chip${activeSeason==='all'?' on':''}" onclick="setSeason('all')">All seasons</button>`
+      + seasons.map(s=>`<button class="chip${activeSeason===s?' on':''}" onclick="setSeason(${JSON.stringify(s)})">${s}</button>`).join('')
+    : '';
+}
+function setCat(c){ activeCat=c; page=0; renderChips(); render(); }
+function setSeason(s){ activeSeason=s; page=0; renderChips(); render(); }
+
+/* ══ SEARCH ══ */
+function onSearch(){
+  clearTimeout(_searchTimer);
+  _searchTimer = setTimeout(()=>{ searchQ=document.getElementById('searchInput').value; page=0; render(); }, 220);
 }
 
-function renderSeasonChips(){
-  const seasons=getSeasons();
-  const el=document.getElementById('seasonChips');
-  if(!seasons.length){el.innerHTML='';return;}
-  el.innerHTML=`<button class="chip${activeSeason==='all'?' on':''}" onclick="setSeason('all')">All</button>`
-    +seasons.map(s=>`<button class="chip${activeSeason===s?' on':''}" onclick="setSeason('${s}')">${esc(s)}</button>`).join('');
+/* ══ VIEW MODE ══ */
+function setView(v){
+  viewMode=v;
+  document.getElementById('togCards').classList.toggle('on',v==='cards');
+  document.getElementById('togTable').classList.toggle('on',v==='table');
+  page=0; render();
 }
 
-function setSeason(s){ activeSeason=s; renderSeasonChips(); renderTable(); }
+/* ══ RENDER ══ */
+function render(){
+  const rows = filteredItems();
+  const total = rows.length;
+  const allCount = activeVendorId==='all' ? allItems().length : (getVendor(activeVendorId)?.items.length||0);
+  document.getElementById('toolbarMeta').textContent = `${total} of ${allCount}`;
+  document.getElementById('addItemBtn').style.display = activeVendorId==='all' ? 'none' : '';
 
-function renderTable(){
-  const search=(document.getElementById('searchInput')?.value||'').toLowerCase();
-  const showHidden=document.getElementById('showHidden')?.checked;
-  const wrap=document.getElementById('tableWrap');
+  const area = document.getElementById('contentArea');
 
-  // Get items for active vendor
-  let rows;
-  if(activeVendorId==='all'){
-    rows=allItems();
+  if (!vendors.length){
+    area.innerHTML=`<div class="empty-state"><h3>No vendors yet</h3><p>Click "+ Add Vendor" to get started, then import your catalog JSON.</p></div>`;
+    document.getElementById('pager').style.display='none';
+    return;
+  }
+  if (!rows.length){
+    area.innerHTML=`<div class="empty-state"><h3>No items found</h3><p>${searchQ?'Try a different search term.':'Nothing matches these filters.'}</p></div>`;
+    document.getElementById('pager').style.display='none';
+    return;
+  }
+
+  const totalPages = Math.ceil(rows.length / PAGE_SIZE);
+  if (page >= totalPages) page = totalPages-1;
+  const pageRows = rows.slice(page*PAGE_SIZE, (page+1)*PAGE_SIZE);
+
+  if (viewMode==='cards'){
+    area.innerHTML = `<div class="card-grid">${pageRows.map(it=>cardHTML(it)).join('')}</div>`;
   } else {
-    const v=getVendor(activeVendorId);
-    rows=v?(v.items.map(it=>({...it,_vendorId:v.id,_vendorName:v.name}))):[]; 
+    area.innerHTML = `<table class="vendor-table"><thead><tr>
+      ${activeVendorId==='all'?'<th style="width:80px">Vendor</th>':''}
+      <th style="width:52px">Photo</th>
+      <th style="width:90px">Style No.</th>
+      <th style="width:90px">Category</th>
+      <th style="width:70px">Season</th>
+      <th>Colors</th>
+      <th style="width:160px">Sizes</th>
+      <th style="width:65px">Price</th>
+      <th style="width:80px">Qty Ordered</th>
+      <th style="width:90px">Actions</th>
+    </tr></thead><tbody>${pageRows.map(it=>rowHTML(it)).join('')}</tbody></table>`;
   }
 
-  // Season filter
-  if(activeSeason!=='all') rows=rows.filter(it=>it.season===activeSeason);
-
-  // Search
-  if(search){
-    rows=rows.filter(it=>[it.styleNo,it.colors,it.sizes,it.material,it.notes,it._vendorName,it.season]
-      .some(f=>(f||'').toLowerCase().includes(search)));
-  }
-
-  // Hidden filter
-  const visRows = showHidden ? rows : rows.filter(it=>!it.hidden);
-
-  // Update meta
-  const allCount=activeVendorId==='all'?allItems().length:(getVendor(activeVendorId)?.items.length||0);
-  document.getElementById('toolbarMeta').textContent=`${visRows.length} of ${allCount} items`;
-  document.getElementById('addItemBtn').style.display=activeVendorId==='all'?'none':'';
-
-  // Empty state
-  if(!vendors.length){
-    wrap.innerHTML=`<div class="empty-state">
-      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
-      <h3>No vendors yet</h3>
-      <p>Click "+ Add Vendor" in the sidebar to get started.</p>
-    </div>`;
-    return;
-  }
-
-  if(!visRows.length){
-    wrap.innerHTML=`<div class="empty-state">
-      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-      <h3>No items found</h3>
-      <p>${search?'Try a different search term.':'Add items to this vendor using the button above.'}</p>
-    </div>`;
-    return;
-  }
-
-  const showVendorCol = activeVendorId==='all';
-
-  wrap.innerHTML=`<table class="vendor-table">
-    <thead><tr>
-      ${showVendorCol?'<th style="width:90px">Vendor</th>':''}
-      <th class="col-style">Style No.</th>
-      <th class="col-season">Season</th>
-      <th class="col-colors">Colors</th>
-      <th class="col-sizes">Sizes</th>
-      <th class="col-price">Price</th>
-      <th class="col-moq">MOQ</th>
-      <th class="col-material">Material</th>
-      <th class="col-notes">Notes</th>
-      <th class="col-qty">Qty Ordered</th>
-      <th class="col-actions">Actions</th>
-    </tr></thead>
-    <tbody>${visRows.map(it=>rowHTML(it, showVendorCol, showHidden)).join('')}</tbody>
-  </table>`;
+  // Pager
+  const pager = document.getElementById('pager');
+  pager.style.display = totalPages > 1 ? '' : 'none';
+  document.getElementById('pageInfo').textContent = `Page ${page+1} of ${totalPages}  (${rows.length} items)`;
+  document.getElementById('prevBtn').disabled = page===0;
+  document.getElementById('nextBtn').disabled = page>=totalPages-1;
 }
 
-function rowHTML(it, showVendorCol, showHidden){
-  const hiddenClass = it.hidden ? ' is-hidden' : '';
-  return `<tr class="${hiddenClass}" data-id="${it.id}" data-vendor="${it._vendorId}">
-    ${showVendorCol?`<td><span style="font-size:.7rem;color:var(--bark-lt);font-weight:500">${esc(it._vendorName)}</span></td>`:''}
-    <td class="col-style">
-      <span style="font-weight:600;font-size:.78rem">${esc(it.styleNo)}</span>
-    </td>
-    <td class="col-season">
-      ${it.season?`<span class="tag tag-season">${esc(it.season)}</span>`:'<span style="color:#ccc">—</span>'}
-    </td>
-    <td class="col-colors">
-      <textarea class="cell-edit" rows="1" style="min-height:24px" onchange="updateField('${it._vendorId}','${it.id}','colors',this.value)" onfocus="autoGrow(this)" oninput="autoGrow(this)">${esc(it.colors)}</textarea>
-    </td>
-    <td class="col-sizes">
-      <textarea class="cell-edit" rows="1" style="min-height:24px" onchange="updateField('${it._vendorId}','${it.id}','sizes',this.value)" onfocus="autoGrow(this)" oninput="autoGrow(this)">${esc(it.sizes)}</textarea>
-    </td>
-    <td class="col-price">
-      <input class="cell-edit" type="text" value="${esc(it.price)}" onchange="updateField('${it._vendorId}','${it.id}','price',this.value)">
-    </td>
-    <td class="col-moq" style="text-align:center">
-      <input class="cell-edit" type="number" min="0" value="${it.moq||0}" style="width:42px;text-align:center" onchange="updateField('${it._vendorId}','${it.id}','moq',parseInt(this.value)||0)">
-    </td>
-    <td class="col-material">
-      <textarea class="cell-edit" rows="1" style="min-height:24px" onchange="updateField('${it._vendorId}','${it.id}','material',this.value)" onfocus="autoGrow(this)" oninput="autoGrow(this)">${esc(it.material)}</textarea>
-    </td>
-    <td class="col-notes">
-      <textarea class="cell-edit" rows="1" style="min-height:24px" onchange="updateField('${it._vendorId}','${it.id}','notes',this.value)" onfocus="autoGrow(this)" oninput="autoGrow(this)">${esc(it.notes)}</textarea>
-    </td>
-    <td class="col-qty">
+function cardHTML(it){
+  const imgTag = it.img
+    ? `<img class="card-img" src="${it.img}" alt="${esc(it.styleNo)}" loading="lazy">`
+    : `<div class="card-img-placeholder">📦</div>`;
+  return `<div class="card${it.hidden?' is-hidden':''}" onclick="openDetail('${it._vendorId}','${it.id}')">
+    ${imgTag}
+    <div class="card-body">
+      <div class="card-cat">${esc(it.category||'')}</div>
+      <div class="card-style">${esc(it.styleNo)}</div>
+      <div class="card-colors">${esc(it.colors||'—')}</div>
+      <div class="card-price">${esc(it.price||'')}</div>
+      ${it.season?`<span class="card-season">${esc(it.season)}</span>`:''}
+    </div>
+  </div>`;
+}
+
+function rowHTML(it){
+  const thumb = it.img
+    ? `<img class="tbl-thumb" src="${it.img}" alt="" loading="lazy">`
+    : `<div class="tbl-thumb" style="display:flex;align-items:center;justify-content:center;color:#ccc">📦</div>`;
+  return `<tr class="${it.hidden?'is-hidden':''}" onclick="openDetail('${it._vendorId}','${it.id}')" style="cursor:pointer">
+    ${activeVendorId==='all'?`<td><span style="font-size:.7rem;color:var(--bark-lt);font-weight:500">${esc(it._vendorName)}</span></td>`:''}
+    <td>${thumb}</td>
+    <td><strong>${esc(it.styleNo)}</strong></td>
+    <td style="font-size:.72rem;color:var(--bark-lt)">${esc(it.category||'')}</td>
+    <td><span style="font-size:.65rem;background:var(--sand-lt);padding:.1rem .3rem;border-radius:3px;color:var(--bark)">${esc(it.season||'')}</span></td>
+    <td style="font-size:.72rem;color:#888">${esc(it.colors||'')}</td>
+    <td style="font-size:.68rem;color:#aaa">${esc(it.sizes||'')}</td>
+    <td style="font-weight:600;color:var(--bark)">${esc(it.price||'')}</td>
+    <td onclick="event.stopPropagation()">
       <div class="qty-stepper">
         <button class="qty-btn" onclick="changeQty('${it._vendorId}','${it.id}',-1)">−</button>
-        <span class="qty-val">${it.qtyOrdered||0}</span>
+        <span class="qty-val" id="qty-${it.id}">${it.qtyOrdered||0}</span>
         <button class="qty-btn" onclick="changeQty('${it._vendorId}','${it.id}',1)">+</button>
       </div>
     </td>
-    <td class="col-actions" style="white-space:nowrap">
+    <td onclick="event.stopPropagation()">
       <button class="hide-btn${it.hidden?' is-hidden':''}" onclick="toggleHide('${it._vendorId}','${it.id}')">${it.hidden?'Hidden':'Visible'}</button>
-      ${it.link?`<a href="${esc(it.link)}" target="_blank" class="link-btn" style="margin-top:.2rem;display:block">↗ Link</a>`:''}
     </td>
   </tr>`;
 }
 
-function autoGrow(el){
-  el.style.height='auto';
-  el.style.height=el.scrollHeight+'px';
+function changePage(d){
+  page = Math.max(0, page+d);
+  render();
+  document.getElementById('contentArea').scrollTop=0;
 }
 
-/* ══════════════════════════════════════════
-   DATA MUTATIONS
-══════════════════════════════════════════ */
-function updateField(vendorId, itemId, field, val){
+/* ══ SIDEBAR ══ */
+function renderSidebar(){
+  const el=document.getElementById('sidebarList');
+  if(!vendors.length){ el.innerHTML='<div style="padding:.75rem .85rem;font-size:.75rem;color:#ccc">No vendors yet.</div>'; return; }
+  el.innerHTML=vendors.map(v=>{
+    const count=v.items.filter(i=>!i.hidden).length;
+    return `<div class="sidebar-item${activeVendorId===v.id?' active':''}" onclick="setActiveVendor('${v.id}')">
+      <span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(v.name)}</span>
+      <span class="sidebar-item-count">${count}</span>
+      <button class="btn ghost sm" style="padding:.1rem .3rem;font-size:.65rem" onclick="event.stopPropagation();openEditVendor('${v.id}')" title="Edit">✎</button>
+    </div>`;
+  }).join('');
+}
+
+function setActiveVendor(id){ activeVendorId=id; activeCat='all'; activeSeason='all'; page=0; renderSidebar(); renderChips(); render(); }
+
+/* ══ DETAIL MODAL ══ */
+function openDetail(vendorId, itemId){
+  const v=getVendor(vendorId); if(!v)return;
+  const it=v.items.find(i=>i.id===itemId); if(!it)return;
+  _detailItem={vendorId,itemId};
+
+  document.getElementById('detailTitle').textContent=`${it.styleNo} — ${it.category||''}`;
+
+  const body=document.getElementById('detailBody');
+  const imgTag=it.img?`<img class="detail-img" src="${it.img}" alt="${esc(it.styleNo)}">`
+    :`<div style="height:180px;background:var(--sand-lt);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#ccc;font-size:2rem">📦</div>`;
+
+  body.innerHTML=`
+    ${imgTag}
+    <div class="detail-grid">
+      <div class="detail-field"><label>Style No.</label><div class="val">${esc(it.styleNo)}</div></div>
+      <div class="detail-field"><label>Category</label><div class="val">${esc(it.category||'')}</div></div>
+      <div class="detail-field"><label>Price</label><input class="val editable" id="d-price" value="${esc(it.price||'')}"></div>
+      <div class="detail-field"><label>Season</label><input class="val editable" id="d-season" value="${esc(it.season||'')}"></div>
+      <div class="detail-field"><label>MOQ</label><input class="val editable" id="d-moq" type="number" value="${it.moq||0}"></div>
+      <div class="detail-field"><label>Qty Ordered</label>
+        <div style="display:flex;align-items:center;gap:.4rem">
+          <button class="qty-btn" onclick="detailQty(-1)">−</button>
+          <span class="qty-val" id="d-qty">${it.qtyOrdered||0}</span>
+          <button class="qty-btn" onclick="detailQty(1)">+</button>
+        </div>
+      </div>
+    </div>
+    <div class="detail-field"><label>Colors</label><input class="val editable" id="d-colors" value="${esc(it.colors||'')}"></div>
+    <div class="detail-field"><label>Sizes</label><input class="val editable" id="d-sizes" value="${esc(it.sizes||'')}"></div>
+    <div class="detail-field"><label>Material</label><input class="val editable" id="d-material" value="${esc(it.material||'')}"></div>
+    <div class="detail-field"><label>Notes</label><textarea class="val editable" id="d-notes" rows="2">${esc(it.notes||'')}</textarea></div>
+    <div class="detail-field"><label>Link</label><input class="val editable" id="d-link" value="${esc(it.link||'')}"></div>
+    <div style="display:flex;align-items:center;gap:.5rem;justify-content:flex-end">
+      <button class="hide-btn${it.hidden?' is-hidden':''}" id="d-hide" onclick="detailToggleHide()">${it.hidden?'Hidden':'Visible'}</button>
+    </div>`;
+
+  openModal('detailModal');
+}
+
+let _detailQtyLocal = 0;
+function detailQty(d){
+  if(!_detailItem)return;
+  const {vendorId,itemId}=_detailItem;
+  const v=getVendor(vendorId);const it=v?.items.find(i=>i.id===itemId);if(!it)return;
+  it.qtyOrdered=Math.max(0,(it.qtyOrdered||0)+d);
+  save(); render();
+  document.getElementById('d-qty').textContent=it.qtyOrdered;
+}
+
+function detailToggleHide(){
+  if(!_detailItem)return;
+  const {vendorId,itemId}=_detailItem;
+  const v=getVendor(vendorId);const it=v?.items.find(i=>i.id===itemId);if(!it)return;
+  it.hidden=!it.hidden;
+  save(); render();
+  const btn=document.getElementById('d-hide');
+  btn.textContent=it.hidden?'Hidden':'Visible';
+  btn.classList.toggle('is-hidden',it.hidden);
+}
+
+function saveDetailEdits(){
+  if(!_detailItem)return;
+  const {vendorId,itemId}=_detailItem;
+  const v=getVendor(vendorId);const it=v?.items.find(i=>i.id===itemId);if(!it)return;
+  it.price    = document.getElementById('d-price')?.value.trim()||it.price;
+  it.season   = document.getElementById('d-season')?.value.trim()||it.season;
+  it.moq      = parseInt(document.getElementById('d-moq')?.value)||0;
+  it.colors   = document.getElementById('d-colors')?.value.trim()||it.colors;
+  it.sizes    = document.getElementById('d-sizes')?.value.trim()||it.sizes;
+  it.material = document.getElementById('d-material')?.value.trim()||'';
+  it.notes    = document.getElementById('d-notes')?.value.trim()||'';
+  it.link     = document.getElementById('d-link')?.value.trim()||'';
+  save(); render();
+  closeModal('detailModal');
+  showToast('✓ Item updated');
+}
+
+function deleteCurrentItem(){
+  if(!_detailItem)return;
+  const {vendorId,itemId}=_detailItem;
   const v=getVendor(vendorId);if(!v)return;
   const it=v.items.find(i=>i.id===itemId);if(!it)return;
-  it[field]=val;
-  save();
+  if(!confirm(`Delete ${it.styleNo}?`))return;
+  v.items=v.items.filter(i=>i.id!==itemId);
+  save(); renderSidebar(); renderChips(); render();
+  closeModal('detailModal'); showToast('Item deleted');
 }
 
-function changeQty(vendorId, itemId, delta){
+/* ══ MUTATIONS ══ */
+function changeQty(vendorId,itemId,delta){
   const v=getVendor(vendorId);if(!v)return;
   const it=v.items.find(i=>i.id===itemId);if(!it)return;
   it.qtyOrdered=Math.max(0,(it.qtyOrdered||0)+delta);
   save();
-  // update just the qty display
-  const row=document.querySelector(`tr[data-id="${itemId}"]`);
-  if(row){const qv=row.querySelector('.qty-val');if(qv)qv.textContent=it.qtyOrdered;}
+  const el=document.getElementById('qty-'+itemId);if(el)el.textContent=it.qtyOrdered;
 }
 
-function toggleHide(vendorId, itemId){
+function toggleHide(vendorId,itemId){
   const v=getVendor(vendorId);if(!v)return;
   const it=v.items.find(i=>i.id===itemId);if(!it)return;
   it.hidden=!it.hidden;
-  save();
-  renderSidebar();
-  renderTable();
+  save(); renderSidebar(); render();
 }
 
-/* ══════════════════════════════════════════
-   VENDOR MODAL
-══════════════════════════════════════════ */
+/* ══ VENDOR MODAL ══ */
 function openAddVendor(){
   document.getElementById('vendorModalTitle').textContent='Add Vendor';
   document.getElementById('vendorModalId').value='';
-  document.getElementById('vName').value='';
-  document.getElementById('vContact').value='';
-  document.getElementById('vWebsite').value='';
-  document.getElementById('vNotes').value='';
+  ['vName','vContact','vWebsite','vNotes'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('vendorDeleteBtn').style.display='none';
   openModal('vendorModal');
   setTimeout(()=>document.getElementById('vName').focus(),80);
 }
-
 function openEditVendor(id){
   const v=getVendor(id);if(!v)return;
   document.getElementById('vendorModalTitle').textContent='Edit Vendor';
@@ -658,161 +658,64 @@ function openEditVendor(id){
   document.getElementById('vendorDeleteBtn').style.display='';
   openModal('vendorModal');
 }
-
 function saveVendor(){
   const name=document.getElementById('vName').value.trim();
-  if(!name){alert('Vendor name is required.');return;}
+  if(!name){alert('Name required.');return;}
   const id=document.getElementById('vendorModalId').value;
   if(id){
     const v=getVendor(id);
     if(v){v.name=name;v.contact=document.getElementById('vContact').value.trim();v.website=document.getElementById('vWebsite').value.trim();v.notes=document.getElementById('vNotes').value.trim();}
   } else {
-    vendors.push({id:uid(),name,contact:document.getElementById('vContact').value.trim(),website:document.getElementById('vWebsite').value.trim(),notes:document.getElementById('vNotes').value.trim(),items:[]});
-    activeVendorId=vendors[vendors.length-1].id;
+    const nv={id:uid(),name,contact:document.getElementById('vContact').value.trim(),website:document.getElementById('vWebsite').value.trim(),notes:document.getElementById('vNotes').value.trim(),items:[]};
+    vendors.push(nv); activeVendorId=nv.id;
   }
-  save();
-  closeModal('vendorModal');
-  renderSidebar();
-  renderSeasonChips();
-  renderTable();
+  save(); closeModal('vendorModal'); renderSidebar(); renderChips(); render();
   showToast('✓ Vendor saved');
 }
-
 function deleteVendor(){
-  const id=document.getElementById('vendorModalId').value;
-  if(!id)return;
-  const v=getVendor(id);
-  if(!v)return;
-  if(!confirm(`Delete vendor "${v.name}" and all ${v.items.length} items? This cannot be undone.`))return;
+  const id=document.getElementById('vendorModalId').value;if(!id)return;
+  const v=getVendor(id);if(!v)return;
+  if(!confirm(`Delete "${v.name}" and all ${v.items.length} items?`))return;
   vendors=vendors.filter(x=>x.id!==id);
   activeVendorId=vendors.length?vendors[0].id:'all';
-  save();
-  closeModal('vendorModal');
-  renderSidebar();
-  renderSeasonChips();
-  renderTable();
+  save(); closeModal('vendorModal'); renderSidebar(); renderChips(); render();
   showToast('Vendor deleted');
 }
 
-/* ══════════════════════════════════════════
-   ITEM MODAL
-══════════════════════════════════════════ */
+/* ══ ITEM MODAL ══ */
 function openAddItem(){
   if(activeVendorId==='all')return;
   const v=getVendor(activeVendorId);if(!v)return;
   document.getElementById('itemModalTitle').textContent='Add Item — '+v.name;
   document.getElementById('itemModalVendorId').value=activeVendorId;
   document.getElementById('itemModalItemId').value='';
-  ['iStyleNo','iSeason','iColors','iSizes','iPrice','iMaterial','iLink','iNotes'].forEach(id=>document.getElementById(id).value='');
+  ['iStyleNo','iCategory','iSeason','iPrice','iColors','iSizes','iMaterial','iNotes'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('iMoq').value='0';
-  populateVendorSelect(activeVendorId);
-  document.getElementById('itemDeleteBtn').style.display='none';
   openModal('itemModal');
   setTimeout(()=>document.getElementById('iStyleNo').focus(),80);
 }
-
-function openEditItem(vendorId, itemId){
-  const v=getVendor(vendorId);if(!v)return;
-  const it=v.items.find(i=>i.id===itemId);if(!it)return;
-  document.getElementById('itemModalTitle').textContent='Edit Item';
-  document.getElementById('itemModalVendorId').value=vendorId;
-  document.getElementById('itemModalItemId').value=itemId;
-  document.getElementById('iStyleNo').value=it.styleNo||'';
-  document.getElementById('iSeason').value=it.season||'';
-  document.getElementById('iColors').value=it.colors||'';
-  document.getElementById('iSizes').value=it.sizes||'';
-  document.getElementById('iPrice').value=it.price||'';
-  document.getElementById('iMoq').value=it.moq||0;
-  document.getElementById('iMaterial').value=it.material||'';
-  document.getElementById('iLink').value=it.link||'';
-  document.getElementById('iNotes').value=it.notes||'';
-  populateVendorSelect(vendorId);
-  document.getElementById('itemDeleteBtn').style.display='';
-  openModal('itemModal');
-}
-
-function populateVendorSelect(selectedId){
-  const sel=document.getElementById('iVendorSelect');
-  sel.innerHTML=vendors.map(v=>`<option value="${v.id}"${v.id===selectedId?' selected':''}>${esc(v.name)}</option>`).join('');
-}
-
 function saveItem(){
   const styleNo=document.getElementById('iStyleNo').value.trim();
-  if(!styleNo){alert('Style number is required.');return;}
-  const vendorId=document.getElementById('iVendorSelect').value;
-  const itemId=document.getElementById('itemModalItemId').value;
-  const origVendorId=document.getElementById('itemModalVendorId').value;
-
-  const itemData={
-    styleNo,
+  if(!styleNo){alert('Style number required.');return;}
+  const vendorId=document.getElementById('itemModalVendorId').value;
+  const v=getVendor(vendorId);if(!v)return;
+  v.items.push({
+    id:uid(), styleNo,
+    category:document.getElementById('iCategory').value.trim(),
     season:document.getElementById('iSeason').value.trim(),
+    price:document.getElementById('iPrice').value.trim(),
     colors:document.getElementById('iColors').value.trim(),
     sizes:document.getElementById('iSizes').value.trim(),
-    price:document.getElementById('iPrice').value.trim(),
-    moq:parseInt(document.getElementById('iMoq').value)||0,
     material:document.getElementById('iMaterial').value.trim(),
-    link:document.getElementById('iLink').value.trim(),
     notes:document.getElementById('iNotes').value.trim(),
-  };
-
-  if(itemId){
-    // Edit — possibly moving vendor
-    const origV=getVendor(origVendorId);
-    if(origV){
-      const idx=origV.items.findIndex(i=>i.id===itemId);
-      if(idx>=0){
-        if(vendorId===origVendorId){
-          origV.items[idx]={...origV.items[idx],...itemData};
-        } else {
-          // Move to new vendor
-          const movedItem={...origV.items[idx],...itemData};
-          origV.items.splice(idx,1);
-          const newV=getVendor(vendorId);
-          if(newV)newV.items.push(movedItem);
-        }
-      }
-    }
-  } else {
-    const v=getVendor(vendorId);
-    if(v)v.items.push({id:uid(),...itemData,hidden:false,qtyOrdered:0});
-  }
-
-  save();
-  closeModal('itemModal');
-  renderSidebar();
-  renderSeasonChips();
-  renderTable();
-  showToast('✓ Item saved');
+    moq:parseInt(document.getElementById('iMoq').value)||0,
+    link:'', hidden:false, qtyOrdered:0, img:''
+  });
+  save(); closeModal('itemModal'); renderSidebar(); renderChips(); render();
+  showToast('✓ Item added');
 }
 
-function deleteItem(){
-  const vendorId=document.getElementById('itemModalVendorId').value;
-  const itemId=document.getElementById('itemModalItemId').value;
-  if(!vendorId||!itemId)return;
-  const v=getVendor(vendorId);if(!v)return;
-  const it=v.items.find(i=>i.id===itemId);if(!it)return;
-  if(!confirm(`Delete item "${it.styleNo}"?`))return;
-  v.items=v.items.filter(i=>i.id!==itemId);
-  save();
-  closeModal('itemModal');
-  renderSidebar();
-  renderSeasonChips();
-  renderTable();
-  showToast('Item deleted');
-}
-
-/* ══════════════════════════════════════════
-   NAVIGATION
-══════════════════════════════════════════ */
-function setActiveVendor(id){
-  activeVendorId=id;
-  renderSidebar();
-  renderTable();
-}
-
-/* ══════════════════════════════════════════
-   EXPORT / IMPORT
-══════════════════════════════════════════ */
+/* ══ EXPORT / IMPORT ══ */
 function exportData(){
   const blob=new Blob([JSON.stringify({vendors},null,2)],{type:'application/json'});
   const a=document.createElement('a');
@@ -820,7 +723,6 @@ function exportData(){
   a.download='littlebasics-vendors-'+new Date().toISOString().slice(0,10)+'.json';
   a.click();
 }
-
 function importData(e){
   const file=e.target.files[0];if(!file)return;
   const reader=new FileReader();
@@ -828,60 +730,36 @@ function importData(e){
     try{
       const data=JSON.parse(ev.target.result);
       if(data.vendors&&Array.isArray(data.vendors)){
-        if(vendors.length&&!confirm('This will replace your current vendor data. Continue?'))return;
-        vendors=data.vendors;
-        save();
+        if(vendors.length&&!confirm('Replace current data?'))return;
+        vendors=data.vendors; save();
         activeVendorId=vendors.length?vendors[0].id:'all';
-        renderSidebar();
-        renderSeasonChips();
-        renderTable();
-        showToast('✓ Data imported');
+        renderSidebar(); renderChips(); render();
+        showToast('✓ Imported');
       } else alert('Invalid file format.');
-    }catch{alert('Could not parse JSON file.');}
+    }catch{alert('Could not parse JSON.');}
   };
-  reader.readAsText(file);
-  e.target.value='';
+  reader.readAsText(file); e.target.value='';
 }
 
-/* ══════════════════════════════════════════
-   MODAL HELPERS
-══════════════════════════════════════════ */
+/* ══ MODAL HELPERS ══ */
 function openModal(id){document.getElementById(id).classList.add('open')}
 function closeModal(id){document.getElementById(id).classList.remove('open')}
-
-// Close on backdrop click
 document.querySelectorAll('.modal-backdrop').forEach(el=>{
   el.addEventListener('click',e=>{if(e.target===el)el.classList.remove('open');});
 });
-// Close on Escape
 document.addEventListener('keydown',e=>{
   if(e.key==='Escape')document.querySelectorAll('.modal-backdrop.open').forEach(el=>el.classList.remove('open'));
 });
 
-/* ══════════════════════════════════════════
-   TOAST
-══════════════════════════════════════════ */
-let _toastTimer;
+/* ══ TOAST ══ */
+let _tt;
 function showToast(msg){
-  const t=document.getElementById('toast');
-  t.textContent=msg;t.classList.add('show');
-  clearTimeout(_toastTimer);
-  _toastTimer=setTimeout(()=>t.classList.remove('show'),2200);
+  const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
+  clearTimeout(_tt);_tt=setTimeout(()=>t.classList.remove('show'),2200);
 }
 
-/* ══════════════════════════════════════════
-   UTILS
-══════════════════════════════════════════ */
-function esc(s){
-  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
-/* ══════════════════════════════════════════
-   BOOT
-══════════════════════════════════════════ */
-renderSidebar();
-renderSeasonChips();
-renderTable();
+/* ══ UTIL ══ */
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
 </script>
 </body>
 </html>
