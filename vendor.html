@@ -102,7 +102,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--mist);color:var(--ink);fo
 .vendor-table tbody td:last-child{border-right:none}
 .vendor-table tbody tr:hover td{background:var(--sand-lt)}
 .vendor-table tbody tr.is-hidden td{opacity:.35}
-.tbl-thumb{width:44px;height:44px;object-fit:cover;border-radius:4px;background:var(--sand-lt)}
+.tbl-thumb{width:62px;height:62px;object-fit:cover;border-radius:4px;background:var(--sand-lt)}
 .cell-edit{width:100%;border:none;background:transparent;font-size:.75rem;font-family:'DM Sans',sans-serif;color:var(--ink);padding:.1rem .2rem;border-radius:3px;resize:none}
 .cell-edit:focus{outline:none;background:var(--white);box-shadow:0 0 0 2px var(--bark)}
 .qty-stepper{display:flex;align-items:center;gap:.25rem}
@@ -456,6 +456,8 @@ function render(){
       <th>Colors</th>
       <th style="width:160px">Sizes</th>
       <th style="width:65px">Price</th>
+      <th style="width:110px">Material</th>
+      <th style="min-width:120px">Notes</th>
       <th style="width:80px">Qty Ordered</th>
       <th style="width:90px">Actions</th>
     </tr></thead><tbody>${pageRows.map(it=>rowHTML(it)).join('')}</tbody></table>`;
@@ -498,6 +500,8 @@ function rowHTML(it){
     <td style="font-size:.72rem;color:#888">${esc(it.colors||'')}</td>
     <td style="font-size:.68rem;color:#aaa">${esc(it.sizes||'')}</td>
     <td style="font-weight:600;color:var(--bark)">${esc(it.price||'')}</td>
+    <td style="font-size:.72rem;color:#888" onclick="event.stopPropagation()"><input class="cell-edit" value="${esc(it.material||'')}" placeholder="—" onchange="updateField('${it._vendorId}','${it.id}','material',this.value)"></td>
+    <td style="font-size:.72rem;color:#888" onclick="event.stopPropagation()"><input class="cell-edit" value="${esc(it.notes||'')}" placeholder="—" onchange="updateField('${it._vendorId}','${it.id}','notes',this.value)"></td>
     <td onclick="event.stopPropagation()">
       <div class="qty-stepper">
         <button class="qty-btn" onclick="changeQty('${it._vendorId}','${it.id}',-1)">−</button>
@@ -629,6 +633,12 @@ function changeQty(vendorId,itemId,delta){
   it.qtyOrdered=Math.max(0,(it.qtyOrdered||0)+delta);
   save();
   const el=document.getElementById('qty-'+itemId);if(el)el.textContent=it.qtyOrdered;
+}
+
+function updateField(vendorId,itemId,field,val){
+  const v=getVendor(vendorId);if(!v)return;
+  const it=v.items.find(i=>i.id===itemId);if(!it)return;
+  it[field]=val; save();
 }
 
 function toggleHide(vendorId,itemId){
