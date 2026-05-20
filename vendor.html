@@ -458,7 +458,7 @@ function filteredItems(){
   let rows = activeVendorId==='all' ? allItems()
     : (getVendor(activeVendorId)?.items||[]).map(it=>({...it,_vendorId:activeVendorId,_vendorName:getVendor(activeVendorId)?.name||''}));
 
-  if (activeCat !== 'all') rows = rows.filter(it=>(it.category||'')=== activeCat);
+  if (activeCat !== 'all') rows = rows.filter(it=>(it.category||'').trim() === activeCat.trim());
   if (activeSeason !== 'all') rows = rows.filter(it=>(it.season||'').toLowerCase().includes(activeSeason.toLowerCase()));
   if (!document.getElementById('showHidden')?.checked) rows = rows.filter(it=>!it.hidden);
   if (searchQ) {
@@ -482,15 +482,24 @@ function renderChips(){
   const cc = document.getElementById('catChips');
   const sc = document.getElementById('seasonChips');
 
+  // Use data-val attributes to avoid quote issues in innerHTML onclick
   cc.innerHTML = cats.length
-    ? `<button class="chip${activeCat==='all'?' on':''}" onclick="setCat('all')">All types</button>`
-      + cats.map(c=>`<button class="chip${activeCat===c?' on':''}" onclick="setCat(${JSON.stringify(c)})">${c.replace('Baby ','')}</button>`).join('')
+    ? `<button class="chip${activeCat==='all'?' on':''}" data-cat="all">All types</button>`
+      + cats.map(c=>`<button class="chip${activeCat===c?' on':''}" data-cat="${c.replace(/"/g,'')}">${c.replace('Baby ','')}</button>`).join('')
     : '';
 
   sc.innerHTML = seasons.length > 1
-    ? `<button class="chip${activeSeason==='all'?' on':''}" onclick="setSeason('all')">All seasons</button>`
-      + seasons.map(s=>`<button class="chip${activeSeason===s?' on':''}" onclick="setSeason(${JSON.stringify(s)})">${s}</button>`).join('')
+    ? `<button class="chip${activeSeason==='all'?' on':''}" data-season="all">All seasons</button>`
+      + seasons.map(s=>`<button class="chip${activeSeason===s?' on':''}" data-season="${s.replace(/"/g,'')}">${s}</button>`).join('')
     : '';
+
+  // Attach click handlers via JS (no inline onclick)
+  cc.querySelectorAll('[data-cat]').forEach(btn=>{
+    btn.addEventListener('click', ()=>setCat(btn.dataset.cat));
+  });
+  sc.querySelectorAll('[data-season]').forEach(btn=>{
+    btn.addEventListener('click', ()=>setSeason(btn.dataset.season));
+  });
 }
 function setCat(c){ activeCat=c; page=0; renderChips(); render(); }
 function setSeason(s){ activeSeason=s; page=0; renderChips(); render(); }
