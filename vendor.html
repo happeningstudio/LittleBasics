@@ -188,6 +188,15 @@ tr.selected td{background:rgba(139,115,85,.07)!important}
   #printArea .order-input{border:1px solid #ccc}
   @page{margin:1.5cm;size:A4 landscape}
 }
+
+/* IMAGE UPLOAD */
+.img-upload-area{border:2px dashed var(--sand-dk);border-radius:8px;padding:.75rem;text-align:center;cursor:pointer;transition:all .15s;background:var(--sand-lt);position:relative}
+.img-upload-area:hover{border-color:var(--bark);background:#faf6f2}
+.img-upload-area.has-img{border-style:solid;border-color:var(--sand-dk);padding:.4rem;background:var(--white)}
+.img-upload-area img{width:100%;max-height:180px;object-fit:contain;border-radius:5px;display:block}
+.img-upload-hint{font-size:.72rem;color:#bbb;margin-top:.3rem}
+.img-upload-actions{display:flex;gap:.4rem;margin-top:.5rem;justify-content:center}
+.img-or{font-size:.65rem;color:#ccc;text-align:center;margin:.35rem 0}
 ::-webkit-scrollbar{width:5px;height:5px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--sand-dk);border-radius:10px}
@@ -340,6 +349,19 @@ tr.selected td{background:rgba(139,115,85,.07)!important}
       <div class="form-row"><div><label class="form-label">Sizes</label><input class="form-input" id="iSizes" placeholder="66cm(3-6M), 73cm(6-12M)…"></div></div>
       <div class="form-row"><div><label class="form-label">Material</label><input class="form-input" id="iMaterial" placeholder="100% Cotton…"></div></div>
       <div class="form-row"><div><label class="form-label">Notes</label><textarea class="form-input" id="iNotes"></textarea></div></div>
+      <div class="form-row"><div>
+        <label class="form-label">Photo</label>
+        <div class="img-upload-area" id="iImgArea" onclick="document.getElementById('iImgFile').click()">
+          <div id="iImgPreview" style="display:none"><img id="iImgPreviewImg" src="" alt="preview"><button class="btn ghost sm" style="margin-top:.4rem" onclick="event.stopPropagation();clearItemImg()">✕ Remove</button></div>
+          <div id="iImgPlaceholder">
+            <div style="font-size:1.5rem">📷</div>
+            <div class="img-upload-hint">Click to upload from computer</div>
+          </div>
+        </div>
+        <input type="file" id="iImgFile" accept="image/*" style="display:none" onchange="handleItemImgUpload(event)">
+        <div class="img-or">— or paste a URL —</div>
+        <input class="form-input" id="iImgUrl" placeholder="https://… image URL" oninput="handleItemImgUrl(this.value)">
+      </div></div>
     </div>
     <div class="modal-foot">
       <button class="btn sm" onclick="closeModal('itemModal')">Cancel</button>
@@ -560,6 +582,96 @@ function printOrder(){
   pa.style.display = 'block';
   window.print();
   pa.style.display = 'none';
+}
+
+
+/* ══ IMAGE UPLOAD ══ */
+window._pendingItemImg = '';
+
+function handleItemImgUpload(e){
+  const file = e.target.files[0]; if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    resizeAndSetItemImg(ev.target.result);
+  };
+  reader.readAsDataURL(file);
+}
+
+function handleItemImgUrl(url){
+  if(!url) return;
+  // Show preview immediately from URL
+  window._pendingItemImg = url;
+  document.getElementById('iImgPreviewImg').src = url;
+  document.getElementById('iImgPreview').style.display = '';
+  document.getElementById('iImgPlaceholder').style.display = 'none';
+  document.getElementById('iImgArea').classList.add('has-img');
+}
+
+function resizeAndSetItemImg(dataUrl){
+  const img = new Image();
+  img.onload = function(){
+    const canvas = document.createElement('canvas');
+    const max = 240;
+    let w = img.width, h = img.height;
+    if(w > h){ if(w>max){h=Math.round(h*max/w);w=max;} }
+    else { if(h>max){w=Math.round(w*max/h);h=max;} }
+    canvas.width=w; canvas.height=h;
+    canvas.getContext('2d').drawImage(img,0,0,w,h);
+    const resized = canvas.toDataURL('image/jpeg', 0.75);
+    window._pendingItemImg = resized;
+    document.getElementById('iImgPreviewImg').src = resized;
+    document.getElementById('iImgPreview').style.display = '';
+    document.getElementById('iImgPlaceholder').style.display = 'none';
+    document.getElementById('iImgArea').classList.add('has-img');
+  };
+  img.src = dataUrl;
+}
+
+function clearItemImg(){
+  window._pendingItemImg = '';
+  document.getElementById('iImgPreview').style.display = 'none';
+  document.getElementById('iImgPlaceholder').style.display = '';
+  document.getElementById('iImgArea').classList.remove('has-img');
+  document.getElementById('iImgFile').value = '';
+  document.getElementById('iImgUrl').value = '';
+}
+
+function handleDetailImgUpload(e, vendorId, itemId){
+  const file = e.target.files[0]; if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const img = new Image();
+    img.onload = function(){
+      const canvas = document.createElement('canvas');
+      const max = 240;
+      let w=img.width, h=img.height;
+      if(w>h){if(w>max){h=Math.round(h*max/w);w=max;}}
+      else{if(h>max){w=Math.round(w*max/h);h=max;}}
+      canvas.width=w; canvas.height=h;
+      canvas.getContext('2d').drawImage(img,0,0,w,h);
+      const resized = canvas.toDataURL('image/jpeg', 0.75);
+      updateField(vendorId, itemId, 'img', resized);
+      save(); render();
+      // Re-open detail to show the new photo
+      openDetail(vendorId, itemId);
+    };
+    img.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function handleDetailImgUrl(url, vendorId, itemId){
+  if(!url || !url.startsWith('http')) return;
+  updateField(vendorId, itemId, 'img', url);
+  save(); render();
+  openDetail(vendorId, itemId);
+}
+
+function clearDetailImg(vendorId, itemId){
+  if(!confirm('Remove photo from this item?')) return;
+  updateField(vendorId, itemId, 'img', '');
+  save(); render();
+  openDetail(vendorId, itemId);
 }
 
 /* ══ STORAGE ══ */
@@ -832,8 +944,18 @@ function openDetail(vendorId, itemId){
   document.getElementById('detailTitle').textContent=`${it.styleNo} — ${it.category||''}`;
 
   const body=document.getElementById('detailBody');
-  const imgTag=it.img?`<img class="detail-img" src="${it.img}" alt="${esc(it.styleNo)}">`
-    :`<div style="height:180px;background:var(--sand-lt);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#ccc;font-size:2rem">📦</div>`;
+  const imgTag=it.img
+    ? `<div style="position:relative">
+        <img class="detail-img" src="${it.img}" alt="${esc(it.styleNo)}">
+        <button class="btn ghost sm" style="position:absolute;top:.4rem;right:.4rem;background:rgba(255,255,255,.9)" onclick="clearDetailImg('${it._vendorId}','${it.id}')">✕ Remove photo</button>
+       </div>`
+    : `<div class="img-upload-area" id="detailImgArea" onclick="document.getElementById('detailImgFile').click()">
+        <div style="font-size:1.5rem">📷</div>
+        <div class="img-upload-hint">Click to upload a photo</div>
+        <input type="file" id="detailImgFile" accept="image/*" style="display:none" onchange="handleDetailImgUpload(event,'${it._vendorId}','${it.id}')">
+       </div>
+       <div class="img-or">— or paste a URL —</div>
+       <input class="form-input" id="detailImgUrl" placeholder="https://… image URL" oninput="handleDetailImgUrl(this.value,'${it._vendorId}','${it.id}')">`;
 
   body.innerHTML=`
     ${imgTag}
@@ -987,6 +1109,8 @@ function openAddItem(){
   document.getElementById('itemModalItemId').value='';
   ['iStyleNo','iCategory','iSeason','iPrice','iColors','iSizes','iMaterial','iNotes'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('iMoq').value='0';
+  clearItemImg();
+  document.getElementById('iImgUrl').value='';
   openModal('itemModal');
   setTimeout(()=>document.getElementById('iStyleNo').focus(),80);
 }
@@ -1005,8 +1129,10 @@ function saveItem(){
     material:document.getElementById('iMaterial').value.trim(),
     notes:document.getElementById('iNotes').value.trim(),
     moq:parseInt(document.getElementById('iMoq').value)||0,
-    link:'', hidden:false, qtyOrdered:0, img:''
+    link:'', hidden:false, qtyOrdered:0,
+    img: window._pendingItemImg || ''
   });
+  window._pendingItemImg = '';
   save(); closeModal('itemModal'); renderSidebar(); renderChips(); render();
   showToast('✓ Item added');
 }
