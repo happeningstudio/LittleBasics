@@ -4,109 +4,137 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Little Basics Product Catalog</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
 <style>
-*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-
-:root{
-  --sand:#e8ddd0;--sand-lt:#f5f0ea;--sand-dk:#c8b89e;
-  --bark:#8b7355;--bark-dk:#6e5c42;--bark-lt:#b09070;
-  --ink:#2a2420;--mist:#faf8f5;--white:#fff;
-  --border:#e5e0d8;--amber:#c97c35;--red:#b84040;
-}
-
-body{font-family:'DM Sans',sans-serif;background:var(--mist);color:var(--ink);font-size:14px;line-height:1.5}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica','Arial',sans-serif;background:#faf8f5;color:#221c13}
 
 /* ── HEADER ── */
-.header{background:var(--white);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:200;transition:padding .25s}
-.header-inner{max-width:1400px;margin:0 auto;padding:1.25rem 1.5rem;display:grid;grid-template-columns:160px 1fr auto;gap:2rem;align-items:center}
-.header-logo{height:80px;width:auto;object-fit:contain;display:block;transition:height .25s}
-.header-info{display:flex;flex-direction:column;gap:.3rem}
-.header-info p{color:#888;font-size:.82rem;line-height:1.5}
-.header-info .bundle-note{color:var(--bark);font-weight:600;font-size:.82rem}
+.header{background:#fff;border-bottom:1px solid #e5e5e5;position:sticky;top:0;z-index:100;transition:padding .2s}
+.header-inner{max-width:1400px;margin:0 auto;padding:1.1rem 1rem;display:flex;align-items:center;gap:1.25rem;flex-wrap:wrap}
+.header-logo{height:52px;width:auto;object-fit:contain;flex-shrink:0;transition:height .2s}
+.header-info{flex:1;min-width:180px}
+.header-info p{color:#666;font-size:.82rem;line-height:1.5}
+.header-info .bundle-note{font-weight:600;color:#8b7355}
+.filter-block{display:flex;flex-direction:column;gap:.45rem}
+.filter-row{display:flex;align-items:center;gap:.35rem;flex-wrap:wrap}
+.filter-row-label{font-size:.68rem;font-weight:600;color:#bbb;text-transform:uppercase;letter-spacing:.07em;white-space:nowrap;min-width:58px}
+
+/* size buttons */
+.filter-btn{padding:.32rem .7rem;border:1px solid #d4c5b9;background:#fff;border-radius:.4rem;cursor:pointer;font-size:.78rem;color:#5a5a5a;transition:all .15s;flex-shrink:0;font-family:inherit}
+.filter-btn:hover{border-color:#8b7355;background:#faf6f2}
+.filter-btn.active{background:#8b7355;color:#fff;border-color:#8b7355}
+
+/* dropdowns */
+.filter-select{padding:.32rem 1.6rem .32rem .65rem;border:1px solid #d4c5b9;background:#fff;border-radius:.4rem;cursor:pointer;font-size:.78rem;color:#5a5a5a;font-family:inherit;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='5'%3E%3Cpath d='M0 0l4.5 5L9 0z' fill='%23bbb'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right .5rem center;transition:all .15s}
+.filter-select:focus{outline:none;border-color:#8b7355}
+.filter-select.has-val{border-color:#8b7355;color:#8b7355;font-weight:600}
+
+/* clearance checkbox */
+.clearance-wrap{display:flex;align-items:center;gap:.35rem;cursor:pointer;padding:.3rem .65rem;border:1px solid #d4c5b9;border-radius:.4rem;background:#fff;transition:all .15s;font-size:.78rem;color:#5a5a5a;user-select:none}
+.clearance-wrap:hover{border-color:#b84040;color:#b84040}
+.clearance-wrap.active{border-color:#b84040;background:#fff4f4;color:#b84040;font-weight:600}
+.clearance-wrap input{accent-color:#b84040;width:13px;height:13px;cursor:pointer}
+
+/* mobile filter toggle */
+.mobile-filter-btn{display:none;align-items:center;gap:.4rem;padding:.38rem .75rem;border:1px solid #d4c5b9;background:#fff;border-radius:.4rem;cursor:pointer;font-size:.8rem;color:#5a5a5a;font-family:inherit;flex-shrink:0;transition:all .15s}
+.mobile-filter-btn.open{border-color:#8b7355;color:#8b7355;background:#faf6f2}
+.mobile-filter-drawer{display:none;width:100%;padding:.5rem 0 .1rem}
+.mobile-filter-drawer.open{display:block}
+.mobile-filter-drawer .filter-row{margin-bottom:.4rem}
+.mobile-filter-drawer .filter-row-label{min-width:64px}
 
 /* minimized */
-.header.mini .header-inner{padding:.55rem 1.5rem}
-.header.mini .header-logo{height:34px}
-.header.mini .header-info{display:none}
+.header.min .header-logo{height:30px}
+.header.min .header-info{display:none}
+.header.min .header-inner{padding:.5rem 1rem}
+.header.min .filter-block{flex-direction:row;align-items:center;flex-wrap:wrap;gap:.35rem}
+.header.min .filter-row-label{display:none}
+.header.min .filter-row{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
+.header.min .filter-row::-webkit-scrollbar{display:none}
 
-/* ── FILTER SIDEBAR (desktop) ── */
-.layout{max-width:1400px;margin:0 auto;display:grid;grid-template-columns:200px 1fr;gap:1.5rem;padding:1.5rem}
-.filter-sidebar{position:sticky;top:72px;height:fit-content;display:flex;flex-direction:column;gap:1.25rem}
-.filter-group{}
-.filter-group-title{font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#bbb;margin-bottom:.5rem}
-.filter-pill{display:block;width:100%;text-align:left;padding:.38rem .7rem;border:1px solid var(--border);border-radius:5px;background:var(--white);font-family:'DM Sans',sans-serif;font-size:.78rem;color:#777;cursor:pointer;transition:all .12s;margin-bottom:.28rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.filter-pill:hover{border-color:var(--bark);color:var(--bark)}
-.filter-pill.on{background:var(--bark);color:var(--white);border-color:var(--bark);font-weight:500}
-.filter-divider{height:1px;background:var(--border);margin:.25rem 0 .75rem}
+/* ── RESULTS BAR ── */
+.results-bar{max-width:1400px;margin:0 auto;padding:.45rem 1rem;display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
+.results-count{font-size:.75rem;color:#aaa}
+.results-count strong{color:#8b7355}
+.sort-note{font-size:.7rem;color:#ccc;font-style:italic;margin-left:auto}
+.active-filters{display:flex;gap:.3rem;flex-wrap:wrap}
+.active-filter-tag{display:inline-flex;align-items:center;gap:.25rem;padding:.15rem .45rem;background:#f5f0ea;border:1px solid #d4c5b9;border-radius:20px;font-size:.68rem;color:#8b7355;cursor:pointer}
+.active-filter-tag:hover{background:#e8ddd0}
+.active-filter-tag span{color:#bbb;font-size:.6rem}
 
-/* ── MOBILE FILTER BAR ── */
-.mobile-filter-bar{display:none;padding:.5rem 1rem;background:var(--white);border-bottom:1px solid var(--border);overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;gap:.4rem;flex-shrink:0}
-.mobile-filter-bar::-webkit-scrollbar{display:none}
-.mobile-chip{padding:.3rem .7rem;border:1px solid var(--border);border-radius:20px;background:var(--white);font-family:'DM Sans',sans-serif;font-size:.72rem;color:#888;cursor:pointer;white-space:nowrap;transition:all .12s;flex-shrink:0}
-.mobile-chip:hover{border-color:var(--bark);color:var(--bark)}
-.mobile-chip.on{background:var(--bark);color:var(--white);border-color:var(--bark)}
-.mobile-filter-toggle{display:none;align-items:center;gap:.5rem;padding:.45rem 1rem;background:var(--white);border-bottom:1px solid var(--border);cursor:pointer;font-size:.78rem;color:#888;font-family:'DM Sans',sans-serif}
-.mobile-filter-toggle svg{color:var(--bark)}
-.mobile-filter-drawer{display:none;background:var(--white);border-bottom:2px solid var(--border);padding:.75rem 1rem 1rem}
-.mobile-filter-drawer.open{display:block}
-.mobile-drawer-section{margin-bottom:.75rem}
-.mobile-drawer-section:last-child{margin-bottom:0}
-.mobile-drawer-label{font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#bbb;margin-bottom:.4rem}
-.mobile-drawer-chips{display:flex;flex-wrap:wrap;gap:.3rem}
-
-/* ── PRODUCT GRID ── */
-.grid-wrap{}
-.sort-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:.85rem;flex-wrap:wrap;gap:.4rem}
-.sort-bar-left{font-size:.75rem;color:#aaa}
-.sort-bar-left strong{color:var(--bark)}
-
-.grid{column-count:1;column-gap:1rem}
+/* ── GRID ── */
+.grid-wrap{max-width:1400px;margin:0 auto;padding:.5rem 1rem 2rem}
+.grid{column-count:2;column-gap:.75rem}
 @media(min-width:640px){.grid{column-count:2}}
-@media(min-width:1024px){.grid{column-count:3}}
+@media(min-width:900px){.grid{column-count:3}}
+@media(min-width:1200px){.grid{column-count:4}}
 
-/* ── PRODUCT CARD ── */
-.product-card{break-inside:avoid;margin-bottom:1rem;background:var(--white);border-radius:8px;overflow:hidden;border:1px solid #ddd8d0;box-shadow:0 1px 4px rgba(66,55,39,.05);transition:box-shadow .18s,transform .18s}
-.product-card:hover{box-shadow:0 4px 16px rgba(66,55,39,.1);transform:translateY(-1px)}
-.product-card img{width:100%;height:auto;display:block}
-.product-details{padding:.85rem .9rem 1rem}
-.product-name{font-size:.95rem;font-weight:600;color:var(--ink);margin-bottom:.55rem;line-height:1.35}
-.product-price{font-size:1rem;font-weight:500;color:var(--bark);margin-bottom:.2rem}
-.bundle-price{font-size:.8rem;color:#aaa;margin-bottom:.5rem}
-.product-material{font-size:.75rem;color:#aaa;margin-bottom:.5rem}
-.sizes-label{font-size:.72rem;color:#aaa;font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.35rem}
-.sizes-container{display:flex;flex-wrap:wrap;gap:.3rem}
-.size-badge{font-size:.72rem;background:var(--sand-lt);padding:.25rem .55rem;border-radius:4px;color:var(--bark);border:1px solid var(--sand-dk)}
-.size-badge.out-of-stock{display:none}
-.size-badge.pending-restock{color:var(--amber);background:#fff8f0;border-color:#f5ddb8;font-size:.68rem}
-.price-was{text-decoration:line-through;color:#ccc;font-size:1rem;margin-right:.25rem}
-.price-now{color:#8e4951;font-weight:600;font-size:1rem}
+/* ── CARD ── */
+.product-card{break-inside:avoid;margin-bottom:.75rem;background:#fff;border-radius:.5rem;overflow:hidden;border:1px solid #d4c5b9;box-shadow:0 1px 3px rgba(0,0,0,.04);transition:box-shadow .2s}
+.product-card:hover{box-shadow:0 4px 12px rgba(66,55,39,.12)}
+.clearance-card{border-color:#e8b4b4}
+.product-image{width:100%;height:auto;display:block}
+.product-details{padding:.8rem .85rem .95rem}
+.badges-row{display:flex;gap:.3rem;flex-wrap:wrap;margin-bottom:.4rem}
 
-/* stock indicator dot */
-.stock-dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:.3rem;vertical-align:middle;flex-shrink:0}
-.stock-hi{background:#5dab55}
-.stock-med{background:var(--amber)}
-.stock-lo{background:var(--red)}
+/* badges */
+.badge{display:inline-block;font-size:.6rem;font-weight:700;padding:.1rem .38rem;border-radius:3px;text-transform:uppercase;letter-spacing:.04em}
+.badge-clearance{background:#b84040;color:#fff}
+.badge-sale{background:#b84040;color:#fff}
+.badge-low{background:#fff3e0;color:#c97c35;border:1px solid #f5ddb8}
 
-.loading-msg{text-align:center;padding:4rem 1rem;color:#ccc;font-size:.85rem}
+/* season tag */
+.season-tag{display:inline-block;font-size:.6rem;font-weight:600;padding:.1rem .38rem;border-radius:3px;text-transform:uppercase;letter-spacing:.04em;border:1px solid}
+.season-summer{background:#fff8e6;color:#b87c1a;border-color:#f5ddb8}
+.season-winter{background:#edf3fb;color:#3a6fa8;border-color:#c0d4ee}
+.season-spring{background:#edf7f0;color:#2d7a4a;border-color:#b0dcc0}
+.season-all{background:#f5f0ea;color:#8b7355;border-color:#d4c5b9}
 
-/* ── FOOTER ── */
-.footer{background:var(--white);border-top:1px solid var(--border);margin-top:2rem}
-.footer-inner{max-width:1400px;margin:0 auto;padding:1.25rem 1.5rem}
-.footer-inner p{color:#bbb;font-size:.72rem}
+.product-name{font-size:.92rem;font-weight:600;margin-bottom:.4rem;color:#221c13;line-height:1.35}
+.price-row{display:flex;align-items:baseline;gap:.4rem;margin-bottom:.15rem;flex-wrap:wrap}
+.product-price{font-size:1rem;font-weight:600;color:#423727}
+.price-was{text-decoration:line-through;color:#bbb;font-size:.9rem;font-weight:400}
+.price-now{color:#b84040;font-weight:600;font-size:1rem}
+.bundle-price{font-size:.75rem;color:#8b7355;opacity:.85;margin-bottom:.4rem}
+.product-material{font-size:.72rem;color:#7a6a5a;margin-bottom:.45rem;opacity:.8}
+.sizes-label{font-size:.7rem;color:#8b7355;font-weight:500;margin-bottom:.28rem}
+.sizes-container{display:flex;flex-wrap:wrap;gap:.28rem}
+.size-badge{font-size:.72rem;background:#f5f1ed;padding:.25rem .5rem;border-radius:.2rem;color:#423727;border:1px solid #ddd6cc}
+.size-badge.out{display:none}
+.size-badge.pending{color:#c97c35;background:#fff8f0;border-color:#f5ddb8;font-size:.68rem}
 
-/* ── RESPONSIVE ── */
-@media(max-width:900px){
-  .layout{grid-template-columns:1fr;padding:1rem}
-  .filter-sidebar{display:none}
-  .mobile-filter-toggle{display:flex}
+/* stock dots */
+.stock-wrap{display:flex;align-items:center;gap:.3rem;margin-bottom:.4rem}
+.sdot{width:5px;height:5px;border-radius:50%;background:#e8ddd0}
+.sdot.on{background:#8b7355}
+.sdot.on.lo{background:#c97c35}
+.stock-txt{font-size:.62rem;color:#bbb}
+.stock-txt.lo{color:#c97c35;font-weight:600}
+
+/* no results */
+.no-results{text-align:center;padding:4rem 1rem;color:#bbb;font-size:.88rem}
+
+/* footer */
+.footer{background:#fff;border-top:1px solid #e5e5e5;margin-top:1rem}
+.footer-inner{max-width:1400px;margin:0 auto;padding:1rem;font-size:.72rem;color:#aaa}
+
+/* ── MOBILE ── */
+@media(max-width:768px){
+  .filter-block{display:none} /* hide desktop filters */
+  .mobile-filter-btn{display:flex}
+  .header-inner{gap:.75rem}
+  .header-info p:not(.bundle-note){display:none}
+  .grid{column-count:2;column-gap:.5rem}
+  .grid-wrap{padding:.4rem .6rem 2rem}
+  .product-details{padding:.6rem .65rem .75rem}
+  .product-name{font-size:.82rem}
+  .product-price,.price-now{font-size:.9rem}
+  .bundle-price{display:none}
+  .product-material{display:none}
 }
-@media(max-width:640px){
-  .header-inner{grid-template-columns:auto 1fr;gap:1rem;padding:1rem}
-  .header-logo{height:52px}
-  .header-info{display:none}
-  .header.mini .header-inner{padding:.5rem 1rem}
-  .header.mini .header-logo{height:28px}
+@media(max-width:420px){
+  .grid{column-count:2}
+  .product-name{font-size:.78rem}
 }
 </style>
 </head>
@@ -116,100 +144,166 @@ body{font-family:'DM Sans',sans-serif;background:var(--mist);color:var(--ink);fo
 <div class="header" id="header">
   <div class="header-inner">
     <img src="https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/LittleBasics.png" alt="Little Basics" class="header-logo">
+
+    <!-- Info (desktop) -->
     <div class="header-info">
       <p>Select your items and screenshot the page to share with us.</p>
       <p>We'll confirm availability as inventory changes daily.</p>
-      <p class="bundle-note">5+ items qualify for the bundle price. Shipping available.</p>
+      <p class="bundle-note">5+ items in an order qualify for the bundle price.</p>
+      <p>Shipping available.</p>
     </div>
+
+    <!-- Desktop filters -->
+    <div class="filter-block" id="desktopFilters">
+      <!-- Size -->
+      <div class="filter-row">
+        <span class="filter-row-label">Size</span>
+        <button class="filter-btn active" data-sz="all" onclick="setSize(this)">All</button>
+        <button class="filter-btn" data-sz="3-6M"   onclick="setSize(this)">3-6M</button>
+        <button class="filter-btn" data-sz="6-12M"  onclick="setSize(this)">6-12M</button>
+        <button class="filter-btn" data-sz="12-24M" onclick="setSize(this)">12-24M</button>
+        <button class="filter-btn" data-sz="2T"     onclick="setSize(this)">2T</button>
+        <button class="filter-btn" data-sz="3T"     onclick="setSize(this)">3T</button>
+        <button class="filter-btn" data-sz="4T"     onclick="setSize(this)">4T</button>
+        <button class="filter-btn" data-sz="5T"     onclick="setSize(this)">5T</button>
+      </div>
+      <!-- Type + Season + Clearance -->
+      <div class="filter-row">
+        <span class="filter-row-label">Filter</span>
+        <select class="filter-select" id="catSelect" onchange="render()">
+          <option value="">All Types</option>
+          <option value="Tops">Tops</option>
+          <option value="Bottoms">Bottoms</option>
+          <option value="Rompers & Overalls">Rompers & Sets</option>
+          <option value="Outerwear & Knitwear">Outerwear & Knitwear</option>
+        </select>
+        <select class="filter-select" id="seasonSelect" onchange="render()">
+          <option value="">All Seasons</option>
+          <option value="Summer">Summer</option>
+          <option value="Winter">Winter</option>
+          <option value="Spring/Autumn">Spring / Autumn</option>
+          <option value="All Season">All Season</option>
+        </select>
+        <label class="clearance-wrap" id="clearanceWrap">
+          <input type="checkbox" id="clearanceCheck" onchange="render()">
+          🏷 Clearance only
+        </label>
+      </div>
+    </div>
+
+    <!-- Mobile filter toggle -->
+    <button class="mobile-filter-btn" id="mobileFilterBtn" onclick="toggleMobileFilters()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/></svg>
+      Filter
+    </button>
+
+    <!-- Mobile filter drawer -->
+    <div class="mobile-filter-drawer" id="mobileDrawer">
+      <div class="filter-row">
+        <span class="filter-row-label">Size</span>
+        <button class="filter-btn active" data-sz="all" onclick="setSize(this)">All</button>
+        <button class="filter-btn" data-sz="3-6M"   onclick="setSize(this)">3-6M</button>
+        <button class="filter-btn" data-sz="6-12M"  onclick="setSize(this)">6-12M</button>
+        <button class="filter-btn" data-sz="12-24M" onclick="setSize(this)">12-24M</button>
+        <button class="filter-btn" data-sz="2T"     onclick="setSize(this)">2T</button>
+        <button class="filter-btn" data-sz="3T"     onclick="setSize(this)">3T</button>
+        <button class="filter-btn" data-sz="4T"     onclick="setSize(this)">4T</button>
+        <button class="filter-btn" data-sz="5T"     onclick="setSize(this)">5T</button>
+      </div>
+      <div class="filter-row">
+        <span class="filter-row-label">Type</span>
+        <select class="filter-select" id="catSelectM" onchange="render()">
+          <option value="">All Types</option>
+          <option value="Tops">Tops</option>
+          <option value="Bottoms">Bottoms</option>
+          <option value="Rompers & Overalls">Rompers & Sets</option>
+          <option value="Outerwear & Knitwear">Outerwear & Knitwear</option>
+        </select>
+      </div>
+      <div class="filter-row">
+        <span class="filter-row-label">Season</span>
+        <select class="filter-select" id="seasonSelectM" onchange="render()">
+          <option value="">All Seasons</option>
+          <option value="Summer">Summer</option>
+          <option value="Winter">Winter</option>
+          <option value="Spring/Autumn">Spring / Autumn</option>
+          <option value="All Season">All Season</option>
+        </select>
+      </div>
+      <div class="filter-row">
+        <span class="filter-row-label">Sale</span>
+        <label class="clearance-wrap" id="clearanceWrapM">
+          <input type="checkbox" id="clearanceCheckM" onchange="render()">
+          🏷 Clearance only
+        </label>
+      </div>
+    </div>
+
   </div>
 </div>
 
-<!-- MOBILE FILTER TOGGLE -->
-<div class="mobile-filter-toggle" id="mobileFilterToggle" onclick="toggleMobileDrawer()">
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="20" y2="12"/><line x1="12" y1="18" x2="20" y2="18"/></svg>
-  <span id="mobileFilterLabel">Filter &amp; Sort</span>
-  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" id="mobileFilterArrow" style="margin-left:auto"><polyline points="6 9 12 15 18 9"/></svg>
-</div>
-<div class="mobile-filter-drawer" id="mobileFilterDrawer">
-  <div class="mobile-drawer-section">
-    <div class="mobile-drawer-label">Size</div>
-    <div class="mobile-drawer-chips" id="mobileSizeChips"></div>
-  </div>
-  <div class="mobile-drawer-section">
-    <div class="mobile-drawer-label">Type</div>
-    <div class="mobile-drawer-chips" id="mobileCatChips"></div>
-  </div>
-  <div class="mobile-drawer-section">
-    <div class="mobile-drawer-label">Season</div>
-    <div class="mobile-drawer-chips" id="mobileSeasonChips"></div>
-  </div>
+<!-- RESULTS BAR -->
+<div class="results-bar">
+  <div class="results-count" id="resultsCount"></div>
+  <div class="active-filters" id="activeFilters"></div>
+  <div class="sort-note" id="sortNote"></div>
 </div>
 
-<!-- MAIN LAYOUT -->
-<div class="layout">
-
-  <!-- DESKTOP FILTER SIDEBAR -->
-  <aside class="filter-sidebar" id="filterSidebar">
-    <div class="filter-group">
-      <div class="filter-group-title">Size</div>
-      <button class="filter-pill on" data-filter="size" data-val="all">All Sizes</button>
-      <button class="filter-pill" data-filter="size" data-val="3-6M">3–6M</button>
-      <button class="filter-pill" data-filter="size" data-val="6-12M">6–12M</button>
-      <button class="filter-pill" data-filter="size" data-val="12-24M">12–24M</button>
-      <button class="filter-pill" data-filter="size" data-val="2T">2T</button>
-      <button class="filter-pill" data-filter="size" data-val="3T">3T</button>
-      <button class="filter-pill" data-filter="size" data-val="4T">4T</button>
-      <button class="filter-pill" data-filter="size" data-val="5T">5T</button>
-    </div>
-
-    <div class="filter-divider"></div>
-
-    <div class="filter-group">
-      <div class="filter-group-title">Type</div>
-      <button class="filter-pill on" data-filter="cat" data-val="all">All Types</button>
-      <button class="filter-pill" data-filter="cat" data-val="Tops">Tops</button>
-      <button class="filter-pill" data-filter="cat" data-val="Bottoms">Bottoms</button>
-      <button class="filter-pill" data-filter="cat" data-val="Rompers & Overalls">Rompers</button>
-      <button class="filter-pill" data-filter="cat" data-val="Sets">Sets</button>
-      <button class="filter-pill" data-filter="cat" data-val="Outerwear">Outerwear</button>
-      <button class="filter-pill" data-filter="cat" data-val="Cardigans & Knitwear">Knitwear</button>
-    </div>
-
-    <div class="filter-divider"></div>
-
-    <div class="filter-group">
-      <div class="filter-group-title">Season</div>
-      <button class="filter-pill on" data-filter="season" data-val="all">All Seasons</button>
-      <button class="filter-pill" data-filter="season" data-val="Summer">Summer</button>
-      <button class="filter-pill" data-filter="season" data-val="Spring/Autumn">Spring / Autumn</button>
-      <button class="filter-pill" data-filter="season" data-val="Winter">Winter</button>
-    </div>
-  </aside>
-
-  <!-- GRID -->
-  <div class="grid-wrap">
-    <div class="sort-bar">
-      <div class="sort-bar-left" id="sortBarLeft">Loading…</div>
-    </div>
-    <div class="grid" id="productGrid">
-      <div class="loading-msg">Loading products…</div>
-    </div>
+<!-- GRID -->
+<div class="grid-wrap">
+  <div class="grid" id="productGrid">
+    <div class="no-results">Loading products…</div>
   </div>
 </div>
 
 <footer class="footer">
-  <div class="footer-inner"><p>Little Basics is part of Epic Layers Inc.</p></div>
+  <div class="footer-inner">Little Basics is part of Epic Layers Inc.</div>
 </footer>
 
 <script>
 const SHEET_URL = 'https://script.google.com/macros/s/AKfycbzolrTY0hQLzMLZI6vfjl2Y6rMoB28QnLQ2JGIsVfZyoUxLqT4ttwt4sDB_GH01pPer/exec';
 
-const SIZE_LABEL_TO_CM = {'3-6M':'60','6-12M':'70','12-24M':'80','2T':'90','3T':'100','4T':'110','5T':'120','130':'130'};
-const CM_TO_LABEL = {'60':'3-6M','70':'6-12M','80':'12-24M','90':'2T','100':'3T','110':'4T','120':'5T','130':'130'};
-const CM_ORDER = ['60','70','80','90','100','110','120','130'];
+const SIZE_TO_CM = {'3-6M':'60','6-12M':'70','12-24M':'80','2T':'90','3T':'100','4T':'110','5T':'120','130':'130'};
+const CM_TO_SIZE = {'60':'3-6M','70':'6-12M','80':'12-24M','90':'2T','100':'3T','110':'4T','120':'5T','130':'130'};
+
+// Detect clearance/sale in product name
+function isClearance(p){
+  const n = (p.name||'').toLowerCase();
+  return n.includes('clearance') || n.includes('additional $') || n.includes('additional $') || (p.saleDiscount||0) > 0;
+}
+
+// Derive category from name keywords if not set
+function deriveCategory(p){
+  if(p.category && p.category !== 'Uncategorized') return p.category;
+  const n = p.name.toLowerCase();
+  if(/cardigan|knitwear|knit|jacket|padded|reversib|sweatshirt|sweater|fleece suit|fleece sweat/.test(n)) return 'Outerwear & Knitwear';
+  if(/romper|overall|suit|set/.test(n)) return 'Rompers & Overalls';
+  if(/pant|legging|short|bottom/.test(n)) return 'Bottoms';
+  if(/shirt|top|sleeve|tee/.test(n)) return 'Tops';
+  return 'Uncategorized';
+}
+
+// Derive season from name/material keywords if not set
+function deriveSeason(p){
+  if(p.season && p.season.trim()) return p.season.trim();
+  const n = (p.name+' '+(p.material||'')).toLowerCase();
+  if(/fleece|padded|quilted|knit|wool|warm|winter/.test(n)) return 'Winter';
+  if(/muslin|linen|sleeveless|terry|summer/.test(n)) return 'Summer';
+  if(/sweatshirt|sweater/.test(n)) return 'Spring/Autumn';
+  return '';
+}
+
+function seasonClass(s){
+  const sl = (s||'').toLowerCase();
+  if(sl.includes('summer')) return 'season-summer';
+  if(sl.includes('winter')) return 'season-winter';
+  if(sl.includes('spring') || sl.includes('autumn')) return 'season-spring';
+  if(sl.includes('all')) return 'season-all';
+  return '';
+}
 
 /* ── FALLBACK PRODUCTS ── */
-const FALLBACK_PRODUCTS = [
+const FALLBACK = [
   {id:1, name:"Cotton Waffle Overall", price:14, bundlePrice:12, sizes:["6-12M"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/6.jpg", category:"Rompers & Overalls"},
   {id:2, name:"Cotton Linen Kimono Overall", price:12, bundlePrice:10, sizes:["6-12M","12-24M","2T"], material:"Cotton Linen", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/28.jpg", category:"Rompers & Overalls"},
   {id:3, name:"Ruffle Cotton Romper, Clearance $4 off", price:14, bundlePrice:12, sizes:["2T"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/11.jpg", category:"Rompers & Overalls"},
@@ -220,359 +314,338 @@ const FALLBACK_PRODUCTS = [
   {id:8, name:"Smile Cotton Long Sleeve Shirt with Stripes", price:10, bundlePrice:9, sizes:["12-24M","2T"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/2.jpg", category:"Tops"},
   {id:9, name:"Solid Cotton Long Sleeve", price:10, bundlePrice:9, sizes:["6-12M","12-24M","3T","4T","5T"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/3.jpg", category:"Tops"},
   {id:10, name:"Solid Cotton Long Sleeve", price:12, bundlePrice:10, sizes:["6-12M","12-24M","2T","3T","4T"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/12.jpg", category:"Tops"},
-  {id:11, name:"Striped Cotton Long Sleeve Shirt with Buttons", price:14, bundlePrice:12, sizes:["6-12M"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/9.jpg", category:"Tops"},
+  {id:11, name:"Striped Cotton Long Sleeve Shirt with buttons", price:14, bundlePrice:12, sizes:["6-12M"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/9.jpg", category:"Tops"},
   {id:12, name:"Cotton Long Sleeve Bear Shirt", price:11, bundlePrice:9, sizes:["6-12M","12-24M"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/17.jpg", category:"Tops"},
-  {id:13, name:"Striped Cotton Sweatshirts", price:18, bundlePrice:16, sizes:["6-12M","12-24M","2T","3T","4T","5T"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/16.jpg", category:"Tops"},
-  {id:14, name:"Scalloped Cotton Knitted Cardigan", price:24, bundlePrice:22, sizes:["3-6M","6-12M","12-24M","2T","3T"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/7.jpg", category:"Cardigans & Knitwear"},
+  {id:13, name:"Striped Cotton Sweatshirts", price:18, bundlePrice:16, sizes:["6-12M","12-24M","2T","3T","4T","5T"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/16.jpg", category:"Outerwear & Knitwear"},
+  {id:14, name:"Scalloped Cotton Knitted Cardigan", price:24, bundlePrice:22, sizes:["3-6M","6-12M","12-24M","2T","3T"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/7.jpg", category:"Outerwear & Knitwear"},
   {id:15, name:"Ruffled Cotton Muslin Pants", price:12, bundlePrice:10, sizes:["3-6M","6-12M","12-24M","2T","3T"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/1.jpg", category:"Bottoms"},
   {id:16, name:"Ruffled Cotton Denim Romper, Clearance $4 off", price:14, bundlePrice:12, sizes:["6-12M","12-24M","2T"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/5.jpg", category:"Rompers & Overalls"},
-  {id:17, name:"Cotton Fleece Leggings", price:12, bundlePrice:10, sizes:["6-12M","12-24M","2T","3T","4T","5T"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/14.jpg", category:"Bottoms"},
+  {id:17, name:"Cotton Fleece Leggings, additional $3 off!", price:12, bundlePrice:10, sizes:["6-12M","12-24M","2T","3T","4T","5T"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/14.jpg", category:"Bottoms"},
   {id:18, name:"Striped Pants", price:14, bundlePrice:12, sizes:["6-12M","12-24M"], material:"Cotton Linen", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/13.jpg", category:"Bottoms"},
-  {id:19, name:"Open Back Cotton Lace Set", price:18, bundlePrice:16, sizes:["12-24M","2T"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/4.jpg", category:"Sets"},
-  {id:20, name:"Embroidered Cotton Fleece Suit", price:"24/set", bundlePrice:"22/set", sizes:["6-12M","12-24M","2T","4T"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/8.jpg", category:"Sets"},
-  {id:21, name:"Solid Cotton Track Suit", price:"24/set", bundlePrice:"22/set", sizes:["3-6M","6-12M","2T","4T"], material:"95% Organic Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/10.jpg", category:"Sets"},
+  {id:19, name:"Open Back Cotton Lace Set", price:18, bundlePrice:16, sizes:["12-24M","2T"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/4.jpg", category:"Rompers & Overalls"},
+  {id:20, name:"Embroidered Cotton Fleece Suit, additional $5 off", price:24, bundlePrice:22, sizes:["6-12M","12-24M","2T","4T"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/8.jpg", category:"Rompers & Overalls"},
+  {id:21, name:"Solid Cotton Track Suit", price:24, bundlePrice:22, sizes:["3-6M","6-12M","2T","4T"], material:"95% Organic Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/10.jpg", category:"Rompers & Overalls"},
   {id:22, name:"Striped Pants", price:14, bundlePrice:12, sizes:["2T","3T","4T","5T"], material:"Cotton Linen", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/26.jpg", category:"Bottoms"},
-  {id:23, name:"Solid Cotton Knit Sweater", price:22, bundlePrice:20, sizes:["2T","3T","4T","5T"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/25.jpg", category:"Tops"},
+  {id:23, name:"Solid Cotton Knit Sweater, additional $5 off!", price:22, bundlePrice:20, sizes:["2T","3T","4T","5T"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/25.jpg", category:"Outerwear & Knitwear"},
   {id:24, name:"Cropped Striped Pants", price:16, bundlePrice:14, sizes:["12-24M","2T","3T","4T","5T"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/21.jpg", category:"Bottoms"},
-  {id:25, name:"Cotton Solid Sweatshirt, Clearance $4 off", price:20, bundlePrice:18, sizes:["12-24M","2T","3T","4T","5T"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/23.jpg", category:"Tops"},
+  {id:25, name:"Cotton Solid Sweatshirt, Clearance $4 off", price:20, bundlePrice:18, sizes:["12-24M","2T","3T","4T","5T"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/23.jpg", category:"Outerwear & Knitwear"},
   {id:26, name:"Cotton Solid Pants", price:18, bundlePrice:16, sizes:["6-12M","12-24M","2T"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/22.jpg", category:"Bottoms"},
-  {id:27, name:"Striped Cotton Fleeced Sweatshirt", price:22, bundlePrice:20, sizes:["12-24M","2T","3T","4T","5T"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/32.jpg", category:"Tops"},
-  {id:28, name:"Cotton Light Fleeced Leggings", price:10, bundlePrice:9, sizes:["2T","3T","5T"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/33.jpg", category:"Bottoms"},
+  {id:27, name:"Striped Cotton Fleeced Sweatshirt, additional $5 off!", price:22, bundlePrice:20, sizes:["12-24M","2T","3T","4T","5T"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/32.jpg", category:"Outerwear & Knitwear"},
+  {id:28, name:"Cotton Light Fleeced Leggings, additional $3 off", price:10, bundlePrice:9, sizes:["2T","3T","5T"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/33.jpg", category:"Bottoms"},
   {id:29, name:"Cotton Knot Leggings", price:9, bundlePrice:8, sizes:["3-6M","6-12M","12-24M"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/34.jpg", category:"Bottoms"},
   {id:30, name:"Cotton Sleeveless Romper, Clearance $4 off", price:14, bundlePrice:12, sizes:["3-6M"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/35.jpg", category:"Rompers & Overalls"},
-  {id:31, name:"Cotton Romper Shirt Set, Clearance $4 off", price:15, bundlePrice:13, sizes:["3-6M"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/36.jpg", category:"Sets"},
+  {id:31, name:"Cotton Romper Shirt Set, Clearance $4 off", price:15, bundlePrice:13, sizes:["3-6M"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/36.jpg", category:"Rompers & Overalls"},
   {id:33, name:"Solid Cotton Muslin Pants", price:12, bundlePrice:10, sizes:["6-12M","12-24M"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/38.jpg", category:"Bottoms"},
-  {id:34, name:"Cotton Denim Jacket", price:20, bundlePrice:18, sizes:["12-24M","2T"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/63.jpg", category:"Outerwear"},
-  {id:35, name:"Cotton Knit Animal Cardigan", price:24, bundlePrice:22, sizes:["3-6M","6-12M"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/66.jpg", category:"Cardigans & Knitwear"},
-  {id:36, name:"Cotton Rainbow Suit", price:"16/set", bundlePrice:"14/set", sizes:["6-12M","12-24M","2T","3T"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/43.jpg", category:"Sets"},
+  {id:34, name:"Cotton Denim Jacket", price:20, bundlePrice:18, sizes:["12-24M","2T"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/63.jpg", category:"Outerwear & Knitwear"},
+  {id:35, name:"Cotton Knit Animal Cardigan", price:24, bundlePrice:22, sizes:["3-6M","6-12M"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/66.jpg", category:"Outerwear & Knitwear"},
+  {id:36, name:"Cotton Rainbow Suit", price:16, bundlePrice:14, sizes:["6-12M","12-24M","2T","3T"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/43.jpg", category:"Rompers & Overalls"},
   {id:37, name:"Cotton Embroidered Floral Romper", price:18, bundlePrice:15, sizes:["12-24M","2T"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/60.jpg", category:"Rompers & Overalls"},
   {id:38, name:"Cotton Embroidered Floral Romper", price:18, bundlePrice:16, sizes:["12-24M","2T"], material:"Cotton Linen", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/40.jpg", category:"Rompers & Overalls"},
-  {id:39, name:"Cotton Reversible Cardigan", price:20, bundlePrice:18, sizes:["6-12M","12-24M","2T","3T","4T"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/54.jpg", category:"Cardigans & Knitwear"},
+  {id:39, name:"Cotton Reverseable Cardigan", price:20, bundlePrice:18, sizes:["6-12M","12-24M","2T","3T","4T"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/54.jpg", category:"Outerwear & Knitwear"},
   {id:41, name:"Cotton Waffle Long Sleeve Overall, Clearance $4 off", price:18, bundlePrice:16, sizes:["3-6M","6-12M"], material:"95% Cotton Outer", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/20.jpg", category:"Rompers & Overalls"},
   {id:43, name:"Cotton Stripes Shirt with Elbow Patches", price:12, bundlePrice:10, sizes:["6-12M","12-24M","2T","3T","4T"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/51.jpg", category:"Tops"},
-  {id:44, name:"Cotton Citrus Suit", price:"18/set", bundlePrice:"16/set", sizes:["2T","3T"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/46.jpg", category:"Sets"},
-  {id:47, name:"Cotton Padded Reversible Sweatshirt", price:22, bundlePrice:20, sizes:["12-24M"], material:"100% Cotton Outer", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/49.jpg", category:"Tops"},
+  {id:44, name:"Cotton Citrus Suit", price:18, bundlePrice:16, sizes:["2T","3T"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/46.jpg", category:"Rompers & Overalls"},
+  {id:47, name:"Cotton Padded Reversible Sweatshirt with Pocket, additional $4 off", price:22, bundlePrice:20, sizes:["12-24M"], material:"100% Cotton Outer", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/49.jpg", category:"Outerwear & Knitwear"},
   {id:48, name:"Cotton Striped Leggings with Knee Patch", price:10, bundlePrice:8, sizes:["3-6M","6-12M"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/50.jpg", category:"Bottoms"},
-  {id:49, name:"Quilt Padded Pants", price:12, bundlePrice:10, sizes:["2T","3T"], material:"Nylon outer with cotton inner", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/55.jpg", category:"Bottoms"},
+  {id:49, name:"Quilt Padded Pants, additional $4 off", price:12, bundlePrice:10, sizes:["2T","3T"], material:"Nylon outer with cotton inner", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/55.jpg", category:"Bottoms"},
   {id:51, name:"Cotton Muslin Romper", price:14, bundlePrice:12, sizes:["6-12M"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/44.jpg", category:"Rompers & Overalls"},
-  {id:52, name:"Cotton Denim Hooded Jacket", price:20, bundlePrice:18, sizes:["3T"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/42.jpg", category:"Outerwear"},
-  {id:53, name:"Cotton Solid Pants with Footies, Clearance $4 off", price:12, bundlePrice:10, sizes:["3-6M","6-12M"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/41.jpg", category:"Bottoms"},
+  {id:52, name:"Cotton Demin Hooded Jacket", price:20, bundlePrice:18, sizes:["3T"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/42.jpg", category:"Outerwear & Knitwear"},
+  {id:53, name:"Cotton Solid Pants with footies, Clearance $4 off", price:12, bundlePrice:10, sizes:["3-6M","6-12M"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/41.jpg", category:"Bottoms"},
   {id:54, name:"Cotton Striped Smile Shirt", price:7, bundlePrice:6, sizes:["12-24M","2T","3T","4T","5T"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/45.jpg", category:"Tops"},
   {id:55, name:"Cotton Muslin Solid Pants", price:12, bundlePrice:10, sizes:["2T","3T","4T","5T"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/62.jpg", category:"Bottoms"},
   {id:56, name:"Cotton Stripe Shirt with Embroidered Face", price:13, bundlePrice:11, sizes:["6-12M","12-24M","2T","3T"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/84.jpg", category:"Tops"},
-  {id:57, name:"Cotton Knit Set", price:20, bundlePrice:18, sizes:["12-24M"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/64.jpg", category:"Sets"},
-  {id:58, name:"Cotton Knit Sprinkle Sweater", price:18, bundlePrice:16, sizes:["6-12M"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/65.jpg", category:"Cardigans & Knitwear"},
-  {id:59, name:"Cotton Quilted Sweatshirt", price:24, bundlePrice:22, sizes:["12-24M","2T","3T","4T","5T"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/39.jpg", category:"Tops"},
+  {id:57, name:"Cotton Knit Set, additional $4 off", price:20, bundlePrice:18, sizes:["12-24M"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/64.jpg", category:"Rompers & Overalls"},
+  {id:58, name:"Cotton Knit Sprinkle Sweater, additional $4 off", price:18, bundlePrice:16, sizes:["6-12M"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/65.jpg", category:"Outerwear & Knitwear"},
+  {id:59, name:"Cotton Quilted Sweatshirt, additional $5 off!", price:24, bundlePrice:22, sizes:["12-24M","2T","3T","4T","5T"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/39.jpg", category:"Outerwear & Knitwear"},
   {id:60, name:"Pattern Cotton Muslin Pants", price:12, bundlePrice:10, sizes:["6-12M","12-24M","2T","3T","4T","5T"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/70.jpg", category:"Bottoms"},
   {id:61, name:"Solid Cotton Shirt", price:12, bundlePrice:10, sizes:["2T","3T","4T","5T"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/69.jpg", category:"Tops"},
   {id:64, name:"Cotton Striped Short Sleeve Shirt, Clearance $4 off", price:11, bundlePrice:9, sizes:["3-6M","6-12M","12-24M","2T"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/58.jpg", category:"Tops"},
-  {id:65, name:"Cotton Embroidered Floral Set, Clearance $4 off", price:18, bundlePrice:16, sizes:["12-24M"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/72.jpg", category:"Sets"},
+  {id:65, name:"Cotton Embroidered Floral Set, Clearance $4 off", price:18, bundlePrice:16, sizes:["12-24M"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/72.jpg", category:"Rompers & Overalls"},
   {id:66, name:"Cotton Animal Short Sleeve Shirt", price:10, bundlePrice:8, sizes:["5T"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/73.jpg", category:"Tops"},
   {id:67, name:"Cotton Muslin Short Sleeve Shirt", price:12, bundlePrice:10, sizes:["12-24M","2T","3T","4T","5T"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/74.jpg", category:"Tops"},
   {id:68, name:"Cotton Linen Cropped Pants", price:15, bundlePrice:13, sizes:["12-24M","3T"], material:"Cotton Linen", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/79.jpg", category:"Bottoms"},
   {id:70, name:"Cotton Embroidered Pants", price:15, bundlePrice:13, sizes:["12-24M","2T","3T"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/81.jpg", category:"Bottoms"},
   {id:71, name:"Cotton Linen Gingham Pants", price:12, bundlePrice:10, sizes:["6-12M","12-24M","2T","3T","4T"], material:"Cotton Linen", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/82.jpg", category:"Bottoms"},
-  {id:72, name:"Cotton Texture Lightweight Cardigan", price:18, bundlePrice:16, sizes:["2T","3T","4T"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/83.jpg", category:"Cardigans & Knitwear"},
+  {id:72, name:"Cotton Texture Lightweight Cardigan", price:18, bundlePrice:16, sizes:["2T","3T","4T"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/83.jpg", category:"Outerwear & Knitwear"},
   {id:74, name:"Extra Soft Cotton Checker Pants", price:15, bundlePrice:13, sizes:["12-24M","3T","5T"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/76.jpg", category:"Bottoms"},
-  {id:75, name:"Cotton Lightweight Button Textured Cardigan", price:20, bundlePrice:18, sizes:["12-24M","2T"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/77.jpg", category:"Cardigans & Knitwear"},
+  {id:75, name:"Cotton Lightweight Button Textured Cardigan", price:20, bundlePrice:18, sizes:["12-24M","2T"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/77.jpg", category:"Outerwear & Knitwear"},
   {id:76, name:"Vintage Style Cotton Checker Shorts", price:15, bundlePrice:13, sizes:["12-24M","2T"], material:"90% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/78.jpg", category:"Bottoms"},
-  {id:77, name:"Cotton Muslin Set", price:18, bundlePrice:16, sizes:["6-12M","12-24M","4T","5T"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/86.jpg", category:"Sets"},
+  {id:77, name:"Cotton Muslin Set", price:18, bundlePrice:16, sizes:["6-12M","12-24M","4T","5T"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/86.jpg", category:"Rompers & Overalls"},
   {id:78, name:"Two Tone Cotton Shirt", price:12, bundlePrice:10, sizes:["12-24M","5T"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/87.jpg", category:"Tops"},
   {id:79, name:"Cotton Checker Pumpkin Shorts", price:10, bundlePrice:8, sizes:["6-12M","12-24M","2T"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/91.jpg", category:"Bottoms"},
   {id:80, name:"Cotton Lightweight Gingham Pants", price:12, bundlePrice:10, sizes:["6-12M","12-24M","2T","3T"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/89.jpg", category:"Bottoms"},
   {id:81, name:"Cotton Muslin Long Sleeve Shirt", price:12, bundlePrice:10, sizes:["6-12M"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/90.jpg", category:"Tops"},
   {id:83, name:"Cotton Striped Short Sleeve Shirt", price:9, bundlePrice:7, sizes:["6-12M","12-24M","2T","3T"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/92.jpg", category:"Tops"},
   {id:84, name:"Cotton Two Tone Short Sleeve Shirt", price:10, bundlePrice:8, sizes:["6-12M","12-24M","2T"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/93.jpg", category:"Tops"},
-  {id:85, name:"Cotton Pineapple Set, Clearance $4 off", price:14, bundlePrice:12, sizes:["6-12M"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/94.jpg", category:"Sets"}
+  {id:85, name:"Cotton Pineapple Set, Clearance $4 off", price:14, bundlePrice:12, sizes:["6-12M"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/94.jpg", category:"Rompers & Overalls"}
 ];
 
 /* ── STATE ── */
-let filters = { size:'all', cat:'all', season:'all' };
 let catalogProducts = [];
 let stockData = {};
 let pendingStock = {};
+let szFilter = 'all';
 
-/* ── HELPERS ── */
 function getSizeStock(product, label){
-  const idx = product.sizes.indexOf(label);
-  const cm = product.sizesCm ? product.sizesCm[idx] : SIZE_LABEL_TO_CM[label];
+  const cm = product.sizesCm ? product.sizesCm[product.sizes.indexOf(label)] : SIZE_TO_CM[label];
   if(!cm || !product.pids) return null;
-  const hasAny = product.pids.some(pid => (pid+'_'+cm) in stockData);
-  if(!hasAny) return null;
-  return product.pids.reduce((s,pid) => {
-    const k = pid+'_'+cm;
-    return k in stockData ? s + stockData[k] : s;
-  }, 0);
+  const hasKey = product.pids.some(pid => (pid+'_'+cm) in stockData);
+  if(!hasKey) return null;
+  return product.pids.reduce((s,pid)=>{ const k=pid+'_'+cm; return k in stockData?s+stockData[k]:s; }, 0);
 }
 
-function getTotalStock(product){
-  // Sum all sizes for this product
-  const hasAny = product.sizes.some(label => getSizeStock(product, label) !== null);
-  if(!hasAny) return null; // no data yet
-  return product.sizes.reduce((s, label) => {
-    const st = getSizeStock(product, label);
-    return s + (st || 0);
-  }, 0);
-}
-
-// Infer season from category/material/name — sheet products may have it explicit
-function getSeason(product){
-  if(product.season) return product.season;
-  const name = (product.name||'').toLowerCase();
-  const mat  = (product.material||'').toLowerCase();
-  if(mat.includes('fleece') || mat.includes('padded') || name.includes('fleece') || name.includes('quilted') || name.includes('padded') || name.includes('knit') || name.includes('sweatshirt') || name.includes('cardigan') || name.includes('sweater'))
-    return 'Winter';
-  if(name.includes('short') || name.includes('linen') || name.includes('muslin') || name.includes('sleeve shirt') || name.includes('romper') || mat.includes('linen'))
-    return 'Summer';
-  return 'Spring/Autumn';
-}
-
-/* ── HEADER MINIMISE ── */
-window.scrollTo(0,0);
-const header = document.getElementById('header');
-let ticking = false;
-window.addEventListener('scroll', ()=>{
-  if(!ticking){
-    requestAnimationFrame(()=>{
-      const s = window.pageYOffset;
-      if(s > 160) header.classList.add('mini');
-      else if(s < 40) header.classList.remove('mini');
-      ticking = false;
-    });
-    ticking = true;
-  }
-}, {passive:true});
-
-/* ── MOBILE DRAWER ── */
-function toggleMobileDrawer(){
-  const drawer = document.getElementById('mobileFilterDrawer');
-  const arrow  = document.getElementById('mobileFilterArrow');
-  const open   = drawer.classList.toggle('open');
-  arrow.style.transform = open ? 'rotate(180deg)' : '';
-}
-
-/* ── FILTER WIRING ── */
-function buildMobileChips(){
-  const sizes = ['all','3-6M','6-12M','12-24M','2T','3T','4T','5T'];
-  const cats  = ['all','Tops','Bottoms','Rompers & Overalls','Sets','Outerwear','Cardigans & Knitwear'];
-  const seasons = ['all','Summer','Spring/Autumn','Winter'];
-  const labels  = {'all':'All','Rompers & Overalls':'Rompers','Cardigans & Knitwear':'Knitwear','Spring/Autumn':'Spring/Autumn'};
-  function makeChips(container, vals, filterKey){
-    const el = document.getElementById(container);
-    el.innerHTML = vals.map(v=>`<button class="mobile-chip${filters[filterKey]===v?' on':''}" data-filter="${filterKey}" data-val="${v}">${labels[v]||v}</button>`).join('');
-    el.addEventListener('click', e=>{
-      const btn = e.target.closest('.mobile-chip'); if(!btn) return;
-      filters[btn.dataset.filter] = btn.dataset.val;
-      el.querySelectorAll('.mobile-chip').forEach(b=>b.classList.toggle('on', b===btn));
-      syncDesktopFilters();
-      renderProducts();
-      updateMobileLabel();
-    });
-  }
-  makeChips('mobileSizeChips', sizes, 'size');
-  makeChips('mobileCatChips', cats, 'cat');
-  makeChips('mobileSeasonChips', seasons, 'season');
-}
-
-function syncDesktopFilters(){
-  document.querySelectorAll('.filter-pill').forEach(btn=>{
-    btn.classList.toggle('on', btn.dataset.val === filters[btn.dataset.filter]);
+function totalStock(product){
+  if(!product.pids) return null;
+  let total = 0, hasAny = false;
+  product.sizes.forEach(label=>{
+    const s = getSizeStock(product, label);
+    if(s !== null){ hasAny = true; total += s; }
   });
+  return hasAny ? total : null;
 }
 
-function updateMobileLabel(){
-  const active = Object.entries(filters).filter(([,v])=>v!=='all').map(([k,v])=>v);
-  document.getElementById('mobileFilterLabel').textContent = active.length
-    ? 'Filters: ' + active.join(', ')
-    : 'Filter & Sort';
+/* ── FILTERS ── */
+function getCatFilter(){ return document.getElementById('catSelect')?.value || document.getElementById('catSelectM')?.value || ''; }
+function getSeasonFilter(){ return document.getElementById('seasonSelect')?.value || document.getElementById('seasonSelectM')?.value || ''; }
+function getClearance(){ return document.getElementById('clearanceCheck')?.checked || document.getElementById('clearanceCheckM')?.checked || false; }
+
+// Keep mobile + desktop selects in sync
+function syncSelects(src, targets){
+  targets.forEach(id=>{ const el=document.getElementById(id); if(el) el.value=src.value; });
+  render();
 }
 
-// Desktop sidebar clicks
-document.getElementById('filterSidebar').addEventListener('click', e=>{
-  const btn = e.target.closest('.filter-pill'); if(!btn) return;
-  const f = btn.dataset.filter;
-  filters[f] = btn.dataset.val;
-  document.querySelectorAll(`.filter-pill[data-filter="${f}"]`).forEach(b=>b.classList.toggle('on', b===btn));
-  // sync mobile
-  document.querySelectorAll(`.mobile-chip[data-filter="${f}"]`).forEach(b=>b.classList.toggle('on', b.dataset.val===filters[f]));
-  updateMobileLabel();
-  renderProducts();
+document.addEventListener('DOMContentLoaded',()=>{
+  document.getElementById('catSelect')?.addEventListener('change', e=>{ const m=document.getElementById('catSelectM'); if(m)m.value=e.target.value; render(); });
+  document.getElementById('catSelectM')?.addEventListener('change', e=>{ const d=document.getElementById('catSelect'); if(d)d.value=e.target.value; render(); });
+  document.getElementById('seasonSelect')?.addEventListener('change', e=>{ const m=document.getElementById('seasonSelectM'); if(m)m.value=e.target.value; render(); });
+  document.getElementById('seasonSelectM')?.addEventListener('change', e=>{ const d=document.getElementById('seasonSelect'); if(d)d.value=e.target.value; render(); });
+  document.getElementById('clearanceCheck')?.addEventListener('change', e=>{ const m=document.getElementById('clearanceCheckM'); if(m)m.checked=e.target.checked; render(); });
+  document.getElementById('clearanceCheckM')?.addEventListener('change', e=>{ const d=document.getElementById('clearanceCheck'); if(d)d.checked=e.target.checked; render(); });
 });
 
-/* ── LOAD FROM SHEET ── */
-async function loadFromSheet(){
-  try{
-    const [prodRes, stockRes, pendingRes] = await Promise.all([
-      fetch(SHEET_URL+'?action=read&tab=Products'),
-      fetch(SHEET_URL+'?action=read&tab=Stock'),
-      fetch(SHEET_URL+'?action=read&tab=Pending')
-    ]);
-    const prodRows    = await prodRes.json();
-    const stockRows   = await stockRes.json();
-    const pendingRows = await pendingRes.json();
-
-    stockData = {};
-    pendingStock = {};
-    stockRows.slice(1).forEach(([key,qty])=>{ stockData[String(key)]=parseInt(qty)||0; });
-    if(pendingRows&&pendingRows.length>1){
-      pendingRows.slice(1).forEach(([key,qty])=>{ if(key&&parseInt(qty)>0) pendingStock[String(key)]=parseInt(qty); });
-    }
-
-    const KNOWN_CM=['130','120','110','100','90','80','70','60'];
-    const sheetProducts=[];
-    prodRows.slice(1).forEach(row=>{
-      const [pid,name,color,hex,sizesRaw,price,bundlePrice,cost,image,material,saleDiscount,category,bin,unit]=row;
-      if(!pid||!name) return;
-      let raw=String(sizesRaw||'');
-      let sizesCm=[];
-      if(raw.includes(',')){ sizesCm=raw.split(',').map(s=>s.trim()).filter(Boolean); }
-      else if(/^\d+$/.test(raw.replace(/\s/g,''))){
-        let rem=raw.replace(/\s/g,'');
-        while(rem.length>0){ const m=KNOWN_CM.find(cm=>rem.startsWith(cm)); if(m){sizesCm.push(m);rem=rem.slice(m.length);}else rem=rem.slice(1); }
-      } else { sizesCm=raw.split(/\s+/).map(s=>s.trim()).filter(Boolean); }
-      const sizesDisplay=sizesCm.map(cm=>CM_TO_LABEL[cm]||cm);
-      sheetProducts.push({
-        id:parseInt(pid), name:String(name), color:String(color||''),
-        price:isNaN(parseFloat(price))?price:parseFloat(price),
-        bundlePrice:isNaN(parseFloat(bundlePrice))?bundlePrice:parseFloat(bundlePrice),
-        sizes:sizesDisplay, sizesCm, material:String(material||''),
-        saleDiscount:parseFloat(saleDiscount)||0,
-        category:String(category||'Uncategorized'),
-        unit:String(unit||'ea'), image:String(image||''),
-        hidden:false
-      });
-    });
-
-    if(sheetProducts.length>0){
-      const grouped={};
-      sheetProducts.forEach(p=>{
-        if(p.category==='Sold Out'||p.hidden) return;
-        if(!grouped[p.name]){
-          grouped[p.name]={...p, allSizes:[...p.sizes], allSizesCm:[...p.sizesCm], pids:[p.id]};
-        } else {
-          p.sizes.forEach((s,i)=>{ if(!grouped[p.name].allSizes.includes(s)){ grouped[p.name].allSizes.push(s); grouped[p.name].allSizesCm.push(p.sizesCm[i]); } });
-          grouped[p.name].pids.push(p.id);
-        }
-      });
-      catalogProducts=Object.values(grouped).map(g=>{
-        const pairs=g.allSizes.map((s,i)=>({label:s,cm:g.allSizesCm[i]}));
-        pairs.sort((a,b)=>CM_ORDER.indexOf(a.cm)-CM_ORDER.indexOf(b.cm));
-        return {...g, sizes:pairs.map(p=>p.label), sizesCm:pairs.map(p=>p.cm)};
-      });
-    } else { useFallback(); }
-  } catch(e){ useFallback(); }
-  renderProducts();
+function setSize(btn){
+  document.querySelectorAll('.filter-btn[data-sz]').forEach(b=>b.classList.toggle('active', b===btn || b.dataset.sz===btn.dataset.sz));
+  szFilter = btn.dataset.sz;
+  render();
 }
 
-function useFallback(){
-  catalogProducts=FALLBACK_PRODUCTS.map(p=>({
-    ...p, pids:[p.id],
-    sizesCm:p.sizes.map(s=>SIZE_LABEL_TO_CM[s]||null)
-  }));
+/* ── MOBILE DRAWER ── */
+function toggleMobileFilters(){
+  const drawer = document.getElementById('mobileDrawer');
+  const btn = document.getElementById('mobileFilterBtn');
+  const open = drawer.classList.toggle('open');
+  btn.classList.toggle('open', open);
+  btn.innerHTML = open
+    ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Close'
+    : '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/></svg> Filter';
 }
 
 /* ── RENDER ── */
-function renderProducts(){
+function render(){
+  const cat = getCatFilter();
+  const season = getSeasonFilter();
+  const clearance = getClearance();
   const grid = document.getElementById('productGrid');
-  grid.innerHTML = '';
 
-  let list = catalogProducts.filter(p=>p.sizes&&p.sizes.length>0);
+  // Style active state on dropdowns
+  ['catSelect','catSelectM'].forEach(id=>{ const el=document.getElementById(id); if(el) el.classList.toggle('has-val', !!el.value); });
+  ['seasonSelect','seasonSelectM'].forEach(id=>{ const el=document.getElementById(id); if(el) el.classList.toggle('has-val', !!el.value); });
+  ['clearanceWrap','clearanceWrapM'].forEach(id=>{ const el=document.getElementById(id); if(el) el.classList.toggle('active', clearance); });
 
-  // ── Size filter ──
-  if(filters.size !== 'all'){
-    list = list.filter(p=>{
-      if(!p.sizes.includes(filters.size)) return false;
-      const st = getSizeStock(p, filters.size);
-      return st === null || st > 0;
+  let rows = catalogProducts.filter(p=>p.sizes&&p.sizes.length);
+
+  // Size filter
+  if(szFilter !== 'all'){
+    rows = rows.filter(p=>{
+      if(!p.sizes.includes(szFilter)) return false;
+      const s = getSizeStock(p, szFilter);
+      return s === null || s > 0;
     });
   }
 
-  // ── Hide all-zero-stock products ──
-  list = list.filter(p=>{
+  // Hide all-zero stock
+  rows = rows.filter(p=>{
     const hasData = p.sizes.some(l=>getSizeStock(p,l)!==null);
     if(!hasData) return true;
     return p.sizes.some(l=>{ const s=getSizeStock(p,l); return s===null||s>0; });
   });
 
-  // ── Category filter ──
-  if(filters.cat !== 'all'){
-    list = list.filter(p=>(p.category||'Uncategorized')===filters.cat);
-  }
+  // Category filter
+  if(cat) rows = rows.filter(p=>deriveCategory(p)===cat||p.category===cat);
 
-  // ── Season filter ──
-  if(filters.season !== 'all'){
-    list = list.filter(p=>getSeason(p)===filters.season);
-  }
-
-  // ── Sort: highest total stock first, no-data products go to end ──
-  list.sort((a,b)=>{
-    const sa = getTotalStock(a);
-    const sb = getTotalStock(b);
-    if(sa === null && sb === null) return 0;
-    if(sa === null) return 1;   // no data → end
-    if(sb === null) return -1;
-    return sb - sa;             // high stock first
+  // Season filter
+  if(season) rows = rows.filter(p=>{
+    const ps = deriveSeason(p);
+    if(!ps) return false;
+    // normalise Spring/Autumn variants
+    const norm = s => s.toLowerCase().replace('spring/autumn','spring').replace('spring / autumn','spring');
+    return norm(ps) === norm(season);
   });
 
-  // Update count bar
-  document.getElementById('sortBarLeft').innerHTML =
-    `<strong>${list.length}</strong> item${list.length!==1?'s':''} available`
-    + (filters.size!=='all'||filters.cat!=='all'||filters.season!=='all'
-      ? ` <span style="color:#ccc">·</span> sorted by stock`
-      : ` <span style="color:#ccc">·</span> sorted by stock`);
+  // Clearance filter
+  if(clearance) rows = rows.filter(p=>isClearance(p));
 
-  if(!list.length){
-    grid.innerHTML='<div class="loading-msg">No products available with these filters.</div>';
+  // Sort: lowest total stock first (to sell faster), no-data at end
+  rows.sort((a,b)=>{
+    const sa = totalStock(a);
+    const sb = totalStock(b);
+    if(sa===null && sb===null) return 0;
+    if(sa===null) return 1;
+    if(sb===null) return -1;
+    return sa - sb;
+  });
+
+  // Results bar
+  document.getElementById('resultsCount').innerHTML = `<strong>${rows.length}</strong> item${rows.length!==1?'s':''}`;
+  document.getElementById('sortNote').textContent = rows.length && totalStock(rows[0])!==null ? 'Sorted by stock — lowest first' : '';
+
+  // Active filter tags
+  const tags = [];
+  if(cat) tags.push({label: cat, clear:()=>{ ['catSelect','catSelectM'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';el?.classList.remove('has-val')}); render(); }});
+  if(season) tags.push({label: season, clear:()=>{ ['seasonSelect','seasonSelectM'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';el?.classList.remove('has-val')}); render(); }});
+  if(clearance) tags.push({label:'Clearance', clear:()=>{ ['clearanceCheck','clearanceCheckM'].forEach(id=>{const el=document.getElementById(id);if(el)el.checked=false;}); render(); }});
+  document.getElementById('activeFilters').innerHTML = tags.map((t,i)=>
+    `<div class="active-filter-tag" onclick="clearTag(${i})">${t.label} <span>✕</span></div>`
+  ).join('');
+  window._filterTags = tags;
+
+  if(!rows.length){
+    grid.innerHTML='<div class="no-results">No items match these filters.<br><span style="font-size:.8rem;color:#ccc">Try adjusting your selection.</span></div>';
     return;
   }
 
-  list.forEach(product=>{
-    const totalSt = getTotalStock(product);
-    const stockDotClass = totalSt===null ? '' : totalSt===0 ? 'stock-lo' : totalSt<=3 ? 'stock-med' : 'stock-hi';
-
-    const sizeBadges = product.sizes.map(label=>{
-      if(!label) return '';
-      const st = getSizeStock(product, label);
-      if(st===null) return `<span class="size-badge">${label}</span>`;
-      if(st===0){
-        const cm = product.sizesCm ? product.sizesCm[product.sizes.indexOf(label)] : SIZE_LABEL_TO_CM[label];
-        const isPending = cm && product.pids && product.pids.some(pid=>pendingStock[pid+'_'+cm]);
-        return isPending
-          ? `<span class="size-badge pending-restock">${label} · Soon</span>`
-          : `<span class="size-badge out-of-stock">${label}</span>`;
-      }
-      return `<span class="size-badge">${label}</span>`;
-    }).join('');
-
-    const sale = product.saleDiscount||0;
-    const unit = product.unit||'ea';
-    const unitLabel = unit==='ea' ? '/ea' : '/set';
-    const salePrice = sale>0 ? parseFloat(product.price)-sale : null;
-    const priceHtml = sale>0
-      ? `<div class="product-price"><span class="price-was">$${product.price}${unitLabel}</span><span class="price-now">$${salePrice.toFixed(2)}${unitLabel}</span></div>`
-      : `<div class="product-price">$${product.price}<span style="font-size:.9em;color:var(--bark);margin-left:1px">${unitLabel}</span></div>`;
-    const bundleHtml = sale>0 ? '' : `<div class="bundle-price">Bundle: $${product.bundlePrice}${unitLabel}</div>`;
-
-    const card = document.createElement('div');
-    card.className = 'product-card';
-    card.innerHTML = `
-      <img src="${product.image}" alt="${product.name}" class="product-image" loading="lazy">
-      <div class="product-details">
-        <div class="product-name">${product.name}</div>
-        ${priceHtml}
-        ${bundleHtml}
-        ${product.material?`<div class="product-material">${product.material}</div>`:''}
-        <div class="sizes-label">
-          ${stockDotClass ? `<span class="stock-dot ${stockDotClass}"></span>` : ''}Sizes Available
-        </div>
-        <div class="sizes-container">${sizeBadges}</div>
-      </div>`;
-    grid.appendChild(card);
-  });
+  grid.innerHTML = rows.map(p=>cardHTML(p)).join('');
 }
 
-/* ── BOOT ── */
-buildMobileChips();
+function clearTag(i){ window._filterTags[i]?.clear(); }
+
+function cardHTML(p){
+  const sale = p.saleDiscount||0;
+  const unit = p.unit||'ea';
+  const ul = unit==='ea'?'/ea':'/set';
+  const salePrice = sale>0 ? parseFloat(p.price)-sale : null;
+  const clearance = isClearance(p);
+  const season = deriveSeason(p);
+  const sc = seasonClass(season);
+  const ts = totalStock(p);
+  const isLow = ts!==null && ts>0 && ts<=4;
+
+  // Price HTML
+  const priceHTML = salePrice!==null
+    ? `<div class="price-row"><span class="price-was">$${p.price}${ul}</span><span class="price-now">$${salePrice.toFixed(2)}${ul}</span></div>`
+    : `<div class="price-row"><span class="product-price">$${p.price}${ul}</span></div>`;
+
+  const bundleHTML = salePrice===null ? `<div class="bundle-price">Bundle 5+: $${p.bundlePrice}${ul}</div>` : '';
+
+  // Badges
+  const badges = [];
+  if(clearance) badges.push('<span class="badge badge-clearance">Sale</span>');
+  if(isLow) badges.push('<span class="badge badge-low">⚠ Low stock</span>');
+  if(season && sc) badges.push(`<span class="season-tag ${sc}">${season}</span>`);
+
+  // Size badges
+  const sizeBadges = p.sizes.map(label=>{
+    const s = getSizeStock(p, label);
+    if(s===null) return `<span class="size-badge">${label}</span>`;
+    if(s===0){
+      const cm = p.sizesCm ? p.sizesCm[p.sizes.indexOf(label)] : SIZE_TO_CM[label];
+      const pending = cm && p.pids && p.pids.some(pid=>pendingStock[pid+'_'+cm]);
+      if(pending) return `<span class="size-badge pending">${label} · Soon</span>`;
+      return `<span class="size-badge out">${label}</span>`;
+    }
+    return `<span class="size-badge">${label}</span>`;
+  }).join('');
+
+  // Clean name — strip discount text for display
+  const displayName = p.name
+    .replace(/,?\s*Clearance \$\d+ off/gi,'')
+    .replace(/,?\s*additional \$\d+\.?\d* off!?/gi,'')
+    .trim();
+
+  return `<div class="product-card${clearance?' clearance-card':''}">
+    <img src="${p.image}" alt="${displayName}" class="product-image" loading="lazy">
+    <div class="product-details">
+      ${badges.length?`<div class="badges-row">${badges.join('')}</div>`:''}
+      <div class="product-name">${displayName}</div>
+      ${priceHTML}
+      ${bundleHTML}
+      ${p.material?`<div class="product-material">${p.material}</div>`:''}
+      <div class="sizes-label">Sizes Available</div>
+      <div class="sizes-container">${sizeBadges}</div>
+    </div>
+  </div>`;
+}
+
+/* ── SCROLL MINIMISE ── */
+const header = document.getElementById('header');
+let ticking = false;
+window.addEventListener('scroll',()=>{
+  if(!ticking){ requestAnimationFrame(()=>{
+    header.classList.toggle('min', window.scrollY > 180);
+    ticking=false;
+  }); ticking=true; }
+},{passive:true});
+
+/* ── LOAD FROM SHEET ── */
+async function loadFromSheet(){
+  try{
+    const [prodRes,stockRes,pendingRes] = await Promise.all([
+      fetch(SHEET_URL+'?action=read&tab=Products'),
+      fetch(SHEET_URL+'?action=read&tab=Stock'),
+      fetch(SHEET_URL+'?action=read&tab=Pending')
+    ]);
+    const prodRows = await prodRes.json();
+    const stockRows = await stockRes.json();
+    const pendingRows = await pendingRes.json();
+
+    stockData={};
+    stockRows.slice(1).forEach(([k,q])=>{ stockData[String(k)]=parseInt(q)||0; });
+    pendingStock={};
+    if(pendingRows&&pendingRows.length>1) pendingRows.slice(1).forEach(([k,q])=>{ if(k&&parseInt(q)>0) pendingStock[String(k)]=parseInt(q); });
+
+    const KNOWN_CM=['130','120','110','100','90','80','70','60'];
+    const sheet=[];
+    prodRows.slice(1).forEach(row=>{
+      const [pid,name,color,hex,sizesRaw,price,bundlePrice,cost,image,material,saleDiscount,category,bin,unit,season]=row;
+      if(!pid||!name) return;
+      let szStr=String(sizesRaw||'');
+      let sizesCm=[];
+      if(szStr.includes(',')) sizesCm=szStr.split(',').map(s=>s.trim()).filter(Boolean);
+      else if(/^\d+$/.test(szStr.replace(/\s/g,''))){
+        let rem=szStr.replace(/\s/g,'');
+        while(rem.length){ const m=KNOWN_CM.find(c=>rem.startsWith(c)); if(m){sizesCm.push(m);rem=rem.slice(m.length);}else rem=rem.slice(1); }
+      } else sizesCm=szStr.split(/\s+/).map(s=>s.trim()).filter(Boolean);
+      const sizesDisplay=sizesCm.map(c=>CM_TO_SIZE[c]||c);
+      sheet.push({id:parseInt(pid),name:String(name),color:String(color||''),price:parseFloat(price)||0,bundlePrice:parseFloat(bundlePrice)||0,sizes:sizesDisplay,sizesCm,material:String(material||''),saleDiscount:parseFloat(saleDiscount)||0,category:String(category||''),bin:String(bin||''),unit:String(unit||'ea'),season:String(season||''),image:String(image||'')});
+    });
+
+    if(sheet.length){
+      const grouped={};
+      sheet.forEach(p=>{
+        if((p.category||'').toLowerCase().includes('sold out')) return;
+        if(!grouped[p.name]){grouped[p.name]={...p,allSizes:[...p.sizes],allSizesCm:[...p.sizesCm],pids:[p.id]};}
+        else{
+          p.sizes.forEach((s,i)=>{ if(!grouped[p.name].allSizes.includes(s)){grouped[p.name].allSizes.push(s);grouped[p.name].allSizesCm.push(p.sizesCm[i]);} });
+          grouped[p.name].pids.push(p.id);
+        }
+      });
+      const CM_ORDER=['60','70','80','90','100','110','120','130'];
+      catalogProducts=Object.values(grouped).map(g=>{
+        const pairs=g.allSizes.map((s,i)=>({label:s,cm:g.allSizesCm[i]}));
+        pairs.sort((a,b)=>CM_ORDER.indexOf(a.cm)-CM_ORDER.indexOf(b.cm));
+        return {...g,sizes:pairs.map(p=>p.label),sizesCm:pairs.map(p=>p.cm)};
+      });
+    } else useFallback();
+  } catch(e){ useFallback(); }
+  render();
+}
+
+function useFallback(){
+  catalogProducts=FALLBACK.map(p=>({...p,pids:[p.id],sizesCm:p.sizes.map(s=>SIZE_TO_CM[s]||null)}));
+}
+
+window.scrollTo(0,0);
 loadFromSheet();
 </script>
 </body>
