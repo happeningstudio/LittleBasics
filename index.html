@@ -75,8 +75,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica','Arial'
 .sidebar-filters{width:180px;flex-shrink:0;position:sticky;top:70px}
 .sf-section{margin-bottom:1.25rem}
 .sf-label{font-size:.68rem;font-weight:600;color:#bbb;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.5rem}
-.sf-options{display:flex;flex-direction:column;gap:.3rem}
-.sf-btn{text-align:left;padding:.38rem .6rem;border:1px solid #e0d8d0;background:#fff;border-radius:.35rem;cursor:pointer;font-size:.8rem;color:#5a5a5a;font-family:inherit;transition:all .12s;width:100%}
+.sf-options{display:flex;flex-direction:row;flex-wrap:wrap;gap:.3rem}
+.sf-btn{text-align:left;padding:.38rem .6rem;border:1px solid #e0d8d0;background:#fff;border-radius:.35rem;cursor:pointer;font-size:.8rem;color:#5a5a5a;font-family:inherit;transition:all .12s;width:auto;white-space:nowrap}
 .sf-btn:hover{border-color:#8b7355;color:#8b7355;background:#faf6f2}
 .sf-btn.active{background:#8b7355;color:#fff;border-color:#8b7355}
 .sf-check-label{display:flex;align-items:center;gap:.45rem;font-size:.8rem;color:#5a5a5a;cursor:pointer}
@@ -101,7 +101,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica','Arial'
 .badge{display:inline-block;font-size:.6rem;font-weight:700;padding:.1rem .38rem;border-radius:3px;text-transform:uppercase;letter-spacing:.04em}
 .badge-clearance{background:#b84040;color:#fff}
 .badge-sale{background:#b84040;color:#fff}
-.badge-low{display:inline-block;font-size:.72rem;background:#f5f1ed;padding:.25rem .5rem;border-radius:.2rem;color:#c97c35;border:1px solid #ddd6cc}
+.badge-low{display:inline-block;font-size:.72rem;background:#f5f1ed;padding:.25rem .5rem;border-radius:.2rem;color:#423727;border:1px solid #ddd6cc;font-weight:400}
 
 /* season tag — matches size badge style */
 .season-tag{display:inline-block;font-size:.72rem;background:#f5f1ed;padding:.25rem .5rem;border-radius:.2rem;color:#423727;border:1px solid #ddd6cc}
@@ -624,7 +624,7 @@ function cardHTML(p){
     ? `<div class="price-row"><span class="price-was">$${p.price}${ul}</span><span class="price-now">$${salePrice.toFixed(2)}${ul}</span></div>`
     : `<div class="price-row"><span class="product-price">$${p.price}${ul}</span></div>`;
 
-  const bundleHTML = salePrice===null ? `<div class="bundle-price">Bundle 5+: $${p.bundlePrice}${ul}</div>` : '';
+  const bundleHTML = salePrice===null ? `<div class="bundle-price">Bundle: $${p.bundlePrice}${ul}</div>` : '';
 
   // Badges
   const badges = [];
