@@ -458,7 +458,19 @@ const FALLBACK = [
 let catalogProducts = [];
 let stockData = {};
 let pendingStock = {};
+let soldData = {}; // pid_cm -> units sold
 let szFilter = 'all';
+
+function totalSold(product){
+  if(!product.pids) return 0;
+  return product.pids.reduce((total, pid)=>{
+    // sum across all sizes for this pid
+    const pidTotal = Object.entries(soldData)
+      .filter(([k])=>k.startsWith(pid+'_'))
+      .reduce((s,[,v])=>s+v, 0);
+    return total + pidTotal;
+  }, 0);
+}
 
 function getSizeStock(product, label){
   const cm = product.sizesCm ? product.sizesCm[product.sizes.indexOf(label)] : SIZE_TO_CM[label];
@@ -578,8 +590,12 @@ function render(){
   // Clearance filter
   if(clearance) rows = rows.filter(p=>isClearance(p));
 
-  // Sort: lowest total stock first (to sell faster), no-data at end
+  // Sort: most sold first (popularity), fallback to lowest stock for ties
   rows.sort((a,b)=>{
+    const soldA = totalSold(a);
+    const soldB = totalSold(b);
+    if(soldA !== soldB) return soldB - soldA; // higher sold = first
+    // tiebreak: lower stock first (to sell faster)
     const sa = totalStock(a);
     const sb = totalStock(b);
     if(sa===null && sb===null) return 0;
@@ -682,17 +698,21 @@ window.addEventListener('scroll',()=>{
 /* ── LOAD FROM SHEET ── */
 async function loadFromSheet(){
   try{
-    const [prodRes,stockRes,pendingRes] = await Promise.all([
+    const [prodRes,stockRes,pendingRes,soldRes] = await Promise.all([
       fetch(SHEET_URL+'?action=read&tab=Products'),
       fetch(SHEET_URL+'?action=read&tab=Stock'),
-      fetch(SHEET_URL+'?action=read&tab=Pending')
+      fetch(SHEET_URL+'?action=read&tab=Pending'),
+      fetch(SHEET_URL+'?action=read&tab=Sold')
     ]);
     const prodRows = await prodRes.json();
     const stockRows = await stockRes.json();
     const pendingRows = await pendingRes.json();
+    const soldRows = await soldRes.json();
 
     stockData={};
     stockRows.slice(1).forEach(([k,q])=>{ stockData[String(k)]=parseInt(q)||0; });
+    soldData={};
+    if(soldRows&&soldRows.length>1) soldRows.slice(1).forEach(([k,q])=>{ if(k) soldData[String(k)]=(soldData[String(k)]||0)+(parseInt(q)||0); });
     pendingStock={};
     if(pendingRows&&pendingRows.length>1) pendingRows.slice(1).forEach(([k,q])=>{ if(k&&parseInt(q)>0) pendingStock[String(k)]=parseInt(q); });
 
