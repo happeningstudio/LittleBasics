@@ -44,10 +44,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica','Arial'
 /* mobile filter toggle */
 .mobile-filter-btn{display:none;align-items:center;gap:.4rem;padding:.38rem .75rem;border:1px solid #d4c5b9;background:#fff;border-radius:.4rem;cursor:pointer;font-size:.8rem;color:#5a5a5a;font-family:inherit;flex-shrink:0;transition:all .15s}
 .mobile-filter-btn.open{border-color:#8b7355;color:#8b7355;background:#faf6f2}
-.mobile-filter-drawer{display:none;width:100%;padding:.5rem 0 .1rem}
+.mobile-filter-drawer{display:none;width:100%;padding:.6rem 0 .2rem}.mdf-section{margin-bottom:.85rem}.mdf-label{font-size:.68rem;font-weight:600;color:#bbb;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.4rem}.mdf-options{display:flex;flex-wrap:wrap;gap:.3rem}
 .mobile-filter-drawer.open{display:block}
-.mobile-filter-drawer .filter-row{display:flex;align-items:center;gap:.35rem;flex-wrap:wrap;margin-bottom:.4rem}
-.mobile-filter-drawer .filter-row-label{min-width:52px}
+
 
 /* minimized */
 .header.min .header-logo{height:30px}
@@ -231,42 +230,41 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica','Arial'
 
     <!-- Mobile filter drawer -->
     <div class="mobile-filter-drawer" id="mobileDrawer">
-      <div class="filter-row">
-        <span class="filter-row-label">Size</span>
-        <button class="filter-btn active" data-sz="all" onclick="setSize(this)">All</button>
-        <button class="filter-btn" data-sz="3-6M"   onclick="setSize(this)">3-6M</button>
-        <button class="filter-btn" data-sz="6-12M"  onclick="setSize(this)">6-12M</button>
-        <button class="filter-btn" data-sz="12-24M" onclick="setSize(this)">12-24M</button>
-        <button class="filter-btn" data-sz="2T"     onclick="setSize(this)">2T</button>
-        <button class="filter-btn" data-sz="3T"     onclick="setSize(this)">3T</button>
-        <button class="filter-btn" data-sz="4T"     onclick="setSize(this)">4T</button>
-        <button class="filter-btn" data-sz="5T"     onclick="setSize(this)">5T</button>
+      <div class="mdf-section">
+        <div class="mdf-label">Size</div>
+        <div class="mdf-options">
+          <button class="sf-btn active" data-sz="all" onclick="setSize(this)">All</button>
+          <button class="sf-btn" data-sz="3-6M"   onclick="setSize(this)">3–6M</button>
+          <button class="sf-btn" data-sz="6-12M"  onclick="setSize(this)">6–12M</button>
+          <button class="sf-btn" data-sz="12-24M" onclick="setSize(this)">12–24M</button>
+          <button class="sf-btn" data-sz="2T"     onclick="setSize(this)">2T</button>
+          <button class="sf-btn" data-sz="3T"     onclick="setSize(this)">3T</button>
+          <button class="sf-btn" data-sz="4T"     onclick="setSize(this)">4T</button>
+          <button class="sf-btn" data-sz="5T"     onclick="setSize(this)">5T</button>
+        </div>
       </div>
-      <div class="filter-row">
-        <span class="filter-row-label">Type</span>
-        <select class="filter-select" id="catSelectM" onchange="render()">
-          <option value="">All Types</option>
-          <option value="Tops">Tops</option>
-          <option value="Bottoms">Bottoms</option>
-          <option value="Rompers & Overalls">Rompers & Sets</option>
-          <option value="Outerwear & Knitwear">Outerwear & Knitwear</option>
-        </select>
+      <div class="mdf-section">
+        <div class="mdf-label">Type</div>
+        <div class="mdf-options">
+          <button class="sf-btn active" data-mcat="" onclick="setMCat(this,'')">All Types</button>
+          <button class="sf-btn" data-mcat="Tops" onclick="setMCat(this,'Tops')">Tops</button>
+          <button class="sf-btn" data-mcat="Bottoms" onclick="setMCat(this,'Bottoms')">Bottoms</button>
+          <button class="sf-btn" data-mcat="Rompers & Overalls" onclick="setMCat(this,'Rompers & Overalls')">Rompers &amp; Sets</button>
+          <button class="sf-btn" data-mcat="Outerwear & Knitwear" onclick="setMCat(this,'Outerwear & Knitwear')">Outerwear &amp; Knitwear</button>
+        </div>
       </div>
-      <div class="filter-row">
-        <span class="filter-row-label">Season</span>
-        <select class="filter-select" id="seasonSelectM" onchange="render()">
-          <option value="">All Seasons</option>
-          <option value="Summer">Summer</option>
-          <option value="Winter">Winter</option>
-          <option value="Spring/Autumn">Spring / Autumn</option>
-          <option value="All Season">All Season</option>
-        </select>
+      <div class="mdf-section">
+        <div class="mdf-label">Season</div>
+        <div class="mdf-options">
+          <button class="sf-btn active" data-mseason="" onclick="setMSeason(this,'')">All Seasons</button>
+          <button class="sf-btn" data-mseason="Summer" onclick="setMSeason(this,'Summer')">Summer</button>
+          <button class="sf-btn" data-mseason="Spring/Autumn" onclick="setMSeason(this,'Spring/Autumn')">Spring / Autumn</button>
+          <button class="sf-btn" data-mseason="Winter" onclick="setMSeason(this,'Winter')">Winter</button>
+        </div>
       </div>
-      <div class="filter-row">
-        <span class="filter-row-label">Sale</span>
-        <label class="clearance-wrap" id="clearanceWrapM">
-          <input type="checkbox" id="clearanceCheckM" onchange="render()">
-          🏷 Clearance only
+      <div class="mdf-section">
+        <label class="sf-check-label">
+          <input type="checkbox" id="clearanceCheckM" onchange="render()"> Clearance
         </label>
       </div>
     </div>
@@ -483,19 +481,32 @@ function totalStock(product){
 /* ── SIDEBAR FILTER SETTERS ── */
 window._sfCat = '';
 window._sfSeason = '';
+function setMCat(btn, val){
+  document.querySelectorAll('[data-mcat]').forEach(b=>b.classList.toggle('active', b===btn));
+  // also sync sidebar
+  document.querySelectorAll('[data-cat]').forEach(b=>b.classList.toggle('active', b.dataset.cat===val));
+  window._sfCat = val; render();
+}
+function setMSeason(btn, val){
+  document.querySelectorAll('[data-mseason]').forEach(b=>b.classList.toggle('active', b===btn));
+  document.querySelectorAll('[data-season]').forEach(b=>b.classList.toggle('active', b.dataset.season===val));
+  window._sfSeason = val; render();
+}
 function setSFCat(btn, val){
-  document.querySelectorAll('.sf-btn[data-cat]').forEach(b=>b.classList.toggle('active', b===btn));
+  document.querySelectorAll('[data-cat]').forEach(b=>b.classList.toggle('active', b.dataset.cat===val));
+  document.querySelectorAll('[data-mcat]').forEach(b=>b.classList.toggle('active', b.dataset.mcat===val));
   window._sfCat = val; render();
 }
 function setSFSeason(btn, val){
-  document.querySelectorAll('.sf-btn[data-season]').forEach(b=>b.classList.toggle('active', b===btn));
+  document.querySelectorAll('[data-season]').forEach(b=>b.classList.toggle('active', b.dataset.season===val));
+  document.querySelectorAll('[data-mseason]').forEach(b=>b.classList.toggle('active', b.dataset.mseason===val));
   window._sfSeason = val; render();
 }
 
 /* ── FILTERS ── */
-function getCatFilter(){ return window._sfCat !== undefined ? window._sfCat : (document.getElementById('catSelect')?.value || document.getElementById('catSelectM')?.value || ''); }
-function getSeasonFilter(){ return window._sfSeason !== undefined ? window._sfSeason : (document.getElementById('seasonSelect')?.value || document.getElementById('seasonSelectM')?.value || ''); }
-function getClearance(){ return document.getElementById('sfClearance')?.checked || document.getElementById('clearanceCheck')?.checked || document.getElementById('clearanceCheckM')?.checked || false; }
+function getCatFilter(){ return window._sfCat || ''; }
+function getSeasonFilter(){ return window._sfSeason || ''; }
+function getClearance(){ return document.getElementById('sfClearance')?.checked || document.getElementById('clearanceCheckM')?.checked || false; }
 
 // Keep mobile + desktop selects in sync
 function syncSelects(src, targets){
@@ -503,14 +514,7 @@ function syncSelects(src, targets){
   render();
 }
 
-document.addEventListener('DOMContentLoaded',()=>{
-  document.getElementById('catSelect')?.addEventListener('change', e=>{ const m=document.getElementById('catSelectM'); if(m)m.value=e.target.value; render(); });
-  document.getElementById('catSelectM')?.addEventListener('change', e=>{ const d=document.getElementById('catSelect'); if(d)d.value=e.target.value; render(); });
-  document.getElementById('seasonSelect')?.addEventListener('change', e=>{ const m=document.getElementById('seasonSelectM'); if(m)m.value=e.target.value; render(); });
-  document.getElementById('seasonSelectM')?.addEventListener('change', e=>{ const d=document.getElementById('seasonSelect'); if(d)d.value=e.target.value; render(); });
-  document.getElementById('clearanceCheck')?.addEventListener('change', e=>{ const m=document.getElementById('clearanceCheckM'); if(m)m.checked=e.target.checked; render(); });
-  document.getElementById('clearanceCheckM')?.addEventListener('change', e=>{ const d=document.getElementById('clearanceCheck'); if(d)d.checked=e.target.checked; render(); });
-});
+// filter sync handled by setSFCat/setSFSeason/setMCat/setMSeason
 
 function setSize(btn){
   document.querySelectorAll('[data-sz]').forEach(b=>b.classList.toggle('active', b.dataset.sz===btn.dataset.sz));
@@ -537,9 +541,9 @@ function render(){
   const grid = document.getElementById('productGrid');
 
   // Style active state on dropdowns
-  ['catSelect','catSelectM'].forEach(id=>{ const el=document.getElementById(id); if(el) el.classList.toggle('has-val', !!el.value); });
-  ['seasonSelect','seasonSelectM'].forEach(id=>{ const el=document.getElementById(id); if(el) el.classList.toggle('has-val', !!el.value); });
-  ['clearanceWrap','clearanceWrapM'].forEach(id=>{ const el=document.getElementById(id); if(el) el.classList.toggle('active', clearance); });
+  // sidebar btn active states handled by setSFCat/setMCat
+
+
 
   let rows = catalogProducts.filter(p=>p.sizes&&p.sizes.length);
 
@@ -590,9 +594,9 @@ function render(){
 
   // Active filter tags
   const tags = [];
-  if(cat) tags.push({label: cat, clear:()=>{ ['catSelect','catSelectM'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';el?.classList.remove('has-val')}); render(); }});
-  if(season) tags.push({label: season, clear:()=>{ ['seasonSelect','seasonSelectM'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';el?.classList.remove('has-val')}); render(); }});
-  if(clearance) tags.push({label:'Clearance', clear:()=>{ ['clearanceCheck','clearanceCheckM'].forEach(id=>{const el=document.getElementById(id);if(el)el.checked=false;}); render(); }});
+  if(cat) tags.push({label: cat, clear:()=>{ window._sfCat=''; document.querySelectorAll('[data-cat],[data-mcat]').forEach(b=>b.classList.toggle('active',!b.dataset.cat&&!b.dataset.mcat||b.dataset.cat===''||b.dataset.mcat==='')); render(); }});
+  if(season) tags.push({label: season, clear:()=>{ window._sfSeason=''; document.querySelectorAll('[data-season],[data-mseason]').forEach(b=>b.classList.toggle('active',b.dataset.season===''||b.dataset.mseason==='')); render(); }});
+  if(clearance) tags.push({label:'Clearance', clear:()=>{ ['sfClearance','clearanceCheckM'].forEach(id=>{const el=document.getElementById(id);if(el)el.checked=false;}); render(); }});
   document.getElementById('activeFilters').innerHTML = tags.map((t,i)=>
     `<div class="active-filter-tag" onclick="clearTag(${i})">${t.label} <span>✕</span></div>`
   ).join('');
