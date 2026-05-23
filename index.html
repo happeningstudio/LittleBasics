@@ -44,7 +44,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica','Arial'
 /* mobile filter toggle */
 .mobile-filter-btn{display:none;align-items:center;gap:.4rem;padding:.38rem .75rem;border:1px solid #d4c5b9;background:#fff;border-radius:.4rem;cursor:pointer;font-size:.8rem;color:#5a5a5a;font-family:inherit;flex-shrink:0;transition:all .15s}
 .mobile-filter-btn.open{border-color:#8b7355;color:#8b7355;background:#faf6f2}
-.mobile-filter-drawer{display:none;width:100%;padding:.6rem 0 .2rem}.mdf-section{margin-bottom:.85rem}.mdf-label{font-size:.68rem;font-weight:600;color:#bbb;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.4rem}.mdf-options{display:flex;flex-wrap:wrap;gap:.3rem}
+.mobile-filter-drawer{display:none;width:100%;padding:.5rem 0 .3rem}.mobile-filter-drawer.open{display:block}.mdf-row{display:flex;align-items:center;gap:.4rem;flex-wrap:wrap}.mdf-select{flex:1;min-width:90px;padding:.3rem .5rem;border:1px solid #d4c5b9;border-radius:.4rem;background:#fff;font-size:.78rem;color:#5a5a5a;font-family:inherit;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='5'%3E%3Cpath d='M0 0l4.5 5L9 0z' fill='%23bbb'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right .4rem center;padding-right:1.4rem}.mdf-select:focus{outline:none;border-color:#8b7355}.mdf-check{display:flex;align-items:center;gap:.3rem;font-size:.78rem;color:#5a5a5a;cursor:pointer;white-space:nowrap}.mdf-check input{accent-color:#8b7355;width:14px;height:14px}
 .mobile-filter-drawer.open{display:block}
 
 
@@ -149,7 +149,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica','Arial'
   .product-details{padding:.6rem .65rem .75rem}
   .product-name{font-size:.82rem}
   .product-price,.price-now{font-size:.9rem}
-  .bundle-price{display:none}
+  /* bundle-price visible on mobile */
   .product-material{display:none}
 }
 @media(max-width:420px){
@@ -230,40 +230,31 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica','Arial'
 
     <!-- Mobile filter drawer -->
     <div class="mobile-filter-drawer" id="mobileDrawer">
-      <div class="mdf-section">
-        <div class="mdf-label">Size</div>
-        <div class="mdf-options">
-          <button class="sf-btn active" data-sz="all" onclick="setSize(this)">All</button>
-          <button class="sf-btn" data-sz="3-6M"   onclick="setSize(this)">3–6M</button>
-          <button class="sf-btn" data-sz="6-12M"  onclick="setSize(this)">6–12M</button>
-          <button class="sf-btn" data-sz="12-24M" onclick="setSize(this)">12–24M</button>
-          <button class="sf-btn" data-sz="2T"     onclick="setSize(this)">2T</button>
-          <button class="sf-btn" data-sz="3T"     onclick="setSize(this)">3T</button>
-          <button class="sf-btn" data-sz="4T"     onclick="setSize(this)">4T</button>
-          <button class="sf-btn" data-sz="5T"     onclick="setSize(this)">5T</button>
-        </div>
-      </div>
-      <div class="mdf-section">
-        <div class="mdf-label">Type</div>
-        <div class="mdf-options">
-          <button class="sf-btn active" data-mcat="" onclick="setMCat(this,'')">All Types</button>
-          <button class="sf-btn" data-mcat="Tops" onclick="setMCat(this,'Tops')">Tops</button>
-          <button class="sf-btn" data-mcat="Bottoms" onclick="setMCat(this,'Bottoms')">Bottoms</button>
-          <button class="sf-btn" data-mcat="Rompers & Overalls" onclick="setMCat(this,'Rompers & Overalls')">Rompers &amp; Sets</button>
-          <button class="sf-btn" data-mcat="Outerwear & Knitwear" onclick="setMCat(this,'Outerwear & Knitwear')">Outerwear &amp; Knitwear</button>
-        </div>
-      </div>
-      <div class="mdf-section">
-        <div class="mdf-label">Season</div>
-        <div class="mdf-options">
-          <button class="sf-btn active" data-mseason="" onclick="setMSeason(this,'')">All Seasons</button>
-          <button class="sf-btn" data-mseason="Summer" onclick="setMSeason(this,'Summer')">Summer</button>
-          <button class="sf-btn" data-mseason="Spring/Autumn" onclick="setMSeason(this,'Spring/Autumn')">Spring / Autumn</button>
-          <button class="sf-btn" data-mseason="Winter" onclick="setMSeason(this,'Winter')">Winter</button>
-        </div>
-      </div>
-      <div class="mdf-section">
-        <label class="sf-check-label">
+      <div class="mdf-row">
+        <select class="mdf-select" id="mSizeSelect" onchange="setMSize(this.value)">
+          <option value="all">All Sizes</option>
+          <option value="3-6M">3–6M</option>
+          <option value="6-12M">6–12M</option>
+          <option value="12-24M">12–24M</option>
+          <option value="2T">2T</option>
+          <option value="3T">3T</option>
+          <option value="4T">4T</option>
+          <option value="5T">5T</option>
+        </select>
+        <select class="mdf-select" id="mCatSelect" onchange="setMCat(null, this.value)">
+          <option value="">All Types</option>
+          <option value="Tops">Tops</option>
+          <option value="Bottoms">Bottoms</option>
+          <option value="Rompers & Overalls">Rompers &amp; Sets</option>
+          <option value="Outerwear & Knitwear">Outerwear &amp; Knitwear</option>
+        </select>
+        <select class="mdf-select" id="mSeasonSelect" onchange="setMSeason(null, this.value)">
+          <option value="">All Seasons</option>
+          <option value="Summer">Summer</option>
+          <option value="Spring/Autumn">Spring / Autumn</option>
+          <option value="Winter">Winter</option>
+        </select>
+        <label class="mdf-check">
           <input type="checkbox" id="clearanceCheckM" onchange="render()"> Clearance
         </label>
       </div>
@@ -494,24 +485,35 @@ function totalStock(product){
 window._sfCat = '';
 window._sfSeason = '';
 function setMCat(btn, val){
-  document.querySelectorAll('[data-mcat]').forEach(b=>b.classList.toggle('active', b===btn));
-  // also sync sidebar
+  // sync mobile select
+  const ms = document.getElementById('mCatSelect'); if(ms) ms.value = val;
+  // sync sidebar buttons
   document.querySelectorAll('[data-cat]').forEach(b=>b.classList.toggle('active', b.dataset.cat===val));
   window._sfCat = val; render();
 }
 function setMSeason(btn, val){
-  document.querySelectorAll('[data-mseason]').forEach(b=>b.classList.toggle('active', b===btn));
+  // sync mobile select
+  const ms = document.getElementById('mSeasonSelect'); if(ms) ms.value = val;
+  // sync sidebar buttons
   document.querySelectorAll('[data-season]').forEach(b=>b.classList.toggle('active', b.dataset.season===val));
   window._sfSeason = val; render();
 }
+function setMSize(val){
+  szFilter = val;
+  // sync sidebar + desktop size buttons
+  document.querySelectorAll('[data-sz]').forEach(b=>b.classList.toggle('active', b.dataset.sz===val));
+  // sync mobile select
+  const ms = document.getElementById('mSizeSelect'); if(ms) ms.value = val;
+  render();
+}
 function setSFCat(btn, val){
   document.querySelectorAll('[data-cat]').forEach(b=>b.classList.toggle('active', b.dataset.cat===val));
-  document.querySelectorAll('[data-mcat]').forEach(b=>b.classList.toggle('active', b.dataset.mcat===val));
+  const ms=document.getElementById('mCatSelect'); if(ms) ms.value=val;
   window._sfCat = val; render();
 }
 function setSFSeason(btn, val){
   document.querySelectorAll('[data-season]').forEach(b=>b.classList.toggle('active', b.dataset.season===val));
-  document.querySelectorAll('[data-mseason]').forEach(b=>b.classList.toggle('active', b.dataset.mseason===val));
+  const ms=document.getElementById('mSeasonSelect'); if(ms) ms.value=val;
   window._sfSeason = val; render();
 }
 
@@ -531,6 +533,7 @@ function syncSelects(src, targets){
 function setSize(btn){
   document.querySelectorAll('[data-sz]').forEach(b=>b.classList.toggle('active', b.dataset.sz===btn.dataset.sz));
   szFilter = btn.dataset.sz;
+  const ms=document.getElementById('mSizeSelect'); if(ms) ms.value=szFilter;
   render();
 }
 
