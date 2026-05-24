@@ -408,8 +408,10 @@ tr.selected td{background:rgba(139,115,85,.07)!important}
       <button class="btn ghost sm" onclick="closeModal('itemModal')">✕</button>
     </div>
     <div class="modal-body">
-      <input type="hidden" id="itemModalVendorId">
       <input type="hidden" id="itemModalItemId">
+      <div class="form-row">
+        <div><label class="form-label">Vendor *</label><select class="form-input" id="iVendorSelect"></select></div>
+      </div>
       <div class="form-row cols-2">
         <div><label class="form-label">Style No. *</label><input class="form-input" id="iStyleNo" placeholder="e.g. BP229"></div>
         <div><label class="form-label">Category</label><input class="form-input" id="iCategory" placeholder="e.g. Baby Pant"></div>
@@ -1038,7 +1040,7 @@ function render(){
   const total = rows.length;
   const allCount = activeVendorId==='all' ? allItems().length : (getVendor(activeVendorId)?.items.length||0);
   document.getElementById('toolbarMeta').textContent = `${total} of ${allCount}`;
-  document.getElementById('addItemBtn').style.display = activeVendorId==='all' ? 'none' : '';
+  document.getElementById('addItemBtn').style.display = ''; // always visible — vendor chosen in modal
 
   const area = document.getElementById('contentArea');
 
@@ -1184,11 +1186,15 @@ function openDetail(vendorId, itemId){
        <div class="img-or">— or paste a URL —</div>
        <input class="form-input" id="detailImgUrl" placeholder="https://… image URL" oninput="handleDetailImgUrl(this.value,'${it._vendorId}','${it.id}')">`;
 
+  // Build vendor options
+  const vendorOpts = vendors.map(v=>`<option value="${v.id}"${v.id===vendorId?' selected':''}>${esc(v.name)}</option>`).join('');
+
   body.innerHTML=`
     ${imgTag}
     <div class="detail-grid">
       <div class="detail-field"><label>Style No.</label><div class="val">${esc(it.styleNo)}</div></div>
       <div class="detail-field"><label>Category</label><div class="val">${esc(it.category||'')}</div></div>
+      <div class="detail-field" style="grid-column:1/-1"><label>Vendor</label><select class="val editable" id="d-vendor" style="width:100%">${vendorOpts}</select></div>
       <div class="detail-field"><label>Price</label><input class="val editable" id="d-price" value="${esc(it.price||'')}"></div>
       <div class="detail-field"><label>Season</label><input class="val editable" id="d-season" value="${esc(it.season||'')}"></div>
       <div class="detail-field"><label>MOQ</label><input class="val editable" id="d-moq" type="number" value="${it.moq||0}"></div>
@@ -1237,6 +1243,32 @@ function saveDetailEdits(){
   if(!_detailItem)return;
   const {vendorId,itemId}=_detailItem;
   const v=getVendor(vendorId);const it=v?.items.find(i=>i.id===itemId);if(!it)return;
+
+  // Check if vendor changed — move item
+  const newVendorId = document.getElementById('d-vendor')?.value;
+  if(newVendorId && newVendorId !== vendorId){
+    const newV = getVendor(newVendorId);
+    if(newV){
+      // Update fields first
+      it.price    = document.getElementById('d-price')?.value.trim()||it.price;
+      it.season   = document.getElementById('d-season')?.value.trim()||it.season;
+      it.moq      = parseInt(document.getElementById('d-moq')?.value)||0;
+      it.colors   = document.getElementById('d-colors')?.value.trim()||it.colors;
+      it.sizes    = document.getElementById('d-sizes')?.value.trim()||it.sizes;
+      it.material = document.getElementById('d-material')?.value.trim()||'';
+      it.notes    = document.getElementById('d-notes')?.value.trim()||'';
+      it.link     = document.getElementById('d-link')?.value.trim()||'';
+      // Move to new vendor
+      v.items = v.items.filter(i=>i.id!==itemId);
+      newV.items.push(it);
+      _detailItem = {vendorId:newVendorId, itemId};
+      save(); renderSidebar(); renderChips(); render();
+      closeModal('detailModal');
+      showToast('✓ Item moved to '+newV.name);
+      return;
+    }
+  }
+
   it.price    = document.getElementById('d-price')?.value.trim()||it.price;
   it.season   = document.getElementById('d-season')?.value.trim()||it.season;
   it.moq      = parseInt(document.getElementById('d-moq')?.value)||0;
@@ -1344,8 +1376,8 @@ function openAddItem(){
 function saveItem(){
   const styleNo=document.getElementById('iStyleNo').value.trim();
   if(!styleNo){alert('Style number required.');return;}
-  const vendorId=document.getElementById('itemModalVendorId').value;
-  const v=getVendor(vendorId);if(!v)return;
+  const vendorId=document.getElementById('iVendorSelect').value;
+  const v=getVendor(vendorId);if(!v){alert('Please select a vendor.');return;}
   v.items.push({
     id:uid(), styleNo,
     category:document.getElementById('iCategory').value.trim(),
