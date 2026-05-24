@@ -238,6 +238,120 @@ tr.selected td{background:rgba(139,115,85,.07)!important}
 .note-tag-del:hover{color:var(--red)}
 .tag-input{border:none;background:transparent;font-size:.65rem;font-family:'DM Sans',sans-serif;color:var(--ink);outline:none;width:80px}
 .tag-input::placeholder{color:#ccc}
+
+
+/* PO GALLERY */
+.po-gallery-wrap{display:flex;height:100%}
+.po-gallery-panel{width:340px;flex-shrink:0;background:var(--white);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
+.po-gallery-head{padding:.6rem .75rem;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:.4rem;flex-shrink:0}
+.po-gallery-search{padding:.28rem .5rem .28rem 1.6rem;border:1px solid var(--border);border-radius:5px;font-family:'DM Sans',sans-serif;font-size:.75rem;background:var(--mist);width:100%}
+.po-gallery-search:focus{outline:none;border-color:var(--bark)}
+.po-gallery-filters{display:flex;gap:.3rem;flex-wrap:wrap}
+.po-gallery-chip{padding:.18rem .45rem;border:1px solid var(--border);border-radius:20px;font-size:.65rem;cursor:pointer;background:var(--white);color:#888;font-family:'DM Sans',sans-serif;transition:all .12s}
+.po-gallery-chip:hover{border-color:var(--bark);color:var(--bark)}
+.po-gallery-chip.on{background:var(--bark);color:var(--white);border-color:var(--bark)}
+.po-gallery-scroll{flex:1;overflow-y:auto;padding:.5rem}
+.po-gallery-grid{display:grid;grid-template-columns:1fr 1fr;gap:.4rem}
+.po-gcard{background:var(--mist);border-radius:6px;overflow:hidden;cursor:pointer;border:2px solid transparent;transition:all .12s;position:relative}
+.po-gcard:hover{border-color:var(--sand-dk);background:var(--sand-lt)}
+.po-gcard.in-order{border-color:var(--bark);background:#fdf9f5}
+.po-gcard-img{width:100%;aspect-ratio:1;object-fit:cover;display:block;background:var(--sand-lt)}
+.po-gcard-img-ph{width:100%;aspect-ratio:1;display:flex;align-items:center;justify-content:center;color:#ccc;font-size:1.4rem;background:var(--sand-lt)}
+.po-gcard-body{padding:.38rem .42rem .45rem}
+.po-gcard-style{font-size:.7rem;font-weight:700;color:var(--ink)}
+.po-gcard-cat{font-size:.58rem;color:var(--bark-lt);margin-bottom:.15rem}
+.po-gcard-price{font-size:.72rem;font-weight:600;color:var(--bark)}
+.po-gcard-detail{font-size:.6rem;color:#aaa;line-height:1.4;margin-top:.1rem;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.po-gcard-add{position:absolute;bottom:.35rem;right:.35rem;width:22px;height:22px;border-radius:50%;background:var(--bark);color:var(--white);border:none;cursor:pointer;font-size:.9rem;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .12s;line-height:1}
+.po-gcard:hover .po-gcard-add{opacity:1}
+.po-gcard.in-order .po-gcard-add{opacity:1;background:var(--green)}
+.po-gcard-qty-badge{position:absolute;top:.3rem;right:.3rem;background:var(--bark);color:var(--white);font-size:.6rem;font-weight:700;border-radius:10px;padding:.08rem .32rem;display:none}
+.po-gcard.in-order .po-gcard-qty-badge{display:block}
+
+/* PO order panel (right side) */
+.po-order-panel{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.po-order-head{padding:.6rem .85rem;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;gap:.5rem}
+.po-order-scroll{flex:1;overflow-y:auto;padding:.75rem}
+.po-order-meta{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-bottom:.85rem}
+.po-order-items{background:var(--white);border-radius:7px;box-shadow:0 1px 6px rgba(42,36,32,.07);overflow:hidden;margin-bottom:.75rem}
+.po-item-row{display:flex;align-items:center;gap:.5rem;padding:.45rem .65rem;border-bottom:1px solid #f0ebe5}
+.po-item-row:last-child{border-bottom:none}
+.po-item-thumb{width:40px;height:40px;object-fit:cover;border-radius:4px;flex-shrink:0;background:var(--sand-lt)}
+.po-item-info{flex:1;min-width:0}
+.po-item-style{font-size:.73rem;font-weight:600;color:var(--ink)}
+.po-item-sub{font-size:.62rem;color:#aaa}
+.po-item-inputs{display:flex;flex-direction:column;gap:.2rem;width:140px;flex-shrink:0}
+.po-item-input{border:1px solid var(--border);border-radius:4px;padding:.18rem .35rem;font-size:.68rem;font-family:'DM Sans',sans-serif;color:var(--ink);background:var(--mist);width:100%}
+.po-item-input:focus{outline:none;border-color:var(--bark)}
+.po-order-empty{text-align:center;padding:2rem;color:#ccc;font-size:.78rem}
+/* PURCHASE ORDER VIEW */
+.po-view{height:calc(100vh - var(--top));display:flex;gap:0;overflow:hidden}
+.po-sidebar{width:260px;background:var(--white);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0}
+.po-sidebar-head{padding:.75rem .85rem .5rem;border-bottom:1px solid var(--border);flex-shrink:0}
+.po-sidebar-head h3{font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:#aaa;margin-bottom:.5rem}
+.po-drafts-list{flex:1;overflow-y:auto;padding:.4rem 0}
+.po-draft-item{padding:.45rem .85rem;cursor:pointer;border-left:2px solid transparent;transition:all .12s}
+.po-draft-item:hover{background:var(--sand-lt)}
+.po-draft-item.active{background:var(--sand-lt);border-left-color:var(--bark)}
+.po-draft-name{font-size:.8rem;font-weight:500;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.po-draft-meta{font-size:.62rem;color:#bbb;margin-top:.05rem}
+.po-sidebar-footer{padding:.6rem .85rem;border-top:1px solid var(--border);flex-shrink:0;display:flex;flex-direction:column;gap:.35rem}
+
+/* PO main area */
+.po-main{flex:1;display:flex;flex-direction:column;overflow:hidden;background:var(--mist)}
+.po-toolbar{display:flex;align-items:center;gap:.5rem;padding:.55rem 1rem;background:var(--white);border-bottom:1px solid var(--border);flex-shrink:0;flex-wrap:wrap}
+.po-body{flex:1;overflow-y:auto;padding:1.25rem}
+
+/* PO meta fields */
+.po-meta-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.65rem;margin-bottom:1.25rem}
+.po-field label{font-size:.65rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:#bbb;display:block;margin-bottom:.2rem}
+.po-field input,.po-field textarea,.po-field select{width:100%;border:1px solid var(--border);border-radius:5px;padding:.32rem .5rem;font-family:'DM Sans',sans-serif;font-size:.8rem;color:var(--ink);background:var(--white);transition:border-color .15s}
+.po-field input:focus,.po-field textarea:focus,.po-field select:focus{outline:none;border-color:var(--bark)}
+.po-field textarea{resize:vertical;min-height:48px}
+
+/* PO items section */
+.po-section-title{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#bbb;margin-bottom:.65rem;display:flex;align-items:center;justify-content:space-between}
+.po-items-wrap{background:var(--white);border-radius:8px;box-shadow:0 1px 8px rgba(42,36,32,.07);overflow:hidden;margin-bottom:1.25rem}
+.po-table{width:100%;border-collapse:collapse;min-width:600px}
+.po-table th{background:var(--sand-lt);font-size:.62rem;font-weight:600;color:#aaa;text-transform:uppercase;letter-spacing:.07em;padding:.38rem .6rem;border-bottom:1px solid var(--border);text-align:left;white-space:nowrap}
+.po-table td{padding:.38rem .6rem;border-bottom:1px solid #f0ebe5;vertical-align:middle;font-size:.76rem}
+.po-table tr:last-child td{border-bottom:none}
+.po-table tr:hover td{background:var(--sand-lt)}
+.po-thumb{width:44px;height:44px;object-fit:cover;border-radius:4px;background:var(--sand-lt)}
+.po-cell-input{width:100%;border:none;background:transparent;font-size:.75rem;font-family:'DM Sans',sans-serif;color:var(--ink);padding:.1rem .2rem;border-radius:3px}
+.po-cell-input:focus{outline:none;background:var(--white);box-shadow:0 0 0 2px var(--bark)}
+.po-qty-ctrl{display:flex;align-items:center;gap:.25rem}
+.po-qb{width:20px;height:20px;border-radius:3px;border:1px solid var(--border);background:var(--white);cursor:pointer;font-size:.75rem;color:#888;display:flex;align-items:center;justify-content:center;transition:all .12s;flex-shrink:0}
+.po-qb:hover{border-color:var(--bark);color:var(--bark)}
+.po-qval{font-weight:600;color:var(--bark);min-width:22px;text-align:center;font-size:.8rem}
+.po-del-btn{background:none;border:none;cursor:pointer;color:#ddd;font-size:.72rem;padding:.2rem .3rem;border-radius:3px;transition:color .15s}
+.po-del-btn:hover{color:var(--red)}
+
+/* Add item from catalog */
+.po-add-row{display:flex;gap:.4rem;align-items:flex-end;flex-wrap:wrap;padding:.65rem;background:var(--mist);border-top:1px solid var(--border)}
+.po-add-row select,.po-add-row input{border:1px solid var(--border);border-radius:5px;padding:.3rem .48rem;font-size:.76rem;font-family:'DM Sans',sans-serif;background:var(--white);color:var(--ink)}
+.po-add-row select:focus,.po-add-row input:focus{outline:none;border-color:var(--bark)}
+
+/* PO notes */
+.po-notes-wrap{background:var(--white);border-radius:8px;box-shadow:0 1px 8px rgba(42,36,32,.07);padding:.85rem;margin-bottom:1.25rem}
+.po-notes-title{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#bbb;margin-bottom:.5rem}
+.po-notes-input{width:100%;border:none;background:transparent;font-family:'DM Sans',sans-serif;font-size:.82rem;color:var(--ink);resize:none;min-height:80px;outline:none;line-height:1.7}
+.po-notes-input::placeholder{color:#ccc;font-style:italic}
+
+/* PO empty */
+.po-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:60%;gap:.65rem;color:#ccc}
+.po-empty h3{font-size:.9rem;color:#bbb;font-weight:500}
+
+/* Print */
+@media print {
+  body > *:not(#poPrintArea){ display:none!important }
+  #poPrintArea{ display:block!important;position:fixed;inset:0;background:white;padding:1.5cm;z-index:99999;font-family:'DM Sans',sans-serif }
+  #poPrintArea table{width:100%;border-collapse:collapse;font-size:10px}
+  #poPrintArea th{background:#f5f0ea;padding:5px 7px;text-align:left;border:1px solid #e2dbd2;font-size:9px;text-transform:uppercase;letter-spacing:.05em;color:#8b7355}
+  #poPrintArea td{padding:5px 7px;border:1px solid #e2dbd2;vertical-align:middle}
+  #poPrintArea img{width:48px;height:48px;object-fit:cover;border-radius:3px}
+  @page{margin:1.5cm;size:A4 landscape}
+}
 .scroll-sentinel{height:40px;display:flex;align-items:center;justify-content:center}
 .scroll-spinner{width:18px;height:18px;border:2px solid var(--border);border-top-color:var(--bark);border-radius:50%;animation:spin .7s linear infinite;display:none}
 .scroll-spinner.show{display:block}
@@ -255,6 +369,7 @@ tr.selected td{background:rgba(139,115,85,.07)!important}
     <div class="tab-rail">
       <button class="tab-btn active" onclick="switchView('catalog')">📦 Catalog</button>
       <button class="tab-btn" onclick="switchView('notes')">📝 Buying Notes</button>
+      <button class="tab-btn" onclick="switchView('po')">🛒 Purchase Order</button>
     </div>
   </div>
   <div class="topbar-right">
@@ -360,6 +475,69 @@ tr.selected td{background:rgba(139,115,85,.07)!important}
   </div>
 </div>
 
+<!-- ══ PURCHASE ORDER VIEW ══ -->
+<div class="view" id="view-po">
+  <div style="display:flex;flex-direction:column;height:calc(100vh - var(--top));overflow:hidden">
+
+    <!-- Top bar -->
+    <div style="display:flex;align-items:center;gap:.5rem;padding:.45rem .85rem;background:var(--white);border-bottom:1px solid var(--border);flex-shrink:0;flex-wrap:wrap">
+      <!-- Draft switcher -->
+      <select id="poDraftSelect" onchange="openPO(this.value)" style="border:1px solid var(--border);border-radius:5px;padding:.28rem .5rem;font-size:.78rem;font-family:'DM Sans',sans-serif;background:var(--mist);color:var(--ink);max-width:200px">
+        <option value="">— Select order —</option>
+      </select>
+      <button class="btn primary sm" onclick="newPO()">+ New</button>
+      <button class="btn danger sm" onclick="deletePO()" id="poDeleteBtn" style="display:none">Delete</button>
+      <span id="poSavedNote" style="font-size:.65rem;color:#bbb"></span>
+      <div style="margin-left:auto;display:flex;gap:.4rem">
+        <button class="btn sm" onclick="savePO()">💾 Save</button>
+        <button class="btn sm" onclick="exportPOPdf()">🖨 Export PDF</button>
+      </div>
+    </div>
+
+    <!-- Two-panel body -->
+    <div class="po-gallery-wrap" id="poGalleryWrap" style="display:none">
+
+      <!-- LEFT: visual catalog browser -->
+      <div class="po-gallery-panel">
+        <div class="po-gallery-head">
+          <div style="position:relative">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="position:absolute;left:.5rem;top:50%;transform:translateY(-50%);color:#bbb;pointer-events:none"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+            <input class="po-gallery-search" id="poGallerySearch" placeholder="Search style, color…" oninput="renderPOGallery()">
+          </div>
+          <div class="po-gallery-filters" id="poGalleryFilters"></div>
+        </div>
+        <div class="po-gallery-scroll">
+          <div class="po-gallery-grid" id="poGalleryGrid"></div>
+        </div>
+      </div>
+
+      <!-- RIGHT: order builder -->
+      <div class="po-order-panel">
+        <div class="po-order-head">
+          <span style="font-size:.78rem;font-weight:600;color:var(--ink)" id="poTitleDisplay">Purchase Order</span>
+          <span id="poItemCount" style="font-size:.68rem;color:#aaa"></span>
+        </div>
+        <div class="po-order-scroll" id="poOrderScroll">
+          <div class="po-order-empty">Select a purchase order or create a new one</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Empty state when no PO selected -->
+    <div id="poEmptyState" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.75rem;color:#ccc">
+      <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg>
+      <h3 style="font-size:.9rem;color:#bbb;font-weight:500">No order selected</h3>
+      <p style="font-size:.75rem;text-align:center;max-width:220px">Create a new purchase order to start browsing and selecting items.</p>
+      <button class="btn primary sm" onclick="newPO()">+ New Purchase Order</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- Print area (hidden until print) -->
+<div id="poPrintArea" style="display:none"></div>
+
 <!-- ITEM DETAIL MODAL -->
 <div class="modal-backdrop" id="detailModal">
   <div class="modal" style="width:480px">
@@ -370,6 +548,7 @@ tr.selected td{background:rgba(139,115,85,.07)!important}
     <div class="modal-body" id="detailBody"></div>
     <div class="modal-foot">
       <button class="btn danger sm" id="detailDeleteBtn" onclick="deleteCurrentItem()" style="margin-right:auto">Delete</button>
+      <button class="btn sm" onclick="addToCurrentPO();closeModal('detailModal')" title="Add to current purchase order">+ Add to PO</button>
       <button class="btn sm" onclick="closeModal('detailModal')">Close</button>
       <button class="btn primary sm" onclick="saveDetailEdits()">Save Changes</button>
     </div>
@@ -760,6 +939,7 @@ function switchView(v){
   document.getElementById('view-'+v).classList.add('active');
   document.querySelector(`.tab-btn[onclick="switchView('${v}')"]`).classList.add('active');
   if(v==='notes') renderNotesList();
+  if(v==='po'){ renderPOSidebar(); renderPOEditor(); }
 }
 
 /* ══ BUYING NOTES ══ */
@@ -938,6 +1118,345 @@ function initScrollObserver(){
   obs.observe(sentinel);
 }
 
+
+/* ══════════════════════════════════════════
+   PURCHASE ORDER SYSTEM
+   po = { id, name, vendor, date, notes, generalNotes, items:[{id,styleNo,category,img,price,qty,colorNote,sizeNote,notes}] }
+══════════════════════════════════════════ */
+let poList      = loadLocal('lb_po_v1', []);
+let activePOId  = null;
+let _poSaveTimer = null;
+
+function savePOLocal(){ saveLocal('lb_po_v1', poList); }
+function getActivePO(){ return poList.find(p=>p.id===activePOId); }
+
+function uid2(){ return 'po_'+Date.now().toString(36)+Math.random().toString(36).slice(2,5); }
+
+function newPO(){
+  const po = {
+    id:           uid2(),
+    name:         'New Order ' + new Date().toLocaleDateString(),
+    vendor:       vendors.length ? vendors[0].name : '',
+    date:         new Date().toISOString().slice(0,10),
+    notes:        '',        // order-level notes (printed)
+    generalNotes: '',        // private notes (printed separately)
+    items:        [],
+  };
+  poList.unshift(po);
+  activePOId = po.id;
+  savePOLocal();
+  renderPOSidebar();
+  renderPOEditor();
+}
+
+function openPO(id){
+  activePOId = id;
+  renderPOSidebar();
+  renderPOEditor();
+}
+
+function deletePO(){
+  if(!activePOId) return;
+  const po = getActivePO();
+  if(!po) return;
+  if(!confirm('Delete "'+po.name+'"? This cannot be undone.')) return;
+  poList = poList.filter(p=>p.id!==activePOId);
+  activePOId = poList.length ? poList[0].id : null;
+  savePOLocal();
+  renderPOSidebar();
+  if(activePOId) renderPOEditor();
+  else document.getElementById('poBody').innerHTML = '<div class="po-empty"><h3>No order selected</h3><button class="btn primary sm" onclick="newPO()">+ New Purchase Order</button></div>';
+}
+
+function savePO(){
+  const po = getActivePO(); if(!po) return;
+  // Read meta fields
+  po.name         = document.getElementById('poName')?.value.trim()  || po.name;
+  po.vendor       = document.getElementById('poVendor')?.value.trim()|| po.vendor;
+  po.date         = document.getElementById('poDate')?.value         || po.date;
+  po.notes        = document.getElementById('poNotes')?.value        || '';
+  po.generalNotes = document.getElementById('poGenNotes')?.value     || '';
+  po.updatedAt    = new Date().toISOString();
+  savePOLocal();
+  renderPOSidebar();
+  document.getElementById('poTitleDisplay').textContent = po.name;
+  const note = document.getElementById('poSavedNote');
+  if(note){ note.textContent='✓ Saved'; setTimeout(()=>note.textContent='',2000); }
+}
+
+function autoSavePO(){
+  clearTimeout(_poSaveTimer);
+  _poSaveTimer = setTimeout(savePO, 800);
+}
+
+/* ── PO item management ── */
+function addItemToPO(vendorId, itemId){
+  const po = getActivePO(); if(!po) { showToast('Open a purchase order first'); return; }
+  const v = getVendor(vendorId); if(!v) return;
+  const it = v.items.find(i=>i.id===itemId); if(!it) return;
+  // Don't add duplicates
+  if(po.items.find(i=>i.id===itemId)){ showToast('Already in order'); return; }
+  po.items.push({
+    id:        itemId,
+    vendorId,
+    styleNo:   it.styleNo,
+    category:  it.category||'',
+    img:       it.img||'',
+    price:     it.price||'',
+    colors:    it.colors||'',
+    sizes:     it.sizes||'',
+    qty:       1,
+    colorNote: '',
+    sizeNote:  '',
+    notes:     '',
+  });
+  savePOLocal();
+  renderPOGallery();
+  renderPOOrderPanel();
+  document.getElementById('poItemCount').textContent = po.items.length+' item'+(po.items.length!==1?'s':'');
+  showToast('✓ Added to purchase order');
+}
+
+function removePOItem(itemId){
+  const po = getActivePO(); if(!po) return;
+  po.items = po.items.filter(i=>i.id!==itemId);
+  savePOLocal();
+  renderPOGallery();
+  renderPOOrderPanel();
+  document.getElementById('poItemCount').textContent = po.items.length+' item'+(po.items.length!==1?'s':'');
+}
+
+function updatePOItem(itemId, field, val){
+  const po = getActivePO(); if(!po) return;
+  const it = po.items.find(i=>i.id===itemId); if(!it) return;
+  it[field] = val;
+  autoSavePO();
+}
+
+function changePOQty(itemId, delta){
+  const po = getActivePO(); if(!po) return;
+  const it = po.items.find(i=>i.id===itemId); if(!it) return;
+  it.qty = Math.max(0, (it.qty||1)+delta);
+  if(it.qty===0){ removePOItem(itemId); return; }
+  savePOLocal();
+  const el = document.getElementById('poqty-'+itemId);
+  if(el) el.textContent = it.qty;
+  // update gallery qty badge
+  renderPOGallery();
+}
+
+/* ── Render PO draft select ── */
+function renderPOSidebar(){
+  const sel = document.getElementById('poDraftSelect');
+  if(!sel) return;
+  sel.innerHTML = '<option value="">— Select order —</option>' +
+    poList.map(po=>`<option value="${po.id}"${po.id===activePOId?' selected':''}>${esc(po.name)} (${po.items.length} items)</option>`).join('');
+  document.getElementById('poDeleteBtn').style.display = activePOId ? '' : 'none';
+}
+
+/* ── Render PO editor (two-panel gallery) ── */
+function renderPOEditor(){
+  const po = getActivePO();
+  const empty = document.getElementById('poEmptyState');
+  const gallery = document.getElementById('poGalleryWrap');
+  if(!po){
+    if(empty) empty.style.display='flex';
+    if(gallery) gallery.style.display='none';
+    return;
+  }
+  if(empty) empty.style.display='none';
+  if(gallery) gallery.style.display='flex';
+
+  document.getElementById('poTitleDisplay').textContent = po.name;
+  document.getElementById('poItemCount').textContent = po.items.length+' item'+(po.items.length!==1?'s':'');
+
+  renderPOGallery();
+  renderPOOrderPanel();
+}
+
+/* ── Gallery (left panel) ── */
+let _poVendorFilter = '';
+function renderPOGallery(){
+  const po = getActivePO(); if(!po) return;
+  const search = (document.getElementById('poGallerySearch')?.value||'').toLowerCase();
+
+  // Build vendor filter chips
+  const filterEl = document.getElementById('poGalleryFilters');
+  if(filterEl && vendors.length > 1){
+    filterEl.innerHTML =
+      `<button class="po-gallery-chip${_poVendorFilter===''?' on':''}" onclick="setPOVFilter('')">All</button>` +
+      vendors.map(v=>`<button class="po-gallery-chip${_poVendorFilter===v.id?' on':''}" onclick="setPOVFilter('${v.id}')">${esc(v.name)}</button>`).join('');
+  }
+
+  // Collect all items
+  let items = [];
+  vendors.forEach(v=>{
+    if(_poVendorFilter && v.id!==_poVendorFilter) return;
+    v.items.forEach(it=>items.push({...it,_vendorId:v.id,_vendorName:v.name}));
+  });
+
+  // Search filter
+  if(search) items = items.filter(it=>[it.styleNo,it.colors,it.category,it.sizes,it.material,it._vendorName]
+    .some(f=>(f||'').toLowerCase().includes(search)));
+
+  const grid = document.getElementById('poGalleryGrid');
+  if(!grid) return;
+
+  if(!items.length){
+    grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:2rem;color:#ccc;font-size:.75rem">No items found</div>';
+    return;
+  }
+
+  const inOrder = new Set(po.items.map(i=>i.id));
+
+  grid.innerHTML = items.map(it=>{
+    const active = inOrder.has(it.id);
+    const qty = active ? (po.items.find(i=>i.id===it.id)?.qty||1) : 0;
+    return `<div class="po-gcard${active?' in-order':''}" onclick="togglePOItem('${it._vendorId}','${it.id}')">
+      ${it.img
+        ? `<img class="po-gcard-img" src="${it.img}" loading="lazy">`
+        : `<div class="po-gcard-img-ph">📦</div>`}
+      <span class="po-gcard-qty-badge">×${qty}</span>
+      <div class="po-gcard-body">
+        <div class="po-gcard-cat">${esc(it.category||'')}</div>
+        <div class="po-gcard-style">${esc(it.styleNo)}</div>
+        <div class="po-gcard-price">${esc(it.price||'')}</div>
+        <div class="po-gcard-detail">${[it.colors,it.sizes,it.material].filter(Boolean).map(v=>esc(v)).join(' · ')}</div>
+      </div>
+      <button class="po-gcard-add" title="${active?'Remove from order':'Add to order'}">${active?'✓':'+'}</button>
+    </div>`;
+  }).join('');
+}
+
+function setPOVFilter(vid){
+  _poVendorFilter = vid;
+  renderPOGallery();
+}
+
+function togglePOItem(vendorId, itemId){
+  const po = getActivePO(); if(!po) return;
+  const exists = po.items.find(i=>i.id===itemId);
+  if(exists){
+    // Remove
+    po.items = po.items.filter(i=>i.id!==itemId);
+    savePOLocal();
+    renderPOGallery();
+    renderPOOrderPanel();
+    document.getElementById('poItemCount').textContent = po.items.length+' item'+(po.items.length!==1?'s':'');
+  } else {
+    addItemToPO(vendorId, itemId);
+  }
+}
+
+/* ── Order panel (right) ── */
+function renderPOOrderPanel(){
+  const po = getActivePO(); if(!po) return;
+  const scroll = document.getElementById('poOrderScroll'); if(!scroll) return;
+
+  const itemRows = po.items.map(it=>`
+    <div class="po-item-row">
+      ${it.img ? `<img class="po-item-thumb" src="${it.img}" loading="lazy">` : '<div class="po-item-thumb" style="display:flex;align-items:center;justify-content:center;color:#ccc;font-size:.9rem">📦</div>'}
+      <div class="po-item-info">
+        <div class="po-item-style">${esc(it.styleNo)}</div>
+        <div class="po-item-sub">${esc(it.price||'')}${it.category?' · '+esc(it.category):''}</div>
+        <div style="display:flex;align-items:center;gap:.25rem;margin-top:.2rem">
+          <button class="po-qb" onclick="changePOQty('${it.id}',-1)">−</button>
+          <span class="po-qval" id="poqty-${it.id}" style="min-width:20px;text-align:center">${it.qty||1}</span>
+          <button class="po-qb" onclick="changePOQty('${it.id}',1)">+</button>
+        </div>
+      </div>
+      <div class="po-item-inputs">
+        <input class="po-item-input" value="${esc(it.colorNote||it.colors||'')}" placeholder="Color/pattern" onchange="updatePOItem('${it.id}','colorNote',this.value)">
+        <input class="po-item-input" value="${esc(it.sizeNote||it.sizes||'')}" placeholder="Size" onchange="updatePOItem('${it.id}','sizeNote',this.value)">
+        <input class="po-item-input" value="${esc(it.notes||'')}" placeholder="Notes…" onchange="updatePOItem('${it.id}','notes',this.value)">
+      </div>
+      <button class="po-del-btn" onclick="removePOItem('${it.id}')">✕</button>
+    </div>`).join('');
+
+  scroll.innerHTML = `
+    <div class="po-order-meta">
+      <div class="po-field"><label>Order Name</label><input id="poName" value="${esc(po.name)}" oninput="autoSavePO();document.getElementById('poTitleDisplay').textContent=this.value"></div>
+      <div class="po-field"><label>Vendor</label><input id="poVendor" value="${esc(po.vendor)}" oninput="autoSavePO()"></div>
+      <div class="po-field"><label>Date</label><input type="date" id="poDate" value="${esc(po.date)}" onchange="autoSavePO()"></div>
+      <div class="po-field"><label>Order Notes <span style="font-weight:400;color:#ccc;font-size:.58rem">(in PDF)</span></label><textarea id="poNotes" class="po-item-input" style="min-height:48px;resize:vertical" placeholder="Min order, lead time…" oninput="autoSavePO()">${esc(po.notes||'')}</textarea></div>
+      <div class="po-field"><label>Private Notes</label><textarea id="poGenNotes" class="po-item-input" style="min-height:48px;resize:vertical" placeholder="Budget, reminders…" oninput="autoSavePO()">${esc(po.generalNotes||'')}</textarea></div>
+    </div>
+    <div style="font-size:.65rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:#bbb;margin-bottom:.4rem">
+      Selected Items (${po.items.length})
+    </div>
+    <div class="po-order-items">
+      ${itemRows||'<div class="po-order-empty">← Click items in the catalog to add them</div>'}
+    </div>`;
+}
+
+/* ── Export PDF ── */
+function exportPOPdf(){
+  const po = getActivePO();
+  if(!po){ showToast('Open a purchase order first'); return; }
+  savePO();
+
+  const rows = po.items.map((it,i)=>`
+    <tr>
+      <td style="text-align:center;color:#aaa;font-size:.7rem">${i+1}</td>
+      <td>${it.img?`<img src="${it.img}" style="width:52px;height:52px;object-fit:cover;border-radius:3px">`:'—'}</td>
+      <td><strong>${it.styleNo}</strong><br><span style="font-size:.68rem;color:#b09070">${it.category||''}</span></td>
+      <td style="font-weight:600;color:#8b7355">${it.price||'—'}</td>
+      <td style="text-align:center;font-weight:700;font-size:1rem;color:#2a2420">${it.qty||1}</td>
+      <td>${it.colorNote||it.colors||'—'}</td>
+      <td>${it.sizeNote||it.sizes||'—'}</td>
+      <td style="color:#666;font-size:.72rem">${it.notes||''}</td>
+    </tr>`).join('');
+
+  const notesSection = po.notes ? `<div style="margin-top:16px;padding:10px 14px;background:#f5f0ea;border-radius:6px;border:1px solid #e2dbd2"><div style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#aaa;margin-bottom:6px">Order Notes</div><div style="font-size:.78rem;color:#2a2420;line-height:1.6;white-space:pre-wrap">${po.notes}</div></div>` : '';
+  const privSection = po.generalNotes ? `<div style="margin-top:10px;padding:10px 14px;background:#faf8f5;border-radius:6px;border:1px solid #e2dbd2"><div style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#aaa;margin-bottom:6px">Private Notes</div><div style="font-size:.78rem;color:#2a2420;line-height:1.6;white-space:pre-wrap">${po.generalNotes}</div></div>` : '';
+
+  document.getElementById('poPrintArea').innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;padding-bottom:10px;border-bottom:2px solid #e2dbd2">
+      <div>
+        <div style="font-family:serif;font-size:20px;color:#2a2420;font-weight:500">${po.name}</div>
+        <div style="font-size:11px;color:#aaa;margin-top:4px">Vendor: <strong style="color:#8b7355">${po.vendor||'—'}</strong> &nbsp;·&nbsp; Date: ${po.date||'—'} &nbsp;·&nbsp; ${po.items.length} styles &nbsp;·&nbsp; ${po.items.reduce((s,i)=>s+(i.qty||1),0)} units</div>
+      </div>
+      <img src="https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/LittleBasics.png" style="height:32px;object-fit:contain">
+    </div>
+    <table>
+      <thead><tr>
+        <th style="width:24px">#</th>
+        <th style="width:60px">Photo</th>
+        <th style="width:80px">Style</th>
+        <th style="width:60px">Price</th>
+        <th style="width:50px;text-align:center">Qty</th>
+        <th>Color / Pattern</th>
+        <th>Size</th>
+        <th>Notes</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+      <tfoot>
+        <tr style="background:#f5f0ea">
+          <td colspan="4" style="text-align:right;font-weight:600;color:#8b7355;padding:8px">Total:</td>
+          <td style="text-align:center;font-weight:700;font-size:1rem;color:#2a2420">${po.items.reduce((s,i)=>s+(i.qty||1),0)}</td>
+          <td colspan="3" style="color:#aaa;font-size:.7rem">${po.items.length} styles</td>
+        </tr>
+      </tfoot>
+    </table>
+    ${notesSection}
+    ${privSection}
+    <div style="margin-top:16px;font-size:.65rem;color:#ccc;display:flex;justify-content:space-between;border-top:1px solid #e2dbd2;padding-top:8px">
+      <span>Little Basics Store Manager</span>
+      <span>Generated ${new Date().toLocaleDateString()}</span>
+    </div>`;
+
+  document.getElementById('poPrintArea').style.display='block';
+  window.print();
+  document.getElementById('poPrintArea').style.display='none';
+}
+
+/* ── Hook: add to PO from catalog detail modal ── */
+function addToCurrentPO(){
+  if(!_detailItem){ showToast('Open an item first'); return; }
+  addItemToPO(_detailItem.vendorId, _detailItem.itemId);
+}
+
+/* ── Init PO on view switch ── */
 /* ══ STORAGE ══ */
 function loadLocal(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch{return d}}
 function saveLocal(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch{}}
