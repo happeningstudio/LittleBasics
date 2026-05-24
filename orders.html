@@ -329,6 +329,21 @@ tr.cat-section-hdr td{
 .hex-swatch{width:20px;height:20px;border-radius:4px;border:1px solid var(--border);flex-shrink:0}
 .mgr-actions{display:flex;gap:.38rem;margin-top:.65rem}
 .mgr-hint{font-size:.72rem;color:#ccc;text-align:center;padding:2rem 1rem;line-height:1.6}
+/* PRODUCT HIDE */
+.mgr-card.is-hidden{opacity:.4;border-style:dashed}
+.mgr-card.is-hidden:hover{opacity:.65}
+.mgr-card.mgr-sel{outline:2px solid var(--bark);outline-offset:1px}
+.mgr-hide-btn{background:transparent;border:1px solid var(--border);border-radius:4px;font-size:.62rem;padding:.15rem .4rem;cursor:pointer;color:#bbb;font-family:'DM Sans',sans-serif;line-height:1.4;transition:all .12s;white-space:nowrap}
+.mgr-hide-btn:hover{border-color:var(--amber);color:var(--amber)}
+.mgr-hide-btn.is-hidden{border-color:var(--green);color:var(--green)}
+.mgr-check{position:absolute;top:.35rem;left:.35rem;width:15px;height:15px;accent-color:var(--bark);display:none;cursor:pointer;z-index:2}
+.mgr-sel-mode .mgr-card{position:relative;cursor:default}
+.mgr-sel-mode .mgr-check{display:block}
+.mgr-sel-bar{display:none;align-items:center;gap:.6rem;background:#fff8f4;border:1px solid var(--sand-dk);border-radius:6px;padding:.38rem .75rem;margin-bottom:.6rem}
+.mgr-sel-bar.on{display:flex}
+.mgr-sel-count{font-size:.78rem;font-weight:600;color:var(--bark)}
+.hidden-tag{display:inline-block;font-size:.58rem;font-weight:600;padding:.08rem .3rem;border-radius:3px;background:var(--sand-lt);color:#aaa;margin-left:.25rem;vertical-align:middle;text-transform:uppercase;letter-spacing:.04em}
+
 /* ════════════════════════════
    ANALYTICS
 ════════════════════════════ */
@@ -895,8 +910,17 @@ function doPost(e) {
         </div>
         <button class="btn primary sm" onclick="startNew()">+ Add Product</button>
         <button class="btn sm" onclick="openBulkSize()">＋ Bulk Add Size</button>
-        <button class="btn sm" onclick="pullProducts()" style="margin-left:auto">↓ Pull from Sheet</button>
+        <button class="btn sm" id="mgrShowHiddenBtn" onclick="toggleMgrHidden()" style="margin-left:auto">👁 Show Hidden</button>
+        <button class="btn sm" id="mgrSelBtn" onclick="enterMgrSel()">☑ Select</button>
+        <button class="btn sm" onclick="pullProducts()">↓ Pull from Sheet</button>
         <span style="font-size:.7rem;color:#bbb;" id="mgrCount"></span>
+      </div>
+      <div class="mgr-sel-bar" id="mgrSelBar">
+        <input type="checkbox" id="mgrSelAll" style="accent-color:var(--bark);cursor:pointer" onchange="mgrSelAll(this.checked)" title="Select all">
+        <span class="mgr-sel-count" id="mgrSelCount">0 selected</span>
+        <button class="btn sm" onclick="mgrHideSelected()">🚫 Hide Selected</button>
+        <button class="btn sm" onclick="mgrUnhideSelected()">✓ Unhide Selected</button>
+        <button class="btn sm" onclick="exitMgrSel()">Cancel</button>
       </div>
       <div class="mgr-grid" id="mgrGrid"></div>
     </div>
@@ -1290,7 +1314,8 @@ function renderTable(){
 
   const groups={};
   products.forEach(p=>{
-    if(getCategory(p)==='Sold Out') return; // hide from order builder
+    if(getCategory(p)==='Sold Out') return;
+    if(p.hidden) return; // hidden products excluded from order builder
     if(!groups[p.name]) groups[p.name]=[];
     p.sizes.forEach(cm=>{
       if(szFilter!=='all'&&cm!==szFilter) return;
@@ -1726,7 +1751,7 @@ const invCollapsed = new Proxy({}, { get: (t,k) => k in t ? t[k] : true });
 
 function renderInventory(){
   const search=document.getElementById('invSearch').value.toLowerCase();
-  const filtered=products.filter(p=>!search||p.name.toLowerCase().includes(search)||p.color.toLowerCase().includes(search));
+  const filtered=products.filter(p=>!p.hidden&&(!search||p.name.toLowerCase().includes(search)||p.color.toLowerCase().includes(search)));
   const usedSizes=ALL_CM.filter(cm=>filtered.some(p=>p.sizes.includes(cm)));
 
   const thead=document.getElementById('invThead');
@@ -1903,7 +1928,7 @@ function renderSold(){ renderSoldSummary(); }
 
 function renderSoldSummary(){
   const search=(document.getElementById('soldSearch')?.value||'').toLowerCase();
-  const filtered=products.filter(p=>!search||p.name.toLowerCase().includes(search)||p.color.toLowerCase().includes(search));
+  const filtered=products.filter(p=>!p.hidden&&(!search||p.name.toLowerCase().includes(search)||p.color.toLowerCase().includes(search)));
   const usedSizes=ALL_CM; // always show all sizes, 0 if none sold
 
   // Build header
@@ -2617,19 +2642,31 @@ function renderMgr(){
     }
   });
 
-  document.getElementById('mgrCount').textContent=groups.length+' products · '+filtered.length+' variants';
-  document.getElementById('mgrGrid').innerHTML=groups.map(({primary:p,siblings})=>{
+  const visGroups = mgrShowHidden ? groups : groups.filter(({primary:p})=>!p.hidden);
+  const hiddenCount = groups.length - groups.filter(({primary:p})=>!p.hidden).length;
+  document.getElementById('mgrCount').textContent = visGroups.length+' products · '+filtered.length+' variants'+(hiddenCount?' · '+hiddenCount+' hidden':'');
+  const shBtn=document.getElementById('mgrShowHiddenBtn');
+  if(shBtn) shBtn.textContent = mgrShowHidden ? '🙈 Hide Hidden' : '👁 Show Hidden'+(hiddenCount?' ('+hiddenCount+')':'');
+  document.getElementById('mgrGrid').classList.toggle('mgr-sel-mode', mgrSelMode);
+  document.getElementById('mgrGrid').innerHTML=visGroups.map(({primary:p,siblings})=>{
     const isEditing=siblings.some(s=>s.pid===editingPid);
-    return `<div class="mgr-card ${isEditing?'sel':''}" onclick="editProductGroup('${escHtml(p.name)}')">
+    const isHidden=!!p.hidden;
+    const isSel=mgrSelected.has(p.name);
+    return `<div class="mgr-card ${isEditing?'sel':''} ${isHidden?'is-hidden':''} ${isSel?'mgr-sel':''}" data-name="${escHtml(p.name)}"
+      onclick="${mgrSelMode?`mgrToggleCard(this,'${escHtml(p.name)}')`:`editProductGroup('${escHtml(p.name)}')`}">
+      <input type="checkbox" class="mgr-check" ${isSel?'checked':''} onclick="event.stopPropagation();mgrToggleCard(this.closest('.mgr-card'),'${escHtml(p.name)}')">
       <img src="${p.image||''}" alt="${p.name}" loading="lazy" onerror="this.style.background='var(--sand-lt)'">
       <div class="mgr-card-body">
-        <div class="mgr-card-name">${p.name}</div>
+        <div class="mgr-card-name">${p.name}${isHidden?'<span class="hidden-tag">hidden</span>':''}</div>
         <div class="mgr-card-meta">
           <span style="display:flex;align-items:center;gap:.2rem">
             ${siblings.map(s=>`<span class="swatch" style="background:${s.hex}" title="${s.color}"></span>`).join('')}
             <span style="font-size:.63rem;color:#bbb">${siblings.length} color${siblings.length>1?'s':''}</span>
           </span>
           <span class="mgr-card-price">${fmt(p.price)}</span>
+        </div>
+        <div style="margin-top:.35rem">
+          <button class="mgr-hide-btn ${isHidden?'is-hidden':''}" onclick="event.stopPropagation();toggleProductHide('${escHtml(p.name)}')">${isHidden?'✓ Unhide':'Hide'}</button>
         </div>
       </div>
     </div>`;
@@ -3487,6 +3524,69 @@ function startAutoSave(){
 
 // Also auto-mark draft as complete when order is saved to records
 const _origCopyAndSave = copyAndSave;
+
+
+/* ══ PRODUCT HIDE / SELECT ══ */
+let mgrShowHidden = false;
+let mgrSelMode    = false;
+let mgrSelected   = new Set();
+
+function toggleMgrHidden(){
+  mgrShowHidden = !mgrShowHidden;
+  renderMgr();
+}
+function toggleProductHide(name){
+  const siblings = products.filter(p=>p.name===name);
+  const nowHidden = !siblings[0]?.hidden;
+  siblings.forEach(p=>p.hidden=nowHidden);
+  saveProducts(); renderMgr(); renderTable();
+  showToast(nowHidden ? '🚫 "'+name+'" hidden — removed from orders & inventory' : '✓ "'+name+'" visible again');
+}
+function enterMgrSel(){
+  mgrSelMode=true; mgrSelected.clear();
+  document.getElementById('mgrSelBar').classList.add('on');
+  document.getElementById('mgrSelBtn').style.display='none';
+  renderMgr();
+}
+function exitMgrSel(){
+  mgrSelMode=false; mgrSelected.clear();
+  document.getElementById('mgrSelBar').classList.remove('on');
+  document.getElementById('mgrSelBtn').style.display='';
+  renderMgr();
+}
+function mgrToggleCard(cardEl, name){
+  if(!mgrSelMode) return;
+  const cb=cardEl.querySelector('.mgr-check');
+  if(mgrSelected.has(name)){ mgrSelected.delete(name); cardEl.classList.remove('mgr-sel'); if(cb)cb.checked=false; }
+  else { mgrSelected.add(name); cardEl.classList.add('mgr-sel'); if(cb)cb.checked=true; }
+  updateMgrSelCount();
+}
+function mgrSelAll(checked){
+  document.querySelectorAll('.mgr-card[data-name]').forEach(card=>{
+    const name=card.dataset.name; const cb=card.querySelector('.mgr-check');
+    if(checked){ mgrSelected.add(name); card.classList.add('mgr-sel'); if(cb)cb.checked=true; }
+    else { mgrSelected.delete(name); card.classList.remove('mgr-sel'); if(cb)cb.checked=false; }
+  });
+  updateMgrSelCount();
+}
+function updateMgrSelCount(){
+  const n=mgrSelected.size;
+  document.getElementById('mgrSelCount').textContent=n===0?'0 selected':n+' selected';
+}
+function mgrHideSelected(){
+  if(!mgrSelected.size){ showToast('Select items first'); return; }
+  mgrSelected.forEach(name=>products.filter(p=>p.name===name).forEach(p=>p.hidden=true));
+  saveProducts(); renderMgr(); renderTable();
+  showToast('🚫 '+mgrSelected.size+' product'+(mgrSelected.size>1?'s':'')+' hidden');
+  exitMgrSel();
+}
+function mgrUnhideSelected(){
+  if(!mgrSelected.size){ showToast('Select items first'); return; }
+  mgrSelected.forEach(name=>products.filter(p=>p.name===name).forEach(p=>p.hidden=false));
+  saveProducts(); renderMgr(); renderTable();
+  showToast('✓ '+mgrSelected.size+' product'+(mgrSelected.size>1?'s':'')+' unhidden');
+  exitMgrSel();
+}
 
 /* ── BOOT ── */
 renderTable(); updatePanel();
