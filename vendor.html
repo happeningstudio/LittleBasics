@@ -152,8 +152,7 @@ textarea.form-input{resize:vertical;min-height:52px}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
 /* PAGING */
-.pager{display:flex;align-items:center;justify-content:center;gap:.5rem;padding:.75rem;flex-shrink:0;border-top:1px solid var(--border);background:var(--white)}
-.pager span{font-size:.72rem;color:#aaa}
+/* pager replaced by infinite scroll */
 
 
 /* SELECT MODE */
@@ -239,6 +238,9 @@ tr.selected td{background:rgba(139,115,85,.07)!important}
 .note-tag-del:hover{color:var(--red)}
 .tag-input{border:none;background:transparent;font-size:.65rem;font-family:'DM Sans',sans-serif;color:var(--ink);outline:none;width:80px}
 .tag-input::placeholder{color:#ccc}
+.scroll-sentinel{height:40px;display:flex;align-items:center;justify-content:center}
+.scroll-spinner{width:18px;height:18px;border:2px solid var(--border);border-top-color:var(--bark);border-radius:50%;animation:spin .7s linear infinite;display:none}
+.scroll-spinner.show{display:block}
 ::-webkit-scrollbar{width:5px;height:5px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--sand-dk);border-radius:10px}
@@ -321,10 +323,8 @@ tr.selected td{background:rgba(139,115,85,.07)!important}
       <div class="loading"><div class="spinner"></div><span>Loading catalog…</span></div>
     </div>
 
-    <div class="pager" id="pager" style="display:none">
-      <button class="btn sm" id="prevBtn" onclick="changePage(-1)">← Prev</button>
-      <span id="pageInfo"></span>
-      <button class="btn sm" id="nextBtn" onclick="changePage(1)">Next →</button>
+    <div class="scroll-sentinel" id="scrollSentinel">
+      <div class="scroll-spinner" id="scrollSpinner"></div>
     </div>
   </div>
 </div>
@@ -903,6 +903,41 @@ function formatNoteDate(iso){
   return d.toLocaleDateString();
 }
 
+
+/* ══ INFINITE SCROLL ══ */
+function loadMoreItems(){
+  const rows = window._filteredRows || [];
+  if(visibleCount >= rows.length){
+    document.getElementById('scrollSpinner')?.classList.remove('show');
+    return;
+  }
+
+  const batch = rows.slice(visibleCount, visibleCount + PAGE_SIZE);
+  visibleCount += batch.length;
+
+  if(viewMode === 'cards'){
+    const grid = document.getElementById('cardGrid');
+    if(grid) batch.forEach(it=>{ const d=document.createElement('div'); d.innerHTML=cardHTML(it); grid.appendChild(d.firstElementChild); });
+  } else {
+    const tbody = document.getElementById('itemTbody');
+    if(tbody) tbody.insertAdjacentHTML('beforeend', batch.map(it=>rowHTML(it)).join(''));
+  }
+
+  // Show/hide spinner
+  const spinner = document.getElementById('scrollSpinner');
+  if(spinner) spinner.classList.toggle('show', visibleCount < rows.length);
+}
+
+// Set up IntersectionObserver on sentinel
+function initScrollObserver(){
+  const sentinel = document.getElementById('scrollSentinel');
+  if(!sentinel) return;
+  const obs = new IntersectionObserver(entries=>{
+    if(entries[0].isIntersecting) loadMoreItems();
+  }, { threshold: 0.1 });
+  obs.observe(sentinel);
+}
+
 /* ══ STORAGE ══ */
 function loadLocal(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch{return d}}
 function saveLocal(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch{}}
@@ -914,8 +949,8 @@ let activeVendorId = 'all';
 let activeCat = 'all';
 let activeSeason = 'all';
 let viewMode = 'cards';  // 'cards' | 'table'
-let page = 0;
-const PAGE_SIZE = 80;
+let visibleCount = 0;
+const PAGE_SIZE = 40; // items loaded per batch
 let searchQ = '';
 let _searchTimer = null;
 let _detailItem = null; // currently open item
@@ -1017,13 +1052,13 @@ function renderChips(){
     btn.addEventListener('click', ()=>setSeason(btn.dataset.season));
   });
 }
-function setCat(c){ activeCat=c; page=0; renderChips(); render(); }
-function setSeason(s){ activeSeason=s; page=0; renderChips(); render(); }
+function setCat(c){ activeCat=c; visibleCount=0; renderChips(); render(); }
+function setSeason(s){ activeSeason=s; visibleCount=0; renderChips(); render(); }
 
 /* ══ SEARCH ══ */
 function onSearch(){
   clearTimeout(_searchTimer);
-  _searchTimer = setTimeout(()=>{ searchQ=document.getElementById('searchInput').value; page=0; render(); }, 220);
+  _searchTimer = setTimeout(()=>{ searchQ=document.getElementById('searchInput').value; visibleCount=0; render(); }, 220);
 }
 
 /* ══ VIEW MODE ══ */
@@ -1031,7 +1066,7 @@ function setView(v){
   viewMode=v;
   document.getElementById('togCards').classList.toggle('on',v==='cards');
   document.getElementById('togTable').classList.toggle('on',v==='table');
-  page=0; render();
+  visibleCount=0; render();
 }
 
 /* ══ RENDER ══ */
@@ -1055,14 +1090,14 @@ function render(){
     return;
   }
 
-  const totalPages = Math.ceil(rows.length / PAGE_SIZE);
-  if (page >= totalPages) page = totalPages-1;
-  const pageRows = rows.slice(page*PAGE_SIZE, (page+1)*PAGE_SIZE);
+  // Store filtered rows for infinite scroll
+  window._filteredRows = rows;
+  visibleCount = 0;
 
   if (viewMode==='cards'){
-    area.innerHTML = `<div class="card-grid">${pageRows.map(it=>cardHTML(it)).join('')}</div>`;
+    area.innerHTML = '<div class="card-grid" id="cardGrid"></div>';
   } else {
-    area.innerHTML = `<table class="vendor-table"><thead><tr>
+    area.innerHTML = `<table class="vendor-table" id="itemTable"><thead><tr>
       <th style="width:28px"></th>
       ${activeVendorId==='all'?'<th style="width:80px">Vendor</th>':''}
       <th style="width:52px">Photo</th>
@@ -1076,15 +1111,10 @@ function render(){
       <th style="min-width:120px">Notes</th>
       <th style="width:80px">Qty Ordered</th>
       <th style="width:90px">Actions</th>
-    </tr></thead><tbody>${pageRows.map(it=>rowHTML(it)).join('')}</tbody></table>`;
+    </tr></thead><tbody id="itemTbody"></tbody></table>`;
   }
 
-  // Pager
-  const pager = document.getElementById('pager');
-  pager.style.display = totalPages > 1 ? '' : 'none';
-  document.getElementById('pageInfo').textContent = `Page ${page+1} of ${totalPages}  (${rows.length} items)`;
-  document.getElementById('prevBtn').disabled = page===0;
-  document.getElementById('nextBtn').disabled = page>=totalPages-1;
+  loadMoreItems();
 }
 
 function cardHTML(it){
@@ -1142,11 +1172,7 @@ function rowHTML(it){
   </tr>`;
 }
 
-function changePage(d){
-  page = Math.max(0, page+d);
-  render();
-  document.getElementById('contentArea').scrollTop=0;
-}
+/* changePage removed — using infinite scroll */
 
 /* ══ SIDEBAR ══ */
 function renderSidebar(){
@@ -1162,7 +1188,7 @@ function renderSidebar(){
   }).join('');
 }
 
-function setActiveVendor(id){ activeVendorId=id; activeCat='all'; activeSeason='all'; page=0; renderSidebar(); renderChips(); render(); }
+function setActiveVendor(id){ activeVendorId=id; activeCat='all'; activeSeason='all'; visibleCount=0; renderSidebar(); renderChips(); render(); }
 
 /* ══ DETAIL MODAL ══ */
 function openDetail(vendorId, itemId){
