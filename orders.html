@@ -382,6 +382,28 @@ tr.cat-section-hdr td{
 .ship-item-picker select:focus,.ship-item-picker input:focus{outline:none;border-color:var(--bark)}
 
 .save-confirm{text-align:center;font-size:.68rem;color:var(--green);margin-top:.35rem;min-height:1em}
+/* ── DRAFTS ── */
+.draft-btn{position:relative}
+.draft-badge{position:absolute;top:-5px;right:-6px;background:var(--bark);color:#fff;font-size:.55rem;font-weight:700;border-radius:10px;padding:.05rem .3rem;min-width:16px;text-align:center;display:none}
+.draft-badge.on{display:block}
+.drafts-drawer{position:fixed;top:var(--top);right:0;width:300px;height:calc(100vh - var(--top));background:var(--white);border-left:1px solid var(--border);box-shadow:-4px 0 16px rgba(42,36,32,.10);z-index:350;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .22s ease}
+.drafts-drawer.open{transform:translateX(0)}
+.drafts-head{display:flex;align-items:center;justify-content:space-between;padding:.75rem .9rem;border-bottom:1px solid var(--border);flex-shrink:0}
+.drafts-head h3{font-family:'Playfair Display',serif;font-size:.95rem;color:var(--bark)}
+.drafts-list{flex:1;overflow-y:auto;padding:.4rem 0}
+.draft-item{padding:.55rem .9rem;border-bottom:1px solid #f5f2ee;cursor:pointer;transition:background .12s}
+.draft-item:hover{background:var(--sand-lt)}
+.draft-item:last-child{border-bottom:none}
+.draft-item-name{font-size:.8rem;font-weight:600;color:var(--ink)}
+.draft-item-meta{font-size:.68rem;color:#aaa;margin-top:.12rem;display:flex;gap:.5rem;align-items:center}
+.draft-item-count{font-size:.65rem;background:var(--sand-lt);color:var(--bark);padding:.08rem .35rem;border-radius:10px;border:1px solid var(--sand-dk)}
+.draft-item-actions{display:flex;gap:.3rem;margin-top:.35rem}
+.draft-empty{font-size:.75rem;color:#ccc;text-align:center;padding:2rem 1rem}
+.drafts-footer{padding:.65rem .9rem;border-top:1px solid var(--border);flex-shrink:0}
+.draft-autosave-note{font-size:.65rem;color:#bbb;text-align:center;margin-top:.3rem}
+.draft-restore-bar{display:none;background:#fff8f4;border-bottom:2px solid var(--bark);padding:.4rem .85rem;font-size:.73rem;color:var(--bark);align-items:center;gap:.5rem;flex-shrink:0}
+.draft-restore-bar.on{display:flex}
+
 
 /* ── VARIANT SECTIONS ── */
 .variant-section{background:var(--mist);border:1px solid var(--border);border-radius:7px;padding:.65rem;margin-bottom:.5rem;position:relative}
@@ -639,6 +661,10 @@ function doPost(e) {
   <div class="topbar-right">
     <span class="badge" id="topBadge" style="display:none"></span>
     <span><span class="sync-dot" id="syncDot"></span><span class="sync-label" id="syncLabel">local</span></span>
+    <button class="btn sm draft-btn" onclick="toggleDraftsDrawer()" title="Saved Drafts">
+      📝 Drafts<span class="draft-badge" id="draftBadge"></span>
+    </button>
+    <button class="btn sm" onclick="saveDraft()">💾 Save Draft</button>
     <button class="btn sm" onclick="showSetup()">⚙ Sync</button>
     <button class="btn sm" onclick="clearOrder()">Clear</button>
   </div>
@@ -908,6 +934,24 @@ function doPost(e) {
   </div>
 </div>
 
+
+<!-- DRAFTS DRAWER -->
+<div class="drafts-drawer" id="draftsDrawer">
+  <div class="drafts-head">
+    <h3>Saved Drafts</h3>
+    <button class="btn ghost sm" onclick="toggleDraftsDrawer()">✕</button>
+  </div>
+  <div class="draft-restore-bar" id="draftRestoreBar">
+    <span id="draftRestoreMsg"></span>
+    <button class="btn sm" style="margin-left:auto;flex-shrink:0" onclick="clearDraftRestore()">Clear indicator</button>
+  </div>
+  <div class="drafts-list" id="draftsList"></div>
+  <div class="drafts-footer">
+    <button class="btn primary sm" style="width:100%" onclick="saveDraft()">💾 Save Current as Draft</button>
+    <div class="draft-autosave-note">Auto-saves every 3 min if items in order</div>
+  </div>
+</div>
+<div id="draftsOverlay" style="display:none;position:fixed;inset:0;z-index:340" onclick="toggleDraftsDrawer()"></div>
 <div class="toast" id="globalToast"></div>
 
 <script>
@@ -1648,6 +1692,16 @@ async function copyAndSave(){
   try{
     await navigator.clipboard.writeText(tsv);
     showToast('✓ Copied to clipboard + saved to records!');
+    // Offer to delete active draft now that order is complete
+    if(_activeDraftId){
+      const d=drafts.find(x=>x.id===_activeDraftId);
+      if(d&&confirm('Order saved! Delete the draft for "'+d.name+'"?')){
+        drafts=drafts.filter(x=>x.id!==_activeDraftId);
+        _activeDraftId=null;
+        saveDrafts(); updateDraftBadge(); renderDraftsList();
+        document.getElementById('draftRestoreBar')?.classList.remove('on');
+      }
+    }
   }catch(e){
     const ta=document.createElement('textarea');ta.value=tsv;document.body.appendChild(ta);ta.select();
     try{document.execCommand('copy');}catch(e2){}
@@ -3230,10 +3284,216 @@ function renderAnalytics(){
   grid.appendChild(fullRow);
 }
 
+
+/* ═══════════════════════════════════════════════
+   DRAFTS
+   Each draft: {id, name, savedAt, order, fields}
+═══════════════════════════════════════════════ */
+let drafts = loadLocal('lb_drafts', []);
+let _activeDraftId = null; // currently loaded draft
+let _autoSaveTimer = null;
+
+function saveDrafts(){ saveLocal('lb_drafts', drafts); }
+
+function draftFields(){
+  return {
+    name:     document.getElementById('fName')?.value||'',
+    address:  document.getElementById('fAddress')?.value||'',
+    tracking: document.getElementById('fTracking')?.value||'',
+    shipIn:   document.getElementById('fShipIn')?.value||'',
+    shipOut:  document.getElementById('fShipOut')?.value||'',
+    fee:      document.getElementById('fFee')?.value||'',
+    notes:    document.getElementById('fNotes')?.value||'',
+    date:     document.getElementById('fDate')?.value||'',
+    status:   document.getElementById('fStatus')?.value||'Paid',
+    payment:  document.getElementById('fPayment')?.value||'Venmo',
+  };
+}
+
+function restoreFields(fields){
+  if(!fields) return;
+  const set = (id, val) => { const el=document.getElementById(id); if(el) el.value=val||''; };
+  set('fName',    fields.name);
+  set('fAddress', fields.address);
+  set('fTracking',fields.tracking);
+  set('fShipIn',  fields.shipIn);
+  set('fShipOut', fields.shipOut);
+  set('fFee',     fields.fee);
+  set('fNotes',   fields.notes);
+  set('fDate',    fields.date);
+  const st=document.getElementById('fStatus'); if(st) st.value=fields.status||'Paid';
+  const pm=document.getElementById('fPayment'); if(pm) pm.value=fields.payment||'Venmo';
+}
+
+function saveDraft(){
+  const entries = Object.entries(order).filter(([,q])=>q>0);
+  const fields = draftFields();
+  const customerName = fields.name||'Unnamed order';
+  const itemCount = entries.reduce((s,[,q])=>s+q, 0);
+
+  if(!entries.length && !fields.name){
+    showToast('Nothing to save — add items or a customer name first');
+    return;
+  }
+
+  const id = _activeDraftId || ('draft_'+Date.now());
+  const existing = drafts.find(d=>d.id===id);
+
+  const draft = {
+    id,
+    name:    customerName,
+    savedAt: new Date().toISOString(),
+    order:   {...order},
+    fields,
+    itemCount,
+  };
+
+  if(existing){
+    Object.assign(existing, draft);
+  } else {
+    drafts.unshift(draft);
+    _activeDraftId = id;
+  }
+
+  saveDrafts();
+  renderDraftsList();
+  updateDraftBadge();
+  showToast('✓ Draft saved — "'+customerName+'"');
+}
+
+function loadDraft(id){
+  const draft = drafts.find(d=>d.id===id);
+  if(!draft) return;
+
+  // Warn if current order has unsaved items
+  const hasItems = Object.values(order).some(q=>q>0);
+  if(hasItems && !confirm('Load this draft? Your current order will be cleared (save it first if needed).')) return;
+
+  // Restore order
+  Object.keys(order).forEach(k=>delete order[k]);
+  Object.entries(draft.order||{}).forEach(([k,v])=>{ order[k]=v; });
+
+  // Restore fields
+  restoreFields(draft.fields);
+
+  _activeDraftId = draft.id;
+
+  // Show restore bar
+  const bar = document.getElementById('draftRestoreBar');
+  const msg = document.getElementById('draftRestoreMsg');
+  if(bar && msg){
+    msg.textContent = '📝 Draft loaded: "'+draft.name+'" — saved '+timeAgo(draft.savedAt);
+    bar.classList.add('on');
+  }
+
+  // Switch to order view
+  switchView('order');
+  renderTable();
+  updatePanel();
+  toggleDraftsDrawer();
+  showToast('✓ Draft restored — "'+draft.name+'"');
+}
+
+function deleteDraft(id, e){
+  e.stopPropagation();
+  const draft = drafts.find(d=>d.id===id);
+  if(!draft) return;
+  if(!confirm('Delete draft "'+draft.name+'"?')) return;
+  drafts = drafts.filter(d=>d.id!==id);
+  if(_activeDraftId===id) _activeDraftId=null;
+  saveDrafts();
+  renderDraftsList();
+  updateDraftBadge();
+  showToast('Draft deleted');
+}
+
+function clearDraftRestore(){
+  document.getElementById('draftRestoreBar')?.classList.remove('on');
+  _activeDraftId = null;
+}
+
+function renderDraftsList(){
+  const el = document.getElementById('draftsList');
+  if(!el) return;
+  if(!drafts.length){
+    el.innerHTML='<div class="draft-empty">No drafts yet.<br>Save a draft to pick up later.</div>';
+    return;
+  }
+  el.innerHTML = drafts.map(d=>`
+    <div class="draft-item" onclick="loadDraft('${d.id}')">
+      <div class="draft-item-name">${escHtml(d.name)}</div>
+      <div class="draft-item-meta">
+        <span>${timeAgo(d.savedAt)}</span>
+        <span class="draft-item-count">${d.itemCount||0} item${(d.itemCount||0)!==1?'s':''}</span>
+        ${_activeDraftId===d.id?'<span style="color:var(--bark);font-size:.63rem">● active</span>':''}
+      </div>
+      <div class="draft-item-actions">
+        <button class="btn sm" onclick="loadDraft('${d.id}')" style="font-size:.65rem;padding:.15rem .4rem">↩ Restore</button>
+        <button class="btn sm" onclick="saveDraftOver('${d.id}',event)" style="font-size:.65rem;padding:.15rem .4rem">💾 Update</button>
+        <button class="btn danger sm" onclick="deleteDraft('${d.id}',event)" style="font-size:.65rem;padding:.15rem .4rem">✕</button>
+      </div>
+    </div>`).join('');
+}
+
+function saveDraftOver(id, e){
+  e.stopPropagation();
+  _activeDraftId = id;
+  saveDraft();
+}
+
+function updateDraftBadge(){
+  const badge = document.getElementById('draftBadge');
+  if(!badge) return;
+  if(drafts.length){
+    badge.textContent = drafts.length;
+    badge.classList.add('on');
+  } else {
+    badge.classList.remove('on');
+  }
+}
+
+function toggleDraftsDrawer(){
+  const drawer = document.getElementById('draftsDrawer');
+  const overlay = document.getElementById('draftsOverlay');
+  if(!drawer) return;
+  const open = drawer.classList.toggle('open');
+  overlay.style.display = open ? 'block' : 'none';
+  if(open) renderDraftsList();
+}
+
+function timeAgo(iso){
+  if(!iso) return '';
+  const diff = Date.now() - new Date(iso).getTime();
+  const min = Math.floor(diff/60000);
+  const hr  = Math.floor(diff/3600000);
+  const day = Math.floor(diff/86400000);
+  if(min < 1)  return 'just now';
+  if(min < 60) return min+'m ago';
+  if(hr  < 24) return hr+'h ago';
+  if(day < 7)  return day+'d ago';
+  return new Date(iso).toLocaleDateString();
+}
+
+// Auto-save every 3 minutes if there are items in the order
+function startAutoSave(){
+  _autoSaveTimer = setInterval(()=>{
+    const hasItems = Object.values(order).some(q=>q>0);
+    if(hasItems){
+      saveDraft();
+      // Silent — no toast for auto-save
+    }
+  }, 3 * 60 * 1000);
+}
+
+// Also auto-mark draft as complete when order is saved to records
+const _origCopyAndSave = copyAndSave;
+
 /* ── BOOT ── */
 renderTable(); updatePanel();
 if(sheetUrl) setSyncStatus('ok','connected');
 else setSyncStatus('','local');
+updateDraftBadge();
+startAutoSave();
 </script>
 </body>
 </html>
