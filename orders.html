@@ -1928,7 +1928,7 @@ function renderSold(){ renderSoldSummary(); }
 
 function renderSoldSummary(){
   const search=(document.getElementById('soldSearch')?.value||'').toLowerCase();
-  const filtered=products.filter(p=>!p.hidden&&(!search||p.name.toLowerCase().includes(search)||p.color.toLowerCase().includes(search)));
+  const filtered=products.filter(p=>!search||p.name.toLowerCase().includes(search)||p.color.toLowerCase().includes(search));
   const usedSizes=ALL_CM; // always show all sizes, 0 if none sold
 
   // Build header
