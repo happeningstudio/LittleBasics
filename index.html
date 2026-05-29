@@ -205,7 +205,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica','Arial'
           <option value="">All Types</option>
           <option value="Tops">Tops</option>
           <option value="Bottoms">Bottoms</option>
-          <option value="Rompers & Overalls">Rompers & Sets</option>
+          <option value="Rompers & Sets">Rompers & Sets</option>
           <option value="Outerwear & Knitwear">Outerwear & Knitwear</option>
         </select>
         <select class="filter-select" id="seasonSelect" onchange="render()">
@@ -245,7 +245,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica','Arial'
           <option value="">All Types</option>
           <option value="Tops">Tops</option>
           <option value="Bottoms">Bottoms</option>
-          <option value="Rompers & Overalls">Rompers &amp; Sets</option>
+          <option value="Rompers & Sets">Rompers &amp; Sets</option>
           <option value="Outerwear & Knitwear">Outerwear &amp; Knitwear</option>
         </select>
         <select class="mdf-select" id="mSeasonSelect" onchange="setMSeason(null, this.value)">
@@ -287,7 +287,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica','Arial'
         <button class="sf-btn active" data-cat="" onclick="setSFCat(this,'')">All Types</button>
         <button class="sf-btn" data-cat="Tops" onclick="setSFCat(this,'Tops')">Tops</button>
         <button class="sf-btn" data-cat="Bottoms" onclick="setSFCat(this,'Bottoms')">Bottoms</button>
-        <button class="sf-btn" data-cat="Rompers & Overalls" onclick="setSFCat(this,'Rompers & Overalls')">Rompers &amp; Sets</button>
+        <button class="sf-btn" data-cat="Rompers & Sets" onclick="setSFCat(this,'Rompers & Sets')">Rompers &amp; Sets</button>
         <button class="sf-btn" data-cat="Outerwear & Knitwear" onclick="setSFCat(this,'Outerwear & Knitwear')">Outerwear &amp; Knitwear</button>
       </div>
     </div>
@@ -342,7 +342,7 @@ function deriveCategory(p){
   if(p.category && p.category !== 'Uncategorized') return p.category;
   const n = p.name.toLowerCase();
   if(/cardigan|knitwear|knit|jacket|padded|reversib|sweatshirt|sweater|fleece suit|fleece sweat/.test(n)) return 'Outerwear & Knitwear';
-  if(/romper|overall|suit|set/.test(n)) return 'Rompers & Overalls';
+  if(/romper|overall|suit|set/.test(n)) return 'Rompers & Sets';
   if(/pant|legging|short|bottom/.test(n)) return 'Bottoms';
   if(/shirt|top|sleeve|tee/.test(n)) return 'Tops';
   return 'Uncategorized';
@@ -369,13 +369,13 @@ function seasonClass(s){
 
 /* ── FALLBACK PRODUCTS ── */
 const FALLBACK = [
-  {id:1, name:"Cotton Waffle Overall", price:14, bundlePrice:12, sizes:["6-12M"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/6.jpg", category:"Rompers & Overalls"},
-  {id:2, name:"Cotton Linen Kimono Overall", price:12, bundlePrice:10, sizes:["6-12M","12-24M","2T"], material:"Cotton Linen", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/28.jpg", category:"Rompers & Overalls"},
-  {id:3, name:"Ruffle Cotton Romper, Clearance $4 off", price:14, bundlePrice:12, sizes:["2T"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/11.jpg", category:"Rompers & Overalls"},
+  {id:1, name:"Cotton Waffle Overall", price:14, bundlePrice:12, sizes:["6-12M"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/6.jpg", category:"Rompers & Sets"},
+  {id:2, name:"Cotton Linen Kimono Overall", price:12, bundlePrice:10, sizes:["6-12M","12-24M","2T"], material:"Cotton Linen", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/28.jpg", category:"Rompers & Sets"},
+  {id:3, name:"Ruffle Cotton Romper, Clearance $4 off", price:14, bundlePrice:12, sizes:["2T"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/11.jpg", category:"Rompers & Sets"},
   {id:4, name:"Cotton Long Sleeve Shirt", price:12, bundlePrice:10, sizes:["3-6M","6-12M","12-24M","2T"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/68.jpg", category:"Tops"},
-  {id:5, name:"Embroidered Cotton Floral Romper", price:18, bundlePrice:16, sizes:["3-6M","12-24M","2T"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/19.jpg", category:"Rompers & Overalls"},
-  {id:6, name:"Cotton Muslin Romper", price:14, bundlePrice:12, sizes:["6-12M","12-24M"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/18.jpg", category:"Rompers & Overalls"},
-  {id:7, name:"Lightweight Cotton Terry Solid Romper, Clearance $4 off", price:14, bundlePrice:12, sizes:["3-6M","6-12M"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/27.jpg", category:"Rompers & Overalls"},
+  {id:5, name:"Embroidered Cotton Floral Romper", price:18, bundlePrice:16, sizes:["3-6M","12-24M","2T"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/19.jpg", category:"Rompers & Sets"},
+  {id:6, name:"Cotton Muslin Romper", price:14, bundlePrice:12, sizes:["6-12M","12-24M"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/18.jpg", category:"Rompers & Sets"},
+  {id:7, name:"Lightweight Cotton Terry Solid Romper, Clearance $4 off", price:14, bundlePrice:12, sizes:["3-6M","6-12M"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/27.jpg", category:"Rompers & Sets"},
   {id:8, name:"Smile Cotton Long Sleeve Shirt with Stripes", price:10, bundlePrice:9, sizes:["12-24M","2T"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/2.jpg", category:"Tops"},
   {id:9, name:"Solid Cotton Long Sleeve", price:10, bundlePrice:9, sizes:["6-12M","12-24M","3T","4T","5T"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/3.jpg", category:"Tops"},
   {id:10, name:"Solid Cotton Long Sleeve", price:12, bundlePrice:10, sizes:["6-12M","12-24M","2T","3T","4T"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/12.jpg", category:"Tops"},
@@ -384,12 +384,12 @@ const FALLBACK = [
   {id:13, name:"Striped Cotton Sweatshirts", price:18, bundlePrice:16, sizes:["6-12M","12-24M","2T","3T","4T","5T"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/16.jpg", category:"Outerwear & Knitwear"},
   {id:14, name:"Scalloped Cotton Knitted Cardigan", price:24, bundlePrice:22, sizes:["3-6M","6-12M","12-24M","2T","3T"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/7.jpg", category:"Outerwear & Knitwear"},
   {id:15, name:"Ruffled Cotton Muslin Pants", price:12, bundlePrice:10, sizes:["3-6M","6-12M","12-24M","2T","3T"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/1.jpg", category:"Bottoms"},
-  {id:16, name:"Ruffled Cotton Denim Romper, Clearance $4 off", price:14, bundlePrice:12, sizes:["6-12M","12-24M","2T"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/5.jpg", category:"Rompers & Overalls"},
+  {id:16, name:"Ruffled Cotton Denim Romper, Clearance $4 off", price:14, bundlePrice:12, sizes:["6-12M","12-24M","2T"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/5.jpg", category:"Rompers & Sets"},
   {id:17, name:"Cotton Fleece Leggings, additional $3 off!", price:12, bundlePrice:10, sizes:["6-12M","12-24M","2T","3T","4T","5T"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/14.jpg", category:"Bottoms"},
   {id:18, name:"Striped Pants", price:14, bundlePrice:12, sizes:["6-12M","12-24M"], material:"Cotton Linen", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/13.jpg", category:"Bottoms"},
-  {id:19, name:"Open Back Cotton Lace Set", price:18, bundlePrice:16, sizes:["12-24M","2T"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/4.jpg", category:"Rompers & Overalls"},
-  {id:20, name:"Embroidered Cotton Fleece Suit, additional $5 off", price:24, bundlePrice:22, sizes:["6-12M","12-24M","2T","4T"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/8.jpg", category:"Rompers & Overalls"},
-  {id:21, name:"Solid Cotton Track Suit", price:24, bundlePrice:22, sizes:["3-6M","6-12M","2T","4T"], material:"95% Organic Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/10.jpg", category:"Rompers & Overalls"},
+  {id:19, name:"Open Back Cotton Lace Set", price:18, bundlePrice:16, sizes:["12-24M","2T"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/4.jpg", category:"Rompers & Sets"},
+  {id:20, name:"Embroidered Cotton Fleece Suit, additional $5 off", price:24, bundlePrice:22, sizes:["6-12M","12-24M","2T","4T"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/8.jpg", category:"Rompers & Sets"},
+  {id:21, name:"Solid Cotton Track Suit", price:24, bundlePrice:22, sizes:["3-6M","6-12M","2T","4T"], material:"95% Organic Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/10.jpg", category:"Rompers & Sets"},
   {id:22, name:"Striped Pants", price:14, bundlePrice:12, sizes:["2T","3T","4T","5T"], material:"Cotton Linen", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/26.jpg", category:"Bottoms"},
   {id:23, name:"Solid Cotton Knit Sweater, additional $5 off!", price:22, bundlePrice:20, sizes:["2T","3T","4T","5T"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/25.jpg", category:"Outerwear & Knitwear"},
   {id:24, name:"Cropped Striped Pants", price:16, bundlePrice:14, sizes:["12-24M","2T","3T","4T","5T"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/21.jpg", category:"Bottoms"},
@@ -398,34 +398,34 @@ const FALLBACK = [
   {id:27, name:"Striped Cotton Fleeced Sweatshirt, additional $5 off!", price:22, bundlePrice:20, sizes:["12-24M","2T","3T","4T","5T"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/32.jpg", category:"Outerwear & Knitwear"},
   {id:28, name:"Cotton Light Fleeced Leggings, additional $3 off", price:10, bundlePrice:9, sizes:["2T","3T","5T"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/33.jpg", category:"Bottoms"},
   {id:29, name:"Cotton Knot Leggings", price:9, bundlePrice:8, sizes:["3-6M","6-12M","12-24M"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/34.jpg", category:"Bottoms"},
-  {id:30, name:"Cotton Sleeveless Romper, Clearance $4 off", price:14, bundlePrice:12, sizes:["3-6M"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/35.jpg", category:"Rompers & Overalls"},
-  {id:31, name:"Cotton Romper Shirt Set, Clearance $4 off", price:15, bundlePrice:13, sizes:["3-6M"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/36.jpg", category:"Rompers & Overalls"},
+  {id:30, name:"Cotton Sleeveless Romper, Clearance $4 off", price:14, bundlePrice:12, sizes:["3-6M"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/35.jpg", category:"Rompers & Sets"},
+  {id:31, name:"Cotton Romper Shirt Set, Clearance $4 off", price:15, bundlePrice:13, sizes:["3-6M"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/36.jpg", category:"Rompers & Sets"},
   {id:33, name:"Solid Cotton Muslin Pants", price:12, bundlePrice:10, sizes:["6-12M","12-24M"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/38.jpg", category:"Bottoms"},
   {id:34, name:"Cotton Denim Jacket", price:20, bundlePrice:18, sizes:["12-24M","2T"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/63.jpg", category:"Outerwear & Knitwear"},
   {id:35, name:"Cotton Knit Animal Cardigan", price:24, bundlePrice:22, sizes:["3-6M","6-12M"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/66.jpg", category:"Outerwear & Knitwear"},
-  {id:36, name:"Cotton Rainbow Suit", price:16, bundlePrice:14, sizes:["6-12M","12-24M","2T","3T"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/43.jpg", category:"Rompers & Overalls"},
-  {id:37, name:"Cotton Embroidered Floral Romper", price:18, bundlePrice:15, sizes:["12-24M","2T"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/60.jpg", category:"Rompers & Overalls"},
-  {id:38, name:"Cotton Embroidered Floral Romper", price:18, bundlePrice:16, sizes:["12-24M","2T"], material:"Cotton Linen", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/40.jpg", category:"Rompers & Overalls"},
+  {id:36, name:"Cotton Rainbow Suit", price:16, bundlePrice:14, sizes:["6-12M","12-24M","2T","3T"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/43.jpg", category:"Rompers & Sets"},
+  {id:37, name:"Cotton Embroidered Floral Romper", price:18, bundlePrice:15, sizes:["12-24M","2T"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/60.jpg", category:"Rompers & Sets"},
+  {id:38, name:"Cotton Embroidered Floral Romper", price:18, bundlePrice:16, sizes:["12-24M","2T"], material:"Cotton Linen", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/40.jpg", category:"Rompers & Sets"},
   {id:39, name:"Cotton Reverseable Cardigan", price:20, bundlePrice:18, sizes:["6-12M","12-24M","2T","3T","4T"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/54.jpg", category:"Outerwear & Knitwear"},
-  {id:41, name:"Cotton Waffle Long Sleeve Overall, Clearance $4 off", price:18, bundlePrice:16, sizes:["3-6M","6-12M"], material:"95% Cotton Outer", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/20.jpg", category:"Rompers & Overalls"},
+  {id:41, name:"Cotton Waffle Long Sleeve Overall, Clearance $4 off", price:18, bundlePrice:16, sizes:["3-6M","6-12M"], material:"95% Cotton Outer", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/20.jpg", category:"Rompers & Sets"},
   {id:43, name:"Cotton Stripes Shirt with Elbow Patches", price:12, bundlePrice:10, sizes:["6-12M","12-24M","2T","3T","4T"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/51.jpg", category:"Tops"},
-  {id:44, name:"Cotton Citrus Suit", price:18, bundlePrice:16, sizes:["2T","3T"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/46.jpg", category:"Rompers & Overalls"},
+  {id:44, name:"Cotton Citrus Suit", price:18, bundlePrice:16, sizes:["2T","3T"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/46.jpg", category:"Rompers & Sets"},
   {id:47, name:"Cotton Padded Reversible Sweatshirt with Pocket, additional $4 off", price:22, bundlePrice:20, sizes:["12-24M"], material:"100% Cotton Outer", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/49.jpg", category:"Outerwear & Knitwear"},
   {id:48, name:"Cotton Striped Leggings with Knee Patch", price:10, bundlePrice:8, sizes:["3-6M","6-12M"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/50.jpg", category:"Bottoms"},
   {id:49, name:"Quilt Padded Pants, additional $4 off", price:12, bundlePrice:10, sizes:["2T","3T"], material:"Nylon outer with cotton inner", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/55.jpg", category:"Bottoms"},
-  {id:51, name:"Cotton Muslin Romper", price:14, bundlePrice:12, sizes:["6-12M"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/44.jpg", category:"Rompers & Overalls"},
+  {id:51, name:"Cotton Muslin Romper", price:14, bundlePrice:12, sizes:["6-12M"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/44.jpg", category:"Rompers & Sets"},
   {id:52, name:"Cotton Demin Hooded Jacket", price:20, bundlePrice:18, sizes:["3T"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/42.jpg", category:"Outerwear & Knitwear"},
   {id:53, name:"Cotton Solid Pants with footies, Clearance $4 off", price:12, bundlePrice:10, sizes:["3-6M","6-12M"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/41.jpg", category:"Bottoms"},
   {id:54, name:"Cotton Striped Smile Shirt", price:7, bundlePrice:6, sizes:["12-24M","2T","3T","4T","5T"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/45.jpg", category:"Tops"},
   {id:55, name:"Cotton Muslin Solid Pants", price:12, bundlePrice:10, sizes:["2T","3T","4T","5T"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/62.jpg", category:"Bottoms"},
   {id:56, name:"Cotton Stripe Shirt with Embroidered Face", price:13, bundlePrice:11, sizes:["6-12M","12-24M","2T","3T"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/84.jpg", category:"Tops"},
-  {id:57, name:"Cotton Knit Set, additional $4 off", price:20, bundlePrice:18, sizes:["12-24M"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/64.jpg", category:"Rompers & Overalls"},
+  {id:57, name:"Cotton Knit Set, additional $4 off", price:20, bundlePrice:18, sizes:["12-24M"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/64.jpg", category:"Rompers & Sets"},
   {id:58, name:"Cotton Knit Sprinkle Sweater, additional $4 off", price:18, bundlePrice:16, sizes:["6-12M"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/65.jpg", category:"Outerwear & Knitwear"},
   {id:59, name:"Cotton Quilted Sweatshirt, additional $5 off!", price:24, bundlePrice:22, sizes:["12-24M","2T","3T","4T","5T"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/39.jpg", category:"Outerwear & Knitwear"},
   {id:60, name:"Pattern Cotton Muslin Pants", price:12, bundlePrice:10, sizes:["6-12M","12-24M","2T","3T","4T","5T"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/70.jpg", category:"Bottoms"},
   {id:61, name:"Solid Cotton Shirt", price:12, bundlePrice:10, sizes:["2T","3T","4T","5T"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/69.jpg", category:"Tops"},
   {id:64, name:"Cotton Striped Short Sleeve Shirt, Clearance $4 off", price:11, bundlePrice:9, sizes:["3-6M","6-12M","12-24M","2T"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/58.jpg", category:"Tops"},
-  {id:65, name:"Cotton Embroidered Floral Set, Clearance $4 off", price:18, bundlePrice:16, sizes:["12-24M"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/72.jpg", category:"Rompers & Overalls"},
+  {id:65, name:"Cotton Embroidered Floral Set, Clearance $4 off", price:18, bundlePrice:16, sizes:["12-24M"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/72.jpg", category:"Rompers & Sets"},
   {id:66, name:"Cotton Animal Short Sleeve Shirt", price:10, bundlePrice:8, sizes:["5T"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/73.jpg", category:"Tops"},
   {id:67, name:"Cotton Muslin Short Sleeve Shirt", price:12, bundlePrice:10, sizes:["12-24M","2T","3T","4T","5T"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/74.jpg", category:"Tops"},
   {id:68, name:"Cotton Linen Cropped Pants", price:15, bundlePrice:13, sizes:["12-24M","3T"], material:"Cotton Linen", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/79.jpg", category:"Bottoms"},
@@ -435,14 +435,14 @@ const FALLBACK = [
   {id:74, name:"Extra Soft Cotton Checker Pants", price:15, bundlePrice:13, sizes:["12-24M","3T","5T"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/76.jpg", category:"Bottoms"},
   {id:75, name:"Cotton Lightweight Button Textured Cardigan", price:20, bundlePrice:18, sizes:["12-24M","2T"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/77.jpg", category:"Outerwear & Knitwear"},
   {id:76, name:"Vintage Style Cotton Checker Shorts", price:15, bundlePrice:13, sizes:["12-24M","2T"], material:"90% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/78.jpg", category:"Bottoms"},
-  {id:77, name:"Cotton Muslin Set", price:18, bundlePrice:16, sizes:["6-12M","12-24M","4T","5T"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/86.jpg", category:"Rompers & Overalls"},
+  {id:77, name:"Cotton Muslin Set", price:18, bundlePrice:16, sizes:["6-12M","12-24M","4T","5T"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/86.jpg", category:"Rompers & Sets"},
   {id:78, name:"Two Tone Cotton Shirt", price:12, bundlePrice:10, sizes:["12-24M","5T"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/87.jpg", category:"Tops"},
   {id:79, name:"Cotton Checker Pumpkin Shorts", price:10, bundlePrice:8, sizes:["6-12M","12-24M","2T"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/91.jpg", category:"Bottoms"},
   {id:80, name:"Cotton Lightweight Gingham Pants", price:12, bundlePrice:10, sizes:["6-12M","12-24M","2T","3T"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/89.jpg", category:"Bottoms"},
   {id:81, name:"Cotton Muslin Long Sleeve Shirt", price:12, bundlePrice:10, sizes:["6-12M"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/90.jpg", category:"Tops"},
   {id:83, name:"Cotton Striped Short Sleeve Shirt", price:9, bundlePrice:7, sizes:["6-12M","12-24M","2T","3T"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/92.jpg", category:"Tops"},
   {id:84, name:"Cotton Two Tone Short Sleeve Shirt", price:10, bundlePrice:8, sizes:["6-12M","12-24M","2T"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/93.jpg", category:"Tops"},
-  {id:85, name:"Cotton Pineapple Set, Clearance $4 off", price:14, bundlePrice:12, sizes:["6-12M"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/94.jpg", category:"Rompers & Overalls"}
+  {id:85, name:"Cotton Pineapple Set, Clearance $4 off", price:14, bundlePrice:12, sizes:["6-12M"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/94.jpg", category:"Rompers & Sets"}
 ];
 
 /* ── STATE ── */
@@ -481,6 +481,16 @@ function totalStock(product){
   return hasAny ? total : null;
 }
 
+
+function normCat(cat){
+  if(!cat) return '';
+  const s = cat.trim();
+  if(s==='Rompers & Overalls'||s==='Sets'||s==='Rompers & Sets') return 'Rompers & Sets';
+  if(s==='Outerwear'||s==='Cardigans & Knitwear'||s==='Outerwear & Knitwear') return 'Outerwear & Knitwear';
+  if(s==='Top') return 'Tops';
+  if(s==='Bottom') return 'Bottoms';
+  return s;
+}
 /* ── SIDEBAR FILTER SETTERS ── */
 window._sfCat = '';
 window._sfSeason = '';
@@ -578,8 +588,13 @@ function render(){
     return p.sizes.some(l=>{ const s=getSizeStock(p,l); return s===null||s>0; });
   });
 
-  // Category filter
-  if(cat) rows = rows.filter(p=>deriveCategory(p)===cat||p.category===cat);
+  // Category filter — normalise both sides before comparing
+  if(cat){
+    rows = rows.filter(p=>{
+      const pc = normCat(p.category||'') || normCat(deriveCategory(p));
+      return pc === normCat(cat);
+    });
+  }
 
   // Season filter
   if(season) rows = rows.filter(p=>{
