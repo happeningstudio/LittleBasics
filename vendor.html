@@ -352,9 +352,8 @@ tr.selected td{background:rgba(139,115,85,.07)!important}
   #poPrintArea img{width:48px;height:48px;object-fit:cover;border-radius:3px}
   @page{margin:1.5cm;size:A4 landscape}
 }
-.scroll-sentinel{height:40px;display:flex;align-items:center;justify-content:center}
-.scroll-spinner{width:18px;height:18px;border:2px solid var(--border);border-top-color:var(--bark);border-radius:50%;animation:spin .7s linear infinite;display:none}
-.scroll-spinner.show{display:block}
+.pager{display:flex;align-items:center;justify-content:center;gap:.5rem;padding:.65rem;flex-shrink:0;border-top:1px solid var(--border);background:var(--white)}
+.pager span{font-size:.72rem;color:#aaa}
 ::-webkit-scrollbar{width:5px;height:5px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--sand-dk);border-radius:10px}
@@ -439,8 +438,10 @@ tr.selected td{background:rgba(139,115,85,.07)!important}
       <div class="loading"><div class="spinner"></div><span>Loading catalog…</span></div>
     </div>
 
-    <div class="scroll-sentinel" id="scrollSentinel">
-      <div class="scroll-spinner" id="scrollSpinner"></div>
+    <div class="pager" id="pager" style="display:none">
+      <button class="btn sm" id="prevBtn" onclick="changePage(-1)">← Prev</button>
+      <span id="pageInfo"></span>
+      <button class="btn sm" id="nextBtn" onclick="changePage(1)">Next →</button>
     </div>
   </div>
 </div>
@@ -1085,38 +1086,11 @@ function formatNoteDate(iso){
 }
 
 
-/* ══ INFINITE SCROLL ══ */
-function loadMoreItems(){
-  const rows = window._filteredRows || [];
-  if(visibleCount >= rows.length){
-    document.getElementById('scrollSpinner')?.classList.remove('show');
-    return;
-  }
-
-  const batch = rows.slice(visibleCount, visibleCount + PAGE_SIZE);
-  visibleCount += batch.length;
-
-  if(viewMode === 'cards'){
-    const grid = document.getElementById('cardGrid');
-    if(grid) batch.forEach(it=>{ const d=document.createElement('div'); d.innerHTML=cardHTML(it); grid.appendChild(d.firstElementChild); });
-  } else {
-    const tbody = document.getElementById('itemTbody');
-    if(tbody) tbody.insertAdjacentHTML('beforeend', batch.map(it=>rowHTML(it)).join(''));
-  }
-
-  // Show/hide spinner
-  const spinner = document.getElementById('scrollSpinner');
-  if(spinner) spinner.classList.toggle('show', visibleCount < rows.length);
-}
-
-// Set up IntersectionObserver on sentinel
-function initScrollObserver(){
-  const sentinel = document.getElementById('scrollSentinel');
-  if(!sentinel) return;
-  const obs = new IntersectionObserver(entries=>{
-    if(entries[0].isIntersecting) loadMoreItems();
-  }, { threshold: 0.1 });
-  obs.observe(sentinel);
+/* ══ PAGINATION ══ */
+function changePage(d){
+  page = Math.max(0, page + d);
+  render();
+  document.getElementById('contentArea').scrollTop = 0;
 }
 
 
@@ -1470,8 +1444,8 @@ let activeCat = 'all';
 let activeSeason = 'all';
 let activeMaterial = 'all';
 let viewMode = 'cards';  // 'cards' | 'table'
-let visibleCount = 0;
-const PAGE_SIZE = 40; // items loaded per batch
+let page = 0;
+const PAGE_SIZE = 60;
 let searchQ = '';
 let _searchTimer = null;
 let _detailItem = null; // currently open item
@@ -1604,9 +1578,9 @@ function renderChips(){
     btn.addEventListener('click', ()=>setSeason(btn.dataset.season));
   });
 }
-function setCat(c){ activeCat=c; visibleCount=0; renderChips(); render(); }
-function setSeason(s){ activeSeason=s; visibleCount=0; renderChips(); render(); }
-function setMaterial(m){ activeMaterial=m; visibleCount=0; renderChips(); render(); }
+function setCat(c){ activeCat=c; page=0; renderChips(); render(); }
+function setSeason(s){ activeSeason=s; page=0; renderChips(); render(); }
+function setMaterial(m){ activeMaterial=m; page=0; renderChips(); render(); }
 
 // Flat list of all items across all vendors (for material chip availability check)
 function allItems_(){
@@ -1618,7 +1592,7 @@ function allItems_(){
 /* ══ SEARCH ══ */
 function onSearch(){
   clearTimeout(_searchTimer);
-  _searchTimer = setTimeout(()=>{ searchQ=document.getElementById('searchInput').value; visibleCount=0; render(); }, 220);
+  _searchTimer = setTimeout(()=>{ searchQ=document.getElementById('searchInput').value; page=0; render(); }, 220);
 }
 
 /* ══ VIEW MODE ══ */
@@ -1626,7 +1600,7 @@ function setView(v){
   viewMode=v;
   document.getElementById('togCards').classList.toggle('on',v==='cards');
   document.getElementById('togTable').classList.toggle('on',v==='table');
-  visibleCount=0; render();
+  page=0; render();
 }
 
 /* ══ RENDER ══ */
@@ -1650,14 +1624,15 @@ function render(){
     return;
   }
 
-  // Store filtered rows for infinite scroll
-  window._filteredRows = rows;
-  visibleCount = 0;
+  // Paginate
+  const totalPages = Math.max(1, Math.ceil(rows.length / PAGE_SIZE));
+  if(page >= totalPages) page = totalPages - 1;
+  const pageRows = rows.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
 
   if (viewMode==='cards'){
-    area.innerHTML = '<div class="card-grid" id="cardGrid"></div>';
+    area.innerHTML = `<div class="card-grid">${pageRows.map(it=>cardHTML(it)).join('')}</div>`;
   } else {
-    area.innerHTML = `<table class="vendor-table" id="itemTable"><thead><tr>
+    area.innerHTML = `<table class="vendor-table"><thead><tr>
       <th style="width:28px"></th>
       ${activeVendorId==='all'?'<th style="width:80px">Vendor</th>':''}
       <th style="width:52px">Photo</th>
@@ -1671,10 +1646,15 @@ function render(){
       <th style="min-width:120px">Notes</th>
       <th style="width:80px">Qty Ordered</th>
       <th style="width:90px">Actions</th>
-    </tr></thead><tbody id="itemTbody"></tbody></table>`;
+    </tr></thead><tbody>${pageRows.map(it=>rowHTML(it)).join('')}</tbody></table>`;
   }
 
-  loadMoreItems();
+  // Pager
+  const pager = document.getElementById('pager');
+  pager.style.display = totalPages > 1 ? '' : 'none';
+  document.getElementById('pageInfo').textContent = `${page+1} / ${totalPages}  (${rows.length} items)`;
+  document.getElementById('prevBtn').disabled = page === 0;
+  document.getElementById('nextBtn').disabled = page >= totalPages - 1;
 }
 
 function cardHTML(it){
@@ -1748,7 +1728,7 @@ function renderSidebar(){
   }).join('');
 }
 
-function setActiveVendor(id){ activeVendorId=id; activeCat='all'; activeSeason='all'; activeMaterial='all'; visibleCount=0; renderSidebar(); renderChips(); render(); }
+function setActiveVendor(id){ activeVendorId=id; activeCat='all'; activeSeason='all'; activeMaterial='all'; page=0; renderSidebar(); renderChips(); render(); }
 
 /* ══ DETAIL MODAL ══ */
 function openDetail(vendorId, itemId){
