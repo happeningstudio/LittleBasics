@@ -1541,6 +1541,11 @@ function normMaterial(m){
   if(s.includes('linen')) return 'Cotton Linen';
   if(s.includes('polyester') || s.includes('poly')) return 'Polyester';
   if(!s) return 'No material yet';
+  // <90% cotton — has a % number below 90 and contains cotton, no linen
+  if(s.includes('cotton') && !s.includes('linen')){
+    const pct = parseInt((s.match(/(\d+)%/) || [])[1] || '0');
+    if(pct > 0 && pct < 90) return '<90% Cotton';
+  }
   return 'other';
 }
 
@@ -1577,7 +1582,7 @@ function renderChips(){
     : '';
 
   // Material chips — fixed set, only show if any items have that material
-  const MATERIALS = ['100% Cotton','90–95% Cotton','Cotton Linen','Polyester','No material yet'];
+  const MATERIALS = ['100% Cotton','90–95% Cotton','<90% Cotton','Cotton Linen','Polyester','No material yet'];
   const allItems = allItems_();
   const mc = document.getElementById('materialChips');
   if(mc){
