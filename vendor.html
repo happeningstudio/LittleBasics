@@ -405,6 +405,7 @@ tr.selected td{background:rgba(139,115,85,.07)!important}
 
       <!-- Season filter -->
       <div id="seasonChips" style="display:flex;gap:.3rem;flex-wrap:wrap"></div>
+      <div id="materialChips" style="display:flex;gap:.3rem;flex-wrap:wrap"></div>
 
       <label style="display:flex;align-items:center;gap:.3rem;font-size:.72rem;color:#aaa;cursor:pointer;white-space:nowrap">
         <input type="checkbox" id="showHidden" onchange="render()" style="accent-color:var(--bark)"> Hidden
@@ -1467,6 +1468,7 @@ let vendors = [];
 let activeVendorId = 'all';
 let activeCat = 'all';
 let activeSeason = 'all';
+let activeMaterial = 'all';
 let viewMode = 'cards';  // 'cards' | 'table'
 let visibleCount = 0;
 const PAGE_SIZE = 40; // items loaded per batch
@@ -1518,6 +1520,7 @@ function filteredItems(){
 
   if (activeCat !== 'all') rows = rows.filter(it=>(it.category||'').trim() === activeCat.trim());
   if (activeSeason !== 'all') rows = rows.filter(it=>normSeason(it.season) === activeSeason);
+  if (activeMaterial !== 'all') rows = rows.filter(it=>normMaterial(it.material||'') === activeMaterial);
   if (!document.getElementById('showHidden')?.checked) rows = rows.filter(it=>!it.hidden);
   if (searchQ) {
     const q = searchQ.toLowerCase();
@@ -1531,6 +1534,15 @@ function filteredItems(){
 function getCategories(){
   const s=new Set(); allItems().forEach(it=>{if(it.category)s.add(it.category);}); return [...s].sort();
 }
+function normMaterial(m){
+  const s = (m||'').toLowerCase().trim();
+  if(s.includes('100%') && s.includes('cotton') && !s.includes('linen')) return '100% Cotton';
+  if((s.includes('90%') || s.includes('95%')) && s.includes('cotton')) return '90–95% Cotton';
+  if(s.includes('linen')) return 'Cotton Linen';
+  if(s.includes('polyester') || s.includes('poly')) return 'Polyester';
+  return 'other';
+}
+
 function normSeason(s){
   if(!s) return '';
   const t = s.trim().toLowerCase();
@@ -1563,6 +1575,21 @@ function renderChips(){
       + seasons.map(s=>`<button class="chip${activeSeason===s?' on':''}" data-season="${s.replace(/"/g,'')}">${s}</button>`).join('')
     : '';
 
+  // Material chips — fixed set, only show if any items have that material
+  const MATERIALS = ['100% Cotton','90–95% Cotton','Cotton Linen','Polyester'];
+  const allItems = allItems_();
+  const mc = document.getElementById('materialChips');
+  if(mc){
+    const available = MATERIALS.filter(m => allItems.some(it=>normMaterial(it.material||'')===m));
+    mc.innerHTML = available.length
+      ? `<button class="chip${activeMaterial==='all'?' on':''}" data-mat="all">All materials</button>`
+        + available.map(m=>`<button class="chip${activeMaterial===m?' on':''}" data-mat="${m}">${m}</button>`).join('')
+      : '';
+    mc.querySelectorAll('[data-mat]').forEach(btn=>{
+      btn.addEventListener('click', ()=>setMaterial(btn.dataset.mat));
+    });
+  }
+
   // Attach click handlers via JS (no inline onclick)
   cc.querySelectorAll('[data-cat]').forEach(btn=>{
     btn.addEventListener('click', ()=>setCat(btn.dataset.cat));
@@ -1573,6 +1600,14 @@ function renderChips(){
 }
 function setCat(c){ activeCat=c; visibleCount=0; renderChips(); render(); }
 function setSeason(s){ activeSeason=s; visibleCount=0; renderChips(); render(); }
+function setMaterial(m){ activeMaterial=m; visibleCount=0; renderChips(); render(); }
+
+// Flat list of all items across all vendors (for material chip availability check)
+function allItems_(){
+  const arr=[];
+  vendors.forEach(v=>v.items.forEach(it=>arr.push(it)));
+  return arr;
+}
 
 /* ══ SEARCH ══ */
 function onSearch(){
@@ -1707,7 +1742,7 @@ function renderSidebar(){
   }).join('');
 }
 
-function setActiveVendor(id){ activeVendorId=id; activeCat='all'; activeSeason='all'; visibleCount=0; renderSidebar(); renderChips(); render(); }
+function setActiveVendor(id){ activeVendorId=id; activeCat='all'; activeSeason='all'; activeMaterial='all'; visibleCount=0; renderSidebar(); renderChips(); render(); }
 
 /* ══ DETAIL MODAL ══ */
 function openDetail(vendorId, itemId){
