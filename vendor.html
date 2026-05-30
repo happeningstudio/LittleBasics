@@ -1540,6 +1540,7 @@ function normMaterial(m){
   if((s.includes('90%') || s.includes('95%')) && s.includes('cotton')) return '90–95% Cotton';
   if(s.includes('linen')) return 'Cotton Linen';
   if(s.includes('polyester') || s.includes('poly')) return 'Polyester';
+  if(!s) return 'No material yet';
   return 'other';
 }
 
@@ -1576,7 +1577,7 @@ function renderChips(){
     : '';
 
   // Material chips — fixed set, only show if any items have that material
-  const MATERIALS = ['100% Cotton','90–95% Cotton','Cotton Linen','Polyester'];
+  const MATERIALS = ['100% Cotton','90–95% Cotton','Cotton Linen','Polyester','No material yet'];
   const allItems = allItems_();
   const mc = document.getElementById('materialChips');
   if(mc){
