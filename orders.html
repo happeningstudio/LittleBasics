@@ -852,6 +852,7 @@ function doPost(e) {
             <th style="min-width:110px">Customer</th>
             <th style="min-width:140px">Address</th>
             <th style="min-width:160px">Items</th>
+            <th style="width:55px;text-align:center">Units</th>
             <th style="min-width:130px">Tracking</th>
             <th style="width:100px">Status</th>
             <th style="width:70px;text-align:right">Gross</th>
@@ -2101,7 +2102,7 @@ function renderLog(){
   if(!tbody) return;
 
   if(!filtered.length){
-    tbody.innerHTML=`<tr><td colspan="12" class="no-data">No orders match this filter</td></tr>`;
+    tbody.innerHTML=`<tr><td colspan="13" class="no-data">No orders match this filter</td></tr>`;
     return;
   }
 
@@ -2151,6 +2152,13 @@ function renderLog(){
     tdItems.style.cssText='font-size:.7rem;color:#888;max-width:220px;line-height:1.5';
     tdItems.textContent=itemStr||'—';
     tr.appendChild(tdItems);
+
+    // Units total
+    const tdUnits=document.createElement('td');
+    const unitTotal=(e.items||[]).reduce((s,i)=>s+i.qty,0);
+    tdUnits.style.cssText='text-align:center;font-weight:600;color:var(--bark);font-size:.78rem';
+    tdUnits.textContent=unitTotal||'—';
+    tr.appendChild(tdUnits);
 
     // Tracking — editable
     const tdTrack=document.createElement('td');
@@ -2264,7 +2272,7 @@ function renderLog(){
     trExp.className='expanded-row';
     trExp.style.display='none';
     const tdExp=document.createElement('td');
-    tdExp.setAttribute('colspan','12');
+    tdExp.setAttribute('colspan','13');
     tdExp.style.padding='0';
 
     // Build item editor rows
