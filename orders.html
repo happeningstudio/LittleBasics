@@ -3627,7 +3627,7 @@ function exportJSON(){
     products:  products,
     stock:     stock,
     soldCounts:soldCounts,
-    log:       log,
+    log:       orderLog,
     archived:  archived,
     shipments: shipments,
     drafts:    drafts,
@@ -3652,7 +3652,7 @@ function importJSON(e){
       if(data.products)   { products  = data.products;   saveProducts(); }
       if(data.stock)      { stock     = data.stock;       saveStock(); }
       if(data.soldCounts) { soldCounts= data.soldCounts;  saveSold(); }
-      if(data.log)        { log       = data.log;         saveLog(); }
+      if(data.log)        { orderLog  = data.log;         saveLog(); }
       if(data.archived)   { archived  = data.archived;    saveLocal('lb_archived', archived); }
       if(data.shipments)  { shipments = data.shipments;   saveLocal('lb_shipments', shipments); }
       if(data.drafts)     { drafts    = data.drafts;      saveDrafts(); }
