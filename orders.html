@@ -680,6 +680,8 @@ function doPost(e) {
       📝 Drafts<span class="draft-badge" id="draftBadge"></span>
     </button>
     <button class="btn sm" onclick="saveDraft()">💾 Save Draft</button>
+    <button class="btn sm" onclick="exportJSON()" title="Download all data as backup file">⬇ Export</button>
+    <label class="btn sm" style="cursor:pointer" title="Restore from backup file">⬆ Import<input type="file" accept=".json" onchange="importJSON(event)" style="display:none"></label>
     <button class="btn sm" onclick="showSetup()">⚙ Sync</button>
     <button class="btn sm" onclick="clearOrder()">Clear</button>
   </div>
@@ -1130,6 +1132,20 @@ async function sheetAppend(tab, row){
 }
 
 // Push stock to sheet (format: pid_cm → qty)
+async function pushSold(){
+  const rows=[['key','qty']];
+  Object.entries(soldCounts).forEach(([k,v])=>{ if(v>0) rows.push([k,v]); });
+  await sheetWrite('Sold', rows);
+  showToast('✓ Sold records pushed to Sheet');
+}
+
+async function pullSold(){
+  const data=await sheetRead('Sold');
+  if(!data||data.length<2) return;
+  data.slice(1).forEach(([k,v])=>{ if(k) soldCounts[String(k)]=(soldCounts[String(k)]||0)+(parseInt(v)||0); });
+  saveSold();
+}
+
 async function pushStock(){
   const rows=[['key','qty']];
   Object.entries(stock).forEach(([k,v])=>rows.push([k,v]));
@@ -1222,6 +1238,8 @@ function saveSheetUrl(){
   // Initial push of products and stock
   pushProducts();
   pushStock();
+  pushSold();
+  showToast('✓ All data pushed to Sheet');
   showToast('Connected! Products and stock pushed to Sheet ✓');
 }
 function copyScript(){
@@ -1718,6 +1736,7 @@ async function copyAndSave(){
   try{
     await navigator.clipboard.writeText(tsv);
     showToast('✓ Copied to clipboard + saved to records!');
+    pushSold(); // keep sheet in sync
     // Offer to delete active draft now that order is complete
     if(_activeDraftId){
       const d=drafts.find(x=>x.id===_activeDraftId);
@@ -3596,10 +3615,71 @@ function mgrUnhideSelected(){
   exitMgrSel();
 }
 
+
+/* ══ EXPORT / IMPORT JSON BACKUP ══ */
+function exportJSON(){
+  const data = {
+    version:   2,
+    exportedAt: new Date().toISOString(),
+    products:  products,
+    stock:     stock,
+    soldCounts:soldCounts,
+    log:       log,
+    archived:  archived,
+    shipments: shipments,
+    drafts:    drafts,
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = 'littlebasics-backup-' + new Date().toISOString().slice(0,10) + '.json';
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('✓ Backup downloaded');
+}
+
+function importJSON(e){
+  const file = e.target.files[0]; if(!file) return;
+  if(!confirm('Import this backup? This will REPLACE your current data. Make sure you exported first.')) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const data = JSON.parse(ev.target.result);
+      if(data.products)   { products  = data.products;   saveProducts(); }
+      if(data.stock)      { stock     = data.stock;       saveStock(); }
+      if(data.soldCounts) { soldCounts= data.soldCounts;  saveSold(); }
+      if(data.log)        { log       = data.log;         saveLog(); }
+      if(data.archived)   { archived  = data.archived;    saveLocal('lb_archived', archived); }
+      if(data.shipments)  { shipments = data.shipments;   saveLocal('lb_shipments', shipments); }
+      if(data.drafts)     { drafts    = data.drafts;      saveDrafts(); }
+      renderTable(); updatePanel(); renderMgr(); renderInventory();
+      showToast('✓ Data restored from backup — ' + (data.products?.length||0) + ' products loaded');
+    } catch(err) {
+      alert('Could not read backup file. Make sure it was exported from this app.');
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = ''; // reset input
+}
+
 /* ── BOOT ── */
 renderTable(); updatePanel();
-if(sheetUrl) setSyncStatus('ok','connected');
-else setSyncStatus('','local');
+if(sheetUrl){
+  setSyncStatus('ok','connected');
+  // Auto-pull products + stock + sold from sheet on load
+  (async ()=>{
+    try{
+      showToast('🔄 Syncing from sheet…');
+      await pullProducts();
+      await pullInventory();
+      await pullSold();
+      showToast('✓ Synced from sheet');
+    } catch(e){
+      console.warn('Auto-pull failed:', e);
+    }
+  })();
+} else setSyncStatus('','local');
 updateDraftBadge();
 startAutoSave();
 </script>
