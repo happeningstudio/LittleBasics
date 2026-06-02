@@ -3194,6 +3194,9 @@ function renderAnalytics(){
     `<button class="chip ${analyticsFilter===m.key?'active':''}" style="font-size:.67rem" onclick="setAnalyticsFilter('${m.key}')">${m.label}</button>`
   ).join('');
 
+  // Parse date safely as local time (avoid UTC rollback)
+  const parseLocal = s => s ? new Date(s+'T00:00:00') : null;
+
   // Filter orderLog by selected period
   let filtered;
   if(analyticsFilter==='all'){
@@ -3201,7 +3204,7 @@ function renderAnalytics(){
   } else if(analyticsFilter==='this-month'){
     filtered=orderLog.filter(e=>{
       if(!e.date) return false;
-      const d=new Date(e.date);
+      const d=new Date(e.date+'T00:00:00');
       return d.getFullYear()===thisYear && d.getMonth()===thisMonth;
     });
   } else if(analyticsFilter==='last-month'){
@@ -3209,7 +3212,7 @@ function renderAnalytics(){
     const lmMonth=thisMonth===0?11:thisMonth-1;
     filtered=orderLog.filter(e=>{
       if(!e.date) return false;
-      const d=new Date(e.date);
+      const d=new Date(e.date+'T00:00:00');
       return d.getFullYear()===lmYear && d.getMonth()===lmMonth;
     });
   } else if(analyticsFilter==='custom'){
