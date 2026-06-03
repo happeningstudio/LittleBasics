@@ -1132,6 +1132,36 @@ async function sheetAppend(tab, row){
 }
 
 // Push stock to sheet (format: pid_cm → qty)
+
+async function pushLog(){
+  const rows=[['id','date','name','address','status','payment','revenue','cost','shipIn','shipOut','fee','profit','tracking','items']];
+  orderLog.forEach(e=>rows.push([
+    e.id||'', e.date||'', e.name||'', e.address||'',
+    e.status||'', e.payment||'',
+    e.revenue||0, e.cost||0, e.shipIn||0, e.shipOut||0, e.fee||0, e.profit||0,
+    e.tracking||'',
+    JSON.stringify(e.items||[])
+  ]));
+  await sheetWrite('Log', rows);
+}
+
+async function pullLog(){
+  const data = await sheetRead('Log');
+  if(!data||data.length<2) return;
+  orderLog = data.slice(1).map(r=>{
+    const [id,date,name,address,status,payment,revenue,cost,shipIn,shipOut,fee,profit,tracking,itemsRaw]=r;
+    let items=[];
+    try{ items=JSON.parse(itemsRaw||'[]'); } catch(e){}
+    return {id:String(id||''),date:String(date||''),name:String(name||''),address:String(address||''),
+      status:String(status||''),payment:String(payment||''),
+      revenue:parseFloat(revenue)||0,cost:parseFloat(cost)||0,
+      shipIn:parseFloat(shipIn)||0,shipOut:parseFloat(shipOut)||0,
+      fee:parseFloat(fee)||0,profit:parseFloat(profit)||0,
+      tracking:String(tracking||''),items};
+  }).filter(e=>e.id);
+  saveLog();
+}
+
 async function pushSold(){
   const rows=[['key','qty']];
   Object.entries(soldCounts).forEach(([k,v])=>{ if(v>0) rows.push([k,v]); });
@@ -1239,6 +1269,7 @@ function saveSheetUrl(){
   pushProducts();
   pushStock();
   pushSold();
+  pushLog();
   showToast('✓ All data pushed to Sheet');
   showToast('Connected! Products and stock pushed to Sheet ✓');
 }
@@ -1726,6 +1757,7 @@ async function copyAndSave(){
     address:document.getElementById('fAddress').value};
   orderLog.unshift(entry);
   saveLog();
+  if(sheetUrl) pushLog(); // keep sheet in sync
 
   // 4. Sync to Google Sheets
   sheetAppend('Orders', row);
@@ -3677,6 +3709,8 @@ if(sheetUrl){
       await pullProducts();
       await pullInventory();
       await pullSold();
+      await pullLog();
+      renderLog();
       showToast('✓ Synced from sheet');
     } catch(e){
       console.warn('Auto-pull failed:', e);
