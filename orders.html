@@ -1172,7 +1172,10 @@ async function pushSold(){
 async function pullSold(){
   const data=await sheetRead('Sold');
   if(!data||data.length<2) return;
-  data.slice(1).forEach(([k,v])=>{ if(k) soldCounts[String(k)]=(soldCounts[String(k)]||0)+(parseInt(v)||0); });
+  // REPLACE don't accumulate — otherwise counts double on every page load
+  const fresh={};
+  data.slice(1).forEach(([k,v])=>{ if(k && parseInt(v)>0) fresh[String(k)]=parseInt(v)||0; });
+  soldCounts=fresh;
   saveSold();
 }
 
