@@ -1376,7 +1376,7 @@ function appendCatHeader(tbody, cat, colspan){
   tr.innerHTML=`<td colspan="${colspan}">${cat}</td>`;
   tbody.appendChild(tr);
 }
-document.getElementById('fDate').valueAsDate=new Date();
+document.getElementById('fDate').value=(()=>{ const t=new Date(); return t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0'); })();
 if(!sheetUrl) document.getElementById('setupModal').classList.remove('hidden');
 else document.getElementById('setupModal').classList.add('hidden');
 setSyncStatus(sheetUrl?'ok':'','sheetUrl'?'connected':'local');
@@ -1842,7 +1842,7 @@ async function copyAndSave(){
 function clearOrder(){
   Object.keys(order).forEach(k=>delete order[k]);
   ['fName','fAddress','fTracking','fShipIn','fShipOut','fFee','fNotes'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('fDate').valueAsDate=new Date();
+  document.getElementById('fDate').value=(()=>{ const t=new Date(); return t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0'); })();
   document.getElementById('fStatus').value='Paid';
   document.getElementById('fPayment').value='Venmo';
   renderTable(); updatePanel();
@@ -3144,7 +3144,7 @@ function openNewShipment(){
     </div>`;
   area.insertBefore(form, area.firstChild);
   // Set today's date
-  document.getElementById('newShipDate').valueAsDate=new Date();
+  document.getElementById('newShipDate').value=(()=>{ const t=new Date(); return t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0'); })();
   document.getElementById('newShipName').focus();
 }
 
