@@ -1201,7 +1201,7 @@ async function pullProducts(){
   // Columns: pid, name, color, hex, sizes, price, bundlePrice, cost, image, material, saleDiscount, category, bin
   const pulled=[];
   data.slice(1).forEach(row=>{
-    const [pid,name,color,hex,sizesRaw,price,bundlePrice,cost,image,material,saleDiscount,category,bin,unit]=row;
+    const [pid,name,color,hex,sizesRaw,price,bundlePrice,cost,image,material,saleDiscount,category,bin,unit,season]=row;
     if(!pid||!name) return;
     const KNOWN_CM_P=['130','120','110','100','90','80','70','60'];
     let rawSzStr=String(sizesRaw||'');
@@ -1232,7 +1232,8 @@ async function pullProducts(){
       saleDiscount:parseFloat(saleDiscount)||0,
       category:    (()=>{ const cat=String(category||'Uncategorized'); if(cat==='Rompers & Overalls'||cat==='Sets') return 'Rompers & Sets'; if(cat==='Outerwear'||cat==='Cardigans & Knitwear') return 'Outerwear & Knitwear'; return cat; })(),
       bin:         String(bin||''),
-      unit:        String(unit||'ea')
+      unit:        String(unit||'ea'),
+      season:      String(season||'')
     });
   });
   if(!pulled.length){showToast('No valid products found in sheet.');return;}
@@ -1245,8 +1246,8 @@ async function pullProducts(){
 
 // Push products to sheet
 async function pushProducts(){
-  const rows=[['pid','name','color','hex','sizes','price','bundlePrice','cost','image','material','saleDiscount','category','bin','unit']];
-  products.forEach(p=>rows.push([p.pid,p.name,p.color,p.hex,p.sizes.join(','),p.price,p.bundlePrice,p.cost,p.image,typeof p.material==='string'?p.material:'',p.saleDiscount||0,p.category||'Uncategorized',p.bin||'',p.unit||'ea']));
+  const rows=[['pid','name','color','hex','sizes','price','bundlePrice','cost','image','material','saleDiscount','category','bin','unit','season']];
+  products.forEach(p=>rows.push([p.pid,p.name,p.color,p.hex,p.sizes.join(','),p.price,p.bundlePrice,p.cost,p.image,typeof p.material==='string'?p.material:'',p.saleDiscount||0,p.category||'Uncategorized',p.bin||'',p.unit||'ea',p.season||'']));
   await sheetWrite('Products', rows);
 }
 
@@ -2783,6 +2784,7 @@ function buildGroupForm(name, siblings){
         ).join('')}
       </select>
     </div>
+    <div class="field" style="margin-bottom:.75rem"><label>Season</label><input type="text" id="epSeason" value="${escHtml(p0.season||'')}" placeholder="e.g. Summer, Winter, Spring/Autumn, All Season"></div>
     <div class="field" style="margin-bottom:.75rem"><label>Bin / Storage Location</label><input type="text" id="epBin" value="${escHtml(p0.bin||'')}" placeholder="e.g. Bin A3, Shelf 2…"></div>
     <div class="field" style="margin-bottom:.75rem"><label>Sold As</label>
       <select id="epUnit">
@@ -2874,6 +2876,7 @@ async function saveGroupProduct(){
   const material=document.getElementById('epMaterial').value.trim();
   const category=document.getElementById('epCategory').value||'Uncategorized';
   const bin=document.getElementById('epBin').value.trim();
+  const season=document.getElementById('epSeason')?.value.trim()||'';
   const unit=document.getElementById('epUnit').value||'ea';
   if(!name){alert('Please enter a product name.');return;}
 
@@ -2896,12 +2899,12 @@ async function saveGroupProduct(){
       const pid=parseInt(existingPid);
       survivingPids.add(pid);
       const ex=products.find(p=>p.pid===pid);
-      if(ex) Object.assign(ex,{name,image,color,hex,sizes,price,bundlePrice,cost,material,saleDiscount,category,bin,unit});
+      if(ex) Object.assign(ex,{name,image,color,hex,sizes,price,bundlePrice,cost,material,saleDiscount,category,bin,season,unit});
     } else {
       // Create new
       const pid=nextPid();
       survivingPids.add(pid);
-      products.push({pid,name,image,color,hex,sizes,price,bundlePrice,cost,material,saleDiscount,category,bin,unit});
+      products.push({pid,name,image,color,hex,sizes,price,bundlePrice,cost,material,saleDiscount,category,bin,season,unit});
     }
   });
 
