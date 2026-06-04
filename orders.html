@@ -822,6 +822,8 @@ function doPost(e) {
     <div class="inv-toolbar">
       <div class="search-wrap">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        <button class="btn primary sm" onclick="rebuildSoldFromLog()" style="margin-right:.5rem">🔧 Rebuild from Order Log</button>
+        <button class="btn sm" onclick="resetSoldFromSheet()" style="color:var(--red);margin-right:.5rem">↺ Reset from Sheet</button>
         <input class="search-input" type="text" id="soldSearch" placeholder="Search…" oninput="renderSoldSummary()">
       </div>
       <span style="font-size:.7rem;color:#bbb" id="soldMeta"></span>
@@ -1169,6 +1171,52 @@ async function pushSold(){
   showToast('✓ Sold records pushed to Sheet');
 }
 
+
+
+async function rebuildSoldFromLog(){
+  if(!confirm('Rebuild sold counts from your Order Log? This recalculates everything from scratch and overwrites both local data and the Sheet.')) return;
+
+  // Wipe existing sold counts
+  soldCounts = {};
+
+  // Recalculate from order log entries
+  let total = 0;
+  orderLog.forEach(e=>{
+    (e.items||[]).forEach(i=>{
+      const k = skey(i.pid, i.cm);
+      soldCounts[k] = (soldCounts[k]||0) + (i.qty||0);
+      total += (i.qty||0);
+    });
+  });
+
+  saveSold();
+
+  // Push corrected data to sheet
+  if(sheetUrl){
+    await pushSold();
+    showToast('✓ Rebuilt from '+orderLog.length+' orders — '+total+' total units. Sheet updated.');
+  } else {
+    showToast('✓ Rebuilt locally — '+total+' total units (no sheet connected)');
+  }
+
+  renderSoldSummary();
+}
+async function resetSoldFromSheet(){
+  if(!sheetUrl){ showToast('No sheet connected'); return; }
+  if(!confirm('Reset sold counts from Google Sheet? This will overwrite your local sold data with whatever is in the Sheet.')) return;
+  // Clear localStorage sold first
+  soldCounts = {};
+  saveSold();
+  // Then pull fresh from sheet
+  const data = await sheetRead('Sold');
+  if(!data||data.length<2){ showToast('Sold tab is empty in sheet'); return; }
+  const fresh = {};
+  data.slice(1).forEach(([k,v])=>{ if(k && parseInt(v)>0) fresh[String(k)]=parseInt(v)||0; });
+  soldCounts = fresh;
+  saveSold();
+  renderSoldSummary();
+  showToast('✓ Sold counts reset from Sheet — '+Object.keys(soldCounts).length+' records loaded');
+}
 async function pullSold(){
   const data=await sheetRead('Sold');
   if(!data||data.length<2) return;
@@ -3714,6 +3762,8 @@ if(sheetUrl){
       showToast('🔄 Syncing from sheet…');
       await pullProducts();
       await pullInventory();
+      // Clear sold before pulling to avoid accumulation
+      soldCounts={}; saveSold();
       await pullSold();
       await pullLog();
       renderLog();
