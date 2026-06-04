@@ -112,6 +112,11 @@ body{font-family:'DM Sans',sans-serif;background:var(--mist);color:var(--ink);fo
 .hide-btn{padding:.15rem .35rem;border-radius:4px;border:1px solid var(--border);background:transparent;cursor:pointer;font-size:.62rem;color:#bbb;font-family:'DM Sans',sans-serif;transition:all .12s;white-space:nowrap}
 .hide-btn:hover{border-color:var(--amber);color:var(--amber)}
 .hide-btn.is-hidden{background:var(--sand-lt);border-color:var(--sand-dk);color:#c0b0a0}
+.fav-btn{padding:.15rem .35rem;border-radius:4px;border:1px solid var(--border);background:transparent;cursor:pointer;font-size:.68rem;color:#ccc;font-family:'DM Sans',sans-serif;transition:all .12s;white-space:nowrap;line-height:1}
+.fav-btn.is-fav{color:#e8a838;border-color:#e8a838;background:#fffbf2}
+.card.is-fav{border-color:#e8a838!important;box-shadow:0 0 0 1px #e8a838}
+.fav-badge{position:absolute;top:.3rem;left:.3rem;font-size:.75rem;line-height:1;pointer-events:none}
+.custom-req-badge{display:inline-block;font-size:.58rem;font-weight:700;padding:.08rem .32rem;border-radius:3px;background:#fdf0e8;color:#c97c35;border:1px solid #f5ddb8;margin-left:.3rem;vertical-align:middle}
 
 /* EMPTY STATE */
 .empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:.75rem;color:#ccc;padding:3rem;text-align:center}
@@ -409,6 +414,12 @@ tr.selected td{background:rgba(139,115,85,.07)!important}
       <label style="display:flex;align-items:center;gap:.3rem;font-size:.72rem;color:#aaa;cursor:pointer;white-space:nowrap">
         <input type="checkbox" id="showHidden" onchange="render()" style="accent-color:var(--bark)"> Hidden
       </label>
+      <label style="display:flex;align-items:center;gap:.3rem;font-size:.72rem;color:var(--amber);cursor:pointer;white-space:nowrap">
+        <input type="checkbox" id="showCustomOnly" onchange="render()" style="accent-color:var(--amber)"> 🎨 Custom
+      </label>
+      <label style="display:flex;align-items:center;gap:.3rem;font-size:.72rem;color:#e8a838;cursor:pointer;white-space:nowrap">
+        <input type="checkbox" id="showFavsOnly" onchange="render()" style="accent-color:#e8a838"> ⭐ Favourites
+      </label>
 
       <span class="toolbar-meta" id="toolbarMeta"></span>
 
@@ -608,6 +619,7 @@ tr.selected td{background:rgba(139,115,85,.07)!important}
       <div class="form-row"><div><label class="form-label">Sizes</label><input class="form-input" id="iSizes" placeholder="66cm(3-6M), 73cm(6-12M)…"></div></div>
       <div class="form-row"><div><label class="form-label">Material</label><input class="form-input" id="iMaterial" placeholder="100% Cotton…"></div></div>
       <div class="form-row"><div><label class="form-label">Notes</label><textarea class="form-input" id="iNotes"></textarea></div></div>
+      <div class="form-row"><div><label class="form-label" style="color:var(--amber)">🎨 Custom Request</label><textarea class="form-input" id="iCustomReq" placeholder="e.g. fabric swap, custom colourway…"></textarea></div></div>
       <div class="form-row"><div>
         <label class="form-label">Photo</label>
         <div class="img-upload-area" id="iImgArea" onclick="document.getElementById('iImgFile').click()">
@@ -1492,10 +1504,19 @@ function filteredItems(){
   let rows = activeVendorId==='all' ? allItems()
     : (getVendor(activeVendorId)?.items||[]).map(it=>({...it,_vendorId:activeVendorId,_vendorName:getVendor(activeVendorId)?.name||''}));
 
-  if (activeCat !== 'all') rows = rows.filter(it=>(it.category||'').trim() === activeCat.trim());
+  if (activeCat !== 'all'){
+    const KNOWN_CATS = ['Baby Pant','Baby Romper','Baby Suit','Baby Top'];
+    if(activeCat === 'Others'){
+      rows = rows.filter(it=>!KNOWN_CATS.includes((it.category||'').trim()) && (it.category||'').trim() !== '');
+    } else {
+      rows = rows.filter(it=>(it.category||'').trim() === activeCat.trim());
+    }
+  }
   if (activeSeason !== 'all') rows = rows.filter(it=>normSeason(it.season) === activeSeason);
   if (activeMaterial !== 'all') rows = rows.filter(it=>normMaterial(it.material||'') === activeMaterial);
   if (!document.getElementById('showHidden')?.checked) rows = rows.filter(it=>!it.hidden);
+  if (document.getElementById('showCustomOnly')?.checked) rows = rows.filter(it=>!!it.customReq);
+  if (document.getElementById('showFavsOnly')?.checked) rows = rows.filter(it=>!!it.fav);
   if (searchQ) {
     const q = searchQ.toLowerCase();
     rows = rows.filter(it=>[it.styleNo,it.colors,it.category,it.season,it.notes,it.material,it._vendorName]
@@ -1548,6 +1569,11 @@ function renderChips(){
   cc.innerHTML = cats.length
     ? `<button class="chip${activeCat==='all'?' on':''}" data-cat="all">All types</button>`
       + cats.map(c=>`<button class="chip${activeCat===c?' on':''}" data-cat="${c.replace(/"/g,'')}">${c.replace('Baby ','')}</button>`).join('')
+      + (()=>{
+          const KNOWN_CATS = ['Baby Pant','Baby Romper','Baby Suit','Baby Top'];
+          const hasOthers = allItems_().some(it=>!KNOWN_CATS.includes((it.category||'').trim()) && (it.category||'').trim() !== '');
+          return hasOthers ? `<button class="chip${activeCat==='Others'?' on':''}" data-cat="Others">Others</button>` : '';
+        })()
     : '';
 
   sc.innerHTML = seasons.length > 1
@@ -1666,7 +1692,7 @@ function cardHTML(it){
   const checkEl = selectMode
     ? `<div class="card-check-wrap"><input type="checkbox" class="tbl-check" ${isSelected?'checked':''} onclick="event.stopPropagation();toggleSelectItem('${it._vendorId}','${it.id}',this.checked)"></div>`
     : '';
-  return `<div class="card${it.hidden?' is-hidden':''}${isSelected?' selected':''}" data-selkey="${k}"
+  return `<div class="card${it.hidden?' is-hidden':''}${it.fav?' is-fav':''}${isSelected?' selected':''}" data-selkey="${k}"
     onclick="${selectMode ? `toggleSelectItem('${it._vendorId}','${it.id}',!selectedIds.has('${k}'));this.classList.toggle('selected',selectedIds.has('${k}'));updateSelectBar()` : `openDetail('${it._vendorId}','${it.id}')`}">
     ${checkEl}
     ${imgTag}
@@ -1676,6 +1702,7 @@ function cardHTML(it){
       <div class="card-colors">${esc(it.colors||'—')}</div>
       <div class="card-price">${esc(it.price||'')}</div>
       ${it.season?`<span class="card-season">${esc(it.season)}</span>`:''}
+      ${it.customReq?`<span class="custom-req-badge">🎨 Custom</span>`:''}
     </div>
   </div>`;
 }
@@ -1707,6 +1734,7 @@ function rowHTML(it){
       </div>
     </td>
     <td onclick="event.stopPropagation()">
+      <button class="fav-btn${it.fav?' is-fav':''}" onclick="toggleFav('${it._vendorId}','${it.id}')" title="${it.fav?'Remove from favourites':'Add to favourites'}">${it.fav?'⭐':'☆'}</button>
       <button class="hide-btn${it.hidden?' is-hidden':''}" onclick="toggleHide('${it._vendorId}','${it.id}')">${it.hidden?'Hidden':'Visible'}</button>
     </td>
   </tr>`;
@@ -1776,8 +1804,10 @@ function openDetail(vendorId, itemId){
     <div class="detail-field"><label>Sizes</label><input class="val editable" id="d-sizes" value="${esc(it.sizes||'')}"></div>
     <div class="detail-field"><label>Material</label><input class="val editable" id="d-material" value="${esc(it.material||'')}"></div>
     <div class="detail-field"><label>Notes</label><textarea class="val editable" id="d-notes" rows="2">${esc(it.notes||'')}</textarea></div>
+    <div class="detail-field" style="grid-column:1/-1"><label style="color:var(--amber)">🎨 Custom Request</label><textarea class="val editable" id="d-customReq" rows="2" placeholder="e.g. fabric swap to linen, custom colourway, private label tag…">${esc(it.customReq||'')}</textarea></div>
     <div class="detail-field"><label>Link</label><input class="val editable" id="d-link" value="${esc(it.link||'')}"></div>
     <div style="display:flex;align-items:center;gap:.5rem;justify-content:flex-end">
+      <button class="fav-btn${it.fav?' is-fav':''}" id="d-fav" onclick="detailToggleFav()">${it.fav?'⭐ Favourited':'☆ Favourite'}</button>
       <button class="hide-btn${it.hidden?' is-hidden':''}" id="d-hide" onclick="detailToggleHide()">${it.hidden?'Hidden':'Visible'}</button>
     </div>`;
 
@@ -1841,8 +1871,9 @@ function saveDetailEdits(){
   it.colors   = document.getElementById('d-colors')?.value.trim()||it.colors;
   it.sizes    = document.getElementById('d-sizes')?.value.trim()||it.sizes;
   it.material = document.getElementById('d-material')?.value.trim()||'';
-  it.notes    = document.getElementById('d-notes')?.value.trim()||'';
-  it.link     = document.getElementById('d-link')?.value.trim()||'';
+  it.notes     = document.getElementById('d-notes')?.value.trim()||'';
+  it.customReq = document.getElementById('d-customReq')?.value.trim()||'';
+  it.link      = document.getElementById('d-link')?.value.trim()||'';
   save(); render();
   closeModal('detailModal');
   showToast('✓ Item updated');
@@ -1874,6 +1905,24 @@ function updateField(vendorId,itemId,field,val){
   it[field]=val; save();
 }
 
+
+function toggleFav(vendorId, itemId){
+  const v=getVendor(vendorId); if(!v) return;
+  const it=v.items.find(i=>i.id===itemId); if(!it) return;
+  it.fav=!it.fav;
+  save(); render();
+}
+
+function detailToggleFav(){
+  if(!_detailItem) return;
+  const {vendorId,itemId}=_detailItem;
+  const v=getVendor(vendorId); const it=v?.items.find(i=>i.id===itemId); if(!it) return;
+  it.fav=!it.fav;
+  const btn=document.getElementById('d-fav');
+  if(btn){ btn.textContent=it.fav?'⭐ Favourited':'☆ Favourite'; btn.classList.toggle('is-fav',it.fav); }
+  save();
+  showToast(it.fav?'⭐ Added to favourites':'Removed from favourites');
+}
 function toggleHide(vendorId,itemId){
   const v=getVendor(vendorId);if(!v)return;
   const it=v.items.find(i=>i.id===itemId);if(!it)return;
@@ -1932,7 +1981,7 @@ function openAddItem(){
   document.getElementById('itemModalTitle').textContent='Add Item — '+v.name;
   document.getElementById('itemModalVendorId').value=activeVendorId;
   document.getElementById('itemModalItemId').value='';
-  ['iStyleNo','iCategory','iSeason','iPrice','iColors','iSizes','iMaterial','iNotes'].forEach(id=>document.getElementById(id).value='');
+  ['iStyleNo','iCategory','iSeason','iPrice','iColors','iSizes','iMaterial','iNotes','iCustomReq'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
   document.getElementById('iMoq').value='0';
   clearItemImg();
   document.getElementById('iImgUrl').value='';
