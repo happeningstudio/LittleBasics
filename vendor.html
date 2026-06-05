@@ -76,7 +76,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--mist);color:var(--ink);fo
 .toolbar-meta{font-size:.68rem;color:#bbb;white-space:nowrap;margin-left:auto}
 
 /* CONTENT AREA */
-.content-area{flex:1;overflow-y:auto;padding:1rem}
+.content-area{flex:1;overflow-y:auto;padding:1rem;min-height:0}
 
 /* CARD GRID */
 .card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:.75rem}
@@ -450,9 +450,11 @@ tr.selected td{background:rgba(139,115,85,.07)!important}
       <button class="btn primary sm" onclick="exportOrderPDF()">📄 Export Order PDF</button>
       <button class="btn sm" onclick="exitSelectMode()">Cancel</button>
     </div>
+    <div style="flex:1;display:flex;flex-direction:column;overflow:hidden">
     <div class="content-area" id="contentArea">
       <div class="loading"><div class="spinner"></div><span>Loading catalog…</span></div>
     </div>
+    </div><!-- end content-flex-wrap -->
 
     <div class="pager" id="pager" style="display:none">
       <button class="btn sm" id="prevBtn" onclick="changePage(-1)">← Prev</button>
