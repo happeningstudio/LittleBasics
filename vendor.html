@@ -1786,8 +1786,8 @@ function openDetail(vendorId, itemId){
   body.innerHTML=`
     ${imgTag}
     <div class="detail-grid">
-      <div class="detail-field"><label>Style No.</label><div class="val">${esc(it.styleNo)}</div></div>
-      <div class="detail-field"><label>Category</label><div class="val">${esc(it.category||'')}</div></div>
+      <div class="detail-field"><label>Style No.</label><input class="val editable" id="d-styleNo" value="${esc(it.styleNo)}"></div>
+      <div class="detail-field"><label>Category</label><input class="val editable" id="d-category" value="${esc(it.category||'')}"></div>
       <div class="detail-field" style="grid-column:1/-1"><label>Vendor</label><select class="val editable" id="d-vendor" style="width:100%">${vendorOpts}</select></div>
       <div class="detail-field"><label>Price</label><input class="val editable" id="d-price" value="${esc(it.price||'')}"></div>
       <div class="detail-field"><label>Season</label><input class="val editable" id="d-season" value="${esc(it.season||'')}"></div>
@@ -1846,7 +1846,9 @@ function saveDetailEdits(){
     const newV = getVendor(newVendorId);
     if(newV){
       // Update fields first
-      it.price    = document.getElementById('d-price')?.value.trim()||it.price;
+      it.styleNo  = document.getElementById('d-styleNo')?.value.trim()||it.styleNo;
+  it.category = document.getElementById('d-category')?.value.trim()||it.category;
+  it.price    = document.getElementById('d-price')?.value.trim()||it.price;
       it.season   = document.getElementById('d-season')?.value.trim()||it.season;
       it.moq      = parseInt(document.getElementById('d-moq')?.value)||0;
       it.colors   = document.getElementById('d-colors')?.value.trim()||it.colors;
@@ -1865,6 +1867,8 @@ function saveDetailEdits(){
     }
   }
 
+  it.styleNo  = document.getElementById('d-styleNo')?.value.trim()||it.styleNo;
+  it.category = document.getElementById('d-category')?.value.trim()||it.category;
   it.price    = document.getElementById('d-price')?.value.trim()||it.price;
   it.season   = document.getElementById('d-season')?.value.trim()||it.season;
   it.moq      = parseInt(document.getElementById('d-moq')?.value)||0;
