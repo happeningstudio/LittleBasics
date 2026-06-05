@@ -433,7 +433,7 @@ tr.selected td{background:rgba(139,115,85,.07)!important}
         </button>
       </div>
 
-      <button class="btn primary sm" id="addItemBtn" onclick="openAddItem()" style="display:none">+ Add Item</button>
+      <button class="btn primary sm" id="addItemBtn" onclick="openAddItem()">+ Add Item</button>
       <button class="btn sm" id="selectModeBtn" onclick="enterSelectMode()">☑ Select</button>
     </div>
 
@@ -1976,13 +1976,13 @@ function deleteVendor(){
 
 /* ══ ITEM MODAL ══ */
 function openAddItem(){
-  if(activeVendorId==='all')return;
-  const v=getVendor(activeVendorId);if(!v)return;
-  document.getElementById('itemModalTitle').textContent='Add Item — '+v.name;
-  document.getElementById('itemModalVendorId').value=activeVendorId;
+  document.getElementById('itemModalTitle').textContent='Add Item';
   document.getElementById('itemModalItemId').value='';
   ['iStyleNo','iCategory','iSeason','iPrice','iColors','iSizes','iMaterial','iNotes','iCustomReq'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
   document.getElementById('iMoq').value='0';
+  // Populate vendor dropdown — default to active vendor if not 'all'
+  const sel=document.getElementById('iVendorSelect');
+  if(sel) sel.innerHTML=vendors.map(v=>`<option value="${v.id}"${v.id===activeVendorId?' selected':''}>${esc(v.name)}</option>`).join('');
   clearItemImg();
   document.getElementById('iImgUrl').value='';
   openModal('itemModal');
@@ -2002,8 +2002,9 @@ function saveItem(){
     sizes:document.getElementById('iSizes').value.trim(),
     material:document.getElementById('iMaterial').value.trim(),
     notes:document.getElementById('iNotes').value.trim(),
+    customReq:document.getElementById('iCustomReq')?.value.trim()||'',
     moq:parseInt(document.getElementById('iMoq').value)||0,
-    link:'', hidden:false, qtyOrdered:0,
+    link:'', hidden:false, fav:false, qtyOrdered:0,
     img: window._pendingItemImg || ''
   });
   window._pendingItemImg = '';
