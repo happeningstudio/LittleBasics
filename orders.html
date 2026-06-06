@@ -1154,7 +1154,7 @@ async function pullLog(){
     const [id,date,name,address,status,payment,revenue,cost,shipIn,shipOut,fee,profit,tracking,itemsRaw]=r;
     let items=[];
     try{ items=JSON.parse(itemsRaw||'[]'); } catch(e){}
-    return {id:String(id||''),date:String(date||''),name:String(name||''),address:String(address||''),
+    return {id:String(id||''),date:normDate(date),name:String(name||''),address:String(address||''),
       status:String(status||''),payment:String(payment||''),
       revenue:parseFloat(revenue)||0,cost:parseFloat(cost)||0,
       shipIn:parseFloat(shipIn)||0,shipOut:parseFloat(shipOut)||0,
@@ -1776,7 +1776,7 @@ async function copyAndSave(){
   const gross=revenue+shipIn;
   const status=document.getElementById('fStatus').value;
   const name=document.getElementById('fName').value;
-  const date=document.getElementById('fDate').value;
+  const date=normDate(document.getElementById('fDate').value);
   const itemSum=itemDetails.map(i=>`${i.qty}x ${i.name} (${toDisplayShort(i.cm)})`).join(', ');
 
   // Google Sheets row (matches your existing column order exactly)
@@ -3290,7 +3290,7 @@ function renderAnalytics(){
   } else if(analyticsFilter==='this-month'){
     filtered=orderLog.filter(e=>{
       if(!e.date) return false;
-      const d=new Date(e.date+'T00:00:00');
+      const d=new Date(normDate(e.date)+'T00:00:00');
       return d.getFullYear()===thisYear && d.getMonth()===thisMonth;
     });
   } else if(analyticsFilter==='last-month'){
@@ -3298,7 +3298,7 @@ function renderAnalytics(){
     const lmMonth=thisMonth===0?11:thisMonth-1;
     filtered=orderLog.filter(e=>{
       if(!e.date) return false;
-      const d=new Date(e.date+'T00:00:00');
+      const d=new Date(normDate(e.date)+'T00:00:00');
       return d.getFullYear()===lmYear && d.getMonth()===lmMonth;
     });
   } else if(analyticsFilter==='custom'){
@@ -3306,13 +3306,13 @@ function renderAnalytics(){
     const to=document.getElementById('analyticsTo')?.value;
     filtered=orderLog.filter(e=>{
       if(!e.date) return false;
-      if(from && e.date < from) return false;
-      if(to && e.date > to) return false;
+      if(from && normDate(e.date) < from) return false;
+      if(to && normDate(e.date) > to) return false;
       return true;
     });
   } else {
     // Year filter
-    filtered=orderLog.filter(e=>e.date&&e.date.startsWith(analyticsFilter));
+    filtered=orderLog.filter(e=>e.date&&normDate(e.date).startsWith(analyticsFilter));
   }
 
   document.getElementById('analyticsMeta').textContent=filtered.length+' order'+(filtered.length!==1?'s':'');
@@ -3750,6 +3750,27 @@ function importJSON(e){
   };
   reader.readAsText(file);
   e.target.value = ''; // reset input
+}
+
+
+// Normalise any date format to YYYY-MM-DD
+function normDate(d){
+  if(!d) return '';
+  const s = String(d).trim();
+  // Already YYYY-MM-DD
+  if(/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+  // M/D/YYYY or MM/DD/YYYY
+  const slash = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if(slash) return slash[3]+'-'+slash[1].padStart(2,'0')+'-'+slash[2].padStart(2,'0');
+  // D/M/YYYY
+  const dmy = s.match(/^(\d{1,2})-(\d{1,2})-(\d{4})$/);
+  if(dmy) return dmy[3]+'-'+dmy[2].padStart(2,'0')+'-'+dmy[1].padStart(2,'0');
+  // Try native parse as fallback
+  try{
+    const dt = new Date(s);
+    if(!isNaN(dt)) return dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0');
+  } catch(e){}
+  return s;
 }
 
 /* ── BOOT ── */
