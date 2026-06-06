@@ -1249,7 +1249,7 @@ async function pullProducts(){
   // Columns: pid, name, color, hex, sizes, price, bundlePrice, cost, image, material, saleDiscount, category, bin
   const pulled=[];
   data.slice(1).forEach(row=>{
-    const [pid,name,color,hex,sizesRaw,price,bundlePrice,cost,image,material,saleDiscount,category,bin,unit,season]=row;
+    const [pid,name,color,hex,sizesRaw,price,bundlePrice,cost,image,material,saleDiscount,category,bin,unit,season,hiddenFlag]=row;
     if(!pid||!name) return;
     const KNOWN_CM_P=['130','120','110','100','90','80','70','60'];
     let rawSzStr=String(sizesRaw||'');
@@ -1281,7 +1281,8 @@ async function pullProducts(){
       category:    (()=>{ const cat=String(category||'Uncategorized'); if(cat==='Rompers & Overalls'||cat==='Sets') return 'Rompers & Sets'; if(cat==='Outerwear'||cat==='Cardigans & Knitwear') return 'Outerwear & Knitwear'; return cat; })(),
       bin:         String(bin||''),
       unit:        String(unit||'ea'),
-      season:      String(season||'')
+      season:      String(season||''),
+      hidden:      hiddenFlag==='1'
     });
   });
   if(!pulled.length){showToast('No valid products found in sheet.');return;}
@@ -1294,8 +1295,8 @@ async function pullProducts(){
 
 // Push products to sheet
 async function pushProducts(){
-  const rows=[['pid','name','color','hex','sizes','price','bundlePrice','cost','image','material','saleDiscount','category','bin','unit','season']];
-  products.forEach(p=>rows.push([p.pid,p.name,p.color,p.hex,p.sizes.join(','),p.price,p.bundlePrice,p.cost,p.image,typeof p.material==='string'?p.material:'',p.saleDiscount||0,p.category||'Uncategorized',p.bin||'',p.unit||'ea',p.season||'']));
+  const rows=[['pid','name','color','hex','sizes','price','bundlePrice','cost','image','material','saleDiscount','category','bin','unit','season','hidden']];
+  products.forEach(p=>rows.push([p.pid,p.name,p.color,p.hex,p.sizes.join(','),p.price,p.bundlePrice,p.cost,p.image,typeof p.material==='string'?p.material:'',p.saleDiscount||0,p.category||'Uncategorized',p.bin||'',p.unit||'ea',p.season||'',p.hidden?'1':'']));
   await sheetWrite('Products', rows);
 }
 
@@ -3656,6 +3657,7 @@ function toggleProductHide(name){
   const nowHidden = !siblings[0]?.hidden;
   siblings.forEach(p=>p.hidden=nowHidden);
   saveProducts(); renderMgr(); renderTable();
+  if(sheetUrl) pushProducts();
   showToast(nowHidden ? '🚫 "'+name+'" hidden — removed from orders & inventory' : '✓ "'+name+'" visible again');
 }
 function enterMgrSel(){
@@ -3693,6 +3695,7 @@ function mgrHideSelected(){
   if(!mgrSelected.size){ showToast('Select items first'); return; }
   mgrSelected.forEach(name=>products.filter(p=>p.name===name).forEach(p=>p.hidden=true));
   saveProducts(); renderMgr(); renderTable();
+  if(sheetUrl) pushProducts();
   showToast('🚫 '+mgrSelected.size+' product'+(mgrSelected.size>1?'s':'')+' hidden');
   exitMgrSel();
 }
@@ -3700,6 +3703,7 @@ function mgrUnhideSelected(){
   if(!mgrSelected.size){ showToast('Select items first'); return; }
   mgrSelected.forEach(name=>products.filter(p=>p.name===name).forEach(p=>p.hidden=false));
   saveProducts(); renderMgr(); renderTable();
+  if(sheetUrl) pushProducts();
   showToast('✓ '+mgrSelected.size+' product'+(mgrSelected.size>1?'s':'')+' unhidden');
   exitMgrSel();
 }
