@@ -637,8 +637,6 @@ tr.selected td{background:rgba(139,115,85,.07)!important}
           </div>
         </div>
         <input type="file" id="iImgFile" accept="image/*" style="display:none" onchange="handleItemImgUpload(event)">
-        <div class="img-or">— or paste a URL —</div>
-        <input class="form-input" id="iImgUrl" placeholder="https://… image URL" oninput="handleItemImgUrl(this.value)">
       </div></div>
     </div>
     <div class="modal-foot">
@@ -875,15 +873,6 @@ function handleItemImgUpload(e){
   reader.readAsDataURL(file);
 }
 
-function handleItemImgUrl(url){
-  if(!url) return;
-  // Show preview immediately from URL
-  window._pendingItemImg = url;
-  document.getElementById('iImgPreviewImg').src = url;
-  document.getElementById('iImgPreview').style.display = '';
-  document.getElementById('iImgPlaceholder').style.display = 'none';
-  document.getElementById('iImgArea').classList.add('has-img');
-}
 
 function resizeAndSetItemImg(dataUrl){
   const img = new Image();
@@ -911,7 +900,6 @@ function clearItemImg(){
   document.getElementById('iImgPlaceholder').style.display = '';
   document.getElementById('iImgArea').classList.remove('has-img');
   document.getElementById('iImgFile').value = '';
-  document.getElementById('iImgUrl').value = '';
 }
 
 function handleDetailImgUpload(e, vendorId, itemId){
@@ -938,12 +926,6 @@ function handleDetailImgUpload(e, vendorId, itemId){
   reader.readAsDataURL(file);
 }
 
-function handleDetailImgUrl(url, vendorId, itemId){
-  if(!url || !url.startsWith('http')) return;
-  updateField(vendorId, itemId, 'img', url);
-  save(); render();
-  openDetail(vendorId, itemId);
-}
 
 function clearDetailImg(vendorId, itemId){
   if(!confirm('Remove photo from this item?')) return;
@@ -956,9 +938,6 @@ function clearDetailImg(vendorId, itemId){
   if(!it) return;
   it.img = '';
   _detailPendingImg = '';
-  // Clear URL input too
-  const urlEl = document.getElementById('dImgUrl');
-  if(urlEl) urlEl.value = '';
   save(); render();
   openDetail(vid, iid);
   showToast('Photo removed');
@@ -1786,11 +1765,6 @@ function triggerDetailImgUpload(){
   document.getElementById('dImgFile')?.click();
 }
 
-function handleDetailImgUrl(url){
-  _detailPendingImg = url.trim();
-  const preview = document.getElementById('dImgPreview');
-  if(preview) preview.src = url;
-}
 
 function handleDetailImgUpload(e){
   const file = e.target.files[0]; if(!file) return;
@@ -1843,9 +1817,7 @@ function openDetail(vendorId, itemId){
         <div style="font-size:1.5rem">📷</div>
         <div class="img-upload-hint">Click to upload a photo</div>
         <input type="file" id="detailImgFile" accept="image/*" style="display:none" onchange="handleDetailImgUpload(event,'${it._vendorId}','${it.id}')">
-       </div>
-       <div class="img-or">— or paste a URL —</div>
-       <input class="form-input" id="detailImgUrl" placeholder="https://… image URL" oninput="handleDetailImgUrl(this.value,'${it._vendorId}','${it.id}')">`;
+       </div>`;
 
   // Build vendor options
   const vendorOpts = vendors.map(v=>`<option value="${v.id}"${v.id===vendorId?' selected':''}>${esc(v.name)}</option>`).join('');
@@ -1853,7 +1825,6 @@ function openDetail(vendorId, itemId){
   body.innerHTML=`
     ${imgTag}
     <input type="file" id="dImgFile" accept="image/*" style="display:none" onchange="handleDetailImgUpload(event)">
-    <div style="margin:.35rem 0"><input class="form-input" id="dImgUrl" placeholder="Or paste image URL…" style="font-size:.72rem" value="${esc(it.img||'')}" oninput="handleDetailImgUrl(this.value)"></div>
     <div class="detail-grid">
       <div class="detail-field"><label>Style No.</label><input class="val editable" id="d-styleNo" value="${esc(it.styleNo)}"></div>
       <div class="detail-field"><label>Category</label><input class="val editable" id="d-category" value="${esc(it.category||'')}"></div>
@@ -1916,7 +1887,6 @@ function saveDetailEdits(){
     if(newV){
       // Update fields first
       if(_detailPendingImg) it.img=_detailPendingImg;
-  else { const urlEl=document.getElementById('dImgUrl'); if(urlEl&&urlEl.value.trim()) it.img=urlEl.value.trim(); }
   it.styleNo  = document.getElementById('d-styleNo')?.value.trim()||it.styleNo;
   it.category = document.getElementById('d-category')?.value.trim()||it.category;
   it.price    = document.getElementById('d-price')?.value.trim()||it.price;
@@ -1939,7 +1909,6 @@ function saveDetailEdits(){
   }
 
   if(_detailPendingImg) it.img=_detailPendingImg;
-  else { const urlEl=document.getElementById('dImgUrl'); if(urlEl&&urlEl.value.trim()) it.img=urlEl.value.trim(); }
   it.styleNo  = document.getElementById('d-styleNo')?.value.trim()||it.styleNo;
   it.category = document.getElementById('d-category')?.value.trim()||it.category;
   it.price    = document.getElementById('d-price')?.value.trim()||it.price;
@@ -2061,7 +2030,6 @@ function openAddItem(){
   const sel=document.getElementById('iVendorSelect');
   if(sel) sel.innerHTML=vendors.map(v=>`<option value="${v.id}"${v.id===activeVendorId?' selected':''}>${esc(v.name)}</option>`).join('');
   clearItemImg();
-  document.getElementById('iImgUrl').value='';
   openModal('itemModal');
   setTimeout(()=>document.getElementById('iStyleNo').focus(),80);
 }
