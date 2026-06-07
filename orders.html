@@ -3785,13 +3785,25 @@ if(sheetUrl){
   (async ()=>{
     try{
       showToast('🔄 Syncing from sheet…');
+      // Save hidden flags from localStorage before pull overwrites them
+      const hiddenFlags={};
+      products.forEach(p=>{ if(p.hidden) hiddenFlags[p.pid]=true; });
+
       await pullProducts();
+
+      // Restore hidden flags — sheet may not have them yet
+      products.forEach(p=>{ if(hiddenFlags[p.pid]) p.hidden=true; });
+      saveProducts();
+      // Push back so sheet stays in sync with hidden flags
+      if(Object.keys(hiddenFlags).length>0) pushProducts();
+
       await pullInventory();
       // Clear sold before pulling to avoid accumulation
       soldCounts={}; saveSold();
       await pullSold();
       await pullLog();
       renderLog();
+      renderMgr();
       showToast('✓ Synced from sheet');
     } catch(e){
       console.warn('Auto-pull failed:', e);
