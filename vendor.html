@@ -947,9 +947,21 @@ function handleDetailImgUrl(url, vendorId, itemId){
 
 function clearDetailImg(vendorId, itemId){
   if(!confirm('Remove photo from this item?')) return;
-  updateField(vendorId, itemId, 'img', '');
+  // Use _detailItem as fallback if vendorId/itemId not passed correctly
+  const vid = vendorId || _detailItem?.vendorId;
+  const iid = itemId  || _detailItem?.itemId;
+  if(!vid || !iid) return;
+  const v = getVendor(vid);
+  const it = v?.items.find(i=>i.id===iid);
+  if(!it) return;
+  it.img = '';
+  _detailPendingImg = '';
+  // Clear URL input too
+  const urlEl = document.getElementById('dImgUrl');
+  if(urlEl) urlEl.value = '';
   save(); render();
-  openDetail(vendorId, itemId);
+  openDetail(vid, iid);
+  showToast('Photo removed');
 }
 
 
@@ -1825,7 +1837,7 @@ function openDetail(vendorId, itemId){
   const imgTag=it.img
     ? `<div style="position:relative">
         <img class="detail-img" src="${it.img}" alt="${esc(it.styleNo)}">
-        <button class="btn ghost sm" style="position:absolute;top:.4rem;right:.4rem;background:rgba(255,255,255,.9)" onclick="clearDetailImg('${it._vendorId}','${it.id}')">✕ Remove photo</button>
+        <button class="btn ghost sm" style="position:absolute;top:.4rem;right:.4rem;background:rgba(255,255,255,.9)" onclick="clearDetailImg('${vendorId}','${itemId}')">✕ Remove photo</button>
        </div>`
     : `<div class="img-upload-area" id="detailImgArea" onclick="document.getElementById('detailImgFile').click()">
         <div style="font-size:1.5rem">📷</div>
