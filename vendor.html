@@ -112,6 +112,23 @@ body{font-family:'DM Sans',sans-serif;background:var(--mist);color:var(--ink);fo
 .hide-btn{padding:.15rem .35rem;border-radius:4px;border:1px solid var(--border);background:transparent;cursor:pointer;font-size:.62rem;color:#bbb;font-family:'DM Sans',sans-serif;transition:all .12s;white-space:nowrap}
 .hide-btn:hover{border-color:var(--amber);color:var(--amber)}
 .hide-btn.is-hidden{background:var(--sand-lt);border-color:var(--sand-dk);color:#c0b0a0}
+
+/* ITEM LABELS */
+.item-label{display:inline-flex;align-items:center;gap:.2rem;font-size:.6rem;font-weight:600;padding:.12rem .42rem;border-radius:3px;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;border:1px solid}
+/* CARD COLOR DOT INDICATORS */
+.card-dots{display:flex;gap:4px;padding:.3rem .4rem .1rem;flex-wrap:wrap}
+.cdot{width:8px;height:8px;border-radius:50%;flex-shrink:0;cursor:pointer;transition:transform .1s}
+.cdot:hover{transform:scale(1.3)}
+.cdot-fav{background:#f0c000}      /* yellow  — Order Again */
+.cdot-radar{background:#e07020}    /* orange  — On My Radar */
+.cdot-custom{background:#2a6db5}   /* blue    — Custom Req */
+.cdot-hidden{background:#bbb}      /* grey    — Hidden */
+
+/* Card border color when labelled */
+.card.is-fav{border-color:#f0c000!important;box-shadow:0 0 0 1.5px #f0c00040}
+.card.is-radar{border-color:#e07020!important;box-shadow:0 0 0 1.5px #e0702040}
+.card.is-custom{border-color:#2a6db5!important;box-shadow:0 0 0 1.5px #2a6db540}
+.card.is-hidden{border-color:#ccc!important;opacity:.45}
 .fav-btn{padding:.15rem .35rem;border-radius:4px;border:1px solid var(--border);background:transparent;cursor:pointer;font-size:.68rem;color:#ccc;font-family:'DM Sans',sans-serif;transition:all .12s;white-space:nowrap;line-height:1}
 .fav-btn.is-fav{color:#e8a838;border-color:#e8a838;background:#fffbf2}
 .card.is-fav{border-color:#e8a838!important;box-shadow:0 0 0 1px #e8a838}
@@ -419,11 +436,18 @@ tr.selected td{background:rgba(139,115,85,.07)!important}
       <label style="display:flex;align-items:center;gap:.3rem;font-size:.72rem;color:#aaa;cursor:pointer;white-space:nowrap">
         <input type="checkbox" id="showHidden" onchange="render()" style="accent-color:var(--bark)"> Hidden
       </label>
-      <label style="display:flex;align-items:center;gap:.3rem;font-size:.72rem;color:var(--amber);cursor:pointer;white-space:nowrap">
-        <input type="checkbox" id="showCustomOnly" onchange="render()" style="accent-color:var(--amber)"> 🎨 Custom
+
+      <label style="display:flex;align-items:center;gap:.3rem;font-size:.72rem;color:#999;cursor:pointer;white-space:nowrap">
+        <input type="checkbox" id="showFavsOnly" onchange="render()" style="accent-color:#f0c000">
+        <span class="cdot cdot-fav" style="pointer-events:none"></span> Order Again
       </label>
-      <label style="display:flex;align-items:center;gap:.3rem;font-size:.72rem;color:#e8a838;cursor:pointer;white-space:nowrap">
-        <input type="checkbox" id="showFavsOnly" onchange="render()" style="accent-color:#e8a838"> ⭐ Favourites
+      <label style="display:flex;align-items:center;gap:.3rem;font-size:.72rem;color:#999;cursor:pointer;white-space:nowrap">
+        <input type="checkbox" id="showRadarOnly" onchange="render()" style="accent-color:#e07020">
+        <span class="cdot cdot-radar" style="pointer-events:none"></span> On My Radar
+      </label>
+      <label style="display:flex;align-items:center;gap:.3rem;font-size:.72rem;color:#999;cursor:pointer;white-space:nowrap">
+        <input type="checkbox" id="showCustomOnly" onchange="render()" style="accent-color:#2a6db5">
+        <span class="cdot cdot-custom" style="pointer-events:none"></span> Custom Req
       </label>
 
       <span class="toolbar-meta" id="toolbarMeta"></span>
@@ -1515,6 +1539,7 @@ function filteredItems(){
   if (!document.getElementById('showHidden')?.checked) rows = rows.filter(it=>!it.hidden);
   if (document.getElementById('showCustomOnly')?.checked) rows = rows.filter(it=>!!it.customReq);
   if (document.getElementById('showFavsOnly')?.checked) rows = rows.filter(it=>!!it.fav);
+  if (document.getElementById('showRadarOnly')?.checked) rows = rows.filter(it=>!!it.radar);
   if (searchQ) {
     const q = searchQ.toLowerCase();
     rows = rows.filter(it=>[it.styleNo,it.colors,it.category,it.season,it.notes,it.material,it._vendorName]
@@ -1690,7 +1715,7 @@ function cardHTML(it){
   const checkEl = selectMode
     ? `<div class="card-check-wrap"><input type="checkbox" class="tbl-check" ${isSelected?'checked':''} onclick="event.stopPropagation();toggleSelectItem('${it._vendorId}','${it.id}',this.checked)"></div>`
     : '';
-  return `<div class="card${it.hidden?' is-hidden':''}${it.fav?' is-fav':''}${isSelected?' selected':''}" data-selkey="${k}"
+  return `<div class="card${it.hidden?' is-hidden':''}${it.fav?' is-fav':''}${it.radar?' is-radar':''}${it.customReq?' is-custom':''}${isSelected?' selected':''}" data-selkey="${k}"
     onclick="${selectMode ? `toggleSelectItem('${it._vendorId}','${it.id}',!selectedIds.has('${k}'));this.classList.toggle('selected',selectedIds.has('${k}'));updateSelectBar()` : `openDetail('${it._vendorId}','${it.id}')`}">
     ${checkEl}
     ${imgTag}
@@ -1700,7 +1725,12 @@ function cardHTML(it){
       <div class="card-colors">${esc(it.colors||'—')}</div>
       <div class="card-price">${esc(it.price||'')}</div>
       ${it.season?`<span class="card-season">${esc(it.season)}</span>`:''}
-      ${it.customReq?`<span class="custom-req-badge">🎨 Custom</span>`:''}
+      ${(it.fav||it.radar||it.customReq||it.hidden)?`<div class="card-dots">
+        ${it.fav?'<span class="cdot cdot-fav" title="Order Again" onclick="event.stopPropagation();toggleFav(''+it._vendorId+'',''+it.id+'')"></span>':''}
+        ${it.radar?'<span class="cdot cdot-radar" title="On My Radar" onclick="event.stopPropagation();toggleRadar(''+it._vendorId+'',''+it.id+'')"></span>':''}
+        ${it.customReq?'<span class="cdot cdot-custom" title="Custom Request"></span>':''}
+        ${it.hidden?'<span class="cdot cdot-hidden" title="Hidden"></span>':''}
+      </div>`:''}`
     </div>
   </div>`;
 }
@@ -1732,7 +1762,8 @@ function rowHTML(it){
       </div>
     </td>
     <td onclick="event.stopPropagation()">
-      <button class="fav-btn${it.fav?' is-fav':''}" onclick="toggleFav('${it._vendorId}','${it.id}')" title="${it.fav?'Remove from favourites':'Add to favourites'}">${it.fav?'⭐':'☆'}</button>
+      <button class="fav-btn${it.fav?' is-fav':''}" onclick="toggleFav('${it._vendorId}','${it.id}')" title="${it.fav?'Remove':'Order Again'}">${it.fav?'⭐':'☆'}</button>
+      <button class="fav-btn${it.radar?' is-fav':''}" style="${it.radar?'color:#2a6db5;border-color:#2a6db5;background:#f0f7ff':''}" onclick="toggleRadar('${it._vendorId}','${it.id}')" title="On My Radar">🔭</button>
       <button class="hide-btn${it.hidden?' is-hidden':''}" onclick="toggleHide('${it._vendorId}','${it.id}')">${it.hidden?'Hidden':'Visible'}</button>
     </td>
   </tr>`;
@@ -1968,6 +1999,26 @@ function detailToggleFav(){
   if(btn){ btn.textContent=it.fav?'⭐ Favourited':'☆ Favourite'; btn.classList.toggle('is-fav',it.fav); }
   save();
   showToast(it.fav?'⭐ Added to favourites':'Removed from favourites');
+}
+
+function toggleRadar(vendorId, itemId){
+  const v=getVendor(vendorId); if(!v) return;
+  const it=v.items.find(i=>i.id===itemId); if(!it) return;
+  it.radar=!it.radar;
+  save(); render();
+}
+
+function detailToggleRadar(){
+  if(!_detailItem) return;
+  const {vendorId,itemId}=_detailItem;
+  const v=getVendor(vendorId); const it=v?.items.find(i=>i.id===itemId); if(!it) return;
+  it.radar=!it.radar;
+  const btn=document.getElementById('d-radar');
+  if(btn){
+    btn.style.cssText=it.radar?'color:#2a6db5;border-color:#2a6db5;background:#f0f7ff':'';
+  }
+  save();
+  showToast(it.radar?'🔭 Added to On My Radar':'Removed from On My Radar');
 }
 function toggleHide(vendorId,itemId){
   const v=getVendor(vendorId);if(!v)return;
