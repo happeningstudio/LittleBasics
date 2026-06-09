@@ -1725,12 +1725,7 @@ function cardHTML(it){
       <div class="card-colors">${esc(it.colors||'—')}</div>
       <div class="card-price">${esc(it.price||'')}</div>
       ${it.season?`<span class="card-season">${esc(it.season)}</span>`:''}
-      ${(it.fav||it.radar||it.customReq||it.hidden)?`<div class="card-dots">
-        ${it.fav?'<span class="cdot cdot-fav" title="Order Again" onclick="event.stopPropagation();toggleFav(''+it._vendorId+'',''+it.id+'')"></span>':''}
-        ${it.radar?'<span class="cdot cdot-radar" title="On My Radar" onclick="event.stopPropagation();toggleRadar(''+it._vendorId+'',''+it.id+'')"></span>':''}
-        ${it.customReq?'<span class="cdot cdot-custom" title="Custom Request"></span>':''}
-        ${it.hidden?'<span class="cdot cdot-hidden" title="Hidden"></span>':''}
-      </div>`:''}`
+      ${(it.fav||it.radar||it.customReq||it.hidden)?('<div class="card-dots">'+(it.fav?'<span class="cdot cdot-fav" title="Order Again"></span>':''  )+(it.radar?'<span class="cdot cdot-radar" title="On My Radar"></span>':''  )+(it.customReq?'<span class="cdot cdot-custom" title="Custom Request"></span>':''  )+(it.hidden?'<span class="cdot cdot-hidden" title="Hidden"></span>':''  )+'</div>'):''}
     </div>
   </div>`;
 }
