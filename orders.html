@@ -801,8 +801,7 @@ function doPost(e) {
         <input class="search-input" type="text" id="invSearch" placeholder="Search…" oninput="renderInventory()">
       </div>
       <span style="font-size:.7rem;color:#bbb">🔴 out  🟠 ≤2 left</span>
-      <button class="btn sm" onclick="clearAllInvChecked()" title="Reset all checkboxes">☐ Clear Checks</button>
-        <button class="btn sm" onclick="pullInventory()" style="margin-left:auto">↓ Pull from Sheet</button>
+      <button class="btn sm" onclick="pullInventory()" style="margin-left:auto">↓ Pull from Sheet</button>
     </div>
     <div class="inv-scroll">
       <table class="inv-tbl" id="invTable">
@@ -823,7 +822,7 @@ function doPost(e) {
     <div class="inv-toolbar">
       <div class="search-wrap">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-        <button class="btn primary sm" onclick="rebuildSoldFromLog()" style="margin-right:.5rem">🔧 Rebuild from Order Log</button>
+        <button class="btn primary sm" onclick="rebuildSoldFromLog()">🔧 Rebuild from Order Log</button>
         <button class="btn sm" onclick="resetSoldFromSheet()" style="color:var(--red);margin-right:.5rem">↺ Reset from Sheet</button>
         <input class="search-input" type="text" id="soldSearch" placeholder="Search…" oninput="renderSoldSummary()">
       </div>
@@ -838,6 +837,7 @@ function doPost(e) {
     </div>
     <div class="sticky-bar">
       <button class="btn primary" onclick="saveArchivedCounts()">💾 Save Archived</button>
+      <button class="btn sm" onclick="clearArchived()" style="color:var(--red)">✕ Clear Archived</button>
     </div>
   </div>
 </div>
@@ -1854,21 +1854,6 @@ function clearOrder(){
    INVENTORY — collapsible product groups × size columns
 ═══════════════════════════════════════════════ */
 const invCollapsed = new Proxy({}, { get: (t,k) => k in t ? t[k] : true });
-let invChecked = loadLocal('lb_inv_checked', {});
-function saveInvChecked(){ saveLocal('lb_inv_checked', invChecked); }
-function clearAllInvChecked(){
-  invChecked={}; saveInvChecked(); renderInventory();
-  showToast('All inventory checks cleared');
-}
-
-function toggleInvChecked(name, el){
-  invChecked[name] = el.checked;
-  saveInvChecked();
-  // Toggle row highlight
-  const row = el.closest('tr');
-  if(row) row.classList.toggle('inv-checked-row', el.checked);
-  el.closest('.inv-check-wrap')?.classList.toggle('done', el.checked);
-}
 
 function renderInventory(){
   const search=document.getElementById('invSearch').value.toLowerCase();
@@ -1915,7 +1900,6 @@ function renderInventory(){
       const htr=document.createElement('tr');
       htr.className='group-header';
       htr.onclick=()=>toggleInvGroup(name);
-      const chkdGroup = !!invChecked[name];
       htr.innerHTML=`
         <td class="lh" colspan="${usedSizes.length+2}">
           <div style="display:flex;align-items:center;gap:.6rem">
@@ -1923,15 +1907,10 @@ function renderInventory(){
             <div>
               <div style="font-size:.78rem;font-weight:600;color:#2a2420">${name}</div>
               <div class="group-meta" style="margin-top:.15rem">${members.length} colors &middot; ${groupTotal} total in stock</div>
-              <label class="inv-check-wrap${chkdGroup?' done':''}" onclick="event.stopPropagation()">
-                <input type="checkbox" ${chkdGroup?'checked':''} onchange="toggleInvChecked('${escHtml(name)}',this)">
-                <span>${chkdGroup?'Checked ✓':'Mark as checked'}</span>
-              </label>
               <span class="group-toggle ${isOpen?'open':''}" style="font-size:.75rem;color:#8b7355;display:inline-block;margin-top:.3rem">&#9654;</span>
             </div>
           </div>
         </td>`;
-      if(chkdGroup) htr.classList.add('inv-checked-row');
       tbody.appendChild(htr);
     }
 
@@ -1964,8 +1943,6 @@ function renderInventory(){
           <td class="row-total">${rowTotal}</td>`;
       } else {
         // Single variant — flat row with image, no indent
-        const chkdSingle = !!invChecked[name];
-        if(chkdSingle) tr.classList.add('inv-checked-row');
         tr.innerHTML=`
           <td class="lh">
             <div style="display:flex;align-items:flex-start;gap:.6rem">
@@ -1976,10 +1953,6 @@ function renderInventory(){
                   <span class="swatch" style="background:${p.hex}"></span>
                   <span style="font-size:.65rem;color:#aaa">${p.color}</span>
                 </div>
-                <label class="inv-check-wrap${chkdSingle?' done':''}" onclick="event.stopPropagation()">
-                  <input type="checkbox" ${chkdSingle?'checked':''} onchange="toggleInvChecked('${escHtml(name)}',this)">
-                  <span>${chkdSingle?'Checked ✓':'Mark as checked'}</span>
-                </label>
               </div>
             </div>
           </td>
@@ -2076,7 +2049,7 @@ function renderSoldSummary(){
 
   const totalUnits=Object.values(soldCounts).reduce((s,v)=>s+v,0);
   const totalArchived=Object.values(archived).reduce((s,v)=>s+(parseInt(v)||0),0);
-  document.getElementById('soldMeta').textContent=(totalUnits+totalArchived)+' units sold ('+(totalArchived)+' archived)';
+  document.getElementById('soldMeta').textContent=(totalUnits+totalArchived)+' total  |  '+totalUnits+' from app orders  +  '+totalArchived+' pre-app';
 
   // Group by product name
   const groups={};
@@ -2153,7 +2126,7 @@ function renderSoldSummary(){
           <td style="border-left:2px solid var(--border);text-align:center">
             <input type="number" min="0" value="${archived[p.pid]||0}" data-apid="${p.pid}"
               style="width:52px;text-align:center;border:1px solid var(--border);border-radius:4px;padding:.2rem;font-size:.76rem;font-family:'DM Sans',sans-serif;background:var(--mist)"
-              oninput="archived[parseInt(this.dataset.apid)]=parseInt(this.value)||0;renderSoldSummary()">
+              oninput="archived[parseInt(this.dataset.apid)]=parseInt(this.value)||0;saveArchived();renderSoldSummary()">
           </td>
           <td class="sold-row-total">${rowTotal+(archived[p.pid]||0)}</td>`;
       } else {
@@ -2175,7 +2148,7 @@ function renderSoldSummary(){
           <td style="border-left:2px solid var(--border);text-align:center">
             <input type="number" min="0" value="${archived[p.pid]||0}" data-apid="${p.pid}"
               style="width:52px;text-align:center;border:1px solid var(--border);border-radius:4px;padding:.2rem;font-size:.76rem;font-family:'DM Sans',sans-serif;background:var(--mist)"
-              oninput="archived[parseInt(this.dataset.apid)]=parseInt(this.value)||0;renderSoldSummary()">
+              oninput="archived[parseInt(this.dataset.apid)]=parseInt(this.value)||0;saveArchived();renderSoldSummary()">
           </td>
           <td class="sold-row-total">${rowTotal+(archived[p.pid]||0)}</td>`;
       }
@@ -2200,6 +2173,14 @@ function renderSoldSummary(){
 function toggleSoldGroup(name){
   soldCollapsed[name]=!soldCollapsed[name];
   renderSoldSummary();
+}
+
+function clearArchived(){
+  if(!confirm('Clear all archived (pre-app) counts? Your order log data is not affected.')) return;
+  archived={};
+  saveArchived();
+  renderSoldSummary();
+  showToast('Archived counts cleared');
 }
 
 function saveArchivedCounts(){
