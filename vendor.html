@@ -129,6 +129,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--mist);color:var(--ink);fo
 .card.is-radar{border-color:#e07020!important;box-shadow:0 0 0 1.5px #e0702040}
 .card.is-custom{border-color:#2a6db5!important;box-shadow:0 0 0 1.5px #2a6db540}
 .card.is-hidden{border-color:#ccc!important;opacity:.45}
+.label-toggle-btn{display:inline-flex;align-items:center;padding:.3rem .7rem;border:1px solid;border-radius:4px;cursor:pointer;font-size:.72rem;font-family:'DM Sans',sans-serif;background:#fff;transition:all .15s;white-space:nowrap}
+.label-toggle-btn:hover{opacity:.8}
 .fav-btn{padding:.15rem .35rem;border-radius:4px;border:1px solid var(--border);background:transparent;cursor:pointer;font-size:.68rem;color:#ccc;font-family:'DM Sans',sans-serif;transition:all .12s;white-space:nowrap;line-height:1}
 .fav-btn.is-fav{color:#e8a838;border-color:#e8a838;background:#fffbf2}
 .card.is-fav{border-color:#e8a838!important;box-shadow:0 0 0 1px #e8a838}
@@ -1872,9 +1874,25 @@ function openDetail(vendorId, itemId){
     <div class="detail-field"><label>Notes</label><textarea class="val editable" id="d-notes" rows="2">${esc(it.notes||'')}</textarea></div>
     <div class="detail-field" style="grid-column:1/-1"><label style="color:var(--amber)">🎨 Custom Request</label><textarea class="val editable" id="d-customReq" rows="2" placeholder="e.g. fabric swap to linen, custom colourway, private label tag…">${esc(it.customReq||'')}</textarea></div>
     <div class="detail-field"><label>Link</label><input class="val editable" id="d-link" value="${esc(it.link||'')}"></div>
-    <div style="display:flex;align-items:center;gap:.5rem;justify-content:flex-end">
-      <button class="fav-btn${it.fav?' is-fav':''}" id="d-fav" onclick="detailToggleFav()">${it.fav?'⭐ Favourited':'☆ Favourite'}</button>
-      <button class="hide-btn${it.hidden?' is-hidden':''}" id="d-hide" onclick="detailToggleHide()">${it.hidden?'Hidden':'Visible'}</button>
+    <div style="margin-top:.5rem">
+      <div style="font-size:.65rem;font-weight:600;color:#bbb;text-transform:uppercase;letter-spacing:.07em;margin-bottom:.4rem">Labels</div>
+      <div style="display:flex;flex-wrap:wrap;gap:.4rem">
+        <button class="label-toggle-btn${it.fav?' active':''}" id="d-fav"
+          style="border-color:#f0c000;${it.fav?'background:#f0c000;color:#fff;':'color:#b09000;'}"
+          onclick="detailToggleFav()">
+          <span class="cdot cdot-fav" style="display:inline-block;vertical-align:middle;margin-right:.25rem"></span>Order Again
+        </button>
+        <button class="label-toggle-btn${it.radar?' active':''}" id="d-radar"
+          style="border-color:#e07020;${it.radar?'background:#e07020;color:#fff;':'color:#c05010;'}"
+          onclick="detailToggleRadar()">
+          <span class="cdot cdot-radar" style="display:inline-block;vertical-align:middle;margin-right:.25rem"></span>On My Radar
+        </button>
+        <button class="label-toggle-btn" id="d-hide"
+          style="border-color:#ccc;${it.hidden?'background:#999;color:#fff;':'color:#aaa;'}"
+          onclick="detailToggleHide()">
+          <span class="cdot cdot-hidden" style="display:inline-block;vertical-align:middle;margin-right:.25rem"></span>${it.hidden?'Hidden':'Hide'}
+        </button>
+      </div>
     </div>`;
 
   openModal('detailModal');
@@ -2009,11 +2027,9 @@ function detailToggleRadar(){
   const v=getVendor(vendorId); const it=v?.items.find(i=>i.id===itemId); if(!it) return;
   it.radar=!it.radar;
   const btn=document.getElementById('d-radar');
-  if(btn){
-    btn.style.cssText=it.radar?'color:#2a6db5;border-color:#2a6db5;background:#f0f7ff':'';
-  }
-  save();
-  showToast(it.radar?'🔭 Added to On My Radar':'Removed from On My Radar');
+  if(btn){ btn.style.cssText='border-color:#e07020;'+(it.radar?'background:#e07020;color:#fff;':'color:#c05010;'); }
+  save(); render();
+  showToast(it.radar?'🔭 On My Radar':'Removed from On My Radar');
 }
 function toggleHide(vendorId,itemId){
   const v=getVendor(vendorId);if(!v)return;
