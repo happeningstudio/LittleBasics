@@ -1656,7 +1656,7 @@ function setView(v){
 
 /* ══ RENDER ══ */
 function render(){
-  const rows = filteredItems();
+  const rows = filteredItems().sort((a,b)=>(a.styleNo||''  ).localeCompare(b.styleNo||''  , undefined, {numeric:true}));
   const total = rows.length;
   const allCount = activeVendorId==='all' ? allItems().length : (getVendor(activeVendorId)?.items.length||0);
   document.getElementById('toolbarMeta').textContent = `${total} of ${allCount}`;
