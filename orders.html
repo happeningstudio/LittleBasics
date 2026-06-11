@@ -204,6 +204,11 @@ tr.cat-section-hdr td{
   padding:.4rem .75rem!important;
 }
 
+.inv-check-wrap{display:flex;align-items:center;gap:.35rem;margin-top:.4rem;cursor:pointer;user-select:none}
+.inv-check-wrap input{accent-color:var(--green);width:14px;height:14px;cursor:pointer;flex-shrink:0}
+.inv-check-wrap span{font-size:.65rem;color:#bbb;font-weight:500}
+.inv-check-wrap.done span{color:var(--green);font-weight:600}
+tr.inv-checked-row td{background:rgba(80,160,80,.05)!important}
 .inv-input{width:48px;text-align:center;border:1px solid var(--border);border-radius:4px;padding:.2rem;font-size:.76rem;font-family:'DM Sans',sans-serif;background:var(--mist);color:var(--ink);transition:border-color .15s}
 .inv-input:focus{outline:none;border-color:var(--bark)}
 .inv-input.zero{background:#fff0f0;border-color:var(--red)}
@@ -801,7 +806,8 @@ function doPost(e) {
         <input class="search-input" type="text" id="invSearch" placeholder="Search…" oninput="renderInventory()">
       </div>
       <span style="font-size:.7rem;color:#bbb">🔴 out  🟠 ≤2 left</span>
-      <button class="btn sm" onclick="pullInventory()" style="margin-left:auto">↓ Pull from Sheet</button>
+      <button class="btn sm" onclick="clearAllInvChecked()">☐ Clear Checks</button>
+        <button class="btn sm" onclick="pullInventory()" style="margin-left:auto">↓ Pull from Sheet</button>
     </div>
     <div class="inv-scroll">
       <table class="inv-tbl" id="invTable">
@@ -1854,6 +1860,21 @@ function clearOrder(){
    INVENTORY — collapsible product groups × size columns
 ═══════════════════════════════════════════════ */
 const invCollapsed = new Proxy({}, { get: (t,k) => k in t ? t[k] : true });
+let invChecked = loadLocal('lb_inv_checked', {});
+function saveInvChecked(){ saveLocal('lb_inv_checked', invChecked); }
+function toggleInvChecked(name, el){
+  invChecked[name] = el.checked;
+  saveInvChecked();
+  const row = el.closest('tr');
+  if(row) row.classList.toggle('inv-checked-row', el.checked);
+  el.closest('.inv-check-wrap')?.classList.toggle('done', el.checked);
+  const lbl = el.closest('.inv-check-wrap')?.querySelector('span');
+  if(lbl) lbl.textContent = el.checked ? 'Checked ✓' : 'Mark as checked';
+}
+function clearAllInvChecked(){
+  invChecked={}; saveInvChecked(); renderInventory();
+  showToast('All inventory checks cleared');
+}
 
 function renderInventory(){
   const search=document.getElementById('invSearch').value.toLowerCase();
@@ -1898,7 +1919,7 @@ function renderInventory(){
     if(multiVariant){
       // Group header — collapsible
       const htr=document.createElement('tr');
-      htr.className='group-header';
+      htr.className='group-header'+(invChecked[name]?' inv-checked-row':'');
       htr.onclick=()=>toggleInvGroup(name);
       htr.innerHTML=`
         <td class="lh" colspan="${usedSizes.length+2}">
@@ -1907,6 +1928,10 @@ function renderInventory(){
             <div>
               <div style="font-size:.78rem;font-weight:600;color:#2a2420">${name}</div>
               <div class="group-meta" style="margin-top:.15rem">${members.length} colors &middot; ${groupTotal} total in stock</div>
+              <label class="inv-check-wrap${invChecked[name]?' done':''}" onclick="event.stopPropagation()">
+                <input type="checkbox" ${invChecked[name]?'checked':''} onchange="toggleInvChecked('${escHtml(name)}',this)">
+                <span>${invChecked[name]?'Checked ✓':'Mark as checked'}</span>
+              </label>
               <span class="group-toggle ${isOpen?'open':''}" style="font-size:.75rem;color:#8b7355;display:inline-block;margin-top:.3rem">&#9654;</span>
             </div>
           </div>
@@ -1953,11 +1978,16 @@ function renderInventory(){
                   <span class="swatch" style="background:${p.hex}"></span>
                   <span style="font-size:.65rem;color:#aaa">${p.color}</span>
                 </div>
+                <label class="inv-check-wrap${invChecked[name]?' done':''}" onclick="event.stopPropagation()">
+                  <input type="checkbox" ${invChecked[name]?'checked':''} onchange="toggleInvChecked('${escHtml(name)}',this)">
+                  <span>${invChecked[name]?'Checked ✓':'Mark as checked'}</span>
+                </label>
               </div>
             </div>
           </td>
           ${cells}
           <td class="row-total">${rowTotal}</td>`;
+        if(invChecked[name]) tr.classList.add('inv-checked-row');
       }
       tbody.appendChild(tr);
     });
