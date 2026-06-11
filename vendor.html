@@ -892,6 +892,11 @@ window._pendingItemImg = '';
 
 function handleItemImgUpload(e){
   const file = e.target.files[0]; if(!file) return;
+  // Only process if add item modal is actually open
+  const modal = document.getElementById('itemModal');
+  if(!modal || modal.style.display === 'none' || !modal.classList.contains('open')) {
+    e.target.value = ''; return;
+  }
   const reader = new FileReader();
   reader.onload = ev => {
     resizeAndSetItemImg(ev.target.result);
@@ -922,10 +927,16 @@ function resizeAndSetItemImg(dataUrl){
 
 function clearItemImg(){
   window._pendingItemImg = '';
-  document.getElementById('iImgPreview').style.display = 'none';
-  document.getElementById('iImgPlaceholder').style.display = '';
-  document.getElementById('iImgArea').classList.remove('has-img');
-  document.getElementById('iImgFile').value = '';
+  const preview = document.getElementById('iImgPreview');
+  const previewImg = document.getElementById('iImgPreviewImg');
+  if(preview) preview.style.display = 'none';
+  if(previewImg) previewImg.src = '';  // clear src so old image is gone
+  const ph = document.getElementById('iImgPlaceholder');
+  if(ph) ph.style.display = '';
+  const area = document.getElementById('iImgArea');
+  if(area) area.classList.remove('has-img');
+  const fileInput = document.getElementById('iImgFile');
+  if(fileInput) fileInput.value = '';
 }
 
 function handleDetailImgUpload(e, vendorId, itemId){
