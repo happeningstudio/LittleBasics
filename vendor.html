@@ -1000,6 +1000,36 @@ function checkStorageUsage(){
     if(pct > 85) showStorageWarning();
   } catch(e){}
 }
+
+// Migrate image keys from itemId-based to styleNo-based (run once on load)
+function migrateImgKeys(){
+  const oldImgs = loadLocal('lb_vendor_imgs', {});
+  if(!oldImgs || !Object.keys(oldImgs).length) return;
+  const newImgs = {};
+  let migrated = 0;
+  vendors.forEach(v=>{
+    v.items.forEach(it=>{
+      // Try old key (vendorId_itemId)
+      const oldKey = v.id+'_'+it.id;
+      const newKey = v.id+'_'+it.styleNo;
+      if(oldImgs[oldKey] && !newImgs[newKey]){
+        newImgs[newKey] = oldImgs[oldKey];
+        it.img = oldImgs[oldKey];
+        migrated++;
+      }
+      // Also preserve any already-correct keys
+      if(oldImgs[newKey]){
+        newImgs[newKey] = oldImgs[newKey];
+        it.img = oldImgs[newKey];
+      }
+    });
+  });
+  if(migrated > 0){
+    saveLocal('lb_vendor_imgs', newImgs);
+    saveLocal('lb_vendors_v2', vendors.map(v=>({...v, items:v.items.map(it=>{ const {img,...rest}=it; return rest; })})));
+    console.log('Migrated '+migrated+' image keys to styleNo-based keys');
+  }
+}
 /* ══ VIEW SWITCHING ══ */
 function switchView(v){
   document.querySelectorAll('.view').forEach(el=>el.classList.remove('active'));
@@ -1544,7 +1574,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   const saved = loadLocal('lb_vendors_v2', null);
   // Merge images back into items
   if(saved) saved.forEach(v=>v.items.forEach(it=>{
-    const key = v.id+'_'+it.id;
+    const key = v.id+'_'+it.styleNo;
     if(savedImgs[key]) it.img = savedImgs[key];
   }));
   if (saved && saved.length) {
@@ -1572,6 +1602,7 @@ function boot() {
 
 function save(){
   // Save vendor data — strip images to keep size down
+  // vendorsSlim strips images but keeps all other fields including styleNo
   const vendorsSlim = vendors.map(v=>({
     ...v,
     items: v.items.map(it=>{ const {img, ...rest}=it; return rest; })
@@ -1580,7 +1611,7 @@ function save(){
 
   // Save images separately (each image is ~15-30KB)
   const imgs = {};
-  vendors.forEach(v=>v.items.forEach(it=>{ if(it.img) imgs[v.id+'_'+it.id]=it.img; }));
+  vendors.forEach(v=>v.items.forEach(it=>{ if(it.img && it.styleNo) imgs[v.id+'_'+it.styleNo]=it.img; }));
   saveLocal('lb_vendor_imgs', imgs);
 
   if(!ok) showStorageWarning();
