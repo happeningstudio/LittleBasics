@@ -930,16 +930,6 @@ function clearItemImg(){
   if(ud) ud.textContent = '';
 }
 
-function handleDetailImgUpload(e, vendorId, itemId){
-  const file = e.target.files[0]; if(!file) return;
-  const reader = new FileReader();
-  reader.onload = ev => {
-    const img = new Image();
-    img.onload = function(){
-      const canvas = document.createElement('canvas');
-      const max = 240;
-      let w=img.width, h=img.height;
-      if(w>h){if(w>max){h=Math.round(h*max/w);w=max;}}
       else{if(h>max){w=Math.round(w*max/h);h=max;}}
       canvas.width=w; canvas.height=h;
       canvas.getContext('2d').drawImage(img,0,0,w,h);
@@ -1992,10 +1982,7 @@ function previewDetailImg(filename){
         // No img yet — replace placeholder
         const ph = document.querySelector('.detail-img-placeholder');
         if(ph){
-          ph.outerHTML = `<div class="detail-img-wrap" onclick="triggerDetailImgUpload()">
-            <img class="detail-img" id="dImgPreview" src="${resized}">
-            <div class="detail-img-overlay">📷 Replace image</div>
-          </div>`;
+          ph.outerHTML = `<div class="detail-img-wrap" onclick="triggerDetailImgUpload()" title="Click to replace"><img class="detail-img" id="dImgPreview" src="${it.img||''}" alt="${esc(it.styleNo)}"><div class="detail-img-overlay">📷 Replace</div></div>`;
         }
       } else {
         preview.src = resized;
@@ -2018,11 +2005,7 @@ function openDetail(vendorId, itemId){
         <img class="detail-img" src="${it.img}" alt="${esc(it.styleNo)}">
         <button class="btn ghost sm" style="position:absolute;top:.4rem;right:.4rem;background:rgba(255,255,255,.9)" onclick="clearDetailImg('${vendorId}','${itemId}')">✕ Remove photo</button>
        </div>`
-    : `<div class="img-upload-area" id="detailImgArea" onclick="document.getElementById('detailImgFile').click()">
-        <div style="font-size:1.5rem">📷</div>
-        <div class="img-upload-hint">Click to upload a photo</div>
-        <input type="file" id="detailImgFile" accept="image/*" style="display:none" onchange="handleDetailImgUpload(event,'${it._vendorId}','${it.id}')">
-       </div>`;
+    : `<div class="img-upload-hint">Click to upload a photo</div> </div>`;
 
   // Build vendor options
   const vendorOpts = vendors.map(v=>`<option value="${v.id}"${v.id===vendorId?' selected':''}>${esc(v.name)}</option>`).join('');
