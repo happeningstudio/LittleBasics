@@ -664,7 +664,6 @@ tr.selected td{background:rgba(139,115,85,.07)!important}
             <div class="img-upload-hint">Click to upload from computer</div>
           </div>
         </div>
-        <input type="file" id="iImgFile" accept="image/*" style="display:none" onchange="handleItemImgUpload(event)">
       </div></div>
     </div>
     <div class="modal-foot">
@@ -905,19 +904,6 @@ function previewItemImg(filename){
 }
 
 
-    else { if(h>max){w=Math.round(w*max/h);h=max;} }
-    canvas.width=w; canvas.height=h;
-    canvas.getContext('2d').drawImage(img,0,0,w,h);
-    const resized = canvas.toDataURL('image/jpeg', 0.75);
-    window._pendingItemImg = resized;
-    document.getElementById('iImgPreviewImg').src = resized;
-    document.getElementById('iImgPreview').style.display = '';
-    document.getElementById('iImgPlaceholder').style.display = 'none';
-    document.getElementById('iImgArea').classList.add('has-img');
-  };
-  img.src = dataUrl;
-}
-
 function clearItemImg(){
   window._pendingItemImg = '';
   const preview = document.getElementById('iImgPreview');
@@ -930,19 +916,6 @@ function clearItemImg(){
   if(ud) ud.textContent = '';
 }
 
-      else{if(h>max){w=Math.round(w*max/h);h=max;}}
-      canvas.width=w; canvas.height=h;
-      canvas.getContext('2d').drawImage(img,0,0,w,h);
-      const resized = canvas.toDataURL('image/jpeg', 0.75);
-      updateField(vendorId, itemId, 'img', resized);
-      save(); render();
-      // Re-open detail to show the new photo
-      openDetail(vendorId, itemId);
-    };
-    img.src = ev.target.result;
-  };
-  reader.readAsDataURL(file);
-}
 
 
 function clearDetailImg(vendorId, itemId){
@@ -1970,28 +1943,6 @@ function previewDetailImg(filename){
   if(urlDisplay) urlDisplay.textContent = url;
 }
 
-
-      else if(h > MAX){ w = Math.round(w*MAX/h); h = MAX; }
-      canvas.width = w; canvas.height = h;
-      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-      const resized = canvas.toDataURL('image/jpeg', 0.75);
-      _detailPendingImg = resized;
-      // Update preview
-      let preview = document.getElementById('dImgPreview');
-      if(!preview){
-        // No img yet — replace placeholder
-        const ph = document.querySelector('.detail-img-placeholder');
-        if(ph){
-          ph.outerHTML = `<div class="detail-img-wrap" onclick="triggerDetailImgUpload()" title="Click to replace"><img class="detail-img" id="dImgPreview" src="${it.img||''}" alt="${esc(it.styleNo)}"><div class="detail-img-overlay">📷 Replace</div></div>`;
-        }
-      } else {
-        preview.src = resized;
-      }
-    };
-    img.src = ev.target.result;
-  };
-  reader.readAsDataURL(file);
-}
 function openDetail(vendorId, itemId){
   const v=getVendor(vendorId); if(!v)return;
   const it=v.items.find(i=>i.id===itemId); if(!it)return;
