@@ -981,6 +981,25 @@ function clearDetailImg(vendorId, itemId){
 }
 
 
+
+function checkStorageUsage(){
+  try{
+    let total = 0;
+    for(let k in localStorage){
+      if(localStorage.hasOwnProperty(k)){
+        total += (localStorage.getItem(k)||'').length * 2; // bytes (UTF-16)
+      }
+    }
+    const mb = (total / 1024 / 1024).toFixed(1);
+    const pct = Math.round(total / (5*1024*1024) * 100);
+    const el = document.getElementById('storageMeter');
+    if(el){
+      el.textContent = mb+'MB / 5MB ('+pct+'%)';
+      el.style.color = pct > 80 ? '#b84040' : pct > 60 ? '#c97c35' : '#aaa';
+    }
+    if(pct > 85) showStorageWarning();
+  } catch(e){}
+}
 /* ══ VIEW SWITCHING ══ */
 function switchView(v){
   document.querySelectorAll('.view').forEach(el=>el.classList.remove('active'));
@@ -1481,7 +1500,28 @@ function addToCurrentPO(){
 /* ── Init PO on view switch ── */
 /* ══ STORAGE ══ */
 function loadLocal(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch{return d}}
-function saveLocal(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch{}}
+function saveLocal(k,v){
+  try{
+    localStorage.setItem(k,JSON.stringify(v));
+    return true;
+  } catch(e){
+    // localStorage full — show warning
+    console.error('localStorage save failed for key:',k,e);
+    if(e.name==='QuotaExceededError'||e.code===22){
+      showStorageWarning();
+    }
+    return false;
+  }
+}
+function showStorageWarning(){
+  const existing = document.getElementById('storageWarning');
+  if(existing) return; // already showing
+  const div = document.createElement('div');
+  div.id = 'storageWarning';
+  div.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:9999;background:#b84040;color:#fff;padding:.6rem 1rem;font-size:.8rem;display:flex;align-items:center;gap:.75rem;font-family:DM Sans,sans-serif';
+  div.innerHTML = '⚠️ <strong>Storage almost full</strong> — your data may not be saving correctly. Export your JSON backup now to avoid data loss. <button onclick="exportData()" style="background:#fff;color:#b84040;border:none;border-radius:4px;padding:.25rem .6rem;cursor:pointer;font-weight:600;margin-left:auto">⬇ Export Now</button><button onclick="this.parentElement.remove()" style="background:none;border:none;color:#fff;cursor:pointer;font-size:1rem;padding:0 .25rem">✕</button>';
+  document.body.prepend(div);
+}
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
 
 /* ══ STATE ══ */
@@ -1500,7 +1540,13 @@ let _detailItem = null; // currently open item
 /* ══ BOOT ══ */
 window.addEventListener('DOMContentLoaded', async () => {
   // Try localStorage first
+  const savedImgs = loadLocal('lb_vendor_imgs', {});
   const saved = loadLocal('lb_vendors_v2', null);
+  // Merge images back into items
+  if(saved) saved.forEach(v=>v.items.forEach(it=>{
+    const key = v.id+'_'+it.id;
+    if(savedImgs[key]) it.img = savedImgs[key];
+  }));
   if (saved && saved.length) {
     vendors = saved;
     boot();
@@ -1511,7 +1557,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     const r = await fetch('littlebasics-vendors.json');
     if (r.ok) {
       const data = await r.json();
-      if (data.vendors) { vendors = data.vendors; saveLocal('lb_vendors_v2', vendors); }
+      if (data.vendors) { vendors = data.vendors; save(); }
     }
   } catch(e) {}
   boot();
@@ -1524,7 +1570,21 @@ function boot() {
   render();
 }
 
-function save() { saveLocal('lb_vendors_v2', vendors); }
+function save(){
+  // Save vendor data — strip images to keep size down
+  const vendorsSlim = vendors.map(v=>({
+    ...v,
+    items: v.items.map(it=>{ const {img, ...rest}=it; return rest; })
+  }));
+  const ok = saveLocal('lb_vendors_v2', vendorsSlim);
+
+  // Save images separately (each image is ~15-30KB)
+  const imgs = {};
+  vendors.forEach(v=>v.items.forEach(it=>{ if(it.img) imgs[v.id+'_'+it.id]=it.img; }));
+  saveLocal('lb_vendor_imgs', imgs);
+
+  if(!ok) showStorageWarning();
+}
 function getVendor(id){ return vendors.find(v=>v.id===id); }
 
 /* ══ ALL ITEMS (flat) ══ */
