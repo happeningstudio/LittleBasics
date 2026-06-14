@@ -1615,9 +1615,10 @@ window.addEventListener('DOMContentLoaded', async () => {
   const saved = loadLocal('lb_vendors_v2', null);
   // Ensure every item has a stable id, assign if missing
   if(saved) saved.forEach(v=>v.items.forEach(it=>{ if(!it.id) it.id=uid(); }));
-  // Merge images back into items using stable id
+  // Merge: use savedImgs for base64, but keep inline URL if no savedImg
   if(saved) saved.forEach(v=>v.items.forEach(it=>{
-    if(savedImgs[it.id]) it.img = savedImgs[it.id];
+    if(savedImgs[it.id]) it.img = savedImgs[it.id]; // base64 override
+    // URL images are already on it.img from lb_vendors_v2, no action needed
   }));
   if (saved && saved.length) {
     vendors = saved;
@@ -1647,13 +1648,19 @@ function save(){
   // vendorsSlim strips images but keeps all other fields including styleNo
   const vendorsSlim = vendors.map(v=>({
     ...v,
-    items: v.items.map(it=>{ const {img, ...rest}=it; return rest; })
+    items: v.items.map(it=>{
+      // Keep URL images in vendor data (tiny text) — only strip base64 blobs
+      const img = it.img && it.img.startsWith('data:') ? undefined : it.img;
+      const {img: _dropped, ...rest} = it;
+      return img ? {...rest, img} : rest;
+    })
   }));
   const ok = saveLocal('lb_vendors_v2', vendorsSlim);
 
   // Save images separately (each image is ~15-30KB)
   const imgs = {};
-  vendors.forEach(v=>v.items.forEach(it=>{ if(it.img && it.id) imgs[it.id]=it.img; }));
+  // Only store base64 images separately — URLs stay in vendor data directly
+  vendors.forEach(v=>v.items.forEach(it=>{ if(it.img && it.img.startsWith('data:') && it.id) imgs[it.id]=it.img; }));
   saveLocal('lb_vendor_imgs', imgs);
 
   if(!ok) showStorageWarning();
