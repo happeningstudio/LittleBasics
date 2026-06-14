@@ -955,8 +955,9 @@ function checkStorageUsage(){
   } catch(e){}
 }
 
-// Migrate any old image key formats to it.id-based keys (stable, never changes)
+// Migrate any old image key formats to it.id-based keys — runs ONCE then disabled
 function migrateImgKeys(){
+  if(loadLocal('lb_img_migrated_v3', false)) return; // already done
   const oldImgs = loadLocal('lb_vendor_imgs', {});
   if(!oldImgs || !Object.keys(oldImgs).length) return;
   const newImgs = {};
@@ -989,6 +990,7 @@ function migrateImgKeys(){
     });
   });
   saveLocal('lb_vendor_imgs', newImgs);
+  saveLocal('lb_img_migrated_v3', true); // mark as done — never run again
   if(migrated > 0){
     console.log('Migrated '+migrated+' image keys to stable it.id keys');
     showToast('✓ Image keys migrated — images now permanently linked to items');
@@ -1954,6 +1956,9 @@ function openDetail(vendorId, itemId){
   const v=getVendor(vendorId); if(!v)return;
   const it=v.items.find(i=>i.id===itemId); if(!it)return;
   _detailItem={vendorId,itemId};
+  _detailPendingImg='';
+  // Restore image from separate store if missing
+  if(!it.img && it.id){ const imgs=loadLocal('lb_vendor_imgs',{}); if(imgs[it.id]) it.img=imgs[it.id]; }
 
   document.getElementById('detailTitle').textContent=`${it.styleNo} — ${it.category||''}`;
 
@@ -2074,7 +2079,10 @@ function saveDetailEdits(){
     }
   }
 
+  // Preserve existing image unless a new one was selected
+  const existingImg = it.img;
   if(_detailPendingImg) it.img=_detailPendingImg;
+  else if(existingImg) it.img=existingImg; // explicitly keep current image
   it.styleNo  = document.getElementById('d-styleNo')?.value.trim()||it.styleNo;
   it.category = document.getElementById('d-category')?.value.trim()||it.category;
   it.price    = document.getElementById('d-price')?.value.trim()||it.price;
