@@ -1226,6 +1226,13 @@ function formatNoteDate(iso){
 
 
 /* ══ PAGINATION ══ */
+function toggleSort(){
+  sortMode = sortMode==='style' ? 'price' : 'style';
+  const btn = document.getElementById('sortBtn');
+  if(btn) btn.textContent = sortMode==='price' ? 'Sort: Price ↑' : 'Sort: Style No.';
+  render();
+}
+
 function changePage(d){
   page = Math.max(0, page + d);
   render();
@@ -1603,6 +1610,7 @@ let activeVendorId = 'all';
 let activeCat = 'all';
 let activeSeason = 'all';
 let activeMaterial = 'all';
+let sortMode = 'style'; // 'style' or 'price'
 let viewMode = 'cards';  // 'cards' | 'table'
 let page = 0;
 const PAGE_SIZE = 60;
