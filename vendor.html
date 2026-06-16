@@ -1692,7 +1692,7 @@ function filteredItems(){
   if (activeCat !== 'all'){
     const KNOWN_CATS = ['Baby Pant','Baby Romper','Baby Suit','Baby Top'];
     if(activeCat === 'Others'){
-      rows = rows.filter(it=>!KNOWN_CATS.includes((it.category||'').trim()) && (it.category||'').trim() !== '');
+      rows = rows.filter(it=>!KNOWN_CATS.includes((it.category||'').trim()));
     } else {
       rows = rows.filter(it=>(it.category||'').trim() === activeCat.trim());
     }
@@ -1713,7 +1713,8 @@ function filteredItems(){
 
 /* ══ CHIPS ══ */
 function getCategories(){
-  const s=new Set(); allItems().forEach(it=>{if(it.category)s.add(it.category);}); return [...s].sort();
+  // Fixed clean category list — not auto-generated from data to avoid typo chips
+  return ['Baby Pant','Baby Romper','Baby Suit','Baby Top','Others'];
 }
 function normMaterial(m){
   const s = (m||'').toLowerCase().trim();
@@ -1754,12 +1755,7 @@ function renderChips(){
   // Use data-val attributes to avoid quote issues in innerHTML onclick
   cc.innerHTML = cats.length
     ? `<button class="chip${activeCat==='all'?' on':''}" data-cat="all">All types</button>`
-      + cats.map(c=>`<button class="chip${activeCat===c?' on':''}" data-cat="${c.replace(/"/g,'')}">${c.replace('Baby ','')}</button>`).join('')
-      + (()=>{
-          const KNOWN_CATS = ['Baby Pant','Baby Romper','Baby Suit','Baby Top'];
-          const hasOthers = allItems_().some(it=>!KNOWN_CATS.includes((it.category||'').trim()) && (it.category||'').trim() !== '');
-          return hasOthers ? `<button class="chip${activeCat==='Others'?' on':''}" data-cat="Others">Others</button>` : '';
-        })()
+      + cats.map(cat=>`<button class="chip${activeCat===cat?' on':''}" data-cat="${cat.replace(/"/g,'')}">${cat.replace('Baby ','')}</button>`).join('')
     : '';
 
   sc.innerHTML = seasons.length > 1
