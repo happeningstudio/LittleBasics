@@ -1411,9 +1411,14 @@ function renderPOGallery(){
 
   // Collect all items
   let items = [];
+  const savedImgs = loadLocal('lb_vendor_imgs', {});
   vendors.forEach(v=>{
     if(_poVendorFilter && v.id!==_poVendorFilter) return;
-    v.items.forEach(it=>items.push({...it,_vendorId:v.id,_vendorName:v.name}));
+    v.items.forEach(it=>{
+      // Restore image if missing
+      const img = it.img || savedImgs[it.id] || '';
+      items.push({...it, img, _vendorId:v.id, _vendorName:v.name});
+    });
   });
 
   // Search filter
@@ -1473,10 +1478,11 @@ function togglePOItem(vendorId, itemId){
 function renderPOOrderPanel(){
   const po = getActivePO(); if(!po) return;
   const scroll = document.getElementById('poOrderScroll'); if(!scroll) return;
+  const savedImgs2 = loadLocal('lb_vendor_imgs', {});
 
   const itemRows = po.items.map(it=>`
     <div class="po-item-row">
-      ${it.img ? `<img class="po-item-thumb" src="${it.img}" loading="lazy">` : '<div class="po-item-thumb" style="display:flex;align-items:center;justify-content:center;color:#ccc;font-size:.9rem">📦</div>'}
+      ${(it.img||savedImgs2[it.id]) ? `<img class="po-item-thumb" src="${it.img||savedImgs2[it.id]}" loading="lazy">` : '<div class="po-item-thumb" style="display:flex;align-items:center;justify-content:center;color:#ccc;font-size:.9rem">📦</div>'}
       <div class="po-item-info">
         <div class="po-item-style">${esc(it.styleNo)}</div>
         <div class="po-item-sub">${esc(it.price||'')}${it.category?' · '+esc(it.category):''}</div>
