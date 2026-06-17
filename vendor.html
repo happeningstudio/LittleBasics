@@ -1435,7 +1435,7 @@ function renderPOGallery(){
     v.items.forEach(it=>{
       // Restore image if missing
       const img = it.img || savedImgs[it.id] || '';
-      items.push({...it, img, _vendorId:v.id, _vendorName:v.name});
+      if(!it.hidden) items.push({...it, img, _vendorId:v.id, _vendorName:v.name});
     });
   });
 
