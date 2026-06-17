@@ -1388,7 +1388,13 @@ function changePOQty(itemId, delta){
   // Update line total
   const totalEl = document.getElementById('pototal-'+itemId);
   if(totalEl){
-    const unitPrice = cleanPrice(it.price);
+    let qPrice = it.price;
+    if(!qPrice || cleanPrice(qPrice)===0){
+      const qv = getVendor(it.vendorId);
+      const qvit = qv?.items.find(i=>i.id===it.id);
+      if(qvit?.price){ qPrice = qvit.price; it.price = qPrice; savePOLocal(); }
+    }
+    const unitPrice = cleanPrice(qPrice);
     totalEl.innerHTML = '$'+unitPrice.toFixed(2)+' × '+it.qty+' = <strong>$'+(unitPrice*it.qty).toFixed(2)+'</strong>';
   }
   // Update order item count
@@ -1513,7 +1519,14 @@ function renderPOOrderPanel(){
 
   const itemRows = po.items.map(it=>{
     const img = it.img||savedImgs2[it.id]||'';
-    const unitPrice = cleanPrice(it.price);
+    // Try to get price from vendor catalog if not stored on PO item
+    let priceVal = it.price;
+    if(!priceVal || cleanPrice(priceVal)===0){
+      const v = getVendor(it.vendorId);
+      const vit = v?.items.find(i=>i.id===it.id);
+      if(vit?.price) { priceVal = vit.price; it.price = priceVal; }
+    }
+    const unitPrice = cleanPrice(priceVal);
     const qty = it.qty||1;
     const lineTotal = (unitPrice * qty).toFixed(2);
     return `
@@ -1568,11 +1581,21 @@ function exportPOPdf(){
   savePO();
   const savedImgs3 = loadLocal('lb_vendor_imgs', {});
   const totalUnits = po.items.reduce((s,i)=>s+(i.qty||1),0);
-  const totalValue = po.items.reduce((s,i)=>s+cleanPrice(i.price)*(i.qty||1),0);
+  const totalValue = po.items.reduce((s,i)=>{
+    let p = i.price;
+    if(!p || cleanPrice(p)===0){ const vv=getVendor(i.vendorId); const vvit=vv?.items.find(x=>x.id===i.id); if(vvit?.price) p=vvit.price; }
+    return s+cleanPrice(p)*(i.qty||1);
+  },0);
 
   const rows = po.items.map((it,i)=>{
     const img = it.img||savedImgs3[it.id]||'';
-    const unitPrice = cleanPrice(it.price);
+    let pVal = it.price;
+    if(!pVal || cleanPrice(pVal)===0){
+      const vv = getVendor(it.vendorId);
+      const vvit = vv?.items.find(i=>i.id===it.id);
+      if(vvit?.price) pVal = vvit.price;
+    }
+    const unitPrice = cleanPrice(pVal);
     const qty = it.qty||1;
     const lineTotal = (unitPrice*qty).toFixed(2);
     // Format sizes as one per line like vendor format
