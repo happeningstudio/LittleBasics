@@ -1378,9 +1378,18 @@ function changePOQty(itemId, delta){
   it.qty = Math.max(0, (it.qty||1)+delta);
   if(it.qty===0){ removePOItem(itemId); return; }
   savePOLocal();
+  // Update qty display
   const el = document.getElementById('poqty-'+itemId);
   if(el) el.textContent = it.qty;
-  // update gallery qty badge
+  // Update line total
+  const totalEl = document.getElementById('pototal-'+itemId);
+  if(totalEl){
+    const unitPrice = parseFloat(it.price)||0;
+    totalEl.innerHTML = '$'+unitPrice.toFixed(2)+' × '+it.qty+' = <strong>$'+(unitPrice*it.qty).toFixed(2)+'</strong>';
+  }
+  // Update order item count
+  const countEl = document.getElementById('poItemCount');
+  if(countEl) countEl.textContent = po.items.length+' item'+(po.items.length!==1?'s':'');
   renderPOGallery();
 }
 
@@ -1521,7 +1530,7 @@ function renderPOOrderPanel(){
               <span class="po-qval" id="poqty-${it.id}">${qty}</span>
               <button class="po-qb" onclick="changePOQty('${it.id}',1)">+</button>
             </div>
-            <div class="po-item-total">$${unitPrice.toFixed(2)} × ${qty} = <strong>$${lineTotal}</strong></div>
+            <div class="po-item-total" id="pototal-${it.id}">$${unitPrice.toFixed(2)} × ${qty} = <strong>$${lineTotal}</strong></div>
           </div>
         </div>
         <button class="po-del-btn" onclick="removePOItem('${it.id}')" style="align-self:flex-start;margin-top:-.15rem">✕</button>
