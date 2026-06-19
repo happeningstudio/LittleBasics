@@ -584,6 +584,7 @@ tr.selected td{background:rgba(139,115,85,.07)!important}
         <div class="po-order-head">
           <span style="font-size:.78rem;font-weight:600;color:var(--ink)" id="poTitleDisplay">Purchase Order</span>
           <span id="poItemCount" style="font-size:.68rem;color:#aaa"></span>
+          <span id="poOrderTotal" style="font-size:.82rem;font-weight:700;color:var(--bark);margin-left:auto"></span>
         </div>
         <div class="po-order-scroll" id="poOrderScroll">
           <div class="po-order-empty">Select a purchase order or create a new one</div>
@@ -1375,6 +1376,18 @@ function updatePOItem(itemId, field, val){
 }
 
 
+function updatePOTotal(){
+  const po = getActivePO(); if(!po) return;
+  const total = po.items.reduce((s,it)=>{
+    let p = it.price;
+    if(!p || cleanPrice(p)===0){ const v=getVendor(it.vendorId); const vit=v?.items.find(i=>i.id===it.id); if(vit?.price) p=vit.price; }
+    return s + cleanPrice(p)*(it.qty||1);
+  },0);
+  const units = po.items.reduce((s,it)=>s+(it.qty||1),0);
+  const el = document.getElementById('poOrderTotal');
+  if(el) el.textContent = po.items.length ? units+' units · $'+total.toFixed(2)+' total' : '';
+}
+
 function cleanPrice(p){ return parseFloat(String(p||'0').replace(/[^0-9.]/g,''))||0; }
 function changePOQty(itemId, delta){
   const po = getActivePO(); if(!po) return;
@@ -1400,6 +1413,7 @@ function changePOQty(itemId, delta){
   // Update order item count
   const countEl = document.getElementById('poItemCount');
   if(countEl) countEl.textContent = po.items.length+' item'+(po.items.length!==1?'s':'');
+  updatePOTotal();
   renderPOGallery();
 }
 
@@ -1427,6 +1441,7 @@ function renderPOEditor(){
 
   document.getElementById('poTitleDisplay').textContent = po.name;
   document.getElementById('poItemCount').textContent = po.items.length+' item'+(po.items.length!==1?'s':'');
+  updatePOTotal();
 
   renderPOGallery();
   renderPOOrderPanel();
