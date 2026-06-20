@@ -330,14 +330,7 @@ tr.selected td{background:rgba(139,115,85,.07)!important}
 .po-item-total{font-size:.8rem;font-weight:600;color:var(--bark)}
 .po-item-card-body{padding:.4rem .75rem .65rem;border-top:1px solid #f0ebe5;background:var(--mist)}
 .po-item-label{font-size:.6rem;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:#bbb;margin-bottom:.2rem;margin-top:.35rem}
-.po-size-grid{display:flex;flex-wrap:wrap;gap:.3rem;margin-bottom:.4rem}
-.po-size-row{display:flex;align-items:center;gap:.25rem;background:var(--white);border:1px solid var(--border);border-radius:4px;padding:.2rem .35rem}
-.po-size-lbl{font-size:.65rem;color:#888;min-width:32px}
-.po-size-input{width:36px;border:none;border-bottom:1px solid var(--border);background:transparent;font-size:.72rem;font-family:'DM Sans',sans-serif;color:var(--ink);text-align:center;padding:.05rem 0}
-.po-size-input:focus{outline:none;border-bottom-color:var(--bark)}
-.po-color-input{flex:1;border:none;border-bottom:1px solid var(--border);background:transparent;font-size:.72rem;font-family:'DM Sans',sans-serif;color:var(--ink);padding:.05rem .2rem;min-width:80px}
-.po-color-input:focus{outline:none;border-bottom-color:var(--bark)}
-.po-item-breakdown{width:100%;border:1px solid var(--border);border-radius:4px;padding:.25rem .4rem;font-size:.72rem;font-family:'DM Sans',sans-serif;color:var(--ink);background:var(--white);resize:none;min-height:44px;line-height:1.6}
+.po-item-breakdown{width:100%;border:1px solid var(--border);border-radius:4px;padding:.35rem .5rem;font-size:.75rem;font-family:'DM Sans',sans-serif;color:var(--ink);background:var(--white);resize:vertical;min-height:72px;line-height:1.8}
 .po-item-breakdown:focus{outline:none;border-color:var(--bark)}
 .po-qty-row{display:flex;align-items:center;gap:.5rem}
 .po-qty-label{font-size:.68rem;color:#888}
@@ -1421,12 +1414,9 @@ function buildPOSummary(po){
     // Category totals
     byCat[cat] = (byCat[cat]||0) + qty;
 
-    // Use structured sizeQtys if available
-    if(it.sizeQtys && Object.keys(it.sizeQtys).length){
-      Object.entries(it.sizeQtys).forEach(([sz,q])=>{
-        if(sizeOrder.includes(sz) && q>0) bySize[sz]=(bySize[sz]||0)+q;
-      });
-    }
+    // Size breakdown: just count total qty against sizes listed (no per-size breakdown)
+    const availSizes = (it.sizes||it.sizeNote||'').match(/\b(60|70|73|80|90|100|110|120|130)\b/g)||[];
+    if(availSizes.length){ availSizes.forEach(sz=>{ bySize[sz]=(bySize[sz]||0); }); }
   });
 
   // Render category breakdown
@@ -1443,7 +1433,7 @@ function buildPOSummary(po){
     .join('');
   const sizeTotal = Object.values(bySize).reduce((s,v)=>s+v,0);
 
-  return `<div class="po-summary" id="poSummaryBlock">
+  return `<div class="po-summary">
     <div class="po-summary-title">Order Breakdown</div>
     <div class="po-summary-grid">
       <div class="po-summary-col">
@@ -1460,44 +1450,8 @@ function buildPOSummary(po){
   </div>`;
 }
 
-function setSizeQty(itemId, size, val){
-  const po = getActivePO(); if(!po) return;
-  const it = po.items.find(i=>i.id===itemId); if(!it) return;
-  if(!it.sizeQtys) it.sizeQtys={};
-  it.sizeQtys[size] = Math.max(0, parseInt(val)||0);
-  // Update total qty from sum of size qtys
-  const total = Object.values(it.sizeQtys).reduce((s,v)=>s+v,0);
-  if(total > 0){
-    it.qty = total;
-    const qEl = document.getElementById('poqty-'+itemId);
-    if(qEl) qEl.textContent = total;
-    const tEl = document.getElementById('pototal-'+itemId);
-    if(tEl){
-      let p=it.price; if(!p||cleanPrice(p)===0){const v=getVendor(it.vendorId);const vit=v?.items.find(i=>i.id===itemId);if(vit?.price)p=vit.price;}
-      const up=cleanPrice(p);
-      tEl.innerHTML='$'+up.toFixed(2)+' × '+total+' = <strong>$'+(up*total).toFixed(2)+'</strong>';
-    }
-  }
-  savePOLocal();
-  updatePOTotal();
-  updatePOSummary();
-}
 
-function adjustSizeQty(itemId, size, delta){
-  const po = getActivePO(); if(!po) return;
-  const it = po.items.find(i=>i.id===itemId); if(!it) return;
-  if(!it.sizeQtys) it.sizeQtys={};
-  it.sizeQtys[size] = Math.max(0, (it.sizeQtys[size]||0)+delta);
-  const inp = document.getElementById('psz-'+itemId+'-'+size);
-  if(inp) inp.value = it.sizeQtys[size];
-  setSizeQty(itemId, size, it.sizeQtys[size]);
-}
 
-function updatePOSummary(){
-  const po = getActivePO(); if(!po) return;
-  const el = document.getElementById('poSummaryBlock');
-  if(el) el.outerHTML = buildPOSummary(po);
-}
 function cleanPrice(p){ return parseFloat(String(p||'0').replace(/[^0-9.]/g,''))||0; }
 function changePOQty(itemId, delta){
   const po = getActivePO(); if(!po) return;
@@ -1677,27 +1631,8 @@ function renderPOOrderPanel(){
         </div>
       </div>
       <div class="po-item-card-body">
-        <div class="po-item-label" style="margin-bottom:.35rem">Qty by Size</div>
-        <div class="po-size-grid">
-          ${(()=>{
-            // Parse sizes from sizes field — extract cm numbers
-            const sizeOrder=['60','70','73','80','90','100','110','120','130'];
-            const rawSizes = (it.sizeNote||it.sizes||'');
-            const found = rawSizes.match(/\b(60|70|73|80|90|100|110|120|130)\b/g)||[];
-            const sizes = [...new Set(found)].sort((a,b)=>parseInt(a)-parseInt(b));
-            const sizeQtys = it.sizeQtys||{};
-            if(!sizes.length) return '<span style="font-size:.68rem;color:#bbb">No sizes found — check item sizes field</span>';
-            return sizes.map(sz=>`
-              <div class="po-size-row">
-                <span class="po-size-lbl">${sz}cm</span>
-                <button class="po-qb" style="width:16px;height:16px;font-size:.6rem" onclick="adjustSizeQty('${it.id}','${sz}',-1)">−</button>
-                <input class="po-size-input" id="psz-${it.id}-${sz}" type="number" min="0" value="${sizeQtys[sz]||0}" onchange="setSizeQty('${it.id}','${sz}',this.value)">
-                <button class="po-qb" style="width:16px;height:16px;font-size:.6rem" onclick="adjustSizeQty('${it.id}','${sz}',1)">+</button>
-              </div>`).join('');
-          })()}
-        </div>
-        <div class="po-item-label" style="margin-top:.35rem;margin-bottom:.2rem">Color / Notes</div>
-        <input class="po-color-input" style="width:100%;border:1px solid var(--border);border-radius:4px;padding:.25rem .4rem;font-size:.72rem;font-family:'DM Sans',sans-serif" placeholder="e.g. brown ×2, khaki ×1…" value="${esc(it.notes||'')}" onchange="updatePOItem('${it.id}','notes',this.value)">
+        <div class="po-item-label">Size & Color Breakdown / Notes</div>
+        <textarea class="po-item-breakdown" placeholder="e.g. brown 80x1 90x3, khaki 100x2…" onchange="updatePOItem('${it.id}','notes',this.value)">${esc(it.notes||'')}</textarea>
       </div>
     </div>`;
   }).join('');
@@ -1821,9 +1756,10 @@ function exportPOPdf(){
         ${(()=>{
           const bySize={};const sOrd=['60','70','73','80','90','100','110','120','130'];
           po.items.forEach(it=>{
-            if(it.sizeQtys){
-              Object.entries(it.sizeQtys).forEach(([sz,q])=>{ if(sOrd.includes(sz)&&q>0) bySize[sz]=(bySize[sz]||0)+q; });
-            }
+            const src = it.notes||it.sizes||'';
+            [...src.matchAll(/(\d{2,3})\s*(?:cm)?\s*[x×*]\s*(\d+)/gi)].forEach(m=>{
+              if(sOrd.includes(m[1])) bySize[m[1]]=(bySize[m[1]]||0)+(parseInt(m[2])||0);
+            });
           });
           const entries=sOrd.filter(s=>bySize[s]>0);
           if(!entries.length) return '<div style="font-size:9px;color:#bbb">Add size breakdown in notes to see totals</div>';
