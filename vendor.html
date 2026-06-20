@@ -1632,7 +1632,9 @@ function renderPOOrderPanel(){
       </div>
       <div class="po-item-card-body">
         <div class="po-item-label">Size & Color Breakdown / Notes</div>
-        <textarea class="po-item-breakdown" placeholder="e.g. brown 80x1 90x3, khaki 100x2…" onchange="updatePOItem('${it.id}','notes',this.value)">${esc(it.notes||'')}</textarea>
+        <textarea class="po-item-breakdown" placeholder="e.g.
+80: brown x2, pink x1
+90: brown x3, khaki x2" oninput="updatePOItem('${it.id}','notes',this.value)">${esc(it.notes||'')}</textarea>
       </div>
     </div>`;
   }).join('');
