@@ -25,6 +25,27 @@ body{font-family:'DM Sans',sans-serif;background:var(--mist);color:var(--ink);fo
 .topbar{height:var(--top);background:var(--white);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 1.25rem;position:sticky;top:0;z-index:400;gap:1rem}
 .topbar-logo{height:28px;display:block}
 .tab-rail{display:flex;background:var(--mist);border:1px solid var(--border);border-radius:6px;overflow:hidden}
+
+/* PENDING ORDERS */
+.pending-card{background:#fff;border:1px solid var(--border);border-radius:8px;margin-bottom:.75rem;overflow:hidden}
+.pending-card-head{display:flex;align-items:center;justify-content:space-between;padding:.6rem .85rem;background:var(--sand-lt);border-bottom:1px solid var(--border)}
+.pending-card-time{font-size:.65rem;color:#aaa}
+.pending-card-body{padding:.75rem .85rem}
+.pending-item-row{display:flex;align-items:center;gap:.5rem;padding:.3rem 0;border-bottom:.5px solid #f5f1ed;font-size:.78rem;color:var(--ink)}
+.pending-item-row:last-child{border-bottom:none}
+.pending-item-thumb{width:38px;height:38px;object-fit:cover;border-radius:4px;background:var(--sand-lt);flex-shrink:0}
+.pending-item-info{flex:1}
+.pending-item-name{font-weight:500;font-size:.75rem}
+.pending-item-meta{font-size:.65rem;color:#aaa}
+.pending-item-price{font-size:.72rem;font-weight:600;color:var(--bark)}
+.pending-card-foot{display:flex;align-items:center;justify-content:space-between;padding:.55rem .85rem;border-top:1px solid var(--border);background:#fafaf9}
+.pending-fulfillment{font-size:.68rem;color:#888}
+.pending-total{font-size:.82rem;font-weight:700;color:var(--ink)}
+.pending-btns{display:flex;gap:.4rem}
+.pending-accept{padding:.28rem .65rem;border:none;border-radius:4px;background:var(--green);color:#fff;font-size:.7rem;font-weight:600;cursor:pointer;font-family:inherit}
+.pending-dismiss{padding:.28rem .65rem;border:1px solid var(--border);border-radius:4px;background:#fff;color:#aaa;font-size:.7rem;cursor:pointer;font-family:inherit}
+.pending-empty{text-align:center;padding:3rem 1rem;color:#bbb;font-size:.85rem}
+.pending-bundle-tag{display:inline-block;font-size:.6rem;background:#f5f0e8;color:#8b7355;border:1px solid #d4c5b9;border-radius:3px;padding:.08rem .3rem;margin-left:.3rem;vertical-align:middle;font-weight:600}
 .tab-btn{padding:.34rem .85rem;font-family:'DM Sans',sans-serif;font-size:.73rem;font-weight:500;border:none;background:transparent;cursor:pointer;color:#999;transition:all .15s;white-space:nowrap}
 .tab-btn:hover{color:var(--bark);background:var(--sand-lt)}
 .tab-btn.active{background:var(--bark);color:var(--white)}
@@ -677,6 +698,7 @@ function doPost(e) {
     <button class="tab-btn" onclick="switchView('analytics')">📈 Analytics</button>
     <button class="tab-btn" onclick="switchView('ship')">🚚 Shipments</button>
     <button class="tab-btn" onclick="switchView('mgr')">⚙️ Products</button>
+    <button class="tab-btn" id="pendingTabBtn" onclick="switchView('pending')">🛍 Pending <span id="pendingBadge" style="display:none;background:#b84040;color:#fff;font-size:.55rem;border-radius:8px;padding:.05rem .28rem;margin-left:.2rem;vertical-align:middle">0</span></button>
   </div>
   <div class="topbar-right">
     <span class="badge" id="topBadge" style="display:none"></span>
@@ -767,6 +789,7 @@ function doPost(e) {
         </div>
         <div class="two-col">
           <div class="field"><label>Fee ($)</label><input type="number" id="fFee" step="0.01" oninput="updatePanel()"></div>
+          <div class="field"><label>Discount ($)</label><input type="number" id="fDiscount" step="0.01" min="0" placeholder="0" oninput="updatePanel()"></div>
           <div class="field"><label>Payment</label>
             <select id="fPayment"><option>Venmo</option><option>PayPal</option><option>Zelle</option><option>Cash</option></select>
           </div>
@@ -849,6 +872,22 @@ function doPost(e) {
 </div>
 
 <!-- ══ ORDER LOG ══ -->
+
+<!-- PENDING ORDERS VIEW -->
+<div class="view" id="view-pending" style="display:none">
+  <div style="height:auto;min-height:calc(100vh - var(--top));padding:.6rem .75rem">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem;flex-wrap:wrap;gap:.4rem">
+      <div style="font-size:.7rem;font-weight:600;color:#aaa;text-transform:uppercase;letter-spacing:.07em">Pending Orders from Catalog Bag</div>
+      <div style="display:flex;gap:.4rem">
+        <button class="btn sm" onclick="pullPendingOrders()" style="font-size:.7rem">↓ Refresh</button>
+        <button class="btn sm" onclick="clearDismissedPending()" style="font-size:.7rem;color:#aaa">Clear Dismissed</button>
+      </div>
+    </div>
+    <div id="pendingList">
+      <div class="pending-empty">No pending orders yet.<br>Orders submitted from the catalog bag will appear here.</div>
+    </div>
+  </div>
+</div>
 <div class="view" id="view-log">
   <div style="padding:.75rem 1.25rem;height:calc(100vh - var(--top));display:flex;flex-direction:column;overflow:hidden;gap:.4rem">
     <div style="display:flex;align-items:center;gap:.4rem;flex-wrap:wrap;flex-shrink:0">
@@ -1400,6 +1439,7 @@ function switchView(v){
   if(v==='analytics') renderAnalytics();
   if(v==='ship')      renderShipments();
   if(v==='mgr')       renderMgr();
+  if(v==='pending'){  renderPendingOrders(); pullPendingOrders(); }
 }
 
 function setFilter(el,type){
@@ -1667,15 +1707,20 @@ function updatePanel(){
   const shipIn=parseFloat(document.getElementById('fShipIn').value)||0;
   const shipOut=parseFloat(document.getElementById('fShipOut').value)||0;
   const fee=parseFloat(document.getElementById('fFee').value)||0;
-  const profit=revenue+shipIn-cost-shipOut-fee;
+  const discount=parseFloat(document.getElementById('fDiscount').value)||0;
+  const profit=revenue+shipIn-cost-shipOut-fee-discount;
   const margin=revenue>0?((profit/revenue)*100).toFixed(1):null;
 
   document.getElementById('sItems').textContent=tqty;
-  document.getElementById('sRevenue').textContent=fmt(revenue);
+  document.getElementById('sRevenue').textContent=discount>0?fmt(revenue-discount)+' (−'+fmt(discount)+')'  :fmt(revenue);
   document.getElementById('sCost').textContent=fmt(cost);
   document.getElementById('sShipIn').textContent=fmt(shipIn);
   document.getElementById('sShipOut').textContent=fmt(shipOut);
   document.getElementById('sFee').textContent=fmt(fee);
+  const discRow=document.getElementById('discountRow');
+  if(discRow) discRow.style.display=discount>0?'':'none';
+  const sDisc=document.getElementById('sDiscount');
+  if(sDisc) sDisc.textContent='−'+fmt(discount);
   document.getElementById('sMargin').textContent=margin?margin+'%':'—';
   const profEl=document.getElementById('sProfit');
   profEl.textContent=fmt(profit);
@@ -1704,7 +1749,7 @@ function updatePanel(){
   const phraseSec=document.getElementById('orderPhraseSec');
   const phraseEl=document.getElementById('orderPhrase');
   if(tqty>0&&phraseEl){
-    const totalForCustomer=revenue+shipIn;
+    const totalForCustomer=revenue+shipIn-discount;
     // Savings = regular price total minus what they actually pay (captures bundle + sale discounts)
     let regularTotal=0;
     entries.forEach(([k,qty])=>{
@@ -1736,7 +1781,7 @@ function updatePanel(){
         return p.name+' ('+toDisplayShort(cm)+') x'+qty;
       }).filter(Boolean).join('\n');
       const shipIn=parseFloat(document.getElementById('fShipIn').value)||0;
-      const totalForCustomer=revenue+shipIn;
+      const totalForCustomer=revenue+shipIn-discount;
       let msg=itemLines+'\n\nThe total is '+fmt(totalForCustomer)+' including shipping and tracking.';
       if(saved>0.009&&bundle) msg+=' You saved '+fmt(saved)+' with the bundle discount!';
       msgBox.style.whiteSpace='pre-wrap';
@@ -1780,7 +1825,8 @@ async function copyAndSave(){
   const shipIn=parseFloat(document.getElementById('fShipIn').value)||0;
   const shipOut=parseFloat(document.getElementById('fShipOut').value)||0;
   const fee=parseFloat(document.getElementById('fFee').value)||0;
-  const profit=revenue+shipIn-cost-shipOut-fee;
+  const discount=parseFloat(document.getElementById('fDiscount').value)||0;
+  const profit=revenue+shipIn-cost-shipOut-fee-discount;
   const gross=revenue+shipIn;
   const status=document.getElementById('fStatus').value;
   const name=document.getElementById('fName').value;
@@ -1849,7 +1895,7 @@ async function copyAndSave(){
 
 function clearOrder(){
   Object.keys(order).forEach(k=>delete order[k]);
-  ['fName','fAddress','fTracking','fShipIn','fShipOut','fFee','fNotes'].forEach(id=>document.getElementById(id).value='');
+  ['fName','fAddress','fTracking','fShipIn','fShipOut','fFee','fDiscount','fNotes'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('fDate').value=(()=>{ const t=new Date(); return t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0'); })();
   document.getElementById('fStatus').value='Paid';
   document.getElementById('fPayment').value='Venmo';
@@ -3496,6 +3542,7 @@ function draftFields(){
     shipIn:   document.getElementById('fShipIn')?.value||'',
     shipOut:  document.getElementById('fShipOut')?.value||'',
     fee:      document.getElementById('fFee')?.value||'',
+    discount: document.getElementById('fDiscount')?.value||'',
     notes:    document.getElementById('fNotes')?.value||'',
     date:     document.getElementById('fDate')?.value||'',
     status:   document.getElementById('fStatus')?.value||'Paid',
@@ -3816,6 +3863,133 @@ function normDate(d){
   return s;
 }
 
+
+/* ══ PENDING ORDERS ══ */
+let pendingOrders = loadLocal('lb_pending_orders', []);
+
+function savePending(){ saveLocal('lb_pending_orders', pendingOrders); }
+
+function updatePendingBadge(){
+  const active = pendingOrders.filter(o=>!o.dismissed).length;
+  const badge = document.getElementById('pendingBadge');
+  if(badge){
+    badge.textContent = active;
+    badge.style.display = active > 0 ? 'inline' : 'none';
+  }
+}
+
+async function pullPendingOrders(){
+  try {
+    const res = await sheetRead('PendingOrders');
+    if(!res || res.length < 2){ showToast('No pending orders in sheet'); return; }
+    let added = 0;
+    res.slice(1).forEach(row=>{
+      const [timestamp, itemsRaw, subtotal, fulfillment, zip, isBundle, message] = row;
+      if(!timestamp) return;
+      const existing = pendingOrders.find(o=>o.timestamp===timestamp);
+      if(existing) return; // already have it
+      let items = [];
+      try { items = JSON.parse(itemsRaw||'[]'); } catch(e){}
+      pendingOrders.unshift({
+        id: 'po_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),
+        timestamp,
+        items,
+        subtotal: parseFloat(subtotal)||0,
+        fulfillment: fulfillment||'pickup',
+        zip: zip||'',
+        isBundle: isBundle==='true'||isBundle===true,
+        message: message||'',
+        dismissed: false
+      });
+      added++;
+    });
+    savePending();
+    renderPendingOrders();
+    updatePendingBadge();
+    showToast(added > 0 ? '✓ '+added+' new pending order'+(added>1?'s':'')+' loaded' : 'Up to date');
+  } catch(e){
+    showToast('Could not load pending orders');
+  }
+}
+
+function renderPendingOrders(){
+  const el = document.getElementById('pendingList'); if(!el) return;
+  const active = pendingOrders.filter(o=>!o.dismissed);
+  if(!active.length){
+    el.innerHTML = '<div class="pending-empty">No pending orders yet.<br>Orders submitted from the catalog bag will appear here.</div>';
+    return;
+  }
+  el.innerHTML = active.map(o=>{
+    const dt = new Date(o.timestamp);
+    const dateStr = dt.toLocaleDateString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+    const itemRows = (o.items||[]).map(it=>`
+      <div class="pending-item-row">
+        <div class="pending-item-info">
+          <div class="pending-item-name">${escHtml(it.name||'')}${o.isBundle?'<span class="pending-bundle-tag">Bundle</span>':''}</div>
+          <div class="pending-item-meta">${escHtml(it.color||'')}${it.color&&it.size?' · ':''}${escHtml(it.size||'')}</div>
+        </div>
+        <div class="pending-item-price">$${(parseFloat(it.price)||0).toFixed(2)}</div>
+      </div>`).join('');
+
+    const fulfillText = o.fulfillment==='shipping'
+      ? '📦 Shipping to '+( o.zip||'—')
+      : '📍 Local Pickup';
+
+    return `<div class="pending-card" id="pcard-${o.id}">
+      <div class="pending-card-head">
+        <div style="font-size:.78rem;font-weight:600;color:var(--ink)">${o.items?.length||0} item${(o.items?.length||0)!==1?'s':''}</div>
+        <div class="pending-card-time">${dateStr}</div>
+      </div>
+      <div class="pending-card-body">${itemRows}</div>
+      <div class="pending-card-foot">
+        <div>
+          <div class="pending-fulfillment">${fulfillText}</div>
+          <div class="pending-total">$${(o.subtotal||0).toFixed(2)} total</div>
+        </div>
+        <div class="pending-btns">
+          <button class="pending-accept" onclick="acceptPending('${o.id}')">✓ Start Order</button>
+          <button class="pending-dismiss" onclick="dismissPending('${o.id}')">Dismiss</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function acceptPending(id){
+  const o = pendingOrders.find(x=>x.id===id); if(!o) return;
+  // Pre-fill the order builder with customer's items
+  // Switch to orders tab and populate customer name field
+  switchView('order');
+  // Fill notes with the order details
+  const notes = (o.items||[]).map(it=>`${it.name}${it.color?' ('+it.color+')':''} — ${it.size}`).join('\n');
+  const notesEl = document.getElementById('fNotes');
+  if(notesEl) notesEl.value = notes;
+  // Fill fulfillment note
+  const addrEl = document.getElementById('fAddress');
+  if(addrEl) addrEl.value = o.fulfillment==='shipping' ? 'SHIP TO ZIP: '+o.zip : 'LOCAL PICKUP';
+  showToast('Order details copied to order builder — add items manually');
+  // Mark as dismissed
+  o.dismissed = true;
+  savePending();
+  updatePendingBadge();
+}
+
+function dismissPending(id){
+  const o = pendingOrders.find(x=>x.id===id); if(!o) return;
+  o.dismissed = true;
+  savePending();
+  renderPendingOrders();
+  updatePendingBadge();
+}
+
+function clearDismissedPending(){
+  pendingOrders = pendingOrders.filter(o=>!o.dismissed);
+  savePending();
+  renderPendingOrders();
+  showToast('Cleared dismissed orders');
+}
+
+/* Auto-pull pending on load */
 /* ── BOOT ── */
 renderTable(); updatePanel();
 if(sheetUrl){
@@ -3850,6 +4024,8 @@ if(sheetUrl){
   })();
 } else setSyncStatus('','local');
 updateDraftBadge();
+updatePendingBadge();
+pullPendingOrders();
 startAutoSave();
 </script>
 </body>
