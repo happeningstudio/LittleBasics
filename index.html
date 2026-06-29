@@ -1000,35 +1000,37 @@ function openSelector(productName){
 
   document.getElementById('selProductName').textContent = p.name;
 
-  // Build color options — one per pid (color variant)
-  // Need to map pids back to individual sheet products
   const colorSel = document.getElementById('selColor');
   colorSel.innerHTML = '';
 
-  // Get all sheet variants for this product name
-  const variants = _allSheetProducts ? _allSheetProducts.filter(x=>x.name===p.name) : [];
+  // variants from flat sheet — use .id (not .pid)
+  const variants = (_allSheetProducts||[]).filter(x=>x.name===productName);
+
   if(variants.length){
     variants.forEach(v=>{
-      // Check if this color has ANY stock in any size
-      const hasAnyStock = p.sizes.some((_,i)=>{
-        const cm = p.sizesCm[i];
-        const key = v.pid+'_'+cm;
-        return stockData[key] === undefined || stockData[key] > 0;
+      // Check stock across this variant's own sizes
+      const hasAnyStock = (v.sizesCm||[]).some(cm=>{
+        const key = String(v.id)+'_'+String(cm);
+        return !(key in stockData) || stockData[key] > 0;
       });
       const opt = document.createElement('option');
-      opt.value = v.pid;
-      opt.textContent = hasAnyStock ? (v.color||'Default') : (v.color||'Default')+' — out of stock';
+      opt.value = String(v.id);
+      opt.textContent = hasAnyStock
+        ? (v.color||'Default')
+        : (v.color||'Default')+' — out of stock';
       if(!hasAnyStock){ opt.disabled = true; opt.style.color='#ccc'; }
       colorSel.appendChild(opt);
     });
-    // Select first in-stock color
-    const firstAvailColor = colorSel.querySelector('option:not(:disabled)');
-    if(firstAvailColor) firstAvailColor.selected = true;
+    // Auto-select first available color
+    const firstAvail = colorSel.querySelector('option:not(:disabled)');
+    if(firstAvail) firstAvail.selected = true;
+    else colorSel.options[0].selected = true;
   } else {
-    p.pids.forEach((pid,i)=>{
+    // Fallback: no sheet data — use grouped product pids
+    (p.pids||[]).forEach(pid=>{
       const opt = document.createElement('option');
-      opt.value = pid;
-      opt.textContent = p.color || 'Default';
+      opt.value = String(pid);
+      opt.textContent = p.color||'Default';
       colorSel.appendChild(opt);
     });
   }
@@ -1044,48 +1046,47 @@ function closeSelector(){
 
 function updateSizeOptions(){
   const p = _selectorProduct; if(!p) return;
-  const pid = parseInt(document.getElementById('selColor').value);
+  const pidStr = document.getElementById('selColor').value;
+  const pid = parseInt(pidStr);
   const sizeSel = document.getElementById('selSize');
   sizeSel.innerHTML = '';
 
-  // Find this color variant's price
-  const variant = _allSheetProducts ? _allSheetProducts.find(x=>x.pid===pid) : null;
-  const isBundle = bag.length >= 4; // will be 5th item
-  const price = isBundle ? (variant?.bundlePrice||p.bundlePrice||p.price) : (variant?.price||p.price);
+  // Find this specific variant from sheet data (use .id not .pid)
+  const variant = (_allSheetProducts||[]).find(x=>x.id===pid);
+  const isBundle = bag.length >= 4;
+  const price = isBundle
+    ? (variant?.bundlePrice||p.bundlePrice||p.price)
+    : (variant?.price||p.price);
   const ul = (variant?.unit||p.unit||'ea')==='ea'?'/ea':'/set';
   document.getElementById('selProductPrice').textContent = `$${price}${ul}`;
 
-  // Build size options — check stock per size
-  const CM_ORDER = ['60','70','73','80','90','100','110','120','130'];
-  const sizes = p.sizes;
-  const sizesCm = p.sizesCm;
+  // Use this variant's own sizes/sizesCm — not the grouped product's
+  const sizes    = variant?.sizes    || p.sizes    || [];
+  const sizesCm  = variant?.sizesCm  || p.sizesCm  || [];
 
   sizes.forEach((label,i)=>{
-    const cm = sizesCm[i];
-    // Check stock across all pids that match this color
-    const key = pid+'_'+cm;
+    const cm  = String(sizesCm[i]||'');
+    const key = String(pid)+'_'+cm;
     const stock = stockData[key];
-    // stock undefined = no data (show as available), 0 = sold out
-    const inStock = stock === undefined || stock > 0;
-    if(!inStock) return; // skip sold-out sizes entirely from dropdown
+    // Only show if in stock (undefined = no tracking = treat as available)
+    const inStock = !(key in stockData) || stock > 0;
+    if(!inStock) return; // hide sold-out sizes
     const opt = document.createElement('option');
     opt.value = label+'|'+cm;
     opt.textContent = label;
     sizeSel.appendChild(opt);
   });
-  // If no sizes available, show message
+
   if(sizeSel.options.length === 0){
     const opt = document.createElement('option');
     opt.textContent = 'All sizes sold out';
     opt.disabled = true;
     sizeSel.appendChild(opt);
+    document.getElementById('selAdd').disabled = true;
+  } else {
+    sizeSel.options[0].selected = true;
+    document.getElementById('selAdd').disabled = false;
   }
-
-  // Select first available
-  const firstAvail = sizeSel.querySelector('option:not(:disabled)');
-  if(firstAvail) firstAvail.selected = true;
-
-  document.getElementById('selAdd').disabled = !firstAvail;
 }
 
 function confirmAddToBag(){
@@ -1096,7 +1097,7 @@ function confirmAddToBag(){
   const [size, sizeCm] = sizeVal.split('|');
 
   // Get color name and image
-  const variant = _allSheetProducts ? _allSheetProducts.find(x=>x.pid===pid) : null;
+  const variant = (_allSheetProducts||[]).find(x=>x.id===pid) || null;
   const colorName = variant?.color || p.color || '';
   const image = variant?.image || p.image || '';
   const isBundle = bag.length >= 4;
