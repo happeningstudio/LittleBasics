@@ -586,10 +586,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica','Arial'
   <div class="selector-modal">
     <h4 id="selProductName"></h4>
     <div class="selector-subtitle" id="selProductPrice"></div>
-    <span class="sel-label">Color / Pattern</span>
-    <select class="sel-select" id="selColor" onchange="updateSizeOptions()"></select>
     <span class="sel-label">Size</span>
-    <select class="sel-select" id="selSize"></select>
+    <select class="sel-select" id="selSize" onchange="updateColorOptions()"></select>
+    <span class="sel-label">Color / Pattern</span>
+    <select class="sel-select" id="selColor"></select>
     <div class="selector-btns">
       <button class="sel-cancel" onclick="closeSelector()">Cancel</button>
       <button class="sel-add" id="selAdd" onclick="confirmAddToBag()">Add to Bag</button>
@@ -1114,77 +1114,38 @@ function openSelector(productName){
 
   document.getElementById('selProductName').textContent = p.name;
 
-  const colorSel = document.getElementById('selColor');
-  colorSel.innerHTML = '';
-
-  // variants from flat sheet — use .id (not .pid)
+  // Get all variants for this product
   const variants = (_allSheetProducts||[]).filter(x=>x.name===productName);
 
-  if(variants.length){
-    variants.forEach(v=>{
-      // Check stock across this variant's own sizes
-      const hasAnyStock = (v.sizesCm||[]).some(cm=>{
-        const key = String(v.id)+'_'+String(cm);
-        return !(key in stockData) || stockData[key] > 0;
-      });
-      const opt = document.createElement('option');
-      opt.value = String(v.id);
-      opt.textContent = hasAnyStock
-        ? (v.color||'Default')
-        : (v.color||'Default')+' — out of stock';
-      if(!hasAnyStock){ opt.disabled = true; opt.style.color='#ccc'; }
-      colorSel.appendChild(opt);
-    });
-    // Auto-select first available color
-    const firstAvail = colorSel.querySelector('option:not(:disabled)');
-    if(firstAvail) firstAvail.selected = true;
-    else colorSel.options[0].selected = true;
-  } else {
-    // Fallback: no sheet data — use grouped product pids
-    (p.pids||[]).forEach(pid=>{
-      const opt = document.createElement('option');
-      opt.value = String(pid);
-      opt.textContent = p.color||'Default';
-      colorSel.appendChild(opt);
-    });
-  }
-
-  updateSizeOptions();
-  document.getElementById('selectorOverlay').classList.add('open');
-}
-
-function closeSelector(){
-  document.getElementById('selectorOverlay').classList.remove('open');
-  _selectorProduct = null;
-}
-
-function updateSizeOptions(){
-  const p = _selectorProduct; if(!p) return;
-  const pidStr = document.getElementById('selColor').value;
-  const pid = parseInt(pidStr);
+  // Collect all unique sizes across all variants that have any stock
   const sizeSel = document.getElementById('selSize');
   sizeSel.innerHTML = '';
 
-  // Find this specific variant from sheet data (use .id not .pid)
-  const variant = (_allSheetProducts||[]).find(x=>x.id===pid);
-  const isBundle = bag.length >= 4;
-  const price = isBundle
-    ? (variant?.bundlePrice||p.bundlePrice||p.price)
-    : (variant?.price||p.price);
-  const ul = (variant?.unit||p.unit||'ea')==='ea'?'/ea':'/set';
-  document.getElementById('selProductPrice').textContent = `$${price}${ul}`;
+  // Build a master size list from all variants
+  const sizeMap = {}; // label -> {cm, hasStock}
+  if(variants.length){
+    variants.forEach(v=>{
+      (v.sizes||[]).forEach((label,i)=>{
+        const cm = String(v.sizesCm?.[i]||'');
+        const key = String(v.id)+'_'+cm;
+        const inStock = !(key in stockData) || stockData[key] > 0;
+        if(!sizeMap[label]) sizeMap[label] = {cm, hasStock: false};
+        if(inStock) sizeMap[label].hasStock = true;
+      });
+    });
+  } else {
+    // Fallback from grouped product
+    (p.sizes||[]).forEach((label,i)=>{
+      const cm = String(p.sizesCm?.[i]||'');
+      sizeMap[label] = {cm, hasStock: true};
+    });
+  }
 
-  // Use this variant's own sizes/sizesCm — not the grouped product's
-  const sizes    = variant?.sizes    || p.sizes    || [];
-  const sizesCm  = variant?.sizesCm  || p.sizesCm  || [];
-
-  sizes.forEach((label,i)=>{
-    const cm  = String(sizesCm[i]||'');
-    const key = String(pid)+'_'+cm;
-    const stock = stockData[key];
-    // Only show if in stock (undefined = no tracking = treat as available)
-    const inStock = !(key in stockData) || stock > 0;
-    if(!inStock) return; // hide sold-out sizes
+  // Populate size dropdown — only in-stock sizes
+  const SIZE_ORDER = ['3-6M','6-12M','12-24M','1T','2T','3T','4T','5T','NB','OS'];
+  const sizeEntries = Object.entries(sizeMap);
+  sizeEntries.forEach(([label, {cm, hasStock}])=>{
+    if(!hasStock) return; // hide out of stock sizes
     const opt = document.createElement('option');
     opt.value = label+'|'+cm;
     opt.textContent = label;
@@ -1201,12 +1162,70 @@ function updateSizeOptions(){
     sizeSel.options[0].selected = true;
     document.getElementById('selAdd').disabled = false;
   }
+
+  // Now populate colors based on selected size
+  updateColorOptions();
+  document.getElementById('selectorOverlay').classList.add('open');
+}
+
+function closeSelector(){
+  document.getElementById('selectorOverlay').classList.remove('open');
+  _selectorProduct = null;
+}
+
+function updateColorOptions(){
+  const p = _selectorProduct; if(!p) return;
+  const sizeVal = document.getElementById('selSize').value;
+  const [selectedSize, selectedCm] = sizeVal ? sizeVal.split('|') : ['',''];
+  const colorSel = document.getElementById('selColor');
+  colorSel.innerHTML = '';
+
+  const variants = (_allSheetProducts||[]).filter(x=>x.name===p.name);
+
+  if(variants.length && selectedCm){
+    variants.forEach(v=>{
+      // Check if this color has stock in the selected size
+      const key = String(v.id)+'_'+String(selectedCm);
+      const inStock = !(key in stockData) || stockData[key] > 0;
+      // Only show colors that have this size
+      const hasSize = (v.sizesCm||[]).some(cm=>String(cm)===String(selectedCm));
+      if(!hasSize) return;
+      const opt = document.createElement('option');
+      opt.value = String(v.id);
+      opt.textContent = inStock
+        ? (v.color||'Default')
+        : (v.color||'Default')+' — out of stock';
+      if(!inStock){ opt.disabled = true; opt.style.color='#ccc'; }
+      colorSel.appendChild(opt);
+    });
+    // Auto-select first available
+    const firstAvail = colorSel.querySelector('option:not(:disabled)');
+    if(firstAvail) firstAvail.selected = true;
+  } else {
+    (p.pids||[]).forEach(pid=>{
+      const opt = document.createElement('option');
+      opt.value = String(pid);
+      opt.textContent = p.color||'Default';
+      colorSel.appendChild(opt);
+    });
+  }
+
+  // Update price display based on selected color
+  const pid = parseInt(colorSel.value)||0;
+  const variant = (_allSheetProducts||[]).find(x=>x.id===pid);
+  const isBundle = bag.length >= 4;
+  const price = isBundle
+    ? (variant?.bundlePrice||p.bundlePrice||p.price)
+    : (variant?.price||p.price);
+  const ul = (variant?.unit||p.unit||'ea')==='ea'?'/ea':'/set';
+  document.getElementById('selProductPrice').textContent = `$${price}${ul}`;
+  document.getElementById('selAdd').disabled = !colorSel.querySelector('option:not(:disabled)');
 }
 
 function confirmAddToBag(){
   const p = _selectorProduct; if(!p) return;
-  const pid = parseInt(document.getElementById('selColor').value);
   const sizeVal = document.getElementById('selSize').value;
+  const pid = parseInt(document.getElementById('selColor').value);
   if(!sizeVal) return;
   const [size, sizeCm] = sizeVal.split('|');
 
