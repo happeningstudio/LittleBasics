@@ -1419,7 +1419,7 @@ async function submitBag(){
         contactLine,
         items: bag.map(item=>({
           name:item.name, color:item.colorName, size:item.size,
-          price: isBundle?(item.bundlePrice||item.price):item.price, unit:item.unit
+          price: isBundle?(item.bundlePrice||item.price):item.price, unit:item.unit, image:item.image||''
         })),
         subtotal: total.toFixed(2),
         fulfillment,
@@ -1429,11 +1429,36 @@ async function submitBag(){
       })
     });
   } catch(e){ console.log('Sheet post failed silently', e); }
+
+  // Notify via ntfy.sh
+  await sendNtfyNotification(contactLine, bag.length, (total+shipFee).toFixed(2), fulfillment);
 }
 
 /* Keep reference to flat sheet products for color/variant lookup */
 let _allSheetProducts = null;
 
+
+/* ── NTFY.SH NOTIFICATION ── */
+const NTFY_TOPIC = 'lb-pendingorder-noti-1988';
+
+async function sendNtfyNotification(contactLine, itemCount, total, fulfillment){
+  if(!NTFY_TOPIC || NTFY_TOPIC === 'YOUR_TOPIC_HERE') return;
+  try {
+    await fetch('https://ntfy.sh/' + NTFY_TOPIC, {
+      method: 'POST',
+      headers: {
+        'Title': '🛍 New Little Basics Order',
+        'Priority': 'high',
+        'Tags': 'shopping'
+      },
+      body: [
+        'From: ' + contactLine,
+        itemCount + ' item' + (itemCount!==1?'s':'') + ' · $' + total,
+        fulfillment==='pickup' ? '📍 Local Pickup' : '📦 Shipping'
+      ].join('\n')
+    });
+  } catch(e){ console.log('ntfy failed silently', e); }
+}
 /* ── CAROUSEL ── */
 let _carouselIdx = 0;
 const CAROUSEL_INTERVAL = 5000;
