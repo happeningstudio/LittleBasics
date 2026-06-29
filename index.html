@@ -158,10 +158,21 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica','Arial'
 }
 
 /* ── SHOPPING BAG ── */
+.bag-shipping-row{display:flex;align-items:center;justify-content:space-between;padding:.35rem 0;font-size:.75rem;color:var(--color-text-secondary,#666)}
+.bag-shipping-fee{font-weight:600;color:#221c13}
+.bag-zip-wrap{position:relative;margin-top:.35rem}
+.bag-zip-zone{position:absolute;right:.5rem;top:50%;transform:translateY(-50%);font-size:.6rem;font-weight:600;padding:.1rem .3rem;border-radius:3px;display:none}
+.bag-zip-zone.ca{background:#e8f4e8;color:#2d7a4a;display:block}
+.bag-zip-zone.west{background:#e8f0f8;color:#2a6db5;display:block}
+.bag-zip-zone.us{background:#f5f0e8;color:#8b7355;display:block}
+.bag-total-row{display:flex;justify-content:space-between;align-items:center;padding:.25rem 0;font-size:.78rem}
+.bag-total-row.grand{border-top:1px solid #e5e5e5;margin-top:.3rem;padding-top:.5rem}
+.bag-total-row.grand .bag-subtotal-label{font-weight:600;color:#221c13}
+.bag-total-row.grand .bag-subtotal-val{font-size:1.05rem;font-weight:700;color:#221c13}
+
 .bag-btn{position:relative;display:flex;align-items:center;gap:.35rem;padding:.35rem .7rem;border:1px solid #d4c5b9;background:#fff;border-radius:.4rem;cursor:pointer;font-size:.78rem;color:#5a5a5a;font-family:inherit;transition:all .15s;flex-shrink:0}
 .bag-btn:hover{border-color:#8b7355;color:#8b7355}
-.bag-count{position:absolute;top:-6px;right:-6px;background:#8b7355;color:#fff;font-size:.55rem;font-weight:700;border-radius:10px;padding:.05rem .28rem;min-width:16px;text-align:center;display:none}
-.bag-count.on{display:block}
+.bag-count{font-weight:700;color:#8b7355}
 
 /* Bag drawer */
 .bag-overlay{position:fixed;inset:0;background:rgba(0,0,0,.25);z-index:400;display:none}
@@ -296,8 +307,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica','Arial'
 
     <!-- Bag button -->
     <button class="bag-btn" onclick="openBag()" style="margin-left:auto">
-      🛍 Bag
-      <span class="bag-count" id="bagCount">0</span>
+      Bag (<span id="bagCount">0</span>)
     </button>
 
     <!-- Mobile filter toggle -->
@@ -409,6 +419,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica','Arial'
     <h3>🛍 Shopping Bag</h3>
     <button class="bag-close" onclick="closeBag()">✕</button>
   </div>
+  <div style="padding:.6rem 1rem;border-bottom:1px solid #e5e5e5;flex-shrink:0">
+    <label style="font-size:.65rem;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:#bbb;display:block;margin-bottom:.25rem">Your Name *</label>
+    <input id="bagCustomerName" placeholder="e.g. Jessica" style="width:100%;padding:.35rem .5rem;border:1px solid #d4c5b9;border-radius:.4rem;font-size:.82rem;font-family:inherit;box-sizing:border-box" oninput="updateSubmitBtn()">
+  </div>
   <div class="bag-items" id="bagItems">
     <div class="bag-empty">Your bag is empty.<br>Add items from the catalog!</div>
   </div>
@@ -421,12 +435,32 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica','Arial'
       <button class="f-opt active" id="fOptPickup" onclick="setFulfillment('pickup')">📍 Local Pickup</button>
       <button class="f-opt" id="fOptShip" onclick="setFulfillment('shipping')">📦 Shipping</button>
     </div>
-    <input class="bag-zip" id="bagZip" placeholder="Enter your ZIP code…" oninput="updateBagTotal()">
+    <div id="bagShipDetails" style="display:none">
+      <div class="bag-zip-wrap">
+        <input class="bag-zip show" id="bagZip" placeholder="Enter your ZIP code…" oninput="updateBagTotal()" maxlength="5" style="padding-right:4.5rem">
+<!-- zone label hidden from customer -->
+      </div>
+      <div class="bag-shipping-row" id="bagShipRow" style="display:none">
+        <span>Estimated shipping</span>
+        <span class="bag-shipping-fee" id="bagShipFee"></span>
+      </div>
+    </div>
   </div>
   <div class="bag-footer">
-    <div class="bag-subtotal">
-      <span class="bag-subtotal-label">Subtotal</span>
-      <span class="bag-subtotal-val" id="bagSubtotal">$0.00</span>
+    <div class="bag-total-row">
+      <span class="bag-subtotal-label">Items subtotal</span>
+      <span id="bagSubtotal">$0.00</span>
+    </div>
+    <div class="bag-total-row" id="bagShipTotalRow" style="display:none">
+      <span class="bag-subtotal-label">Shipping</span>
+      <span id="bagShipTotal" class="bag-shipping-fee"></span>
+    </div>
+    <div class="bag-total-row grand">
+      <span class="bag-subtotal-label">Total</span>
+      <span class="bag-subtotal-val" id="bagGrandTotal">$0.00</span>
+    </div>
+    <div style="font-size:.72rem;color:#8b7355;text-align:center;line-height:1.5;margin-bottom:.5rem;padding:.4rem .5rem;background:#faf6f2;border-radius:.4rem;border:1px solid #e8ddd4">
+      Let us know what you need — we'll check inventory and finalize your order! 🧡
     </div>
     <button class="bag-submit" id="bagSubmit" onclick="submitBag()" disabled>Submit Order Draft</button>
     <div class="bag-copied" id="bagCopied"></div>
@@ -914,6 +948,39 @@ let bag = []; // [{product, colorPid, colorName, size, sizeCm, price, image}]
 let fulfillment = 'pickup';
 let _selectorProduct = null;
 
+
+/* ── SHIPPING CALCULATOR ── */
+const SHIP_FROM_ZIP = '90230'; // Little Basics location
+
+function getZipZone(zip){
+  if(!zip || zip.length < 5) return null;
+  const z = parseInt(zip.substring(0,3));
+  // California: 900-961
+  if(z >= 900 && z <= 961) return 'ca';
+  // West: AZ(850-865), NV(889-891), OR(970-979), WA(980-994), UT(840-847), CO(800-816), ID(832-838), MT(590-599), WY(820-831), NM(870-884), HI(967-968), AK(995-999)
+  const westRanges = [[850,865],[889,891],[970,979],[980,994],[840,847],[800,816],[832,838],[590,599],[820,831],[870,884],[967,968],[995,999]];
+  if(westRanges.some(([lo,hi])=>z>=lo&&z<=hi)) return 'west';
+  return 'us';
+}
+
+function getShippingFee(zip, itemCount){
+  const zone = getZipZone(zip);
+  if(!zone) return null;
+
+  // [CA, West, Rest of US]
+  let tier;
+  if(itemCount <= 4)       tier = [8, 9, 10];
+  else if(itemCount <= 7)  tier = [9, 10, 11];
+  else if(itemCount <= 10) tier = [10, 11, 12];
+  else                     tier = [12, 13, 14];
+
+  const zoneIdx = {ca:0, west:1, us:2}[zone];
+  return { fee: tier[zoneIdx], zone };
+}
+
+function getZoneLabel(zone){
+  return {ca:'California', west:'West US', us:'Rest of US'}[zone]||'';
+}
 /* ── Open / Close ── */
 function openBag(){
   document.getElementById('bagDrawer').classList.add('open');
@@ -942,13 +1009,22 @@ function openSelector(productName){
   const variants = _allSheetProducts ? _allSheetProducts.filter(x=>x.name===p.name) : [];
   if(variants.length){
     variants.forEach(v=>{
+      // Check if this color has ANY stock in any size
+      const hasAnyStock = p.sizes.some((_,i)=>{
+        const cm = p.sizesCm[i];
+        const key = v.pid+'_'+cm;
+        return stockData[key] === undefined || stockData[key] > 0;
+      });
       const opt = document.createElement('option');
       opt.value = v.pid;
-      opt.textContent = v.color || 'Default';
+      opt.textContent = hasAnyStock ? (v.color||'Default') : (v.color||'Default')+' — out of stock';
+      if(!hasAnyStock){ opt.disabled = true; opt.style.color='#ccc'; }
       colorSel.appendChild(opt);
     });
+    // Select first in-stock color
+    const firstAvailColor = colorSel.querySelector('option:not(:disabled)');
+    if(firstAvailColor) firstAvailColor.selected = true;
   } else {
-    // Fallback — use pids from grouped product
     p.pids.forEach((pid,i)=>{
       const opt = document.createElement('option');
       opt.value = pid;
@@ -986,16 +1062,24 @@ function updateSizeOptions(){
 
   sizes.forEach((label,i)=>{
     const cm = sizesCm[i];
+    // Check stock across all pids that match this color
     const key = pid+'_'+cm;
-    const stock = stockData[key] !== undefined ? stockData[key] : null;
+    const stock = stockData[key];
+    // stock undefined = no data (show as available), 0 = sold out
+    const inStock = stock === undefined || stock > 0;
+    if(!inStock) return; // skip sold-out sizes entirely from dropdown
     const opt = document.createElement('option');
     opt.value = label+'|'+cm;
-    const inStock = stock === null || stock > 0;
-    opt.textContent = inStock ? label : label+' (sold out)';
-    opt.disabled = !inStock;
-    if(!inStock) opt.style.color = '#ccc';
+    opt.textContent = label;
     sizeSel.appendChild(opt);
   });
+  // If no sizes available, show message
+  if(sizeSel.options.length === 0){
+    const opt = document.createElement('option');
+    opt.textContent = 'All sizes sold out';
+    opt.disabled = true;
+    sizeSel.appendChild(opt);
+  }
 
   // Select first available
   const firstAvail = sizeSel.querySelector('option:not(:disabled)');
@@ -1044,6 +1128,7 @@ function renderBag(){
   if(!bag.length){
     el.innerHTML = '<div class="bag-empty">Your bag is empty.<br>Add items from the catalog!</div>';
     document.getElementById('bagSubmit').disabled = true;
+  updateSubmitBtn();
     document.getElementById('bagBundle').classList.remove('show');
     document.getElementById('bagSubtotal').textContent = '$0.00';
     return;
@@ -1067,7 +1152,7 @@ function renderBag(){
   }).join('');
 
   updateBagTotal();
-  document.getElementById('bagSubmit').disabled = false;
+  updateSubmitBtn();
 }
 
 function removeFromBag(id){
@@ -1082,19 +1167,56 @@ function recalcBagPrices(){
   // Nothing to change on the item — price recalc happens in renderBag
 }
 
+function updateSubmitBtn(){
+  const name = document.getElementById('bagCustomerName')?.value.trim()||'';
+  const btn = document.getElementById('bagSubmit');
+  if(btn) btn.disabled = !bag.length || !name;
+}
+
 function updateBagCount(){
   const badge = document.getElementById('bagCount');
-  badge.textContent = bag.length;
-  badge.classList.toggle('on', bag.length>0);
+  if(badge) badge.textContent = bag.length;
 }
 
 function updateBagTotal(){
   const isBundle = bag.length >= 5;
-  const total = bag.reduce((s,item)=>{
+  const subtotal = bag.reduce((s,item)=>{
     const price = isBundle ? (item.bundlePrice||item.price) : item.price;
     return s + price;
   }, 0);
-  document.getElementById('bagSubtotal').textContent = '$'+total.toFixed(2);
+  document.getElementById('bagSubtotal').textContent = '$'+subtotal.toFixed(2);
+
+  // Shipping
+  let shipFee = 0;
+  const shipRow = document.getElementById('bagShipRow');
+  const shipTotalRow = document.getElementById('bagShipTotalRow');
+  const shipFeeEl = document.getElementById('bagShipFee');
+  const shipTotalEl = document.getElementById('bagShipTotal');
+
+  if(fulfillment === 'shipping'){
+    const zip = document.getElementById('bagZip')?.value.trim()||'';
+    const result = getShippingFee(zip, bag.length);
+    if(result){
+      shipFee = result.fee;
+      const label = getZoneLabel(result.zone);
+      if(shipRow){ shipRow.style.display='flex'; }
+      if(shipFeeEl) shipFeeEl.textContent = '$'+shipFee.toFixed(2);
+      if(shipTotalRow) shipTotalRow.style.display='flex';
+      if(shipTotalEl) shipTotalEl.textContent = '$'+shipFee.toFixed(2);
+      // zone label hidden
+    } else {
+      if(shipRow) shipRow.style.display='none';
+      if(shipTotalRow) shipTotalRow.style.display='none';
+      // zone label hidden
+    }
+  } else {
+    if(shipRow) shipRow.style.display='none';
+    if(shipTotalRow) shipTotalRow.style.display='none';
+    if(zoneEl) zoneEl.className='bag-zip-zone';
+  }
+
+  const grand = subtotal + shipFee;
+  document.getElementById('bagGrandTotal').textContent = '$'+grand.toFixed(2);
 }
 
 /* ── Fulfillment ── */
@@ -1102,12 +1224,15 @@ function setFulfillment(type){
   fulfillment = type;
   document.getElementById('fOptPickup').classList.toggle('active', type==='pickup');
   document.getElementById('fOptShip').classList.toggle('active', type==='shipping');
-  document.getElementById('bagZip').classList.toggle('show', type==='shipping');
+  document.getElementById('bagShipDetails').style.display = type==='shipping' ? '' : 'none';
+  updateBagTotal();
 }
 
 /* ── Submit ── */
 async function submitBag(){
   if(!bag.length) return;
+  const customerName = document.getElementById('bagCustomerName')?.value.trim()||'';
+  if(!customerName){ alert('Please enter your name so we know who to expect!'); return; }
   const isBundle = bag.length >= 5;
   const zip = document.getElementById('bagZip').value.trim();
   if(fulfillment==='shipping' && !zip){ alert('Please enter your ZIP code for shipping.'); return; }
@@ -1117,8 +1242,11 @@ async function submitBag(){
     return s + price;
   }, 0);
 
+  const shipResult = fulfillment==='shipping' ? getShippingFee(zip, bag.length) : null;
+  const shipFee = shipResult ? shipResult.fee : 0;
+  const zoneLabel = shipResult ? getZoneLabel(shipResult.zone) : '';
   const fulfillmentLine = fulfillment==='shipping'
-    ? `📦 Shipping to ZIP: ${zip}`
+    ? `📦 Shipping to ZIP: ${zip} (${zoneLabel}) — Est. $${shipFee.toFixed(2)}`
     : '📍 Local Pickup';
 
   // Build clean message
@@ -1129,12 +1257,14 @@ async function submitBag(){
   }).join('\n');
 
   const msg = [
-    '🛍 Little Basics Order Draft',
+    `🛍 Little Basics Order Draft — ${customerName}`,
     '─────────────────────────',
     itemLines,
     '─────────────────────────',
     `${isBundle?'✓ Bundle price applied (5+ items)':''}`,
-    `Subtotal: $${total.toFixed(2)}`,
+    `Items: $${total.toFixed(2)}`,
+    shipFee>0?`Shipping: $${shipFee.toFixed(2)}`:'',
+    `Total: $${(total+shipFee).toFixed(2)}`,
     fulfillmentLine,
     '',
     'Please confirm availability and payment details. Thank you! 🧡'
@@ -1163,6 +1293,7 @@ async function submitBag(){
       method:'POST',
       body: JSON.stringify({
         timestamp: new Date().toISOString(),
+        customerName,
         items: bag.map(item=>({
           name:item.name, color:item.colorName, size:item.size,
           price: isBundle?(item.bundlePrice||item.price):item.price, unit:item.unit
