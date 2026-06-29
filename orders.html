@@ -3885,35 +3885,45 @@ function updatePendingBadge(){
 async function pullPendingOrders(){
   try {
     const res = await sheetRead('PendingOrders');
-    if(!res || res.length < 2){ showToast('No pending orders in sheet'); return; }
+    if(!res || res.length < 2){
+      renderPendingOrders();
+      return;
+    }
     let added = 0;
-    res.slice(1).forEach(row=>{
-      const [timestamp, customerName, itemsRaw, subtotal, fulfillment, zip, isBundle, shippingFee, message] = row;
+    // Row format: [timestamp, contactLine, itemsJSON, grandTotal, fulfillment, zip, isBundle, shippingFee, status]
+    res.slice(0).forEach(row=>{
+      if(!row || !row[0]) return;
+      const [timestamp, contactLine, itemsRaw, grandTotal, fulfillment, zip, isBundleFlag, shippingFee, status] = row;
       if(!timestamp) return;
-      const existing = pendingOrders.find(o=>o.timestamp===timestamp);
-      if(existing) return; // already have it
+      // Skip already dismissed/completed
+      const existing = pendingOrders.find(o=>o.timestamp===String(timestamp));
+      if(existing) return;
       let items = [];
       try { items = JSON.parse(itemsRaw||'[]'); } catch(e){}
+      const shipFee = parseFloat(shippingFee)||0;
+      const total   = parseFloat(grandTotal)||0;
       pendingOrders.unshift({
-        id: 'po_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),
-        timestamp,
-        customerName: String(customerName||''),
+        id:          'po_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),
+        timestamp:   String(timestamp),
+        contactLine: String(contactLine||''),
+        customerName:String(contactLine||''),
         items,
-        subtotal: parseFloat(subtotal)||0,
-        fulfillment: fulfillment||'pickup',
-        zip: zip||'',
-        isBundle: isBundle==='true'||isBundle===true,
-        shippingFee: parseFloat(shippingFee)||0,
-        message: message||'',
-        dismissed: false
+        subtotal:    total - shipFee,
+        fulfillment: String(fulfillment||'pickup'),
+        zip:         String(zip||''),
+        isBundle:    isBundleFlag==='1'||isBundleFlag===true,
+        shippingFee: shipFee,
+        status:      String(status||'pending'),
+        dismissed:   false
       });
       added++;
     });
     savePending();
     renderPendingOrders();
     updatePendingBadge();
-    showToast(added > 0 ? '✓ '+added+' new pending order'+(added>1?'s':'')+' loaded' : 'Up to date');
+    if(added > 0) showToast('✓ '+added+' new pending order'+(added>1?'s':'')+' loaded');
   } catch(e){
+    console.error('pullPendingOrders error:', e);
     showToast('Could not load pending orders');
   }
 }
@@ -3935,6 +3945,9 @@ function renderPendingOrders(){
     const pickRows = (o.items||[]).map((it,idx)=>`
       <div class="pending-item-row" id="pick-${o.id}-${idx}">
         <div class="pending-pick-num">${idx+1}</div>
+        ${it.image
+          ? `<img src="${it.image}" style="width:44px;height:44px;object-fit:cover;border-radius:5px;flex-shrink:0" onerror="this.style.display='none'">`
+          : '<div style="width:44px;height:44px;border-radius:5px;background:var(--sand-lt);flex-shrink:0"></div>'}
         <div class="pending-item-info">
           <div class="pending-item-name">${escHtml(it.name||'')}</div>
           <div class="pending-item-meta">
@@ -3961,7 +3974,7 @@ function renderPendingOrders(){
     return `<div class="pending-card" id="pcard-${o.id}">
       <div class="pending-card-head">
         <div>
-          <div style="font-size:.82rem;font-weight:700;color:var(--ink)">${o.customerName?escHtml(o.customerName)+' — ':''  }${itemCount} item${itemCount!==1?'s':''} ${o.isBundle?'<span class="pending-bundle-tag">Bundle deal</span>':''}</div>
+          <div style="font-size:.82rem;font-weight:700;color:var(--ink)">${o.contactLine?escHtml(o.contactLine)+' — ':(o.customerName?escHtml(o.customerName)+' — ':'')}${itemCount} item${itemCount!==1?'s':''} ${o.isBundle?'<span class="pending-bundle-tag">Bundle deal</span>':''}</div>
           <div class="pending-card-time">${dateStr}</div>
         </div>
         <div style="text-align:right">
