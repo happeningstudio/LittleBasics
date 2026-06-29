@@ -156,6 +156,78 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica','Arial'
   .grid{column-count:1}
   .product-name{font-size:.78rem}
 }
+
+/* ── SHOPPING BAG ── */
+.bag-btn{position:relative;display:flex;align-items:center;gap:.35rem;padding:.35rem .7rem;border:1px solid #d4c5b9;background:#fff;border-radius:.4rem;cursor:pointer;font-size:.78rem;color:#5a5a5a;font-family:inherit;transition:all .15s;flex-shrink:0}
+.bag-btn:hover{border-color:#8b7355;color:#8b7355}
+.bag-count{position:absolute;top:-6px;right:-6px;background:#8b7355;color:#fff;font-size:.55rem;font-weight:700;border-radius:10px;padding:.05rem .28rem;min-width:16px;text-align:center;display:none}
+.bag-count.on{display:block}
+
+/* Bag drawer */
+.bag-overlay{position:fixed;inset:0;background:rgba(0,0,0,.25);z-index:400;display:none}
+.bag-overlay.open{display:block}
+.bag-drawer{position:fixed;top:0;right:0;width:min(420px,100vw);height:100vh;background:#fff;z-index:401;display:flex;flex-direction:column;box-shadow:-4px 0 24px rgba(0,0,0,.12);transform:translateX(100%);transition:transform .22s ease}
+.bag-drawer.open{transform:translateX(0)}
+.bag-head{display:flex;align-items:center;justify-content:space-between;padding:.85rem 1rem;border-bottom:1px solid #e5e5e5;flex-shrink:0}
+.bag-head h3{font-size:1rem;font-weight:600;color:#221c13}
+.bag-close{background:none;border:none;font-size:1.2rem;cursor:pointer;color:#aaa;padding:.2rem}
+.bag-items{flex:1;overflow-y:auto;padding:.75rem 1rem}
+.bag-empty{text-align:center;padding:3rem 1rem;color:#bbb;font-size:.85rem}
+.bag-item{display:flex;gap:.65rem;padding:.65rem 0;border-bottom:.5px solid #f0ebe5}
+.bag-item:last-child{border-bottom:none}
+.bag-item-img{width:60px;height:60px;object-fit:cover;border-radius:6px;flex-shrink:0;background:#f5f1ed}
+.bag-item-info{flex:1;min-width:0}
+.bag-item-name{font-size:.78rem;font-weight:600;color:#221c13;margin-bottom:.18rem;line-height:1.3}
+.bag-item-meta{font-size:.68rem;color:#8b7355;margin-bottom:.25rem}
+.bag-item-price{font-size:.75rem;color:#423727;font-weight:500}
+.bag-item-remove{background:none;border:none;cursor:pointer;color:#ccc;font-size:.8rem;padding:.2rem;flex-shrink:0;transition:color .15s}
+.bag-item-remove:hover{color:#b84040}
+
+/* Bundle banner */
+.bag-bundle{background:#faf6f2;border:1px solid #d4c5b9;border-radius:.4rem;padding:.5rem .75rem;margin:.5rem 0;font-size:.75rem;color:#8b7355;text-align:center;display:none}
+.bag-bundle.show{display:block}
+.bag-bundle strong{font-weight:600}
+
+/* Fulfillment */
+.bag-fulfillment{padding:.65rem 1rem;border-top:1px solid #e5e5e5;flex-shrink:0}
+.bag-fulfillment-title{font-size:.68rem;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:#bbb;margin-bottom:.45rem}
+.fulfillment-opts{display:flex;gap:.4rem;margin-bottom:.5rem;flex-wrap:wrap}
+.f-opt{flex:1;min-width:120px;padding:.4rem .6rem;border:1.5px solid #d4c5b9;border-radius:.4rem;cursor:pointer;font-size:.75rem;color:#5a5a5a;background:#fff;font-family:inherit;transition:all .15s;text-align:center}
+.f-opt:hover{border-color:#8b7355}
+.f-opt.active{border-color:#8b7355;background:#8b7355;color:#fff;font-weight:600}
+.bag-zip{width:100%;padding:.32rem .5rem;border:1px solid #d4c5b9;border-radius:.4rem;font-size:.78rem;font-family:inherit;margin-top:.35rem;display:none}
+.bag-zip.show{display:block}
+.bag-zip:focus{outline:none;border-color:#8b7355}
+
+/* Footer */
+.bag-footer{padding:.75rem 1rem;border-top:1px solid #e5e5e5;flex-shrink:0}
+.bag-subtotal{display:flex;justify-content:space-between;align-items:center;margin-bottom:.55rem}
+.bag-subtotal-label{font-size:.78rem;color:#aaa}
+.bag-subtotal-val{font-size:1.1rem;font-weight:700;color:#221c13}
+.bag-submit{width:100%;padding:.65rem;background:#8b7355;color:#fff;border:none;border-radius:.5rem;font-size:.85rem;font-weight:600;cursor:pointer;font-family:inherit;transition:background .15s}
+.bag-submit:hover{background:#7a6448}
+.bag-submit:disabled{background:#d4c5b9;cursor:not-allowed}
+.bag-copied{text-align:center;font-size:.7rem;color:#2d7a4a;margin-top:.4rem;min-height:1em;font-weight:500}
+
+/* Add to bag button on card */
+.add-to-bag-btn{width:100%;margin-top:.5rem;padding:.32rem;border:1px solid #d4c5b9;border-radius:.35rem;background:#fff;color:#8b7355;font-size:.72rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s}
+.add-to-bag-btn:hover{background:#8b7355;color:#fff;border-color:#8b7355}
+
+/* Product selector modal */
+.selector-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:500;display:none;align-items:center;justify-content:center;padding:1rem}
+.selector-overlay.open{display:flex}
+.selector-modal{background:#fff;border-radius:.75rem;padding:1.25rem;width:100%;max-width:360px;box-shadow:0 8px 32px rgba(0,0,0,.18)}
+.selector-modal h4{font-size:.92rem;font-weight:700;color:#221c13;margin-bottom:.15rem}
+.selector-subtitle{font-size:.72rem;color:#aaa;margin-bottom:.85rem}
+.sel-label{font-size:.65rem;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:#bbb;margin-bottom:.28rem;margin-top:.6rem;display:block}
+.sel-select{width:100%;padding:.38rem .5rem;border:1px solid #d4c5b9;border-radius:.4rem;font-size:.82rem;font-family:inherit;background:#fff;color:#221c13;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='5'%3E%3Cpath d='M0 0l4.5 5L9 0z' fill='%23bbb'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right .5rem center;padding-right:1.5rem}
+.sel-select:focus{outline:none;border-color:#8b7355}
+.sel-select option:disabled{color:#ccc}
+.selector-btns{display:flex;gap:.5rem;margin-top:1rem}
+.sel-cancel{flex:1;padding:.45rem;border:1px solid #d4c5b9;border-radius:.4rem;background:#fff;color:#aaa;font-size:.8rem;cursor:pointer;font-family:inherit}
+.sel-add{flex:2;padding:.45rem;border:none;border-radius:.4rem;background:#8b7355;color:#fff;font-size:.8rem;font-weight:600;cursor:pointer;font-family:inherit;transition:background .15s}
+.sel-add:hover{background:#7a6448}
+.sel-add:disabled{background:#d4c5b9;cursor:not-allowed}
 </style>
 </head>
 <body>
@@ -221,6 +293,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica','Arial'
         </label>
       </div>
     </div>
+
+    <!-- Bag button -->
+    <button class="bag-btn" onclick="openBag()" style="margin-left:auto">
+      🛍 Bag
+      <span class="bag-count" id="bagCount">0</span>
+    </button>
 
     <!-- Mobile filter toggle -->
     <button class="mobile-filter-btn" id="mobileFilterBtn" onclick="toggleMobileFilters()">
@@ -321,6 +399,55 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica','Arial'
 
 </div>
 
+
+<!-- BAG OVERLAY -->
+<div class="bag-overlay" id="bagOverlay" onclick="closeBag()"></div>
+
+<!-- BAG DRAWER -->
+<div class="bag-drawer" id="bagDrawer">
+  <div class="bag-head">
+    <h3>🛍 Shopping Bag</h3>
+    <button class="bag-close" onclick="closeBag()">✕</button>
+  </div>
+  <div class="bag-items" id="bagItems">
+    <div class="bag-empty">Your bag is empty.<br>Add items from the catalog!</div>
+  </div>
+  <div class="bag-bundle" id="bagBundle">
+    🎉 <strong>Bundle price unlocked!</strong> 5+ items — bundle pricing applied.
+  </div>
+  <div class="bag-fulfillment">
+    <div class="bag-fulfillment-title">Fulfillment</div>
+    <div class="fulfillment-opts">
+      <button class="f-opt active" id="fOptPickup" onclick="setFulfillment('pickup')">📍 Local Pickup</button>
+      <button class="f-opt" id="fOptShip" onclick="setFulfillment('shipping')">📦 Shipping</button>
+    </div>
+    <input class="bag-zip" id="bagZip" placeholder="Enter your ZIP code…" oninput="updateBagTotal()">
+  </div>
+  <div class="bag-footer">
+    <div class="bag-subtotal">
+      <span class="bag-subtotal-label">Subtotal</span>
+      <span class="bag-subtotal-val" id="bagSubtotal">$0.00</span>
+    </div>
+    <button class="bag-submit" id="bagSubmit" onclick="submitBag()" disabled>Submit Order Draft</button>
+    <div class="bag-copied" id="bagCopied"></div>
+  </div>
+</div>
+
+<!-- PRODUCT SELECTOR MODAL -->
+<div class="selector-overlay" id="selectorOverlay">
+  <div class="selector-modal">
+    <h4 id="selProductName"></h4>
+    <div class="selector-subtitle" id="selProductPrice"></div>
+    <span class="sel-label">Color / Pattern</span>
+    <select class="sel-select" id="selColor" onchange="updateSizeOptions()"></select>
+    <span class="sel-label">Size</span>
+    <select class="sel-select" id="selSize"></select>
+    <div class="selector-btns">
+      <button class="sel-cancel" onclick="closeSelector()">Cancel</button>
+      <button class="sel-add" id="selAdd" onclick="confirmAddToBag()">Add to Bag</button>
+    </div>
+  </div>
+</div>
 <footer class="footer">
   <div class="footer-inner">Little Basics is part of Epic Layers Inc.</div>
 </footer>
@@ -699,6 +826,7 @@ function cardHTML(p){
       ${p.material?`<div class="product-material">${p.material}</div>`:''}
       <div class="sizes-label">Sizes Available</div>
       <div class="sizes-container">${sizeBadges}</div>
+      <button class="add-to-bag-btn" onclick="event.stopPropagation();openSelector('${p.name}')">+ Add to Bag</button>
     </div>
   </div>`;
 }
@@ -750,6 +878,7 @@ async function loadFromSheet(){
       sheet.push({id:parseInt(pid),name:String(name),color:String(color||''),price:parseFloat(price)||0,bundlePrice:parseFloat(bundlePrice)||0,sizes:sizesDisplay,sizesCm,material:String(material||''),saleDiscount:parseFloat(saleDiscount)||0,category:String(category||''),bin:String(bin||''),unit:String(unit||'ea'),season:String(season||''),image:String(image||'')});
     });
 
+    _allSheetProducts = sheet; // store flat for bag color lookup
     if(sheet.length){
       const grouped={};
       sheet.forEach(p=>{
@@ -777,6 +906,279 @@ function useFallback(){
   catalogProducts=FALLBACK.map(p=>({...p,pids:[p.id],sizesCm:p.sizes.map(s=>SIZE_TO_CM[s]||null)}));
 }
 
+
+/* ══════════════════════════════════════════════
+   SHOPPING BAG
+══════════════════════════════════════════════ */
+let bag = []; // [{product, colorPid, colorName, size, sizeCm, price, image}]
+let fulfillment = 'pickup';
+let _selectorProduct = null;
+
+/* ── Open / Close ── */
+function openBag(){
+  document.getElementById('bagDrawer').classList.add('open');
+  document.getElementById('bagOverlay').classList.add('open');
+  renderBag();
+}
+function closeBag(){
+  document.getElementById('bagDrawer').classList.remove('open');
+  document.getElementById('bagOverlay').classList.remove('open');
+}
+
+/* ── Selector modal ── */
+function openSelector(productName){
+  const p = catalogProducts.find(x=>x.name===productName);
+  if(!p) return;
+  _selectorProduct = p;
+
+  document.getElementById('selProductName').textContent = p.name;
+
+  // Build color options — one per pid (color variant)
+  // Need to map pids back to individual sheet products
+  const colorSel = document.getElementById('selColor');
+  colorSel.innerHTML = '';
+
+  // Get all sheet variants for this product name
+  const variants = _allSheetProducts ? _allSheetProducts.filter(x=>x.name===p.name) : [];
+  if(variants.length){
+    variants.forEach(v=>{
+      const opt = document.createElement('option');
+      opt.value = v.pid;
+      opt.textContent = v.color || 'Default';
+      colorSel.appendChild(opt);
+    });
+  } else {
+    // Fallback — use pids from grouped product
+    p.pids.forEach((pid,i)=>{
+      const opt = document.createElement('option');
+      opt.value = pid;
+      opt.textContent = p.color || 'Default';
+      colorSel.appendChild(opt);
+    });
+  }
+
+  updateSizeOptions();
+  document.getElementById('selectorOverlay').classList.add('open');
+}
+
+function closeSelector(){
+  document.getElementById('selectorOverlay').classList.remove('open');
+  _selectorProduct = null;
+}
+
+function updateSizeOptions(){
+  const p = _selectorProduct; if(!p) return;
+  const pid = parseInt(document.getElementById('selColor').value);
+  const sizeSel = document.getElementById('selSize');
+  sizeSel.innerHTML = '';
+
+  // Find this color variant's price
+  const variant = _allSheetProducts ? _allSheetProducts.find(x=>x.pid===pid) : null;
+  const isBundle = bag.length >= 4; // will be 5th item
+  const price = isBundle ? (variant?.bundlePrice||p.bundlePrice||p.price) : (variant?.price||p.price);
+  const ul = (variant?.unit||p.unit||'ea')==='ea'?'/ea':'/set';
+  document.getElementById('selProductPrice').textContent = `$${price}${ul}`;
+
+  // Build size options — check stock per size
+  const CM_ORDER = ['60','70','73','80','90','100','110','120','130'];
+  const sizes = p.sizes;
+  const sizesCm = p.sizesCm;
+
+  sizes.forEach((label,i)=>{
+    const cm = sizesCm[i];
+    const key = pid+'_'+cm;
+    const stock = stockData[key] !== undefined ? stockData[key] : null;
+    const opt = document.createElement('option');
+    opt.value = label+'|'+cm;
+    const inStock = stock === null || stock > 0;
+    opt.textContent = inStock ? label : label+' (sold out)';
+    opt.disabled = !inStock;
+    if(!inStock) opt.style.color = '#ccc';
+    sizeSel.appendChild(opt);
+  });
+
+  // Select first available
+  const firstAvail = sizeSel.querySelector('option:not(:disabled)');
+  if(firstAvail) firstAvail.selected = true;
+
+  document.getElementById('selAdd').disabled = !firstAvail;
+}
+
+function confirmAddToBag(){
+  const p = _selectorProduct; if(!p) return;
+  const pid = parseInt(document.getElementById('selColor').value);
+  const sizeVal = document.getElementById('selSize').value;
+  if(!sizeVal) return;
+  const [size, sizeCm] = sizeVal.split('|');
+
+  // Get color name and image
+  const variant = _allSheetProducts ? _allSheetProducts.find(x=>x.pid===pid) : null;
+  const colorName = variant?.color || p.color || '';
+  const image = variant?.image || p.image || '';
+  const isBundle = bag.length >= 4;
+  const price = isBundle ? (variant?.bundlePrice||p.bundlePrice||p.price) : (variant?.price||p.price);
+  const unit = variant?.unit||p.unit||'ea';
+
+  bag.push({
+    id: Date.now(),
+    name: p.name,
+    colorPid: pid,
+    colorName,
+    size,
+    sizeCm,
+    price: parseFloat(price)||0,
+    bundlePrice: parseFloat(variant?.bundlePrice||p.bundlePrice||0),
+    unit,
+    image
+  });
+
+  closeSelector();
+  updateBagCount();
+  recalcBagPrices();
+  openBag();
+}
+
+/* ── Bag rendering ── */
+function renderBag(){
+  const el = document.getElementById('bagItems');
+  if(!bag.length){
+    el.innerHTML = '<div class="bag-empty">Your bag is empty.<br>Add items from the catalog!</div>';
+    document.getElementById('bagSubmit').disabled = true;
+    document.getElementById('bagBundle').classList.remove('show');
+    document.getElementById('bagSubtotal').textContent = '$0.00';
+    return;
+  }
+
+  const isBundle = bag.length >= 5;
+  document.getElementById('bagBundle').classList.toggle('show', isBundle);
+
+  el.innerHTML = bag.map(item=>{
+    const price = isBundle ? (item.bundlePrice||item.price) : item.price;
+    const ul = item.unit==='ea'?'/ea':'/set';
+    return `<div class="bag-item">
+      <img class="bag-item-img" src="${item.image}" onerror="this.style.background='#f5f1ed'" alt="${item.name}">
+      <div class="bag-item-info">
+        <div class="bag-item-name">${item.name}</div>
+        <div class="bag-item-meta">${item.colorName ? item.colorName+' · ' : ''}${item.size}</div>
+        <div class="bag-item-price">$${price.toFixed(2)}${ul}</div>
+      </div>
+      <button class="bag-item-remove" onclick="removeFromBag(${item.id})">✕</button>
+    </div>`;
+  }).join('');
+
+  updateBagTotal();
+  document.getElementById('bagSubmit').disabled = false;
+}
+
+function removeFromBag(id){
+  bag = bag.filter(x=>x.id!==id);
+  recalcBagPrices();
+  renderBag();
+  updateBagCount();
+}
+
+function recalcBagPrices(){
+  // When bag size changes, prices may switch between regular and bundle
+  // Nothing to change on the item — price recalc happens in renderBag
+}
+
+function updateBagCount(){
+  const badge = document.getElementById('bagCount');
+  badge.textContent = bag.length;
+  badge.classList.toggle('on', bag.length>0);
+}
+
+function updateBagTotal(){
+  const isBundle = bag.length >= 5;
+  const total = bag.reduce((s,item)=>{
+    const price = isBundle ? (item.bundlePrice||item.price) : item.price;
+    return s + price;
+  }, 0);
+  document.getElementById('bagSubtotal').textContent = '$'+total.toFixed(2);
+}
+
+/* ── Fulfillment ── */
+function setFulfillment(type){
+  fulfillment = type;
+  document.getElementById('fOptPickup').classList.toggle('active', type==='pickup');
+  document.getElementById('fOptShip').classList.toggle('active', type==='shipping');
+  document.getElementById('bagZip').classList.toggle('show', type==='shipping');
+}
+
+/* ── Submit ── */
+async function submitBag(){
+  if(!bag.length) return;
+  const isBundle = bag.length >= 5;
+  const zip = document.getElementById('bagZip').value.trim();
+  if(fulfillment==='shipping' && !zip){ alert('Please enter your ZIP code for shipping.'); return; }
+
+  const total = bag.reduce((s,item)=>{
+    const price = isBundle ? (item.bundlePrice||item.price) : item.price;
+    return s + price;
+  }, 0);
+
+  const fulfillmentLine = fulfillment==='shipping'
+    ? `📦 Shipping to ZIP: ${zip}`
+    : '📍 Local Pickup';
+
+  // Build clean message
+  const itemLines = bag.map((item,i)=>{
+    const price = isBundle ? (item.bundlePrice||item.price) : item.price;
+    const ul = item.unit==='ea'?'/ea':'/set';
+    return `${i+1}. ${item.name}${item.colorName?' — '+item.colorName:''} | Size: ${item.size} | $${price.toFixed(2)}${ul}`;
+  }).join('\n');
+
+  const msg = [
+    '🛍 Little Basics Order Draft',
+    '─────────────────────────',
+    itemLines,
+    '─────────────────────────',
+    `${isBundle?'✓ Bundle price applied (5+ items)':''}`,
+    `Subtotal: $${total.toFixed(2)}`,
+    fulfillmentLine,
+    '',
+    'Please confirm availability and payment details. Thank you! 🧡'
+  ].filter(Boolean).join('\n');
+
+  // Copy to clipboard
+  try {
+    await navigator.clipboard.writeText(msg);
+    document.getElementById('bagCopied').textContent = '✓ Copied! Paste into your DM to send.';
+    setTimeout(()=>document.getElementById('bagCopied').textContent='', 4000);
+  } catch(e){
+    // Fallback
+    const ta = document.createElement('textarea');
+    ta.value = msg;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    document.getElementById('bagCopied').textContent = '✓ Copied! Paste into your DM to send.';
+    setTimeout(()=>document.getElementById('bagCopied').textContent='', 4000);
+  }
+
+  // Post to Google Sheet as pending order
+  try {
+    await fetch(SHEET_URL+'?action=write&tab=PendingOrders', {
+      method:'POST',
+      body: JSON.stringify({
+        timestamp: new Date().toISOString(),
+        items: bag.map(item=>({
+          name:item.name, color:item.colorName, size:item.size,
+          price: isBundle?(item.bundlePrice||item.price):item.price, unit:item.unit
+        })),
+        subtotal: total.toFixed(2),
+        fulfillment,
+        zip: zip||'',
+        isBundle,
+        message: msg
+      })
+    });
+  } catch(e){ console.log('Sheet post failed silently', e); }
+}
+
+/* Keep reference to flat sheet products for color/variant lookup */
+let _allSheetProducts = null;
 window.scrollTo(0,0);
 loadFromSheet();
 </script>
