@@ -44,6 +44,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--mist);color:var(--ink);fo
 .pending-btns{display:flex;gap:.4rem}
 .pending-accept{padding:.28rem .65rem;border:none;border-radius:4px;background:var(--green);color:#fff;font-size:.7rem;font-weight:600;cursor:pointer;font-family:inherit}
 .pending-dismiss{padding:.28rem .65rem;border:1px solid var(--border);border-radius:4px;background:#fff;color:#aaa;font-size:.7rem;cursor:pointer;font-family:inherit}
+.pending-pick-num{width:18px;height:18px;border-radius:50%;background:var(--sand-lt);color:#aaa;font-size:.6rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.pending-pick-check{display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;padding:.2rem}
+.pending-pick-check input{width:16px;height:16px;accent-color:var(--green);cursor:pointer}
+.pending-item-row.picked{opacity:.45;text-decoration:line-through}
 .pending-empty{text-align:center;padding:3rem 1rem;color:#bbb;font-size:.85rem}
 .pending-bundle-tag{display:inline-block;font-size:.6rem;background:#f5f0e8;color:#8b7355;border:1px solid #d4c5b9;border-radius:3px;padding:.08rem .3rem;margin-left:.3rem;vertical-align:middle;font-weight:600}
 .tab-btn{padding:.34rem .85rem;font-family:'DM Sans',sans-serif;font-size:.73rem;font-weight:500;border:none;background:transparent;cursor:pointer;color:#999;transition:all .15s;white-space:nowrap}
@@ -3884,7 +3888,7 @@ async function pullPendingOrders(){
     if(!res || res.length < 2){ showToast('No pending orders in sheet'); return; }
     let added = 0;
     res.slice(1).forEach(row=>{
-      const [timestamp, itemsRaw, subtotal, fulfillment, zip, isBundle, message] = row;
+      const [timestamp, customerName, itemsRaw, subtotal, fulfillment, zip, isBundle, shippingFee, message] = row;
       if(!timestamp) return;
       const existing = pendingOrders.find(o=>o.timestamp===timestamp);
       if(existing) return; // already have it
@@ -3893,11 +3897,13 @@ async function pullPendingOrders(){
       pendingOrders.unshift({
         id: 'po_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),
         timestamp,
+        customerName: String(customerName||''),
         items,
         subtotal: parseFloat(subtotal)||0,
         fulfillment: fulfillment||'pickup',
         zip: zip||'',
         isBundle: isBundle==='true'||isBundle===true,
+        shippingFee: parseFloat(shippingFee)||0,
         message: message||'',
         dismissed: false
       });
@@ -3921,30 +3927,59 @@ function renderPendingOrders(){
   }
   el.innerHTML = active.map(o=>{
     const dt = new Date(o.timestamp);
-    const dateStr = dt.toLocaleDateString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
-    const itemRows = (o.items||[]).map(it=>`
-      <div class="pending-item-row">
+    const dateStr = dt.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'});
+    const itemCount = o.items?.length||0;
+    const grandTotal = (parseFloat(o.subtotal)||0) + (parseFloat(o.shippingFee)||0);
+
+    // Pick list rows with checkboxes
+    const pickRows = (o.items||[]).map((it,idx)=>`
+      <div class="pending-item-row" id="pick-${o.id}-${idx}">
+        <div class="pending-pick-num">${idx+1}</div>
         <div class="pending-item-info">
-          <div class="pending-item-name">${escHtml(it.name||'')}${o.isBundle?'<span class="pending-bundle-tag">Bundle</span>':''}</div>
-          <div class="pending-item-meta">${escHtml(it.color||'')}${it.color&&it.size?' · ':''}${escHtml(it.size||'')}</div>
+          <div class="pending-item-name">${escHtml(it.name||'')}</div>
+          <div class="pending-item-meta">
+            ${it.color?`<span style="color:#8b7355">${escHtml(it.color)}</span>`:''}
+            ${it.color&&it.size?' &middot; ':''}
+            ${it.size?`<strong>${escHtml(it.size)}</strong>`:''}
+            ${o.isBundle?'<span class="pending-bundle-tag">Bundle $</span>':''}
+          </div>
         </div>
         <div class="pending-item-price">$${(parseFloat(it.price)||0).toFixed(2)}</div>
+        <label class="pending-pick-check" title="Mark as picked">
+          <input type="checkbox" onchange="markPicked(this,'pick-${o.id}-${idx}')">
+        </label>
       </div>`).join('');
 
     const fulfillText = o.fulfillment==='shipping'
-      ? '📦 Shipping to '+( o.zip||'—')
+      ? `📦 Ship to <strong>${escHtml(o.zip||'—')}</strong>`
       : '📍 Local Pickup';
+
+    const shipLine = o.shippingFee>0
+      ? `<div style="font-size:.68rem;color:#aaa;margin-top:.1rem">Est. shipping: $${parseFloat(o.shippingFee||0).toFixed(2)}</div>`
+      : '';
 
     return `<div class="pending-card" id="pcard-${o.id}">
       <div class="pending-card-head">
-        <div style="font-size:.78rem;font-weight:600;color:var(--ink)">${o.items?.length||0} item${(o.items?.length||0)!==1?'s':''}</div>
-        <div class="pending-card-time">${dateStr}</div>
+        <div>
+          <div style="font-size:.82rem;font-weight:700;color:var(--ink)">${o.customerName?escHtml(o.customerName)+' — ':''  }${itemCount} item${itemCount!==1?'s':''} ${o.isBundle?'<span class="pending-bundle-tag">Bundle deal</span>':''}</div>
+          <div class="pending-card-time">${dateStr}</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:.88rem;font-weight:700;color:var(--ink)">$${grandTotal.toFixed(2)}</div>
+          <div style="font-size:.62rem;color:#aaa">${o.fulfillment==='shipping'?'incl. est. shipping':''}</div>
+        </div>
       </div>
-      <div class="pending-card-body">${itemRows}</div>
+      <div class="pending-card-body">
+        <div style="font-size:.6rem;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:#bbb;margin-bottom:.4rem;display:flex;justify-content:space-between">
+          <span>Pick List</span><span style="margin-right:1.8rem">✓ Picked</span>
+        </div>
+        ${pickRows}
+      </div>
       <div class="pending-card-foot">
         <div>
           <div class="pending-fulfillment">${fulfillText}</div>
-          <div class="pending-total">$${(o.subtotal||0).toFixed(2)} total</div>
+          ${shipLine}
+          <div class="pending-total" style="margin-top:.2rem">Items $${(parseFloat(o.subtotal)||0).toFixed(2)} · Total $${grandTotal.toFixed(2)}</div>
         </div>
         <div class="pending-btns">
           <button class="pending-accept" onclick="acceptPending('${o.id}')">✓ Start Order</button>
@@ -3980,6 +4015,11 @@ function dismissPending(id){
   savePending();
   renderPendingOrders();
   updatePendingBadge();
+}
+
+function markPicked(checkbox, rowId){
+  const row = document.getElementById(rowId);
+  if(row) row.classList.toggle('picked', checkbox.checked);
 }
 
 function clearDismissedPending(){
