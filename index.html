@@ -365,7 +365,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica','Arial'
 
           <div class="faq-item">
             <div class="faq-q" onclick="toggleFAQItem(this)">How do I know if my order went through? <span class="faq-arrow">▾</span></div>
-            <div class="faq-a">After submitting your order draft, a formatted message is copied to your clipboard — paste it directly into our Instagram or Facebook DM. We'll reply to confirm within 24 hours.</div>
+            <div class="faq-a">After submitting your order draft, we receive your order instantly. We'll reach out via Instagram or Facebook DM within 24 hours to confirm availability and send payment details. No extra steps needed from you!</div>
           </div>
 
         </div>
@@ -577,7 +577,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica','Arial'
       Let us know what you need — we'll check inventory and finalize your order! 🧡
     </div>
     <button class="bag-submit" id="bagSubmit" onclick="submitBag()" disabled>Submit Order Draft</button>
-    <div class="bag-copied" id="bagCopied"></div>
+    <div class="bag-confirm" id="bagConfirm" style="display:none;text-align:center;padding:.75rem .5rem;background:#f5fbf5;border-radius:.4rem;border:1px solid #b8ddb8"></div>
   </div>
 </div>
 
@@ -1387,51 +1387,49 @@ async function submitBag(){
     shipFee>0?`Shipping: $${shipFee.toFixed(2)}`:'',
     `Total: $${(total+shipFee).toFixed(2)}`,
     fulfillmentLine,
-    '',
-    'Please confirm availability and payment details. Thank you! 🧡'
   ].filter(Boolean).join('\n');
 
-  // Copy to clipboard
-  try {
-    await navigator.clipboard.writeText(msg);
-    document.getElementById('bagCopied').textContent = '✓ Copied! Paste into your DM to send.';
-    setTimeout(()=>document.getElementById('bagCopied').textContent='', 4000);
-  } catch(e){
-    // Fallback
-    const ta = document.createElement('textarea');
-    ta.value = msg;
-    document.body.appendChild(ta);
-    ta.select();
-    document.execCommand('copy');
-    document.body.removeChild(ta);
-    document.getElementById('bagCopied').textContent = '✓ Copied! Paste into your DM to send.';
-    setTimeout(()=>document.getElementById('bagCopied').textContent='', 4000);
-  }
+  // Show confirmation — no clipboard needed
 
-  // Post to Google Sheet as pending order
+  // Fire ntfy FIRST — before anything else can fail
+  await sendNtfyNotification(contactLine, bag.length, (total+shipFee).toFixed(2), fulfillment);
+
+  // Post to Google Sheet as pending order — flat row format that Apps Script understands
   try {
-    await fetch(SHEET_URL+'?action=write&tab=PendingOrders', {
-      method:'POST',
-      body: JSON.stringify({
-        timestamp: new Date().toISOString(),
-        customerName,
-        customerHandle: handle||'',
-        contactLine,
-        items: bag.map(item=>({
-          name:item.name, color:item.colorName, size:item.size,
-          price: isBundle?(item.bundlePrice||item.price):item.price, unit:item.unit, image:item.image||''
-        })),
-        subtotal: total.toFixed(2),
-        fulfillment,
-        zip: zip||'',
-        isBundle,
-        message: msg
-      })
+    const pendingRow = [
+      new Date().toISOString(),                          // timestamp
+      contactLine,                                        // name / handle
+      JSON.stringify(bag.map(item=>({                    // items JSON
+        name:item.name, color:item.colorName, size:item.size,
+        price: isBundle?(item.bundlePrice||item.price):item.price,
+        unit:item.unit, image:item.image||''
+      }))),
+      (total+shipFee).toFixed(2),                        // grand total
+      fulfillment,                                        // pickup or shipping
+      zip||'',                                            // zip
+      isBundle ? '1' : '0',                              // bundle flag
+      shipFee.toFixed(2),                                // shipping fee
+      'pending'                                           // status
+    ];
+    await fetch(SHEET_URL, {
+      method: 'POST',
+      body: JSON.stringify({ action:'append', tab:'PendingOrders', row: pendingRow })
     });
   } catch(e){ console.log('Sheet post failed silently', e); }
 
-  // Notify via ntfy.sh
-  await sendNtfyNotification(contactLine, bag.length, (total+shipFee).toFixed(2), fulfillment);
+  // Show confirmation + clear bag
+  const confirmEl = document.getElementById('bagConfirm');
+  if(confirmEl){
+    confirmEl.style.display = 'block';
+    confirmEl.innerHTML = `
+      <div style="font-size:1.1rem;margin-bottom:.3rem">✅</div>
+      <div style="font-size:.82rem;font-weight:600;color:#2d7a4a;margin-bottom:.2rem">Order received!</div>
+      <div style="font-size:.72rem;color:#555;line-height:1.5">We'll check availability and get back to you within 24 hours.</div>`;
+  }
+  // Disable submit to prevent double submission
+  document.getElementById('bagSubmit').disabled = true;
+  document.getElementById('bagSubmit').textContent = '✓ Order Submitted';
+  document.getElementById('bagSubmit').style.background = '#2d7a4a';
 }
 
 /* Keep reference to flat sheet products for color/variant lookup */
@@ -1443,21 +1441,28 @@ const NTFY_TOPIC = 'lb-pendingorder-noti-1988';
 
 async function sendNtfyNotification(contactLine, itemCount, total, fulfillment){
   if(!NTFY_TOPIC || NTFY_TOPIC === 'YOUR_TOPIC_HERE') return;
+  const body = [
+    'From: ' + contactLine,
+    itemCount + ' item' + (itemCount!==1?'s':'') + ' · $' + total,
+    fulfillment==='pickup' ? '📍 Local Pickup' : '📦 Shipping'
+  ].join('\n');
   try {
+    // Use no-cors so browser doesn't block — ntfy.sh accepts this
     await fetch('https://ntfy.sh/' + NTFY_TOPIC, {
       method: 'POST',
+      mode: 'no-cors',
       headers: {
-        'Title': '🛍 New Little Basics Order',
+        'Content-Type': 'text/plain',
+        'Title': 'New LB Order',
         'Priority': 'high',
-        'Tags': 'shopping'
+        'Tags': 'shopping_bags'
       },
-      body: [
-        'From: ' + contactLine,
-        itemCount + ' item' + (itemCount!==1?'s':'') + ' · $' + total,
-        fulfillment==='pickup' ? '📍 Local Pickup' : '📦 Shipping'
-      ].join('\n')
+      body
     });
-  } catch(e){ console.log('ntfy failed silently', e); }
+    console.log('ntfy notification sent');
+  } catch(e){
+    console.warn('ntfy notification failed:', e);
+  }
 }
 /* ── CAROUSEL ── */
 let _carouselIdx = 0;
