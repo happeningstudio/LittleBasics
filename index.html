@@ -10,20 +10,20 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica','Arial'
 
 /* ── HEADER ── */
 .header{background:#fff;border-bottom:1px solid #e8e0d8;position:sticky;top:0;z-index:100}
-.header-inner{max-width:1400px;margin:0 auto;padding:.7rem 1.25rem;display:flex;align-items:center;gap:1rem}
+.header-inner{max-width:1400px;margin:0 auto;padding:.55rem 1.25rem;display:flex;align-items:center;gap:1rem}
 .header-logo{height:48px;width:auto;object-fit:contain;flex-shrink:0}
 
 /* Carousel strip */
-.header-carousel{flex:1;min-width:0;overflow:hidden;position:relative;height:42px;display:flex;align-items:center}
+.header-carousel{flex:1;min-width:0;overflow:hidden;position:relative;height:44px;display:flex;align-items:center}
 .carousel-track{display:flex;flex-direction:column;transition:transform .5s ease;width:100%}
-.carousel-slide{display:flex;align-items:center;gap:1.5rem;min-height:42px;flex-shrink:0;width:100%}
-.carousel-item{display:flex;align-items:center;gap:.5rem;font-size:.75rem;color:#7a6a5a;white-space:nowrap}
+.carousel-slide{display:flex;align-items:center;gap:1rem;min-height:44px;height:44px;flex-shrink:0;width:100%;overflow:hidden;flex-wrap:nowrap}
+.carousel-item{display:flex;align-items:center;gap:.4rem;font-size:.73rem;color:#7a6a5a;white-space:nowrap;flex-shrink:0}
 .carousel-item strong{color:#5a4a3a;font-weight:600}
 .carousel-item a{color:#8b7355;text-decoration:none;display:flex;align-items:center;gap:.3rem}
 .carousel-item a:hover{color:#5a4a3a}
 .carousel-step{display:flex;align-items:center;gap:.5rem}
-.carousel-step-num{width:18px;height:18px;border-radius:50%;background:#8b7355;color:#fff;font-size:.6rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.carousel-step-text{font-size:.72rem;color:#7a6a5a;line-height:1.2;max-width:100px;white-space:normal}
+.carousel-step-num{width:16px;height:16px;border-radius:50%;background:#8b7355;color:#fff;font-size:.58rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.carousel-step-text{font-size:.68rem;color:#7a6a5a;line-height:1.2;max-width:80px;white-space:normal}
 .carousel-arrow{font-size:.8rem;color:#bbb;flex-shrink:0}
 
 /* FAQ button */
@@ -75,7 +75,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica','Arial'
 
 /* minimized */
 .header.min .header-logo{height:32px}
-.header.min .header-carousel{height:32px}
+.header.min .header-carousel{height:36px}
 .header.min .header-inner{padding:.4rem 1.25rem}
 
 /* ── RESULTS BAR ── */
@@ -344,8 +344,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica','Arial'
           </div>
 
           <div class="faq-item">
-            <div class="faq-q" onclick="toggleFAQItem(this)">Can I pick up locally? <span class="faq-arrow">▾</span></div>
-            <div class="faq-a">Yes! We offer free local pickup in Culver City. Select "Local Pickup" in your bag before submitting. We'll arrange a time via DM.</div>
+            <div class="faq-q" onclick="toggleFAQItem(this)">Can I pick up locally or view items in person? <span class="faq-arrow">▾</span></div>
+            <div class="faq-a">Yes! We can schedule an in-person viewing Monday–Friday, 10am–3pm on most days. Contact-free pickup is also available 24/7. Select "Local Pickup" in your bag and we'll coordinate the details via DM.</div>
           </div>
 
           <div class="faq-item">
@@ -355,17 +355,27 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica','Arial'
 
           <div class="faq-item">
             <div class="faq-q" onclick="toggleFAQItem(this)">What if my size is sold out? <span class="faq-arrow">▾</span></div>
-            <div class="faq-a">Sold-out sizes are hidden or greyed out in the selector. Follow us on Instagram @little_basics_la for restock updates — popular items often come back!</div>
+            <div class="faq-a">Little Basics restocks monthly! Follow us on Instagram <a href="https://www.instagram.com/little_basics_la/" target="_blank" style="color:#8b7355">@little_basics_la</a> for the latest restock announcements and new arrival updates.</div>
           </div>
 
           <div class="faq-item">
             <div class="faq-q" onclick="toggleFAQItem(this)">Can I return or exchange? <span class="faq-arrow">▾</span></div>
-            <div class="faq-a">We don't accept returns, but if there's an issue with your item please DM us and we'll do our best to make it right.</div>
+            <div class="faq-a">Returns and exchanges are accepted within 2 weeks of purchase for unused, brand new items. Buyers are responsible for return shipping. If you have an issue, DM us — we're always happy to work out a solution together.</div>
           </div>
 
           <div class="faq-item">
             <div class="faq-q" onclick="toggleFAQItem(this)">How do I know if my order went through? <span class="faq-arrow">▾</span></div>
             <div class="faq-a">After submitting your order draft, we receive your order instantly. We'll reach out via Instagram or Facebook DM within 24 hours to confirm availability and send payment details. No extra steps needed from you!</div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-q" onclick="toggleFAQItem(this)">Where do the items come from? Do you sew them yourself? <span class="faq-arrow">▾</span></div>
+            <div class="faq-a">Can't sew a stitch — so you're safe from my creations! Instead, I carefully source from certified vendors who specialize in quality baby and kids clothing. Every item is personally reviewed before it makes it to the catalog. Questions? Just DM me!</div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-q" onclick="toggleFAQItem(this)">Who are you? Why are you selling children's clothes? <span class="faq-arrow">▾</span></div>
+            <div class="faq-a">A mom who got tired of choosing between cute and affordable — so I did something about it. I spent months researching and testing vendors to find cotton clothing that's genuinely safe, comfortable, and won't break the bank. The response surprised me — strangers started stopping us to ask where my son's outfits were from. That's when I knew other families needed this too. Little Basics exists for you. 🧡</div>
           </div>
 
         </div>
@@ -1492,7 +1502,7 @@ function startCarousel(){
   _carouselTimer = setInterval(()=>{
     _carouselIdx = (_carouselIdx + 1) % 2;
     const track = document.getElementById('carouselTrack');
-    if(track) track.style.transform = `translateY(-${_carouselIdx * 42}px)`;
+    if(track) track.style.transform = `translateY(-${_carouselIdx * 44}px)`;
   }, CAROUSEL_INTERVAL);
 }
 
