@@ -524,9 +524,18 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica','Arial'
     <h3>🛍 Shopping Bag</h3>
     <button class="bag-close" onclick="closeBag()">✕</button>
   </div>
-  <div style="padding:.6rem 1rem;border-bottom:1px solid #e5e5e5;flex-shrink:0">
-    <label style="font-size:.65rem;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:#bbb;display:block;margin-bottom:.25rem">Your Name *</label>
-    <input id="bagCustomerName" placeholder="e.g. Jessica" style="width:100%;padding:.35rem .5rem;border:1px solid #d4c5b9;border-radius:.4rem;font-size:.82rem;font-family:inherit;box-sizing:border-box" oninput="updateSubmitBtn()">
+  <div style="padding:.6rem 1rem .5rem;border-bottom:1px solid #e5e5e5;flex-shrink:0">
+    <div style="font-size:.65rem;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:#bbb;margin-bottom:.5rem">How should we reach you? <span style="color:#c0392b">*</span> (fill at least one)</div>
+    <div style="display:flex;gap:.5rem;margin-bottom:.35rem">
+      <div style="flex:1">
+        <label style="font-size:.62rem;color:#aaa;display:block;margin-bottom:.18rem">Full Name</label>
+        <input id="bagCustomerName" placeholder="e.g. Jessica Smith" style="width:100%;padding:.32rem .45rem;border:1px solid #d4c5b9;border-radius:.4rem;font-size:.78rem;font-family:inherit;box-sizing:border-box" oninput="updateSubmitBtn()">
+      </div>
+      <div style="flex:1">
+        <label style="font-size:.62rem;color:#aaa;display:block;margin-bottom:.18rem">Instagram Handle</label>
+        <input id="bagCustomerHandle" placeholder="@username" style="width:100%;padding:.32rem .45rem;border:1px solid #d4c5b9;border-radius:.4rem;font-size:.78rem;font-family:inherit;box-sizing:border-box" oninput="updateSubmitBtn()">
+      </div>
+    </div>
   </div>
   <div class="bag-items" id="bagItems">
     <div class="bag-empty">Your bag is empty.<br>Add items from the catalog!</div>
@@ -1274,9 +1283,10 @@ function recalcBagPrices(){
 }
 
 function updateSubmitBtn(){
-  const name = document.getElementById('bagCustomerName')?.value.trim()||'';
+  const name   = document.getElementById('bagCustomerName')?.value.trim()||'';
+  const handle = document.getElementById('bagCustomerHandle')?.value.trim()||'';
   const btn = document.getElementById('bagSubmit');
-  if(btn) btn.disabled = !bag.length || !name;
+  if(btn) btn.disabled = !bag.length || (!name && !handle);
 }
 
 function updateBagCount(){
@@ -1337,8 +1347,11 @@ function setFulfillment(type){
 /* ── Submit ── */
 async function submitBag(){
   if(!bag.length) return;
-  const customerName = document.getElementById('bagCustomerName')?.value.trim()||'';
-  if(!customerName){ alert('Please enter your name so we know who to expect!'); return; }
+  const customerName   = document.getElementById('bagCustomerName')?.value.trim()||'';
+  const customerHandle = document.getElementById('bagCustomerHandle')?.value.trim()||'';
+  if(!customerName && !customerHandle){ alert('Please enter your name or Instagram handle so we know who to expect!'); return; }
+  // Normalize handle — add @ if missing
+  const handle = customerHandle && !customerHandle.startsWith('@') ? '@'+customerHandle : customerHandle;
   const isBundle = bag.length >= 5;
   const zip = document.getElementById('bagZip').value.trim();
   if(fulfillment==='shipping' && !zip){ alert('Please enter your ZIP code for shipping.'); return; }
@@ -1362,8 +1375,10 @@ async function submitBag(){
     return `${i+1}. ${item.name}${item.colorName?' — '+item.colorName:''} | Size: ${item.size} | $${price.toFixed(2)}${ul}`;
   }).join('\n');
 
+  const contactLine = [customerName, handle].filter(Boolean).join(' / ');
   const msg = [
-    `🛍 Little Basics Order Draft — ${customerName}`,
+    `🛍 Little Basics Order Draft`,
+    `From: ${contactLine}`,
     '─────────────────────────',
     itemLines,
     '─────────────────────────',
@@ -1400,6 +1415,8 @@ async function submitBag(){
       body: JSON.stringify({
         timestamp: new Date().toISOString(),
         customerName,
+        customerHandle: handle||'',
+        contactLine,
         items: bag.map(item=>({
           name:item.name, color:item.colorName, size:item.size,
           price: isBundle?(item.bundlePrice||item.price):item.price, unit:item.unit
