@@ -3964,8 +3964,8 @@ function renderPendingOrders(){
       </div>`).join('');
 
     const fulfillText = o.fulfillment==='shipping'
-      ? `📦 Ship to <strong>${escHtml(o.zip||'—')}</strong>`
-      : '📍 Local Pickup';
+      ? `Ship to: <strong>${escHtml(o.zip||'—')}</strong>`
+      : 'Local Pickup';
 
     const shipLine = o.shippingFee>0
       ? `<div style="font-size:.68rem;color:#aaa;margin-top:.1rem">Est. shipping: $${parseFloat(o.shippingFee||0).toFixed(2)}</div>`
@@ -4005,20 +4005,43 @@ function renderPendingOrders(){
 
 function acceptPending(id){
   const o = pendingOrders.find(x=>x.id===id); if(!o) return;
-  // Pre-fill the order builder with customer's items
-  // Switch to orders tab and populate customer name field
+
+  // Switch to the Orders tab
   switchView('order');
-  // Fill notes with the order details
-  const notes = (o.items||[]).map(it=>`${it.name}${it.color?' ('+it.color+')':''} — ${it.size}`).join('\n');
-  const notesEl = document.getElementById('fNotes');
-  if(notesEl) notesEl.value = notes;
-  // Fill fulfillment note
-  const addrEl = document.getElementById('fAddress');
-  if(addrEl) addrEl.value = o.fulfillment==='shipping' ? 'SHIP TO ZIP: '+o.zip : 'LOCAL PICKUP';
-  showToast('Order details copied to order builder — add items manually');
-  // Mark as dismissed
+
+  // Give the DOM a moment to render the order view before filling fields
+  setTimeout(()=>{
+    // Fill customer name
+    const nameEl = document.getElementById('fName');
+    if(nameEl) nameEl.value = o.contactLine || o.customerName || '';
+
+    // Fill address/fulfillment field
+    const addrEl = document.getElementById('fAddress');
+    if(addrEl){
+      addrEl.value = o.fulfillment==='shipping'
+        ? ('SHIP TO ZIP: '+(o.zip||'—'))
+        : 'LOCAL PICKUP';
+    }
+
+    // Build a clear item list in Notes — one line per item
+    const itemLines = (o.items||[]).map((it,i)=>
+      `${i+1}. ${it.name}${it.color?' — '+it.color:''} | Size: ${it.size||'—'} | $${(parseFloat(it.price)||0).toFixed(2)}`
+    ).join('\n');
+    const notesEl = document.getElementById('fNotes');
+    if(notesEl){
+      notesEl.value = `PENDING ORDER ITEMS (add these manually below):\n${itemLines}` +
+        (o.shippingFee>0 ? `\n\nEst. shipping: $${parseFloat(o.shippingFee).toFixed(2)}` : '');
+    }
+
+    // Scroll to top of order form so user sees it filled in
+    document.getElementById('view-order')?.scrollIntoView({behavior:'smooth', block:'start'});
+    showToast('Order details loaded — add each item below to complete the order');
+  }, 50);
+
+  // Mark as dismissed from pending list
   o.dismissed = true;
   savePending();
+  renderPendingOrders();
   updatePendingBadge();
 }
 
