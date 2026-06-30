@@ -226,7 +226,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica','Arial'
 .f-opt{flex:1;min-width:120px;padding:.4rem .6rem;border:1.5px solid #d4c5b9;border-radius:.4rem;cursor:pointer;font-size:.75rem;color:#5a5a5a;background:#fff;font-family:inherit;transition:all .15s;text-align:center}
 .f-opt:hover{border-color:#8b7355}
 .f-opt.active{border-color:#8b7355;background:#8b7355;color:#fff;font-weight:600}
-.bag-zip{width:100%;padding:.32rem .5rem;border:1px solid #d4c5b9;border-radius:.4rem;font-size:.78rem;font-family:inherit;margin-top:.35rem;display:none}
+.bag-zip{width:100%;padding:.32rem .5rem;border:1px solid #d4c5b9;border-radius:.4rem;font-size:.78rem;font-family:inherit;display:none;box-sizing:border-box}
 .bag-zip.show{display:block}
 .bag-zip:focus{outline:none;border-color:#8b7355}
 
@@ -557,13 +557,16 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica','Arial'
   <div class="bag-fulfillment">
     <div class="bag-fulfillment-title">Fulfillment</div>
     <div class="fulfillment-opts">
-      <button class="f-opt active" id="fOptPickup" onclick="setFulfillment('pickup')">📍 Local Pickup</button>
-      <button class="f-opt" id="fOptShip" onclick="setFulfillment('shipping')">📦 Shipping</button>
+      <button class="f-opt active" id="fOptPickup" onclick="setFulfillment('pickup')">Local Pickup</button>
+      <button class="f-opt" id="fOptShip" onclick="setFulfillment('shipping')">Shipping</button>
     </div>
     <div id="bagShipDetails" style="display:none">
-      <div class="bag-zip-wrap">
-        <input class="bag-zip show" id="bagZip" placeholder="Enter your ZIP code…" oninput="updateBagTotal()" maxlength="5" style="padding-right:4.5rem">
-<!-- zone label hidden from customer -->
+      <input class="bag-zip show" id="bagAddr1" placeholder="Street address" style="margin-top:.35rem">
+      <input class="bag-zip show" id="bagAddr2" placeholder="Apt / Unit (optional)" style="margin-top:.35rem">
+      <div style="display:flex;gap:.4rem;margin-top:.35rem">
+        <input class="bag-zip show" id="bagCity" placeholder="City" style="flex:2;margin-top:0">
+        <input class="bag-zip show" id="bagState" placeholder="State" style="flex:1;margin-top:0" maxlength="2">
+        <input class="bag-zip show" id="bagZip" placeholder="ZIP" oninput="updateBagTotal()" maxlength="5" style="flex:1;margin-top:0">
       </div>
       <div class="bag-shipping-row" id="bagShipRow" style="display:none">
         <span>Estimated shipping</span>
@@ -1404,8 +1407,18 @@ async function submitBag(){
   // Normalize handle — add @ if missing
   const handle = customerHandle && !customerHandle.startsWith('@') ? '@'+customerHandle : customerHandle;
   const isBundle = bag.length >= 5;
+  const addr1 = document.getElementById('bagAddr1')?.value.trim()||'';
+  const addr2 = document.getElementById('bagAddr2')?.value.trim()||'';
+  const city  = document.getElementById('bagCity')?.value.trim()||'';
+  const state = document.getElementById('bagState')?.value.trim()||'';
   const zip = document.getElementById('bagZip').value.trim();
-  if(fulfillment==='shipping' && !zip){ alert('Please enter your ZIP code for shipping.'); return; }
+  if(fulfillment==='shipping' && (!addr1 || !city || !state || !zip)){
+    alert('Please fill in your full shipping address.');
+    return;
+  }
+  const fullAddress = fulfillment==='shipping'
+    ? [addr1, addr2, [city,state,zip].filter(Boolean).join(', ')].filter(Boolean).join(', ')
+    : '';
 
   const total = bag.reduce((s,item)=>{
     const price = isBundle ? (item.bundlePrice||item.price) : item.price;
@@ -1457,7 +1470,7 @@ async function submitBag(){
       }))),
       (total+shipFee).toFixed(2),                        // grand total
       fulfillment,                                        // pickup or shipping
-      zip||'',                                            // zip
+      fullAddress||'',                                     // full shipping address
       isBundle ? '1' : '0',                              // bundle flag
       shipFee.toFixed(2),                                // shipping fee
       'pending'                                           // status
