@@ -14,7 +14,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica','Arial'
 .header-logo{height:48px;width:auto;object-fit:contain;flex-shrink:0}
 
 /* Carousel strip */
-.header-carousel{flex:1;min-width:0;overflow:hidden;position:relative;height:44px;display:flex;align-items:center}
+.header-carousel{flex:1;min-width:0;overflow:hidden;position:relative;height:44px;display:flex;align-items:center;justify-content:center}
 .carousel-track{display:flex;flex-direction:column;transition:transform .5s ease;width:100%}
 .carousel-slide{display:flex;align-items:center;gap:1rem;min-height:44px;height:44px;flex-shrink:0;width:100%;overflow:hidden;flex-wrap:nowrap}
 .carousel-item{display:flex;align-items:center;gap:.4rem;font-size:.73rem;color:#7a6a5a;white-space:nowrap;flex-shrink:0}
@@ -23,7 +23,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica','Arial'
 .carousel-item a:hover{color:#5a4a3a}
 .carousel-step{display:flex;align-items:center;gap:.5rem}
 .carousel-step-num{width:16px;height:16px;border-radius:50%;background:#8b7355;color:#fff;font-size:.58rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.carousel-step-text{font-size:.68rem;color:#7a6a5a;line-height:1.2;max-width:80px;white-space:normal}
+.carousel-step-text{font-size:.68rem;color:#7a6a5a;line-height:1.2;white-space:nowrap}
 .carousel-arrow{font-size:.8rem;color:#bbb;flex-shrink:0}
 
 /* FAQ button */
@@ -238,7 +238,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica','Arial'
 .bag-submit{width:100%;padding:.65rem;background:#8b7355;color:#fff;border:none;border-radius:.5rem;font-size:.85rem;font-weight:600;cursor:pointer;font-family:inherit;transition:background .15s}
 .bag-submit:hover{background:#7a6448}
 .bag-submit:disabled{background:#d4c5b9;cursor:not-allowed}
-.bag-copied{text-align:center;font-size:.7rem;color:#2d7a4a;margin-top:.4rem;min-height:1em;font-weight:500}
+.bag-copied{text-align:center;font-size:.7rem;color:#8b7355;margin-top:.4rem;min-height:1em;font-weight:500}
 
 /* Add to bag button on card */
 .add-to-bag-btn{width:100%;margin-top:.5rem;padding:.32rem;border:1px solid #d4c5b9;border-radius:.35rem;background:#fff;color:#8b7355;font-size:.72rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s}
@@ -276,45 +276,31 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica','Arial'
         <!-- Slide 1: Info + IG -->
         <div class="carousel-slide">
           <div class="carousel-item">
-            <span>🎁</span>
-            <span><strong>Bundle deal:</strong> 5+ items = bundle pricing</span>
+            <strong>Bundle:</strong>&nbsp;5+ items = bundle pricing
           </div>
           <div class="carousel-item" style="color:#d4c5b9">|</div>
           <div class="carousel-item">
-            <span>📍</span>
-            <span>Local pickup · Culver City &nbsp;|&nbsp; Shipping available</span>
+            Local pickup · Culver City &nbsp;|&nbsp; Shipping available
           </div>
           <div class="carousel-item" style="color:#d4c5b9">|</div>
           <div class="carousel-item">
             <a href="https://www.instagram.com/little_basics_la/" target="_blank">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r=".5" fill="currentColor" stroke="none"/></svg>
-              <strong>@little_basics_la</strong> — restocks &amp; new arrivals
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r=".5" fill="currentColor" stroke="none"/></svg>
+              <strong>@little_basics_la</strong>
             </a>
           </div>
         </div>
 
         <!-- Slide 2: How to order steps -->
-        <div class="carousel-slide">
-          <div class="carousel-item" style="gap:.75rem">
-            <div class="carousel-step">
-              <div class="carousel-step-num">1</div>
-              <div class="carousel-step-text">Pick size<br>&amp; color</div>
-            </div>
+        <div class="carousel-slide" style="justify-content:center">
+          <div class="carousel-item" style="gap:.5rem">
+            <div class="carousel-step"><div class="carousel-step-num">1</div><div class="carousel-step-text">Pick size &amp; color</div></div>
             <div class="carousel-arrow">→</div>
-            <div class="carousel-step">
-              <div class="carousel-step-num">2</div>
-              <div class="carousel-step-text">Add to<br>your bag</div>
-            </div>
+            <div class="carousel-step"><div class="carousel-step-num">2</div><div class="carousel-step-text">Add to bag</div></div>
             <div class="carousel-arrow">→</div>
-            <div class="carousel-step">
-              <div class="carousel-step-num">3</div>
-              <div class="carousel-step-text">Submit<br>order draft</div>
-            </div>
+            <div class="carousel-step"><div class="carousel-step-num">3</div><div class="carousel-step-text">Submit order</div></div>
             <div class="carousel-arrow">→</div>
-            <div class="carousel-step">
-              <div class="carousel-step-num">4</div>
-              <div class="carousel-step-text">We confirm<br>&amp; finalize order</div>
-            </div>
+            <div class="carousel-step"><div class="carousel-step-num">4</div><div class="carousel-step-text">We confirm</div></div>
           </div>
         </div>
 
@@ -390,7 +376,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica','Arial'
 
           <div class="faq-item">
             <div class="faq-q" onclick="toggleFAQItem(this)">Why can't I purchase directly from the catalog? <span class="faq-arrow">▾</span></div>
-            <div class="faq-a">Two reasons, both in your favor. First, I sell across a few platforms and manually confirming each order means I never accidentally sell something that's already gone — no surprise cancellations on your end. Second, skipping a built-in checkout means skipping the platform fees that get baked into most online shop prices. That one extra step of sending a message is how I keep prices honest. I think that's a trade worth making. 🧡</div>
+            <div class="faq-a">Two reasons, both in your favor. First, I sell across a few platforms and manually confirming each order means I never accidentally sell something that's already gone — no surprise cancellations on your end. Second, skipping a built-in checkout means skipping the platform fees that get baked into most online shop prices. That one extra step of sending a message is how I keep prices honest. I think that's a trade worth making.</div>
           </div>
 
         </div>
@@ -566,7 +552,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica','Arial'
     <div class="bag-empty">Your bag is empty.<br>Add items from the catalog!</div>
   </div>
   <div class="bag-bundle" id="bagBundle">
-    🎉 <strong>Bundle price unlocked!</strong> 5+ items — bundle pricing applied.
+    <strong>Bundle price unlocked!</strong> 5+ items — bundle pricing applied.
   </div>
   <div class="bag-fulfillment">
     <div class="bag-fulfillment-title">Fulfillment</div>
@@ -599,10 +585,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica','Arial'
       <span class="bag-subtotal-val" id="bagGrandTotal">$0.00</span>
     </div>
     <div style="font-size:.72rem;color:#8b7355;text-align:center;line-height:1.5;margin-bottom:.5rem;padding:.4rem .5rem;background:#faf6f2;border-radius:.4rem;border:1px solid #e8ddd4">
-      Let us know what you need — we'll check inventory and finalize your order! 🧡
+      Let us know what you need — we'll check inventory and finalize your order.
     </div>
     <button class="bag-submit" id="bagSubmit" onclick="submitBag()" disabled>Submit Order Draft</button>
-    <div class="bag-confirm" id="bagConfirm" style="display:none;text-align:center;padding:.75rem .5rem;background:#f5fbf5;border-radius:.4rem;border:1px solid #b8ddb8"></div>
+    <div class="bag-confirm" id="bagConfirm" style="display:none;text-align:center;padding:.75rem .5rem;background:#faf6f2;border-radius:.4rem;border:1px solid #e8ddd4"></div>
   </div>
 </div>
 
@@ -1086,6 +1072,7 @@ function useFallback(){
 let bag = []; // [{product, colorPid, colorName, size, sizeCm, price, image}]
 let fulfillment = 'pickup';
 let _selectorProduct = null;
+let _submitting = false;
 
 
 /* ── SHIPPING CALCULATOR ── */
@@ -1262,6 +1249,18 @@ function confirmAddToBag(){
   const price = isBundle ? (variant?.bundlePrice||p.bundlePrice||p.price) : (variant?.price||p.price);
   const unit = variant?.unit||p.unit||'ea';
 
+  // Check stock for this exact pid+size combo
+  const stockKey = String(pid)+'_'+String(sizeCm);
+  const availableStock = stockData[stockKey]; // undefined = untracked, treat as unlimited
+
+  // Count how many of this exact item (same pid + same size) are already in the bag
+  const alreadyInBag = bag.filter(b=>b.colorPid===pid && b.sizeCm===sizeCm).length;
+
+  if(availableStock !== undefined && alreadyInBag >= availableStock){
+    alert(`Only ${availableStock} left in stock for this size/color — you already have ${alreadyInBag} in your bag.`);
+    return;
+  }
+
   bag.push({
     id: Date.now(),
     name: p.name,
@@ -1391,9 +1390,17 @@ function setFulfillment(type){
 /* ── Submit ── */
 async function submitBag(){
   if(!bag.length) return;
+  if(_submitting) return; // prevent double submission
+  _submitting = true;
   const customerName   = document.getElementById('bagCustomerName')?.value.trim()||'';
   const customerHandle = document.getElementById('bagCustomerHandle')?.value.trim()||'';
-  if(!customerName && !customerHandle){ alert('Please enter your name or Instagram handle so we know who to expect!'); return; }
+  if(!customerName && !customerHandle){
+    _submitting = false;
+    alert('Please enter your name or Instagram handle so we know who to expect!'); return;
+  }
+  // Disable button immediately to prevent double-tap
+  const submitBtn = document.getElementById('bagSubmit');
+  if(submitBtn){ submitBtn.disabled = true; submitBtn.textContent = 'Sending…'; }
   // Normalize handle — add @ if missing
   const handle = customerHandle && !customerHandle.startsWith('@') ? '@'+customerHandle : customerHandle;
   const isBundle = bag.length >= 5;
@@ -1436,7 +1443,7 @@ async function submitBag(){
   // Show confirmation — no clipboard needed
 
   // Fire ntfy FIRST — before anything else can fail
-  await sendNtfyNotification(contactLine, bag.length, (total+shipFee).toFixed(2), fulfillment);
+  try { await sendNtfyNotification(contactLine, bag.length, (total+shipFee).toFixed(2), fulfillment); } catch(e){}
 
   // Post to Google Sheet as pending order — flat row format that Apps Script understands
   try {
@@ -1466,14 +1473,15 @@ async function submitBag(){
   if(confirmEl){
     confirmEl.style.display = 'block';
     confirmEl.innerHTML = `
-      <div style="font-size:1.1rem;margin-bottom:.3rem">✅</div>
-      <div style="font-size:.82rem;font-weight:600;color:#2d7a4a;margin-bottom:.2rem">Order received!</div>
+      <div style="font-size:1.1rem;margin-bottom:.3rem">✓</div>
+      <div style="font-size:.82rem;font-weight:600;color:#5a4a3a;margin-bottom:.2rem">Order received!</div>
       <div style="font-size:.72rem;color:#555;line-height:1.5">We'll check availability and get back to you within 24 hours.</div>`;
   }
   // Disable submit to prevent double submission
+  _submitting = false;
   document.getElementById('bagSubmit').disabled = true;
   document.getElementById('bagSubmit').textContent = '✓ Order Submitted';
-  document.getElementById('bagSubmit').style.background = '#2d7a4a';
+  document.getElementById('bagSubmit').style.background = '#5a4a3a';
 }
 
 /* Keep reference to flat sheet products for color/variant lookup */
