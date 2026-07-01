@@ -3890,10 +3890,10 @@ async function pullPendingOrders(){
       return;
     }
     let added = 0;
-    // Row format: [timestamp, contactLine, itemsJSON, grandTotal, fulfillment, zip, isBundle, shippingFee, status]
+    // Row format: [timestamp, contactLine, itemsJSON, grandTotal, fulfillment, fullAddress, isBundle, shippingFee, status, contactInfo]
     res.slice(0).forEach(row=>{
       if(!row || !row[0]) return;
-      const [timestamp, contactLine, itemsRaw, grandTotal, fulfillment, zip, isBundleFlag, shippingFee, status] = row;
+      const [timestamp, contactLine, itemsRaw, grandTotal, fulfillment, fullAddress, isBundleFlag, shippingFee, status, contactInfo] = row;
       if(!timestamp) return;
       // Skip already dismissed/completed
       const existing = pendingOrders.find(o=>o.timestamp===String(timestamp));
@@ -3910,10 +3910,11 @@ async function pullPendingOrders(){
         items,
         subtotal:    total - shipFee,
         fulfillment: String(fulfillment||'pickup'),
-        zip:         String(zip||''),
+        fullAddress: String(fullAddress||''),
         isBundle:    isBundleFlag==='1'||isBundleFlag===true,
         shippingFee: shipFee,
         status:      String(status||'pending'),
+        contactInfo: String(contactInfo||''),
         dismissed:   false
       });
       added++;
@@ -3964,7 +3965,7 @@ function renderPendingOrders(){
       </div>`).join('');
 
     const fulfillText = o.fulfillment==='shipping'
-      ? `Ship to: <strong>${escHtml(o.zip||'—')}</strong>`
+      ? `📦 Ship to:<br><strong>${escHtml(o.fullAddress||'—')}</strong>`
       : 'Local Pickup';
 
     const shipLine = o.shippingFee>0
@@ -3975,7 +3976,9 @@ function renderPendingOrders(){
       <div class="pending-card-head">
         <div>
           <div style="font-size:.82rem;font-weight:700;color:var(--ink)">${o.contactLine?escHtml(o.contactLine)+' — ':(o.customerName?escHtml(o.customerName)+' — ':'')}${itemCount} item${itemCount!==1?'s':''} ${o.isBundle?'<span class="pending-bundle-tag">Bundle deal</span>':''}</div>
+          ${o.contactInfo?`<div style="font-size:.72rem;color:#8b7355;margin-top:.15rem;font-weight:500">${escHtml(o.contactInfo)}</div>`:''}
           <div class="pending-card-time">${dateStr}</div>
+
         </div>
         <div style="text-align:right">
           <div style="font-size:.88rem;font-weight:700;color:var(--ink)">$${grandTotal.toFixed(2)}</div>
@@ -4019,7 +4022,7 @@ function acceptPending(id){
     const addrEl = document.getElementById('fAddress');
     if(addrEl){
       addrEl.value = o.fulfillment==='shipping'
-        ? ('SHIP TO ZIP: '+(o.zip||'—'))
+        ? (o.fullAddress||'')
         : 'LOCAL PICKUP';
     }
 
