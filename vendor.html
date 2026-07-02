@@ -1671,9 +1671,9 @@ function exportPOPdf(){
     const lineTotal = (unitPrice*qty).toFixed(2);
     const sizesFormatted = (it.sizeNote||it.sizes||'').split(/[,\n]/).map(s=>s.trim()).filter(Boolean).join('<br>');
     return '<tr>'
-      +'<td style="vertical-align:middle;font-weight:700;padding:4px 5px">'+it.styleNo+'<\/td>'
+      +'<td style="vertical-align:middle;padding:4px 5px"><div style="font-weight:700">'+it.styleNo+'<\/div>'+(it.material?'<div style="color:#aaa;font-size:6.5pt;margin-top:2px">'+it.material+'<\/div>':'')+'<\/td>'
       +'<td style="text-align:center;vertical-align:middle;padding:4px 5px">'+(img?'<img src="'+img+'" style="width:64px;height:64px;object-fit:cover;border-radius:3px;display:block;margin:0 auto">':'')+'<\/td>'
-      +'<td style="vertical-align:middle;text-align:center;line-height:1.7;padding:4px 5px">'+(sizesFormatted||'—')+(it.colorNote||it.colors?'<br><span style="color:#555">'+(it.colorNote||it.colors)+'<\/span>':'')+(it.material?'<br><span style="color:#aaa">'+it.material+'<\/span>':'')+'<\/td>'
+      +'<td style="vertical-align:middle;text-align:center;line-height:1.7;padding:4px 5px">'+(sizesFormatted||'—')+(it.colorNote||it.colors?'<br><span style="color:#555">'+(it.colorNote||it.colors)+'<\/span>':'')+'<\/td>'
       +'<td style="text-align:center;vertical-align:middle;padding:4px 5px">$'+unitPrice.toFixed(2)+'<\/td>'
       +'<td style="text-align:center;vertical-align:middle;font-weight:700;padding:4px 5px">'+qty+'<\/td>'
       +'<td style="text-align:center;vertical-align:middle;font-weight:700;padding:4px 5px">$'+lineTotal+'<\/td>'
