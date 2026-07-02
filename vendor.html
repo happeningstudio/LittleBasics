@@ -1773,9 +1773,32 @@ function exportPOPdf(){
       <span>Little Basics — Purchase Order</span><span>Generated ${new Date().toLocaleDateString()}</span>
     </div>`;
 
-  document.getElementById('poPrintArea').style.display='block';
-  window.print();
-  document.getElementById('poPrintArea').style.display='none';
+  // Open in new window — avoids CSS conflicts entirely
+  const printContent = document.getElementById('poPrintArea').innerHTML;
+  const win = window.open('', '_blank');
+  win.document.write(`<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>${po.name} — Purchase Order</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:Arial,sans-serif;font-size:11px;color:#2a2420;padding:1.5cm}
+  table{width:100%;border-collapse:collapse}
+  th{background:#3a8fc7;color:#fff;padding:6px 8px;text-align:left;border:1px solid #2a7ab0;font-size:9px}
+  td{padding:6px 8px;border:1px solid #ddd;vertical-align:middle}
+  tr:nth-child(even) td{background:#f9f9f9}
+  img{width:80px;height:80px;object-fit:cover;border-radius:3px;display:block}
+  .footer{margin-top:12px;padding-top:8px;border-top:1px solid #eee;font-size:8px;color:#aaa;display:flex;justify-content:space-between}
+  @page{size:A4 portrait;margin:1cm}
+</style>
+</head>
+<body>
+${printContent}
+</body>
+</html>`);
+  win.document.close();
+  win.onload = () => { win.focus(); win.print(); };
 }
 
 /* ── Hook: add to PO from catalog detail modal ── */
