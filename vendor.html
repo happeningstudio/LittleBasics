@@ -16,7 +16,7 @@
   --shadow:0 1px 8px rgba(42,36,32,.07);
   --shadow-md:0 4px 20px rgba(42,36,32,.11);
 }
-body{font-family:'DM Sans',sans-serif;background:var(--mist);color:var(--ink);font-size:13px;line-height:1.5;min-height:100vh}
+body{font-family:'DM Sans',sans-serif;background:var(--mist);color:var(--ink);font-size:7pt;line-height:1.5;min-height:100vh}
 
 /* TOPBAR */
 .topbar{height:var(--top);background:var(--white);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 1.25rem;position:sticky;top:0;z-index:400;gap:1rem}
@@ -199,12 +199,12 @@ textarea.form-input{resize:vertical;min-height:52px}
 tr.selected td{background:rgba(139,115,85,.07)!important}
 
 /* ORDER PDF */
-#orderPdfModal .order-table{width:100%;border-collapse:collapse;font-size:11px}
-#orderPdfModal .order-table th{background:#f5f0ea;padding:6px 8px;text-align:left;border:1px solid #e2dbd2;font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:#8b7355}
+#orderPdfModal .order-table{width:100%;border-collapse:collapse;font-size:7pt}
+#orderPdfModal .order-table th{background:#f5f0ea;padding:6px 8px;text-align:left;border:1px solid #e2dbd2;font-size:7pt;text-transform:uppercase;letter-spacing:.05em;color:#8b7355}
 #orderPdfModal .order-table td{padding:6px 8px;border:1px solid #e2dbd2;vertical-align:middle}
 #orderPdfModal .order-table tr:nth-child(even) td{background:#faf8f5}
 #orderPdfModal .order-thumb{width:56px;height:56px;object-fit:cover;border-radius:3px}
-#orderPdfModal .order-input{width:60px;border:1px solid #e2dbd2;border-radius:3px;padding:3px 5px;font-size:11px;text-align:center;font-family:'DM Sans',sans-serif}
+#orderPdfModal .order-input{width:60px;border:1px solid #e2dbd2;border-radius:3px;padding:3px 5px;font-size:7pt;text-align:center;font-family:'DM Sans',sans-serif}
 .order-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1rem;padding-bottom:.75rem;border-bottom:2px solid #e2dbd2}
 .order-header h1{font-family:'DM Serif Display',serif;font-size:1.3rem;color:#2a2420}
 .order-header p{font-size:.72rem;color:#aaa;margin-top:.2rem}
@@ -220,8 +220,8 @@ tr.selected td{background:rgba(139,115,85,.07)!important}
     font-family:'DM Sans',sans-serif
   }
   #printArea .no-print{display:none!important}
-  #poPrintArea table{width:100%;border-collapse:collapse;font-size:10px}
-  #poPrintArea th{background:#f5f0ea;padding:5px 7px;text-align:left;border:1px solid #e2dbd2;font-size:9px;text-transform:uppercase;letter-spacing:.05em;color:#8b7355}
+  #poPrintArea table{width:100%;border-collapse:collapse;font-size:7pt}
+  #poPrintArea th{background:#f5f0ea;padding:5px 7px;text-align:left;border:1px solid #e2dbd2;font-size:7pt;text-transform:uppercase;letter-spacing:.05em;color:#8b7355}
   #poPrintArea td{padding:5px 7px;border:1px solid #e2dbd2;vertical-align:middle}
   #poPrintArea img,#printArea img{width:100px!important;height:100px!important;object-fit:cover;border-radius:3px}
   @page{margin:1cm;size:A4 portrait}
@@ -901,15 +901,15 @@ function printOrder(){
   const pa = document.getElementById('printArea');
   pa.innerHTML = `<style>
     body{font-family:'DM Sans',sans-serif}
-    table{width:100%;border-collapse:collapse;font-size:10px}
-    th{background:#f5f0ea;padding:5px 7px;text-align:left;border:1px solid #e2dbd2;font-size:9px;text-transform:uppercase;letter-spacing:.05em;color:#8b7355}
+    table{width:100%;border-collapse:collapse;font-size:7pt}
+    th{background:#f5f0ea;padding:5px 7px;text-align:left;border:1px solid #e2dbd2;font-size:7pt;text-transform:uppercase;letter-spacing:.05em;color:#8b7355}
     td{padding:5px 7px;border:1px solid #e2dbd2;vertical-align:middle}
     tr:nth-child(even) td{background:#faf8f5}
     img{width:52px;height:52px;object-fit:cover;border-radius:3px}
     h1{font-size:18px;margin:0 0 4px}
     .hdr{display:flex;justify-content:space-between;margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid #e2dbd2}
-    .hdr-r{text-align:right;font-size:10px;color:#888}
-    .footer{margin-top:12px;padding-top:8px;border-top:1px solid #e2dbd2;font-size:9px;color:#ccc;display:flex;justify-content:space-between}
+    .hdr-r{text-align:right;font-size:7pt;color:#888}
+    .footer{margin-top:12px;padding-top:8px;border-top:1px solid #e2dbd2;font-size:7pt;color:#ccc;display:flex;justify-content:space-between}
   </style>` + document.getElementById('orderPdfBody').innerHTML;
   pa.style.display = 'block';
   window.print();
@@ -1680,471 +1680,45 @@ function exportPOPdf(){
     // Format sizes as one per line like vendor format
     const sizesFormatted = (it.sizeNote||it.sizes||'').split(/[,\n]/).map(s=>s.trim()).filter(Boolean).join('<br>');
     return `
-    <tr style="page-break-inside:avoid;background:${i%2===0?'#fff':'#f9f9f9'}">
-      <td style="text-align:center;vertical-align:middle;padding:8px;border:1px solid #ddd;font-weight:600">${it.styleNo}</td>
-      <td style="text-align:center;vertical-align:middle;padding:8px;border:1px solid #ddd;font-size:10px;color:#555">${it.category||'—'}</td>
-      <td style="text-align:center;vertical-align:middle;padding:8px;border:1px solid #ddd">
-        ${img?`<img src="${img}" style="width:100px;height:100px;object-fit:cover;border-radius:3px;display:block;margin:0 auto">`
-             :'<div style="width:100px;height:100px;background:#f5f0ea;border-radius:3px;display:flex;align-items:center;justify-content:center;color:#ccc;font-size:24px;margin:0 auto">📦</div>'}
+    <tr>
+      <td class="bold" style="vertical-align:middle;text-align:left">${it.styleNo}</td>
+      <td style="text-align:center;vertical-align:middle">
+        ${img?`<img src="${img}" style="width:72px;height:72px">`:''}
       </td>
-      <td style="text-align:center;vertical-align:middle;padding:8px;border:1px solid #ddd;font-size:10px;line-height:1.8">
-        ${sizesFormatted||'—'}
-        ${it.colorNote||it.colors?`<br><span style="color:#888;font-size:9px">${it.colorNote||it.colors}</span>`:''}
+      <td class="sz">
+        ${sizesFormatted}
+        ${(it.colorNote||it.colors)?`<div class="mat">${it.colorNote||it.colors}</div>`:''}
+        ${it.material&&!(it.colorNote||it.colors)?`<div class="mat">${it.material}</div>`:''}
       </td>
-      <td style="text-align:center;vertical-align:middle;padding:8px;border:1px solid #ddd;font-weight:600">$${unitPrice.toFixed(2)}</td>
-      <td style="text-align:center;vertical-align:middle;padding:8px;border:1px solid #ddd;font-weight:700;font-size:14px">${qty}</td>
-      <td style="text-align:center;vertical-align:middle;padding:8px;border:1px solid #ddd;font-weight:700;font-size:13px">$${lineTotal}</td>
-      <td style="vertical-align:top;padding:8px;border:1px solid #ddd;font-size:10px;color:#c0392b;line-height:1.7;white-space:pre-wrap">${it.notes||''}</td>
+      <td style="text-align:center;vertical-align:middle">$${unitPrice.toFixed(2)}</td>
+      <td style="text-align:center;vertical-align:middle;font-weight:700">${qty}</td>
+      <td style="text-align:center;vertical-align:middle;font-weight:700">$${lineTotal}</td>
+      <td class="note">${it.notes||''}</td>
     </tr>`;
   }).join('');
 
-  const notesSection = po.notes ? `<div style="margin-top:16px;padding:10px 14px;background:#f5f0ea;border-radius:6px;border:1px solid #e2dbd2"><div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#aaa;margin-bottom:6px">Order Notes</div><div style="font-size:10px;color:#2a2420;line-height:1.6;white-space:pre-wrap">${po.notes}</div></div>` : '';
-  const privSection = po.generalNotes ? `<div style="margin-top:10px;padding:10px 14px;background:#faf8f5;border-radius:6px;border:1px solid #e2dbd2"><div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#aaa;margin-bottom:6px">Private Notes</div><div style="font-size:10px;color:#2a2420;line-height:1.6;white-space:pre-wrap">${po.generalNotes}</div></div>` : '';
-
-  // Pre-compute summary — avoids IIFE issues in new window
+  // Pre-compute summary
   const _byCat={};
   po.items.forEach(it=>{ const _cat=(it.category||'Other').replace('Baby ',''); _byCat[_cat]=(_byCat[_cat]||0)+(it.qty||1); });
   const _catRows = Object.entries(_byCat).sort((a,b)=>b[1]-a[1])
-    .map(([cat,q])=>`<div style="display:flex;justify-content:space-between;padding:2px 0;border-bottom:.5px solid #f0ebe5"><span>${cat}</span><span style="font-weight:600">${q}</span></div>`)
-    .join('') + '<div style="display:flex;justify-content:space-between;padding:3px 0;font-weight:700;color:#8b7355"><span>Total</span><span>' + totalUnits + '</span></div>';
-  const summaryHTML = '<div style="margin-top:10px;font-size:8px"><div style="font-size:7px;font-weight:700;text-transform:uppercase;color:#8b7355;margin-bottom:4px;border-bottom:1px solid #e2dbd2;padding-bottom:3px">Order Summary by Category</div>' + _catRows + '</div>';
+    .map(([cat,q])=>'<div style="display:flex;justify-content:space-between;padding:2px 0;border-bottom:.5px solid #f0ebe5"><span>'+cat+'</span><span style="font-weight:600">'+q+'</span></div>')
+    .join('') + '<div style="display:flex;justify-content:space-between;padding:3px 0;font-weight:700;color:#8b7355"><span>Total</span><span>'+totalUnits+' pcs</span></div>';
+  const summaryHTML = '<div style="margin-top:10px;font-size:7pt"><div style="font-weight:700;text-transform:uppercase;color:#8b7355;margin-bottom:4px;border-bottom:1px solid #e2dbd2;padding-bottom:3px">Order Summary by Category</div>'+_catRows+'</div>';
 
-    document.getElementById('poPrintArea').innerHTML = `
-    <!-- Header -->
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;padding-bottom:10px;border-bottom:2px solid #3a8fc7">
-      <div>
-        <div style="font-size:18px;font-weight:700;color:#2a2420">${po.name}</div>
-        <div style="font-size:10px;color:#777;margin-top:4px">
-          Vendor: <strong>${po.vendor||'—'}</strong> &nbsp;·&nbsp; Date: ${po.date||'—'} &nbsp;·&nbsp; ${po.items.length} styles &nbsp;·&nbsp; ${totalUnits} units &nbsp;·&nbsp; <strong>Total: $${totalValue.toFixed(2)}</strong>
-        </div>
-      </div>
-      <img src="https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/LittleBasics.png" style="height:32px;object-fit:contain">
-    </div>
-    <!-- Table matching vendor format -->
-    <table style="width:100%;border-collapse:collapse;font-family:Arial,sans-serif;font-size:11px">
-      <thead>
-        <tr style="background:#3a8fc7;color:#fff">
-          <th style="padding:7px 8px;border:1px solid #2a7ab0;text-align:center;width:70px">Product Code</th>
-          <th style="padding:7px 8px;border:1px solid #2a7ab0;width:70px">Product Name</th>
-          <th style="padding:7px 8px;border:1px solid #2a7ab0;width:120px;text-align:center">Pic</th>
-          <th style="padding:7px 8px;border:1px solid #2a7ab0;text-align:center">Size</th>
-          <th style="padding:7px 8px;border:1px solid #2a7ab0;text-align:center;width:60px">Price</th>
-          <th style="padding:7px 8px;border:1px solid #2a7ab0;text-align:center;width:40px">Qty</th>
-          <th style="padding:7px 8px;border:1px solid #2a7ab0;text-align:center;width:70px">Total</th>
-          <th style="padding:7px 8px;border:1px solid #2a7ab0;text-align:center">Note</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${rows}
-      </tbody>
-      <tfoot>
-        <tr style="background:#f5f5f5;font-weight:700">
-          <td colspan="5" style="padding:8px;border:1px solid #ddd;text-align:right;color:#3a8fc7">TOTAL ORDER</td>
-          <td style="padding:8px;border:1px solid #ddd;text-align:center;font-size:14px">${totalUnits}</td>
-          <td style="padding:8px;border:1px solid #ddd;text-align:center;font-size:13px">$${totalValue.toFixed(2)}</td>
-          <td style="padding:8px;border:1px solid #ddd;font-size:9px;color:#aaa">${po.items.length} styles</td>
-        </tr>
-      </tfoot>
-    </table>
-    ${summaryHTML}
-        ${notesSection}${privSection}
-    <div style="margin-top:12px;font-size:8px;color:#aaa;display:flex;justify-content:space-between;border-top:1px solid #eee;padding-top:6px">
-      <span>Little Basics — Purchase Order</span><span>Generated ${new Date().toLocaleDateString()}</span>
-    </div>`;
+  const poName = po.name||'Purchase Order';
+  const poVendor = po.vendor||'—';
+  const poDate = po.date||'—';
 
-  // Open in new window — avoids CSS conflicts entirely
-  const printContent = document.getElementById('poPrintArea').innerHTML;
   const win = window.open('', '_blank');
-  win.document.write(`<!DOCTYPE html>
-<html>
-<head>
-<meta charset="utf-8">
-<title>${po.name} — Purchase Order</title>
-<style>
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:Arial,sans-serif;font-size:8px;color:#2a2420;padding:.8cm}
-  table{width:100%;border-collapse:collapse;table-layout:fixed}
-  th{background:#3a8fc7;color:#fff;padding:4px 5px;text-align:left;border:1px solid #2a7ab0;font-size:7px;font-weight:600}
-  td{padding:4px 5px;border:1px solid #ddd;vertical-align:top;word-wrap:break-word}
-  tr:nth-child(even) td{background:#f9f9f9}
-  img{width:64px;height:64px;object-fit:cover;border-radius:3px;display:block}
-  .footer{margin-top:8px;padding-top:6px;border-top:1px solid #eee;font-size:7px;color:#aaa;display:flex;justify-content:space-between}
-  /* Column widths — no product name column */
-  col.c-num  {width:3%}
-  col.c-img  {width:9%}
-  col.c-style{width:9%}
-  col.c-detail{width:20%}
-  col.c-qty  {width:5%}
-  col.c-price{width:7%}
-  col.c-total{width:8%}
-  col.c-notes{width:39%}
-  @page{size:A4 portrait;margin:.8cm}
-  @media print{
-    html,body{-webkit-print-color-adjust:exact;print-color-adjust:exact}
-    a[href]:after{content:none!important}
-    head,nav,header,footer,.no-print{display:none!important}
-  }
-</style>
-</head>
-<body>
-${printContent}
-</body>
-</html>`);
+  if(!win){ showToast('Please allow popups for this page'); return; }
+  win.document.write('<!DOCTYPE html><html><head><meta charset="utf-8"><title>'+poName+' — Purchase Order<\/title><style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:Arial,sans-serif;font-size:7pt;color:#2a2420;padding:.7cm}table{width:100%;border-collapse:collapse;table-layout:fixed}th{background:#3a8fc7;color:#fff;padding:5px 6px;text-align:center;border:1px solid #2a7ab0;font-size:7pt;font-weight:700;font-style:italic}td{padding:5px 6px;border:1px solid #ddd;vertical-align:middle;font-size:7pt;word-wrap:break-word}img{object-fit:cover;border-radius:3px;display:block;margin:0 auto}.sz{text-align:center;line-height:1.7;vertical-align:middle}.mat{color:#aaa;font-size:7pt;text-align:center;margin-top:2px}.note{color:#c0392b;line-height:1.7;white-space:pre-wrap;vertical-align:top}.bold{font-weight:700}tr:nth-child(even) td{background:#f9f9f9}@page{size:A4 portrait;margin:.8cm}@media print{html,body{-webkit-print-color-adjust:exact;print-color-adjust:exact}a[href]:after{content:none!important}thead{display:table-header-group}tr{page-break-inside:avoid}}<\/style><\/head><body>');
+  win.document.write('<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;padding-bottom:8px;border-bottom:2px solid #3a8fc7"><div><div style="font-size:10pt;font-weight:700">'+poName+'<\/div><div style="font-size:7pt;color:#777;margin-top:3px">Vendor: <strong>'+poVendor+'<\/strong> &nbsp;&middot;&nbsp; Date: '+poDate+' &nbsp;&middot;&nbsp; '+po.items.length+' styles &nbsp;&middot;&nbsp; '+totalUnits+' units &nbsp;&middot;&nbsp; Total: <strong>$'+totalValue.toFixed(2)+'<\/strong><\/div><\/div><img src="https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/LittleBasics.png" style="height:28px;object-fit:contain"><\/div>');
+  win.document.write('<table><colgroup><col style="width:9%"><col style="width:13%"><col style="width:24%"><col style="width:7%"><col style="width:5%"><col style="width:8%"><col style="width:34%"><\/colgroup><thead><tr><th>Product Code<\/th><th>Pic<\/th><th>Size<\/th><th>Price<\/th><th>Qty<\/th><th>Total<\/th><th>Note<\/th><\/tr><\/thead><tbody>'+rows+'<\/tbody><tfoot><tr style="background:#f5f5f5"><td colspan="3" style="text-align:right;font-weight:700;color:#8b7355;padding:5px">TOTAL ORDER<\/td><td style="text-align:center;font-weight:700;padding:5px">$'+totalValue.toFixed(2)+'<\/td><td style="text-align:center;font-weight:700;padding:5px">'+totalUnits+' pcs<\/td><td colspan="2" style="color:#aaa;padding:5px">'+po.items.length+' styles<\/td><\/tr><\/tfoot><\/table>');
+  win.document.write(summaryHTML);
+  win.document.write('<div style="margin-top:8px;padding-top:6px;border-top:1px solid #eee;font-size:7pt;color:#aaa;display:flex;justify-content:space-between"><span>Little Basics — Purchase Order<\/span><span>Generated '+new Date().toLocaleDateString()+'<\/span><\/div>');
+  win.document.write('<\/body><\/html>');
   win.document.close();
-  win.onload = () => { win.focus(); win.print(); };
-}
-
-/* ── Hook: add to PO from catalog detail modal ── */
-function addToCurrentPO(){
-  if(!_detailItem){ showToast('Open an item first'); return; }
-  addItemToPO(_detailItem.vendorId, _detailItem.itemId);
-}
-
-/* ── Init PO on view switch ── */
-/* ══ STORAGE ══ */
-function loadLocal(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch{return d}}
-function saveLocal(k,v){
-  try{
-    localStorage.setItem(k,JSON.stringify(v));
-    return true;
-  } catch(e){
-    // localStorage full — show warning
-    console.error('localStorage save failed for key:',k,e);
-    if(e.name==='QuotaExceededError'||e.code===22){
-      showStorageWarning();
-    }
-    return false;
-  }
-}
-function showStorageWarning(){
-  const existing = document.getElementById('storageWarning');
-  if(existing) return; // already showing
-  const div = document.createElement('div');
-  div.id = 'storageWarning';
-  div.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:9999;background:#b84040;color:#fff;padding:.6rem 1rem;font-size:.8rem;display:flex;align-items:center;gap:.75rem;font-family:DM Sans,sans-serif';
-  div.innerHTML = '⚠️ <strong>Storage almost full</strong> — your data may not be saving correctly. Export your JSON backup now to avoid data loss. <button onclick="exportData()" style="background:#fff;color:#b84040;border:none;border-radius:4px;padding:.25rem .6rem;cursor:pointer;font-weight:600;margin-left:auto">⬇ Export Now</button><button onclick="this.parentElement.remove()" style="background:none;border:none;color:#fff;cursor:pointer;font-size:1rem;padding:0 .25rem">✕</button>';
-  document.body.prepend(div);
-}
-function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
-
-/* ══ STATE ══ */
-let vendors = [];
-let activeVendorId = 'all';
-let activeCat = 'all';
-let activeSeason = 'all';
-let activeMaterial = 'all';
-let sortMode = 'style'; // 'style' or 'price'
-let viewMode = 'cards';  // 'cards' | 'table'
-let page = 0;
-const PAGE_SIZE = 60;
-let searchQ = '';
-let _searchTimer = null;
-let _detailItem = null; // currently open item
-
-/* ══ BOOT ══ */
-window.addEventListener('DOMContentLoaded', async () => {
-  // Try localStorage first
-  const savedImgs = loadLocal('lb_vendor_imgs', {});
-  const saved = loadLocal('lb_vendors_v2', null);
-  // Ensure every item has a stable id, assign if missing
-  if(saved) saved.forEach(v=>v.items.forEach(it=>{ if(!it.id) it.id=uid(); }));
-  // Merge: use savedImgs for base64, but keep inline URL if no savedImg
-  if(saved) saved.forEach(v=>v.items.forEach(it=>{
-    if(savedImgs[it.id]) it.img = savedImgs[it.id]; // base64 override
-    // URL images are already on it.img from lb_vendors_v2, no action needed
-  }));
-  if (saved && saved.length) {
-    vendors = saved;
-    boot();
-    return;
-  }
-  // Try loading the companion JSON
-  try {
-    const r = await fetch('littlebasics-vendors.json');
-    if (r.ok) {
-      const data = await r.json();
-      if (data.vendors) { vendors = data.vendors; save(); }
-    }
-  } catch(e) {}
-  boot();
-});
-
-function boot() {
-  if (vendors.length) activeVendorId = vendors[0].id;
-  renderSidebar();
-  renderChips();
-  render();
-}
-
-function save(){
-  // Save vendor data — strip images to keep size down
-  // vendorsSlim strips images but keeps all other fields including styleNo
-  const vendorsSlim = vendors.map(v=>({
-    ...v,
-    items: v.items.map(it=>{
-      // Keep URL images in vendor data (tiny text) — only strip base64 blobs
-      const img = it.img && it.img.startsWith('data:') ? undefined : it.img;
-      const {img: _dropped, ...rest} = it;
-      return img ? {...rest, img} : rest;
-    })
-  }));
-  const ok = saveLocal('lb_vendors_v2', vendorsSlim);
-
-  // Save images separately (each image is ~15-30KB)
-  const imgs = {};
-  // Only store base64 images separately — URLs stay in vendor data directly
-  vendors.forEach(v=>v.items.forEach(it=>{ if(it.img && it.img.startsWith('data:') && it.id) imgs[it.id]=it.img; }));
-  saveLocal('lb_vendor_imgs', imgs);
-
-  if(!ok) showStorageWarning();
-}
-function getVendor(id){ return vendors.find(v=>v.id===id); }
-
-/* ══ ALL ITEMS (flat) ══ */
-function allItems(){
-  const arr=[];
-  vendors.forEach(v=>v.items.forEach(it=>arr.push({...it,_vendorId:v.id,_vendorName:v.name})));
-  return arr;
-}
-
-/* ══ FILTERED ITEMS ══ */
-function filteredItems(){
-  let rows = activeVendorId==='all' ? allItems()
-    : (getVendor(activeVendorId)?.items||[]).map(it=>({...it,_vendorId:activeVendorId,_vendorName:getVendor(activeVendorId)?.name||''}));
-
-  if (activeCat !== 'all'){
-    const KNOWN_CATS = ['Baby Pant','Baby Romper','Baby Suit','Baby Top'];
-    if(activeCat === 'Others'){
-      rows = rows.filter(it=>!KNOWN_CATS.includes((it.category||'').trim()));
-    } else {
-      rows = rows.filter(it=>(it.category||'').trim() === activeCat.trim());
-    }
-  }
-  if (activeSeason !== 'all') rows = rows.filter(it=>normSeason(it.season) === activeSeason);
-  if (activeMaterial !== 'all') rows = rows.filter(it=>normMaterial(it.material||'') === activeMaterial);
-  if (!document.getElementById('showHidden')?.checked) rows = rows.filter(it=>!it.hidden);
-  if (document.getElementById('showCustomOnly')?.checked) rows = rows.filter(it=>!!it.customReq);
-  if (document.getElementById('showFavsOnly')?.checked) rows = rows.filter(it=>!!it.fav);
-  if (document.getElementById('showRadarOnly')?.checked) rows = rows.filter(it=>!!it.radar);
-  if (searchQ) {
-    const q = searchQ.toLowerCase();
-    rows = rows.filter(it=>[it.styleNo,it.colors,it.category,it.season,it.notes,it.material,it._vendorName]
-      .some(f=>(f||'').toLowerCase().includes(q)));
-  }
-  return rows;
-}
-
-/* ══ CHIPS ══ */
-function getCategories(){
-  // Fixed clean category list — not auto-generated from data to avoid typo chips
-  return ['Baby Pant','Baby Romper','Baby Suit','Baby Top','Others'];
-}
-function normMaterial(m){
-  const s = (m||'').toLowerCase().trim();
-  if(s.includes('organic') && s.includes('cotton')) return 'Organic Cotton';
-  if(s.includes('100%') && s.includes('cotton') && !s.includes('linen')) return '100% Cotton';
-  if((s.includes('90%') || s.includes('95%')) && s.includes('cotton')) return '90–95% Cotton';
-  if(s.includes('linen')) return 'Cotton Linen';
-  if(s.includes('polyester') || s.includes('poly')) return 'Polyester';
-  if(!s) return 'No material yet';
-  // <90% cotton — has a % number below 90 and contains cotton, no linen
-  if(s.includes('cotton') && !s.includes('linen')){
-    const pct = parseInt((s.match(/(\d+)%/) || [])[1] || '0');
-    if(pct > 0 && pct < 90) return '<90% Cotton';
-  }
-  return 'other';
-}
-
-function normSeason(s){
-  if(!s) return '';
-  const t = s.trim().toLowerCase();
-  if(t.includes('spring') && t.includes('autumn')) return 'Spring/Autumn';
-  if(t.includes('autumn') || t.includes('fall')) return 'Autumn';
-  if(t.includes('spring')) return 'Spring';
-  if(t.includes('summer')) return 'Summer';
-  if(t.includes('winter')) return 'Winter';
-  return s.trim();
-}
-function getSeasons(){
-  const s=new Set();
-  allItems().forEach(it=>{ const n=normSeason(it.season); if(n) s.add(n); });
-  return [...s].sort();
-}
-function renderChips(){
-  const cats = getCategories();
-  const seasons = getSeasons();
-  const cc = document.getElementById('catChips');
-  const sc = document.getElementById('seasonChips');
-
-  // Use data-val attributes to avoid quote issues in innerHTML onclick
-  cc.innerHTML = cats.length
-    ? `<button class="chip${activeCat==='all'?' on':''}" data-cat="all">All types</button>`
-      + cats.map(cat=>`<button class="chip${activeCat===cat?' on':''}" data-cat="${cat.replace(/"/g,'')}">${cat.replace('Baby ','')}</button>`).join('')
-    : '';
-
-  sc.innerHTML = seasons.length > 1
-    ? `<button class="chip${activeSeason==='all'?' on':''}" data-season="all">All seasons</button>`
-      + seasons.map(s=>`<button class="chip${activeSeason===s?' on':''}" data-season="${s.replace(/"/g,'')}">${s}</button>`).join('')
-    : '';
-
-  // Material chips — fixed set, only show if any items have that material
-  const MATERIALS = ['100% Cotton','Organic Cotton','90–95% Cotton','<90% Cotton','Cotton Linen','Polyester','No material yet'];
-  const allItems = allItems_();
-  const mc = document.getElementById('materialChips');
-  if(mc){
-    const available = MATERIALS.filter(m => allItems.some(it=>normMaterial(it.material||'')===m));
-    mc.innerHTML = available.length
-      ? `<button class="chip${activeMaterial==='all'?' on':''}" data-mat="all">All materials</button>`
-        + available.map(m=>`<button class="chip${activeMaterial===m?' on':''}" data-mat="${m}">${m}</button>`).join('')
-      : '';
-    mc.querySelectorAll('[data-mat]').forEach(btn=>{
-      btn.addEventListener('click', ()=>setMaterial(btn.dataset.mat));
-    });
-  }
-
-  // Attach click handlers via JS (no inline onclick)
-  cc.querySelectorAll('[data-cat]').forEach(btn=>{
-    btn.addEventListener('click', ()=>setCat(btn.dataset.cat));
-  });
-  sc.querySelectorAll('[data-season]').forEach(btn=>{
-    btn.addEventListener('click', ()=>setSeason(btn.dataset.season));
-  });
-}
-function setCat(c){ activeCat=c; page=0; renderChips(); render(); }
-function setSeason(s){ activeSeason=s; page=0; renderChips(); render(); }
-function setMaterial(m){ activeMaterial=m; page=0; renderChips(); render(); }
-
-// Flat list of all items across all vendors (for material chip availability check)
-function allItems_(){
-  const arr=[];
-  vendors.forEach(v=>v.items.forEach(it=>arr.push(it)));
-  return arr;
-}
-
-/* ══ SEARCH ══ */
-function onSearch(){
-  clearTimeout(_searchTimer);
-  _searchTimer = setTimeout(()=>{ searchQ=document.getElementById('searchInput').value; page=0; render(); }, 220);
-}
-
-/* ══ VIEW MODE ══ */
-function setView(v){
-  viewMode=v;
-  document.getElementById('togCards').classList.toggle('on',v==='cards');
-  document.getElementById('togTable').classList.toggle('on',v==='table');
-  page=0; render();
-}
-
-/* ══ RENDER ══ */
-function render(){
-  const rows = filteredItems().sort((a,b)=>(a.styleNo||''  ).localeCompare(b.styleNo||''  , undefined, {numeric:true}));
-  const total = rows.length;
-  const allCount = activeVendorId==='all' ? allItems().length : (getVendor(activeVendorId)?.items.length||0);
-  document.getElementById('toolbarMeta').textContent = `${total} of ${allCount}`;
-  document.getElementById('addItemBtn').style.display = ''; // always visible — vendor chosen in modal
-
-  const area = document.getElementById('contentArea');
-
-  if (!vendors.length){
-    area.innerHTML=`<div class="empty-state"><h3>No vendors yet</h3><p>Click "+ Add Vendor" to get started, then import your catalog JSON.</p></div>`;
-    document.getElementById('pager').style.display='none';
-    return;
-  }
-  if (!rows.length){
-    area.innerHTML=`<div class="empty-state"><h3>No items found</h3><p>${searchQ?'Try a different search term.':'Nothing matches these filters.'}</p></div>`;
-    document.getElementById('pager').style.display='none';
-    return;
-  }
-
-  // Paginate
-  const totalPages = Math.max(1, Math.ceil(rows.length / PAGE_SIZE));
-  if(page >= totalPages) page = totalPages - 1;
-  const pageRows = rows.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
-
-  if (viewMode==='cards'){
-    area.innerHTML = `<div class="card-grid">${pageRows.map(it=>cardHTML(it)).join('')}</div>`;
-  } else {
-    area.innerHTML = `<table class="vendor-table"><thead><tr>
-      <th style="width:28px"></th>
-      ${activeVendorId==='all'?'<th style="width:80px">Vendor</th>':''}
-      <th style="width:52px">Photo</th>
-      <th style="width:90px">Style No.</th>
-      <th style="width:90px">Category</th>
-      <th style="width:70px">Season</th>
-      <th>Colors</th>
-      <th style="width:160px">Sizes</th>
-      <th style="width:65px">Price</th>
-      <th style="width:110px">Material</th>
-      <th style="min-width:120px">Notes</th>
-      <th style="width:80px">Qty Ordered</th>
-      <th style="width:90px">Actions</th>
-    </tr></thead><tbody>${pageRows.map(it=>rowHTML(it)).join('')}</tbody></table>`;
-  }
-
-  // Pager
-  const pager = document.getElementById('pager');
-  pager.style.display = totalPages > 1 ? '' : 'none';
-  document.getElementById('pageInfo').textContent = `${page+1} / ${totalPages}  (${rows.length} items)`;
-  document.getElementById('prevBtn').disabled = page === 0;
-  document.getElementById('nextBtn').disabled = page >= totalPages - 1;
-}
-
-function cardHTML(it){
-  const k = selKey(it._vendorId, it.id);
-  const isSelected = selectedIds.has(k);
-  const imgTag = it.img
-    ? `<img class="card-img" src="${it.img}" alt="${esc(it.styleNo)}" loading="lazy">`
-    : `<div class="card-img-placeholder">📦</div>`;
-  const checkEl = selectMode
-    ? `<div class="card-check-wrap"><input type="checkbox" class="tbl-check" ${isSelected?'checked':''} onclick="event.stopPropagation();toggleSelectItem('${it._vendorId}','${it.id}',this.checked)"></div>`
-    : '';
-  return `<div class="card${it.hidden?' is-hidden':''}${it.fav?' is-fav':''}${it.radar?' is-radar':''}${it.customReq?' is-custom':''}${isSelected?' selected':''}" data-selkey="${k}"
-    onclick="${selectMode ? `toggleSelectItem('${it._vendorId}','${it.id}',!selectedIds.has('${k}'));this.classList.toggle('selected',selectedIds.has('${k}'));updateSelectBar()` : `openDetail('${it._vendorId}','${it.id}')`}">
-    ${checkEl}
-    ${imgTag}
-    <div class="card-body">
-      <div class="card-cat">${esc(it.category||'')}</div>
-      <div class="card-style">${esc(it.styleNo)}</div>
-      <div class="card-colors">${esc(it.colors||'—')}</div>
-      <div class="card-price">${esc(it.price||'')}</div>
-      ${it.season?`<span class="card-season">${esc(it.season)}</span>`:''}
-      ${(it.fav||it.radar||it.customReq||it.hidden)?('<div class="card-dots">'+(it.fav?'<span class="cdot cdot-fav" title="Order Again"></span>':''  )+(it.radar?'<span class="cdot cdot-radar" title="On My Radar"></span>':''  )+(it.customReq?'<span class="cdot cdot-custom" title="Custom Request"></span>':''  )+(it.hidden?'<span class="cdot cdot-hidden" title="Hidden"></span>':''  )+'</div>'):''}
-    </div>
-  </div>`;
-}
-
-function rowHTML(it){
-  const thumb = it.img
-    ? `<img class="tbl-thumb" src="${it.img}" alt="" loading="lazy">`
-    : `<div class="tbl-thumb" style="display:flex;align-items:center;justify-content:center;color:#ccc">📦</div>`;
-  const k = selKey(it._vendorId, it.id);
-  const isSelected = selectedIds.has(k);
-  return `<tr class="${it.hidden?'is-hidden':''}${isSelected?' selected':''}" data-selkey="${k}"
-    onclick="${selectMode ? `event.stopPropagation();toggleSelectItem('${it._vendorId}','${it.id}',!selectedIds.has('${k}'));this.classList.toggle('selected',selectedIds.has('${k}'));updateSelectBar()` : `openDetail('${it._vendorId}','${it.id}')`}" style="cursor:pointer">
-    <td onclick="event.stopPropagation()"><input type="checkbox" class="tbl-check" ${isSelected?'checked':''} onchange="toggleSelectItem('${it._vendorId}','${it.id}',this.checked)"></td>
-    ${activeVendorId==='all'?`<td><span style="font-size:.7rem;color:var(--bark-lt);font-weight:500">${esc(it._vendorName)}</span></td>`:''}
-    <td>${thumb}</td>
-    <td><strong>${esc(it.styleNo)}</strong></td>
-    <td style="font-size:.72rem;color:var(--bark-lt)">${esc(it.category||'')}</td>
-    <td><span style="font-size:.65rem;background:var(--sand-lt);padding:.1rem .3rem;border-radius:3px;color:var(--bark)">${esc(it.season||'')}</span></td>
-    <td style="font-size:.72rem;color:#888">${esc(it.colors||'')}</td>
-    <td style="font-size:.68rem;color:#aaa">${esc(it.sizes||'')}</td>
-    <td style="font-weight:600;color:var(--bark)">${esc(it.price||'')}</td>
-    <td style="font-size:.72rem;color:#888" onclick="event.stopPropagation()"><input class="cell-edit" value="${esc(it.material||'')}" placeholder="—" onchange="updateField('${it._vendorId}','${it.id}','material',this.value)"></td>
-    <td style="font-size:.72rem;color:#888" onclick="event.stopPropagation()"><input class="cell-edit" value="${esc(it.notes||'')}" placeholder="—" onchange="updateField('${it._vendorId}','${it.id}','notes',this.value)"></td>
-    <td onclick="event.stopPropagation()">
-      <div class="qty-stepper">
-        <button class="qty-btn" onclick="changeQty('${it._vendorId}','${it.id}',-1)">−</button>
-        <span class="qty-val" id="qty-${it.id}">${it.qtyOrdered||0}</span>
-        <button class="qty-btn" onclick="changeQty('${it._vendorId}','${it.id}',1)">+</button>
-      </div>
-    </td>
-    <td onclick="event.stopPropagation()">
-      <button class="fav-btn${it.fav?' is-fav':''}" onclick="toggleFav('${it._vendorId}','${it.id}')" title="${it.fav?'Remove':'Order Again'}">${it.fav?'⭐':'☆'}</button>
-      <button class="fav-btn${it.radar?' is-fav':''}" style="${it.radar?'color:#2a6db5;border-color:#2a6db5;background:#f0f7ff':''}" onclick="toggleRadar('${it._vendorId}','${it.id}')" title="On My Radar">🔭</button>
-      <button class="hide-btn${it.hidden?' is-hidden':''}" onclick="toggleHide('${it._vendorId}','${it.id}')">${it.hidden?'Hidden':'Visible'}</button>
-    </td>
-  </tr>`;
+  win.onload = function(){ win.focus(); win.print(); };
 }
 
 /* changePage removed — using infinite scroll */
