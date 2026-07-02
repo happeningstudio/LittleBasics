@@ -210,9 +210,15 @@ tr.selected td{background:rgba(139,115,85,.07)!important}
 .order-header p{font-size:.72rem;color:#aaa;margin-top:.2rem}
 
 @media print {
-  /* Hide everything except whichever print area is active */
-  body > *:not(#printArea):not(#poPrintArea){ display:none!important }
-  #printArea,#poPrintArea{ display:block!important;position:fixed;inset:0;background:white;padding:1.5cm;z-index:99999;font-family:'DM Sans',sans-serif }
+  body > *{ display:none!important }
+  #printArea[style*="block"],#poPrintArea[style*="block"]{
+    display:block!important;
+    position:fixed;inset:0;
+    background:white;
+    padding:1.5cm;
+    z-index:99999;
+    font-family:'DM Sans',sans-serif
+  }
   #printArea .no-print{display:none!important}
   #poPrintArea table{width:100%;border-collapse:collapse;font-size:10px}
   #poPrintArea th{background:#f5f0ea;padding:5px 7px;text-align:left;border:1px solid #e2dbd2;font-size:9px;text-transform:uppercase;letter-spacing:.05em;color:#8b7355}
