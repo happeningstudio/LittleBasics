@@ -1718,7 +1718,7 @@ function exportPOPdf(){
   win.document.write('<div style="margin-top:8px;padding-top:6px;border-top:1px solid #eee;font-size:7pt;color:#aaa;display:flex;justify-content:space-between"><span>Little Basics — Purchase Order<\/span><span>Generated '+new Date().toLocaleDateString()+'<\/span><\/div>');
   win.document.write('<\/body><\/html>');
   win.document.close();
-  win.onload = function(){ win.focus(); win.print(); };
+  setTimeout(function(){ win.focus(); win.print(); }, 500);
 }
 
 /* ── Hook: add to PO from catalog detail modal ── */
