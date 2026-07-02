@@ -1254,6 +1254,111 @@ function formatNoteDate(iso){
 }
 
 
+
+function filteredItems(){
+  let rows = activeVendorId==='all' ? allItems()
+    : (getVendor(activeVendorId)?.items||[]).map(it=>({...it,_vendorId:activeVendorId,_vendorName:getVendor(activeVendorId)?.name||''}));
+
+  if (activeCat !== 'all'){
+    const KNOWN_CATS = ['Baby Pant','Baby Romper','Baby Suit','Baby Top'];
+    if(activeCat === 'Others'){
+      rows = rows.filter(it=>!KNOWN_CATS.includes((it.category||'').trim()));
+    } else {
+      rows = rows.filter(it=>(it.category||'').trim() === activeCat.trim());
+    }
+  }
+  if (activeSeason !== 'all') rows = rows.filter(it=>normSeason(it.season) === activeSeason);
+  if (activeMaterial !== 'all') rows = rows.filter(it=>normMaterial(it.material||'') === activeMaterial);
+  if (!document.getElementById('showHidden')?.checked) rows = rows.filter(it=>!it.hidden);
+  if (document.getElementById('showCustomOnly')?.checked) rows = rows.filter(it=>!!it.customReq);
+  if (document.getElementById('showFavsOnly')?.checked) rows = rows.filter(it=>!!it.fav);
+  if (document.getElementById('showRadarOnly')?.checked) rows = rows.filter(it=>!!it.radar);
+  if (searchQ) {
+    const q = searchQ.toLowerCase();
+    rows = rows.filter(it=>[it.styleNo,it.colors,it.category,it.season,it.notes,it.material,it._vendorName]
+      .some(f=>(f||'').toLowerCase().includes(q)));
+  }
+  return rows;
+}
+
+/* ══ CHIPS ══ */
+function render(){
+  const rows = filteredItems().sort((a,b)=>(a.styleNo||''  ).localeCompare(b.styleNo||''  , undefined, {numeric:true}));
+  const total = rows.length;
+  const allCount = activeVendorId==='all' ? allItems().length : (getVendor(activeVendorId)?.items.length||0);
+  document.getElementById('toolbarMeta').textContent = `${total} of ${allCount}`;
+  document.getElementById('addItemBtn').style.display = ''; // always visible — vendor chosen in modal
+
+  const area = document.getElementById('contentArea');
+
+  if (!vendors.length){
+    area.innerHTML=`<div class="empty-state"><h3>No vendors yet</h3><p>Click "+ Add Vendor" to get started, then import your catalog JSON.</p></div>`;
+    document.getElementById('pager').style.display='none';
+    return;
+  }
+  if (!rows.length){
+    area.innerHTML=`<div class="empty-state"><h3>No items found</h3><p>${searchQ?'Try a different search term.':'Nothing matches these filters.'}</p></div>`;
+    document.getElementById('pager').style.display='none';
+    return;
+  }
+
+  // Paginate
+  const totalPages = Math.max(1, Math.ceil(rows.length / PAGE_SIZE));
+  if(page >= totalPages) page = totalPages - 1;
+  const pageRows = rows.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
+
+  if (viewMode==='cards'){
+    area.innerHTML = `<div class="card-grid">${pageRows.map(it=>cardHTML(it)).join('')}</div>`;
+  } else {
+    area.innerHTML = `<table class="vendor-table"><thead><tr>
+      <th style="width:28px"></th>
+      ${activeVendorId==='all'?'<th style="width:80px">Vendor</th>':''}
+      <th style="width:52px">Photo</th>
+      <th style="width:90px">Style No.</th>
+      <th style="width:90px">Category</th>
+      <th style="width:70px">Season</th>
+      <th>Colors</th>
+      <th style="width:160px">Sizes</th>
+      <th style="width:65px">Price</th>
+      <th style="width:110px">Material</th>
+      <th style="min-width:120px">Notes</th>
+      <th style="width:80px">Qty Ordered</th>
+      <th style="width:90px">Actions</th>
+    </tr></thead><tbody>${pageRows.map(it=>rowHTML(it)).join('')}</tbody></table>`;
+  }
+
+  // Pager
+  const pager = document.getElementById('pager');
+  pager.style.display = totalPages > 1 ? '' : 'none';
+  document.getElementById('pageInfo').textContent = `${page+1} / ${totalPages}  (${rows.length} items)`;
+  document.getElementById('prevBtn').disabled = page === 0;
+  document.getElementById('nextBtn').disabled = page >= totalPages - 1;
+}
+
+function cardHTML(it){
+  const k = selKey(it._vendorId, it.id);
+  const isSelected = selectedIds.has(k);
+  const imgTag = it.img
+    ? `<img class="card-img" src="${it.img}" alt="${esc(it.styleNo)}" loading="lazy">`
+    : `<div class="card-img-placeholder">📦</div>`;
+  const checkEl = selectMode
+    ? `<div class="card-check-wrap"><input type="checkbox" class="tbl-check" ${isSelected?'checked':''} onclick="event.stopPropagation();toggleSelectItem('${it._vendorId}','${it.id}',this.checked)"></div>`
+    : '';
+  return `<div class="card${it.hidden?' is-hidden':''}${it.fav?' is-fav':''}${it.radar?' is-radar':''}${it.customReq?' is-custom':''}${isSelected?' selected':''}" data-selkey="${k}"
+    onclick="${selectMode ? `toggleSelectItem('${it._vendorId}','${it.id}',!selectedIds.has('${k}'));this.classList.toggle('selected',selectedIds.has('${k}'));updateSelectBar()` : `openDetail('${it._vendorId}','${it.id}')`}">
+    ${checkEl}
+    ${imgTag}
+    <div class="card-body">
+      <div class="card-cat">${esc(it.category||'')}</div>
+      <div class="card-style">${esc(it.styleNo)}</div>
+      <div class="card-colors">${esc(it.colors||'—')}</div>
+      <div class="card-price">${esc(it.price||'')}</div>
+      ${it.season?`<span class="card-season">${esc(it.season)}</span>`:''}
+      ${(it.fav||it.radar||it.customReq||it.hidden)?('<div class="card-dots">'+(it.fav?'<span class="cdot cdot-fav" title="Order Again"></span>':''  )+(it.radar?'<span class="cdot cdot-radar" title="On My Radar"></span>':''  )+(it.customReq?'<span class="cdot cdot-custom" title="Custom Request"></span>':''  )+(it.hidden?'<span class="cdot cdot-hidden" title="Hidden"></span>':''  )+'</div>'):''}
+    </div>
+  </div>`;
+}
+
 /* ══ PAGINATION ══ */
 function toggleSort(){
   sortMode = sortMode==='style' ? 'price' : 'style';
