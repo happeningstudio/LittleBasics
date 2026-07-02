@@ -1701,7 +1701,15 @@ function exportPOPdf(){
   const notesSection = po.notes ? `<div style="margin-top:16px;padding:10px 14px;background:#f5f0ea;border-radius:6px;border:1px solid #e2dbd2"><div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#aaa;margin-bottom:6px">Order Notes</div><div style="font-size:10px;color:#2a2420;line-height:1.6;white-space:pre-wrap">${po.notes}</div></div>` : '';
   const privSection = po.generalNotes ? `<div style="margin-top:10px;padding:10px 14px;background:#faf8f5;border-radius:6px;border:1px solid #e2dbd2"><div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#aaa;margin-bottom:6px">Private Notes</div><div style="font-size:10px;color:#2a2420;line-height:1.6;white-space:pre-wrap">${po.generalNotes}</div></div>` : '';
 
-  document.getElementById('poPrintArea').innerHTML = `
+  // Pre-compute summary — avoids IIFE issues in new window
+  const _byCat={};
+  po.items.forEach(it=>{ const _cat=(it.category||'Other').replace('Baby ',''); _byCat[_cat]=(_byCat[_cat]||0)+(it.qty||1); });
+  const _catRows = Object.entries(_byCat).sort((a,b)=>b[1]-a[1])
+    .map(([cat,q])=>`<div style="display:flex;justify-content:space-between;padding:2px 0;border-bottom:.5px solid #f0ebe5"><span>${cat}</span><span style="font-weight:600">${q}</span></div>`)
+    .join('') + '<div style="display:flex;justify-content:space-between;padding:3px 0;font-weight:700;color:#8b7355"><span>Total</span><span>' + totalUnits + '</span></div>';
+  const summaryHTML = '<div style="margin-top:10px;font-size:8px"><div style="font-size:7px;font-weight:700;text-transform:uppercase;color:#8b7355;margin-bottom:4px;border-bottom:1px solid #e2dbd2;padding-bottom:3px">Order Summary by Category</div>' + _catRows + '</div>';
+
+    document.getElementById('poPrintArea').innerHTML = `
     <!-- Header -->
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;padding-bottom:10px;border-bottom:2px solid #3a8fc7">
       <div>
@@ -1738,37 +1746,8 @@ function exportPOPdf(){
         </tr>
       </tfoot>
     </table>
-    <!-- Summary breakdown -->
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px">
-      <div>
-        <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#8b7355;margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid #e2dbd2">Units by Category</div>
-        ${(()=>{
-          const byCat={};
-          po.items.forEach(it=>{ const c=it.category||'Other'; byCat[c]=(byCat[c]||0)+(it.qty||1); });
-          return Object.entries(byCat).sort((a,b)=>b[1]-a[1])
-            .map(([cat,q])=>`<div style="display:flex;justify-content:space-between;font-size:9px;padding:3px 0;border-bottom:.5px solid #f0ebe5"><span>${cat.replace('Baby ','')}</span><span style="font-weight:600">${q}</span></div>`)
-            .join('')+'<div style="display:flex;justify-content:space-between;font-size:10px;padding:4px 0;font-weight:700;color:#8b7355"><span>Total</span><span>${po.items.reduce((s,i)=>s+(i.qty||1),0)}</span></div>';
-        })()}
-      </div>
-      <div>
-        <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#8b7355;margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid #e2dbd2">Units by Size (from notes)</div>
-        ${(()=>{
-          const bySize={};const sOrd=['60','70','73','80','90','100','110','120','130'];
-          po.items.forEach(it=>{
-            const src = it.notes||it.sizes||'';
-            [...src.matchAll(/(\d{2,3})\s*(?:cm)?\s*[x×*]\s*(\d+)/gi)].forEach(m=>{
-              if(sOrd.includes(m[1])) bySize[m[1]]=(bySize[m[1]]||0)+(parseInt(m[2])||0);
-            });
-          });
-          const entries=sOrd.filter(s=>bySize[s]>0);
-          if(!entries.length) return '<div style="font-size:9px;color:#bbb">Add size breakdown in notes to see totals</div>';
-          const tot=entries.reduce((s,sz)=>s+bySize[sz],0);
-          return entries.map(sz=>`<div style="display:flex;justify-content:space-between;font-size:9px;padding:3px 0;border-bottom:.5px solid #f0ebe5"><span>${sz}cm</span><span style="font-weight:600">${bySize[sz]}</span></div>`).join('')
-            +'<div style="display:flex;justify-content:space-between;font-size:10px;padding:4px 0;font-weight:700;color:#8b7355"><span>Total</span><span>${tot}</span></div>';
-        })()}
-      </div>
-    </div>
-    ${notesSection}${privSection}
+    ${summaryHTML}
+        ${notesSection}${privSection}
     <div style="margin-top:12px;font-size:8px;color:#aaa;display:flex;justify-content:space-between;border-top:1px solid #eee;padding-top:6px">
       <span>Little Basics — Purchase Order</span><span>Generated ${new Date().toLocaleDateString()}</span>
     </div>`;
