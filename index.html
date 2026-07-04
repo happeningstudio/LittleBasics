@@ -1493,7 +1493,8 @@ async function submitBag(){
  fullAddress||'', // full shipping address
  isBundle ? '1' : '0', // bundle flag
  shipFee.toFixed(2), // shipping fee
- 'pending' // status
+ 'pending',  // status
+      contactInfo  // phone or email
  ];
  await fetch(SHEET_URL, {
  method: 'POST',
