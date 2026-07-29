@@ -929,7 +929,7 @@ function render(){
  // Hide all-zero stock
  rows = rows.filter(p=>{
  const hasData = p.sizes.some(l=>getSizeStock(p,l)!==null);
- if(!hasData) return true;
+ if(!hasData) return false; // no stock data = hide (draft product, not yet received)
  return p.sizes.some(l=>{ const s=getSizeStock(p,l); return s===null||s>0; });
  });
 
