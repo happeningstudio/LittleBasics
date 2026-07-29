@@ -204,6 +204,11 @@ tr.cat-section-hdr td{
   padding:.4rem .75rem!important;
 }
 
+.inv-check-wrap{display:flex;align-items:center;gap:.35rem;margin-top:.4rem;cursor:pointer;user-select:none}
+.inv-check-wrap input{accent-color:var(--green);width:14px;height:14px;cursor:pointer;flex-shrink:0}
+.inv-check-wrap span{font-size:.65rem;color:#bbb;font-weight:500}
+.inv-check-wrap.done span{color:var(--green);font-weight:600}
+tr.inv-checked-row td{background:rgba(80,160,80,.05)!important}
 .inv-input{width:48px;text-align:center;border:1px solid var(--border);border-radius:4px;padding:.2rem;font-size:.76rem;font-family:'DM Sans',sans-serif;background:var(--mist);color:var(--ink);transition:border-color .15s}
 .inv-input:focus{outline:none;border-color:var(--bark)}
 .inv-input.zero{background:#fff0f0;border-color:var(--red)}
@@ -311,6 +316,7 @@ tr.cat-section-hdr td{
 .mgr-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:.65rem}
 .mgr-card{background:var(--white);border-radius:8px;box-shadow:var(--shadow);overflow:hidden;cursor:pointer;border:2px solid transparent;transition:all .15s}
 .mgr-card:hover{border-color:var(--sand-dk);box-shadow:var(--shadow-md)}
+.mgr-card.sel{border-color:var(--bark)}
 .mgr-card.mgr-card-hidden{opacity:.45;border-style:dashed}
 .mgr-card img{width:100%;height:120px;object-fit:cover;display:block}
 .mgr-card-body{padding:.48rem .55rem}
@@ -335,7 +341,7 @@ tr.cat-section-hdr td{
 .pending-wrap{padding:.75rem 1.25rem;height:calc(100vh - var(--top));display:flex;flex-direction:column;gap:.5rem;overflow:hidden}
 .pending-toolbar{display:flex;align-items:center;gap:.5rem;flex-shrink:0;flex-wrap:wrap}
 .pending-scroll{overflow-y:auto;flex:1}
-.pending-card{background:var(--white);border-radius:8px;box-shadow:var(--shadow);margin-bottom:.6rem;border-left:3px solid var(--bark);overflow:hidden;transition:opacity .2s}
+.pending-card{background:var(--white);border-radius:8px;box-shadow:var(--shadow);margin-bottom:.6rem;border-left:3px solid var(--bark);overflow:hidden}
 .pending-card.dismissed{opacity:.4;border-color:var(--border)}
 .pending-card-head{display:flex;align-items:flex-start;justify-content:space-between;padding:.6rem .75rem;border-bottom:1px solid #f2ede8;gap:.5rem}
 .pending-card-body{padding:.5rem .75rem}
@@ -347,6 +353,20 @@ tr.cat-section-hdr td{
 .pending-tag{display:inline-block;font-size:.62rem;font-weight:600;padding:.12rem .38rem;border-radius:10px;background:var(--sand-lt);color:var(--bark)}
 .pending-tag.shipping{background:#edf0f7;color:var(--blue)}
 .pending-tag.bundle{background:#edf7f0;color:var(--green)}
+/* PRODUCT HIDE */
+.mgr-card.is-hidden{opacity:.4;border-style:dashed}
+.mgr-card.is-hidden:hover{opacity:.65}
+.mgr-card.mgr-sel{outline:2px solid var(--bark);outline-offset:1px}
+.mgr-hide-btn{background:transparent;border:1px solid var(--border);border-radius:4px;font-size:.62rem;padding:.15rem .4rem;cursor:pointer;color:#bbb;font-family:'DM Sans',sans-serif;line-height:1.4;transition:all .12s;white-space:nowrap}
+.mgr-hide-btn:hover{border-color:var(--amber);color:var(--amber)}
+.mgr-hide-btn.is-hidden{border-color:var(--green);color:var(--green)}
+.mgr-check{position:absolute;top:.35rem;left:.35rem;width:15px;height:15px;accent-color:var(--bark);display:none;cursor:pointer;z-index:2}
+.mgr-sel-mode .mgr-card{position:relative;cursor:default}
+.mgr-sel-mode .mgr-check{display:block}
+.mgr-sel-bar{display:none;align-items:center;gap:.6rem;background:#fff8f4;border:1px solid var(--sand-dk);border-radius:6px;padding:.38rem .75rem;margin-bottom:.6rem}
+.mgr-sel-bar.on{display:flex}
+.mgr-sel-count{font-size:.78rem;font-weight:600;color:var(--bark)}
+.hidden-tag{display:inline-block;font-size:.58rem;font-weight:600;padding:.08rem .3rem;border-radius:3px;background:var(--sand-lt);color:#aaa;margin-left:.25rem;vertical-align:middle;text-transform:uppercase;letter-spacing:.04em}
 
 /* ════════════════════════════
    ANALYTICS
@@ -373,6 +393,78 @@ tr.cat-section-hdr td{
 .analytics-hero-val{font-size:1.8rem;font-weight:700;color:var(--bark);line-height:1}
 .analytics-hero-lbl{font-size:.68rem;color:#aaa;margin-top:.25rem;text-transform:uppercase;letter-spacing:.07em}
 .analytics-empty{text-align:center;color:#ccc;font-size:.78rem;padding:2rem}
+
+/* ════════════════════════════
+   SHIPMENTS VIEW
+════════════════════════════ */
+.ship-wrap{padding:1rem 1.25rem;height:calc(100vh - var(--top));display:flex;flex-direction:column;overflow:hidden}
+.ship-toolbar{display:flex;align-items:center;gap:.6rem;margin-bottom:.75rem;flex-shrink:0}
+.ship-scroll{overflow-y:auto;flex:1}
+.ship-card{background:var(--white);border-radius:8px;box-shadow:var(--shadow);margin-bottom:.75rem;overflow:hidden;border:1px solid var(--border)}
+.ship-card-head{display:flex;align-items:center;justify-content:space-between;padding:.65rem .85rem;background:var(--sand-lt);border-bottom:1px solid var(--border)}
+.ship-card-name{font-weight:600;font-size:.82rem;color:var(--ink)}
+.ship-card-meta{font-size:.7rem;color:#aaa;margin-top:.1rem}
+.ship-card-actions{display:flex;gap:.4rem;align-items:center}
+.ship-item-row{display:flex;align-items:center;gap:.5rem;padding:.35rem .85rem;border-bottom:1px solid #f5f0ea;font-size:.76rem}
+.ship-item-row:last-child{border-bottom:none}
+.ship-item-name{flex:1;color:var(--ink)}
+.ship-item-size{font-size:.7rem;background:var(--sand-lt);padding:.1rem .4rem;border-radius:10px;color:#666;white-space:nowrap}
+.ship-item-qty{font-weight:600;color:var(--bark);min-width:28px;text-align:center}
+.ship-item-del{background:none;border:none;cursor:pointer;color:#ddd;font-size:.7rem;padding:0;transition:color .15s}
+.ship-item-del:hover{color:var(--red)}
+.ship-received{opacity:.55;border-color:var(--green)}
+.ship-received .ship-card-head{background:#edf7f0}
+.add-ship-form{background:var(--white);border-radius:8px;box-shadow:var(--shadow);padding:.85rem;margin-bottom:.75rem;border:1px dashed var(--sand-dk)}
+.add-ship-form h4{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#bbb;margin-bottom:.6rem}
+.ship-item-picker{display:flex;gap:.4rem;align-items:flex-end;flex-wrap:wrap;margin-bottom:.4rem}
+.ship-item-picker select,.ship-item-picker input{border:1px solid var(--border);border-radius:5px;padding:.3rem .48rem;font-size:.76rem;font-family:"DM Sans",sans-serif;background:var(--mist);color:var(--ink)}
+.ship-item-picker select:focus,.ship-item-picker input:focus{outline:none;border-color:var(--bark)}
+
+.save-confirm{text-align:center;font-size:.68rem;color:var(--green);margin-top:.35rem;min-height:1em}
+/* ── DRAFTS ── */
+.draft-btn{position:relative}
+.draft-badge{position:absolute;top:-5px;right:-6px;background:var(--bark);color:#fff;font-size:.55rem;font-weight:700;border-radius:10px;padding:.05rem .3rem;min-width:16px;text-align:center;display:none}
+.draft-badge.on{display:block}
+.drafts-drawer{position:fixed;top:var(--top);right:0;width:300px;height:calc(100vh - var(--top));background:var(--white);border-left:1px solid var(--border);box-shadow:-4px 0 16px rgba(42,36,32,.10);z-index:350;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .22s ease}
+.drafts-drawer.open{transform:translateX(0)}
+.drafts-head{display:flex;align-items:center;justify-content:space-between;padding:.75rem .9rem;border-bottom:1px solid var(--border);flex-shrink:0}
+.drafts-head h3{font-family:'Playfair Display',serif;font-size:.95rem;color:var(--bark)}
+.drafts-list{flex:1;overflow-y:auto;padding:.4rem 0}
+.draft-item{padding:.55rem .9rem;border-bottom:1px solid #f5f2ee;cursor:pointer;transition:background .12s}
+.draft-item:hover{background:var(--sand-lt)}
+.draft-item:last-child{border-bottom:none}
+.draft-item-name{font-size:.8rem;font-weight:600;color:var(--ink)}
+.draft-item-meta{font-size:.68rem;color:#aaa;margin-top:.12rem;display:flex;gap:.5rem;align-items:center}
+.draft-item-count{font-size:.65rem;background:var(--sand-lt);color:var(--bark);padding:.08rem .35rem;border-radius:10px;border:1px solid var(--sand-dk)}
+.draft-item-actions{display:flex;gap:.3rem;margin-top:.35rem}
+.draft-empty{font-size:.75rem;color:#ccc;text-align:center;padding:2rem 1rem}
+.drafts-footer{padding:.65rem .9rem;border-top:1px solid var(--border);flex-shrink:0}
+.draft-autosave-note{font-size:.65rem;color:#bbb;text-align:center;margin-top:.3rem}
+.draft-restore-bar{display:none;background:#fff8f4;border-bottom:2px solid var(--bark);padding:.4rem .85rem;font-size:.73rem;color:var(--bark);align-items:center;gap:.5rem;flex-shrink:0}
+.draft-restore-bar.on{display:flex}
+
+
+/* ── VARIANT SECTIONS ── */
+.variant-section{background:var(--mist);border:1px solid var(--border);border-radius:7px;padding:.65rem;margin-bottom:.5rem;position:relative}
+.variant-section-title{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--bark);margin-bottom:.5rem;display:flex;align-items:center;justify-content:space-between}
+.variant-remove{background:none;border:none;cursor:pointer;color:#ccc;font-size:.75rem;padding:0;line-height:1;transition:color .15s}
+.variant-remove:hover{color:var(--red)}
+.add-variant-btn{width:100%;border:1px dashed var(--sand-dk);background:transparent;border-radius:6px;padding:.4rem;font-size:.75rem;color:var(--bark-lt);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s;margin-top:.3rem}
+.add-variant-btn:hover{border-color:var(--bark);color:var(--bark);background:var(--sand-lt)}
+
+/* ── BULK SIZE MODAL ── */
+.bulk-overlay{position:fixed;inset:0;background:rgba(42,36,32,.4);z-index:800;display:flex;align-items:center;justify-content:center;padding:1rem}
+.bulk-overlay.hidden{display:none}
+.bulk-modal{background:var(--white);border-radius:10px;box-shadow:0 8px 40px rgba(0,0,0,.2);width:480px;max-height:80vh;display:flex;flex-direction:column;overflow:hidden}
+.bulk-modal-head{padding:1rem 1.1rem .6rem;border-bottom:1px solid var(--border);flex-shrink:0}
+.bulk-modal-head h3{font-family:'Playfair Display',serif;font-size:1rem;color:var(--bark);margin-bottom:.2rem}
+.bulk-modal-head p{font-size:.72rem;color:#aaa}
+.bulk-modal-body{overflow-y:auto;padding:.75rem 1.1rem;flex:1}
+.bulk-modal-foot{padding:.6rem 1.1rem;border-top:1px solid var(--border);display:flex;gap:.4rem;justify-content:flex-end;flex-shrink:0}
+.bulk-product-row{display:flex;align-items:center;gap:.5rem;padding:.28rem 0;border-bottom:1px solid #f5f2ee;font-size:.76rem}
+.bulk-product-row:last-child{border:none}
+.bulk-product-row input[type=checkbox]{accent-color:var(--bark);width:14px;height:14px;flex-shrink:0}
+.bulk-size-pills{display:flex;gap:.3rem;flex-wrap:wrap;margin-bottom:.6rem}
 
 /* ════════════════════════════
    SETUP MODAL
@@ -608,6 +700,12 @@ function doPost(e) {
   <div class="topbar-right">
     <span class="badge" id="topBadge" style="display:none"></span>
     <span><span class="sync-dot" id="syncDot"></span><span class="sync-label" id="syncLabel">local</span></span>
+    <button class="btn sm draft-btn" onclick="toggleDraftsDrawer()" title="Saved Drafts">
+      📝 Drafts<span class="draft-badge" id="draftBadge"></span>
+    </button>
+    <button class="btn sm" onclick="saveDraft()">💾 Save Draft</button>
+    <button class="btn sm" onclick="exportJSON()" title="Download all data as backup file">⬇ Export</button>
+    <label class="btn sm" style="cursor:pointer" title="Restore from backup file">⬆ Import<input type="file" accept=".json" onchange="importJSON(event)" style="display:none"></label>
     <button class="btn sm" onclick="showSetup()">⚙ Sync</button>
     <button class="btn sm" onclick="clearOrder()">Clear</button>
   </div>
@@ -727,7 +825,8 @@ function doPost(e) {
         <input class="search-input" type="text" id="invSearch" placeholder="Search…" oninput="renderInventory()">
       </div>
       <span style="font-size:.7rem;color:#bbb">🔴 out  🟠 ≤2 left</span>
-      <button class="btn sm" onclick="pullInventory()" style="margin-left:auto">↓ Pull from Sheet</button>
+      <button class="btn sm" onclick="clearAllInvChecked()">☐ Clear Checks</button>
+        <button class="btn sm" onclick="pullInventory()" style="margin-left:auto">↓ Pull from Sheet</button>
     </div>
     <div class="inv-scroll">
       <table class="inv-tbl" id="invTable">
@@ -748,6 +847,8 @@ function doPost(e) {
     <div class="inv-toolbar">
       <div class="search-wrap">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        <button class="btn primary sm" onclick="rebuildSoldFromLog()">🔧 Rebuild from Order Log</button>
+        <button class="btn sm" onclick="resetSoldFromSheet()" style="color:var(--red);margin-right:.5rem">↺ Reset from Sheet</button>
         <input class="search-input" type="text" id="soldSearch" placeholder="Search…" oninput="renderSoldSummary()">
       </div>
       <span style="font-size:.7rem;color:#bbb" id="soldMeta"></span>
@@ -761,6 +862,7 @@ function doPost(e) {
     </div>
     <div class="sticky-bar">
       <button class="btn primary" onclick="saveArchivedCounts()">💾 Save Archived</button>
+      <button class="btn sm" onclick="clearArchived()" style="color:var(--red)">✕ Clear Archived</button>
     </div>
   </div>
 </div>
@@ -794,6 +896,7 @@ function doPost(e) {
             <th style="min-width:110px">Customer</th>
             <th style="min-width:140px">Address</th>
             <th style="min-width:160px">Items</th>
+            <th style="width:55px;text-align:center">Units</th>
             <th style="min-width:130px">Tracking</th>
             <th style="width:100px">Status</th>
             <th style="width:70px;text-align:right">Gross</th>
@@ -839,8 +942,17 @@ function doPost(e) {
         </div>
         <button class="btn primary sm" onclick="startNew()">+ Add Product</button>
         <button class="btn sm" onclick="openBulkSize()">＋ Bulk Add Size</button>
-        <button class="btn sm" onclick="pullProducts()" style="margin-left:auto">↓ Pull from Sheet</button>
+        <button class="btn sm" id="mgrShowHiddenBtn" onclick="toggleMgrHidden()" style="margin-left:auto">👁 Show Hidden</button>
+        <button class="btn sm" id="mgrSelBtn" onclick="enterMgrSel()">☑ Select</button>
+        <button class="btn sm" onclick="pullProducts()">↓ Pull from Sheet</button>
         <span style="font-size:.7rem;color:#bbb;" id="mgrCount"></span>
+      </div>
+      <div class="mgr-sel-bar" id="mgrSelBar">
+        <input type="checkbox" id="mgrSelAll" style="accent-color:var(--bark);cursor:pointer" onchange="mgrSelAll(this.checked)" title="Select all">
+        <span class="mgr-sel-count" id="mgrSelCount">0 selected</span>
+        <button class="btn sm" onclick="mgrHideSelected()">🚫 Hide Selected</button>
+        <button class="btn sm" onclick="mgrUnhideSelected()">✓ Unhide Selected</button>
+        <button class="btn sm" onclick="exitMgrSel()">Cancel</button>
       </div>
       <div class="mgr-grid" id="mgrGrid"></div>
     </div>
@@ -878,6 +990,24 @@ function doPost(e) {
   </div>
 </div>
 
+
+<!-- DRAFTS DRAWER -->
+<div class="drafts-drawer" id="draftsDrawer">
+  <div class="drafts-head">
+    <h3>Saved Drafts</h3>
+    <button class="btn ghost sm" onclick="toggleDraftsDrawer()">✕</button>
+  </div>
+  <div class="draft-restore-bar" id="draftRestoreBar">
+    <span id="draftRestoreMsg"></span>
+    <button class="btn sm" style="margin-left:auto;flex-shrink:0" onclick="clearDraftRestore()">Clear indicator</button>
+  </div>
+  <div class="drafts-list" id="draftsList"></div>
+  <div class="drafts-footer">
+    <button class="btn primary sm" style="width:100%" onclick="saveDraft()">💾 Save Current as Draft</button>
+    <div class="draft-autosave-note">Auto-saves every 3 min if items in order</div>
+  </div>
+</div>
+<div id="draftsOverlay" style="display:none;position:fixed;inset:0;z-index:340" onclick="toggleDraftsDrawer()"></div>
 <div class="toast" id="globalToast"></div>
 
 <script>
@@ -1031,6 +1161,99 @@ async function sheetAppend(tab, row){
 }
 
 // Push stock to sheet (format: pid_cm → qty)
+
+async function pushLog(){
+  const rows=[['id','date','name','address','status','payment','revenue','cost','shipIn','shipOut','fee','profit','tracking','items']];
+  orderLog.forEach(e=>rows.push([
+    e.id||'', e.date||'', e.name||'', e.address||'',
+    e.status||'', e.payment||'',
+    e.revenue||0, e.cost||0, e.shipIn||0, e.shipOut||0, e.fee||0, e.profit||0,
+    e.tracking||'',
+    JSON.stringify(e.items||[])
+  ]));
+  await sheetWrite('Log', rows);
+}
+
+async function pullLog(){
+  const data = await sheetRead('Log');
+  if(!data||data.length<2) return;
+  orderLog = data.slice(1).map(r=>{
+    const [id,date,name,address,status,payment,revenue,cost,shipIn,shipOut,fee,profit,tracking,itemsRaw]=r;
+    let items=[];
+    try{ items=JSON.parse(itemsRaw||'[]'); } catch(e){}
+    return {id:String(id||''),date:normDate(date),name:String(name||''),address:String(address||''),
+      status:String(status||''),payment:String(payment||''),
+      revenue:parseFloat(revenue)||0,cost:parseFloat(cost)||0,
+      shipIn:parseFloat(shipIn)||0,shipOut:parseFloat(shipOut)||0,
+      fee:parseFloat(fee)||0,profit:parseFloat(profit)||0,
+      tracking:String(tracking||''),items};
+  }).filter(e=>e.id);
+  saveLog();
+}
+
+async function pushSold(){
+  const rows=[['key','qty']];
+  Object.entries(soldCounts).forEach(([k,v])=>{ if(v>0) rows.push([k,v]); });
+  await sheetWrite('Sold', rows);
+  showToast('✓ Sold records pushed to Sheet');
+}
+
+
+
+async function rebuildSoldFromLog(){
+  if(!confirm('Rebuild sold counts from your Order Log? This recalculates everything from scratch and overwrites both local data and the Sheet.')) return;
+
+  // Wipe existing sold counts
+  soldCounts = {};
+
+  // Recalculate from order log entries
+  let total = 0;
+  orderLog.forEach(e=>{
+    (e.items||[]).forEach(i=>{
+      const k = skey(i.pid, i.cm);
+      soldCounts[k] = (soldCounts[k]||0) + (i.qty||0);
+      total += (i.qty||0);
+    });
+  });
+
+  saveSold();
+
+  // Push corrected data to sheet
+  if(sheetUrl){
+    await pushSold();
+    showToast('✓ Rebuilt from '+orderLog.length+' orders — '+total+' total units. Sheet updated.');
+  } else {
+    showToast('✓ Rebuilt locally — '+total+' total units (no sheet connected)');
+  }
+
+  renderSoldSummary();
+}
+async function resetSoldFromSheet(){
+  if(!sheetUrl){ showToast('No sheet connected'); return; }
+  if(!confirm('Reset sold counts from Google Sheet? This will overwrite your local sold data with whatever is in the Sheet.')) return;
+  // Clear localStorage sold first
+  soldCounts = {};
+  saveSold();
+  // Then pull fresh from sheet
+  const data = await sheetRead('Sold');
+  if(!data||data.length<2){ showToast('Sold tab is empty in sheet'); return; }
+  const fresh = {};
+  data.slice(1).forEach(([k,v])=>{ if(k && parseInt(v)>0) fresh[String(k)]=parseInt(v)||0; });
+  soldCounts = fresh;
+  saveSold();
+  renderSoldSummary();
+  showToast('✓ Sold counts reset from Sheet — '+Object.keys(soldCounts).length+' records loaded');
+}
+async function pullSold(){
+  const data=await sheetRead('Sold');
+  if(!data||data.length<2) return;
+  // REPLACE don't accumulate — otherwise counts double on every page load
+  const fresh={};
+  data.slice(1).forEach(([k,v])=>{ if(k && parseInt(v)>0) fresh[String(k)]=parseInt(v)||0; });
+  soldCounts=fresh;
+  saveSold();
+}
+
 async function pushStock(){
   const rows=[['key','qty']];
   Object.entries(stock).forEach(([k,v])=>rows.push([k,v]));
@@ -1053,7 +1276,7 @@ async function pullProducts(){
   // Columns: pid, name, color, hex, sizes, price, bundlePrice, cost, image, material, saleDiscount, category, bin
   const pulled=[];
   data.slice(1).forEach(row=>{
-    const [pid,name,color,hex,sizesRaw,price,bundlePrice,cost,image,material,saleDiscount,category,bin,unit,productId]=row;
+    const [pid,name,color,hex,sizesRaw,price,bundlePrice,cost,image,material,saleDiscount,category,bin,unit,season,hiddenFlag]=row;
     if(!pid||!name) return;
     const KNOWN_CM_P=['130','120','110','100','90','80','70','60'];
     let rawSzStr=String(sizesRaw||'');
@@ -1082,10 +1305,11 @@ async function pullProducts(){
       image:       String(image||''),
       material:    String(material||''),
       saleDiscount:parseFloat(saleDiscount)||0,
-      category:    String(category||'Uncategorized'),
+      category:    (()=>{ const cat=String(category||'Uncategorized'); if(cat==='Rompers & Overalls'||cat==='Sets') return 'Rompers & Sets'; if(cat==='Outerwear'||cat==='Cardigans & Knitwear') return 'Outerwear & Knitwear'; return cat; })(),
       bin:         String(bin||''),
       unit:        String(unit||'ea'),
-      productId:   String(productId||'')
+      season:      String(season||''),
+      hidden:      hiddenFlag==='1'
     });
   });
   if(!pulled.length){showToast('No valid products found in sheet.');return;}
@@ -1098,8 +1322,8 @@ async function pullProducts(){
 
 // Push products to sheet
 async function pushProducts(){
-  const rows=[['pid','name','color','hex','sizes','price','bundlePrice','cost','image','material','saleDiscount','category','bin','unit','productId']];
-  products.forEach(p=>rows.push([p.pid,p.name,p.color,p.hex,p.sizes.join(','),p.price,p.bundlePrice,p.cost,p.image,typeof p.material==='string'?p.material:'',p.saleDiscount||0,p.category||'Uncategorized',p.bin||'',p.unit||'ea',p.productId||'']));
+  const rows=[['pid','name','color','hex','sizes','price','bundlePrice','cost','image','material','saleDiscount','category','bin','unit','season','hidden']];
+  products.forEach(p=>rows.push([p.pid,p.name,p.color,p.hex,p.sizes.join(','),p.price,p.bundlePrice,p.cost,p.image,typeof p.material==='string'?p.material:'',p.saleDiscount||0,p.category||'Uncategorized',p.bin||'',p.unit||'ea',p.season||'',p.hidden?'1':'']));
   await sheetWrite('Products', rows);
 }
 
@@ -1124,6 +1348,9 @@ function saveSheetUrl(){
   // Initial push of products and stock
   pushProducts();
   pushStock();
+  pushSold();
+  pushLog();
+  showToast('✓ All data pushed to Sheet');
   showToast('Connected! Products and stock pushed to Sheet ✓');
 }
 function copyScript(){
@@ -1153,7 +1380,7 @@ function showToast(msg, dur=3000){
   toastTimer=setTimeout(()=>toast.classList.remove('show'), dur);
 }
 
-const CAT_ORDER=['Tops','Bottoms','Rompers & Overalls','Sets','Outerwear','Cardigans & Knitwear','Uncategorized','Sold Out'];
+const CAT_ORDER=['Tops','Bottoms','Rompers & Sets','Outerwear & Knitwear','Uncategorized','Sold Out'];
 
 function getCategory(p){ return p.category||'Uncategorized'; }
 
@@ -1177,7 +1404,7 @@ function appendCatHeader(tbody, cat, colspan){
   tr.innerHTML=`<td colspan="${colspan}">${cat}</td>`;
   tbody.appendChild(tr);
 }
-document.getElementById('fDate').valueAsDate=new Date();
+document.getElementById('fDate').value=(()=>{ const t=new Date(); return t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0'); })();
 if(!sheetUrl) document.getElementById('setupModal').classList.remove('hidden');
 else document.getElementById('setupModal').classList.add('hidden');
 setSyncStatus(sheetUrl?'ok':'','sheetUrl'?'connected':'local');
@@ -1217,8 +1444,9 @@ function renderTable(){
 
   const groups={};
   products.forEach(p=>{
-    if(p.hidden) return; // skip hidden products
+    if(p.hidden) return;
     if(getCategory(p)==='Sold Out') return;
+    if(p.hidden) return; // hidden products excluded from order builder
     if(!groups[p.name]) groups[p.name]=[];
     p.sizes.forEach(cm=>{
       if(szFilter!=='all'&&cm!==szFilter) return;
@@ -1435,7 +1663,7 @@ function changeQty(pid,cm,delta){
   const k=skey(pid,cm);
   const nq=Math.max(0,(order[k]||0)+delta);
   if(nq===0) delete order[k]; else order[k]=nq;
-  renderTable(); updatePanel();
+  renderTable(); updatePanel(); updatePendingBadge();
 }
 
 function removeOrderItem(k){
@@ -1577,7 +1805,7 @@ async function copyAndSave(){
   const gross=revenue+shipIn;
   const status=document.getElementById('fStatus').value;
   const name=document.getElementById('fName').value;
-  const date=document.getElementById('fDate').value;
+  const date=normDate(document.getElementById('fDate').value);
   const itemSum=itemDetails.map(i=>`${i.qty}x ${i.name} (${toDisplayShort(i.cm)})`).join(', ');
 
   // Google Sheets row (matches your existing column order exactly)
@@ -1610,16 +1838,28 @@ async function copyAndSave(){
     address:document.getElementById('fAddress').value};
   orderLog.unshift(entry);
   saveLog();
+  if(sheetUrl) pushLog(); // keep sheet in sync
 
   // 4. Sync to Google Sheets
   sheetAppend('Orders', row);
-  pushStock(); pushLog(); pushSold();
+  pushStock();
 
   // 5. Copy to clipboard
   renderTable();
   try{
     await navigator.clipboard.writeText(tsv);
     showToast('✓ Copied to clipboard + saved to records!');
+    pushSold(); // keep sheet in sync
+    // Offer to delete active draft now that order is complete
+    if(_activeDraftId){
+      const d=drafts.find(x=>x.id===_activeDraftId);
+      if(d&&confirm('Order saved! Delete the draft for "'+d.name+'"?')){
+        drafts=drafts.filter(x=>x.id!==_activeDraftId);
+        _activeDraftId=null;
+        saveDrafts(); updateDraftBadge(); renderDraftsList();
+        document.getElementById('draftRestoreBar')?.classList.remove('on');
+      }
+    }
   }catch(e){
     const ta=document.createElement('textarea');ta.value=tsv;document.body.appendChild(ta);ta.select();
     try{document.execCommand('copy');}catch(e2){}
@@ -1631,7 +1871,7 @@ async function copyAndSave(){
 function clearOrder(){
   Object.keys(order).forEach(k=>delete order[k]);
   ['fName','fAddress','fTracking','fShipIn','fShipOut','fFee','fNotes'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('fDate').valueAsDate=new Date();
+  document.getElementById('fDate').value=(()=>{ const t=new Date(); return t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0'); })();
   document.getElementById('fStatus').value='Paid';
   document.getElementById('fPayment').value='Venmo';
   renderTable(); updatePanel();
@@ -1641,6 +1881,21 @@ function clearOrder(){
    INVENTORY — collapsible product groups × size columns
 ═══════════════════════════════════════════════ */
 const invCollapsed = new Proxy({}, { get: (t,k) => k in t ? t[k] : true });
+let invChecked = loadLocal('lb_inv_checked', {});
+function saveInvChecked(){ saveLocal('lb_inv_checked', invChecked); }
+function toggleInvChecked(name, el){
+  invChecked[name] = el.checked;
+  saveInvChecked();
+  const row = el.closest('tr');
+  if(row) row.classList.toggle('inv-checked-row', el.checked);
+  el.closest('.inv-check-wrap')?.classList.toggle('done', el.checked);
+  const lbl = el.closest('.inv-check-wrap')?.querySelector('span');
+  if(lbl) lbl.textContent = el.checked ? 'Checked ✓' : 'Mark as checked';
+}
+function clearAllInvChecked(){
+  invChecked={}; saveInvChecked(); renderInventory();
+  showToast('All inventory checks cleared');
+}
 
 function renderInventory(){
   const search=document.getElementById('invSearch').value.toLowerCase();
@@ -1685,7 +1940,7 @@ function renderInventory(){
     if(multiVariant){
       // Group header — collapsible
       const htr=document.createElement('tr');
-      htr.className='group-header';
+      htr.className='group-header'+(invChecked[name]?' inv-checked-row':'');
       htr.onclick=()=>toggleInvGroup(name);
       htr.innerHTML=`
         <td class="lh" colspan="${usedSizes.length+2}">
@@ -1694,6 +1949,10 @@ function renderInventory(){
             <div>
               <div style="font-size:.78rem;font-weight:600;color:#2a2420">${name}</div>
               <div class="group-meta" style="margin-top:.15rem">${members.length} colors &middot; ${groupTotal} total in stock</div>
+              <label class="inv-check-wrap${invChecked[name]?' done':''}" onclick="event.stopPropagation()">
+                <input type="checkbox" ${invChecked[name]?'checked':''} onchange="toggleInvChecked('${escHtml(name)}',this)">
+                <span>${invChecked[name]?'Checked ✓':'Mark as checked'}</span>
+              </label>
               <span class="group-toggle ${isOpen?'open':''}" style="font-size:.75rem;color:#8b7355;display:inline-block;margin-top:.3rem">&#9654;</span>
             </div>
           </div>
@@ -1740,11 +1999,16 @@ function renderInventory(){
                   <span class="swatch" style="background:${p.hex}"></span>
                   <span style="font-size:.65rem;color:#aaa">${p.color}</span>
                 </div>
+                <label class="inv-check-wrap${invChecked[name]?' done':''}" onclick="event.stopPropagation()">
+                  <input type="checkbox" ${invChecked[name]?'checked':''} onchange="toggleInvChecked('${escHtml(name)}',this)">
+                  <span>${invChecked[name]?'Checked ✓':'Mark as checked'}</span>
+                </label>
               </div>
             </div>
           </td>
           ${cells}
           <td class="row-total">${rowTotal}</td>`;
+        if(invChecked[name]) tr.classList.add('inv-checked-row');
       }
       tbody.appendChild(tr);
     });
@@ -1836,7 +2100,7 @@ function renderSoldSummary(){
 
   const totalUnits=Object.values(soldCounts).reduce((s,v)=>s+v,0);
   const totalArchived=Object.values(archived).reduce((s,v)=>s+(parseInt(v)||0),0);
-  document.getElementById('soldMeta').textContent=(totalUnits+totalArchived)+' units sold ('+(totalArchived)+' archived)';
+  document.getElementById('soldMeta').textContent=(totalUnits+totalArchived)+' total  |  '+totalUnits+' from app orders  +  '+totalArchived+' pre-app';
 
   // Group by product name
   const groups={};
@@ -1913,7 +2177,7 @@ function renderSoldSummary(){
           <td style="border-left:2px solid var(--border);text-align:center">
             <input type="number" min="0" value="${archived[p.pid]||0}" data-apid="${p.pid}"
               style="width:52px;text-align:center;border:1px solid var(--border);border-radius:4px;padding:.2rem;font-size:.76rem;font-family:'DM Sans',sans-serif;background:var(--mist)"
-              oninput="archived[parseInt(this.dataset.apid)]=parseInt(this.value)||0;renderSoldSummary()">
+              oninput="archived[parseInt(this.dataset.apid)]=parseInt(this.value)||0;saveArchived();renderSoldSummary()">
           </td>
           <td class="sold-row-total">${rowTotal+(archived[p.pid]||0)}</td>`;
       } else {
@@ -1935,7 +2199,7 @@ function renderSoldSummary(){
           <td style="border-left:2px solid var(--border);text-align:center">
             <input type="number" min="0" value="${archived[p.pid]||0}" data-apid="${p.pid}"
               style="width:52px;text-align:center;border:1px solid var(--border);border-radius:4px;padding:.2rem;font-size:.76rem;font-family:'DM Sans',sans-serif;background:var(--mist)"
-              oninput="archived[parseInt(this.dataset.apid)]=parseInt(this.value)||0;renderSoldSummary()">
+              oninput="archived[parseInt(this.dataset.apid)]=parseInt(this.value)||0;saveArchived();renderSoldSummary()">
           </td>
           <td class="sold-row-total">${rowTotal+(archived[p.pid]||0)}</td>`;
       }
@@ -1962,6 +2226,14 @@ function toggleSoldGroup(name){
   renderSoldSummary();
 }
 
+function clearArchived(){
+  if(!confirm('Clear all archived (pre-app) counts? Your order log data is not affected.')) return;
+  archived={};
+  saveArchived();
+  renderSoldSummary();
+  showToast('Archived counts cleared');
+}
+
 function saveArchivedCounts(){
   // Read all archived inputs from the current DOM
   document.querySelectorAll('[data-apid]').forEach(input=>{
@@ -1972,7 +2244,6 @@ function saveArchivedCounts(){
   });
   saveArchived();
   renderSoldSummary();
-  pushArchived();
   showToast('✓ Archived counts saved!');
 }
 
@@ -1995,7 +2266,7 @@ function renderLog(){
   if(!tbody) return;
 
   if(!filtered.length){
-    tbody.innerHTML=`<tr><td colspan="12" class="no-data">No orders match this filter</td></tr>`;
+    tbody.innerHTML=`<tr><td colspan="13" class="no-data">No orders match this filter</td></tr>`;
     return;
   }
 
@@ -2045,6 +2316,13 @@ function renderLog(){
     tdItems.style.cssText='font-size:.7rem;color:#888;max-width:220px;line-height:1.5';
     tdItems.textContent=itemStr||'—';
     tr.appendChild(tdItems);
+
+    // Units total
+    const tdUnits=document.createElement('td');
+    const unitTotal=(e.items||[]).reduce((s,i)=>s+i.qty,0);
+    tdUnits.style.cssText='text-align:center;font-weight:600;color:var(--bark);font-size:.78rem';
+    tdUnits.textContent=unitTotal||'—';
+    tr.appendChild(tdUnits);
 
     // Tracking — editable
     const tdTrack=document.createElement('td');
@@ -2158,7 +2436,7 @@ function renderLog(){
     trExp.className='expanded-row';
     trExp.style.display='none';
     const tdExp=document.createElement('td');
-    tdExp.setAttribute('colspan','12');
+    tdExp.setAttribute('colspan','13');
     tdExp.style.padding='0';
 
     // Build item editor rows
@@ -2214,24 +2492,21 @@ function toggleLogExpand(id){
   row.style.display=row.style.display==='none'?'':'none';
 }
 
-// Recalculate revenue, cost & profit for a log entry based on current items
+// Recalculate revenue & profit for a log entry based on current items
 function recalcLogEntry(entry){
-  const totalQtyInOrder=(entry.items||[]).reduce((s,i)=>s+i.qty,0);
-  const isBundle=totalQtyInOrder>=5;
-  let revenue=0, cost=0;
+  const isBundle=(entry.items||[]).reduce((s,i)=>s+i.qty,0)>=5;
+  let revenue=0;
   (entry.items||[]).forEach(i=>{
     const p=products.find(pp=>pp.pid===i.pid);
-    if(!p){ revenue+=i.sp*i.qty; cost+=i.qty*100; return; }
+    if(!p) { revenue+=i.sp*i.qty; return; }
     const sale=p.saleDiscount||0;
     const effectiveBundle=isBundle&&sale===0;
     const sp=effectiveBundle?p.bundlePrice:(sale>0?p.price-sale:p.price);
-    i.sp=sp;
+    i.sp=sp; // update stored unit price too
     revenue+=sp*i.qty;
-    cost+=p.cost*i.qty;
   });
   entry.revenue=revenue.toFixed(2);
-  entry.cost=cost.toFixed(2);
-  entry.profit=(revenue+parseFloat(entry.shipIn||0)-cost-parseFloat(entry.shipOut||0)-parseFloat(entry.fee||0)).toFixed(2);
+  entry.profit=(revenue+parseFloat(entry.shipIn||0)-parseFloat(entry.cost||0)-parseFloat(entry.shipOut||0)-parseFloat(entry.fee||0)).toFixed(2);
 }
 
 function editLogItem(entryId, idx, newQty){
@@ -2270,11 +2545,6 @@ function addLogItem(entryId){
   const existing=entry.items.find(i=>i.pid===pid&&i.cm===cm);
   if(existing){ existing.qty+=qty; }
   else { entry.items.push({pid,name:p.name,color:p.color,cm,qty,sp}); }
-  // Deduct stock for the added item
-  const k=skey(pid,cm);
-  stock[k]=Math.max(0,(stock[k]||0)-qty);
-  soldCounts[k]=(soldCounts[k]||0)+qty;
-  saveStock(); saveSold(); pushStock();
   recalcLogEntry(entry);
   saveLog();
   renderLog();
@@ -2456,7 +2726,7 @@ function applyFullRefund(btn){
     soldCounts[k]=Math.max(0,(soldCounts[k]||0)-i.qty);
   });
   entry.status='Refunded';
-  saveStock(); saveSold(); saveLog(); pushStock(); pushLog(); pushSold();
+  saveStock(); saveSold(); saveLog(); pushStock();
   renderLog(); renderSoldSummary(); renderTable();
   showToast('✓ Full refund applied — stock restored');
 }
@@ -2487,7 +2757,7 @@ function applyPartialReturn(btn){
   });
   entry.items=entry.items.filter(i=>i.qty>0);
   if(!entry.items.length) entry.status='Refunded';
-  saveStock(); saveSold(); saveLog(); pushStock(); pushLog(); pushSold();
+  saveStock(); saveSold(); saveLog(); pushStock();
   renderLog(); renderSoldSummary(); renderTable();
   showToast('✓ Partial return applied');
 }
@@ -2519,7 +2789,7 @@ function applyExchange(btn){
   if(existing){ existing.qty+=actualQty; }
   else { entry.items.push({pid:toPid,name:toProduct.name,color:toProduct.color,cm:toCm,qty:actualQty,sp:toProduct.price}); }
   entry.items=entry.items.filter(i=>i.qty>0);
-  saveStock(); saveSold(); saveLog(); pushStock(); pushLog(); pushSold();
+  saveStock(); saveSold(); saveLog(); pushStock();
   renderLog(); renderSoldSummary(); renderTable();
   showToast('⇄ Exchange applied — stock updated');
 }
@@ -2544,19 +2814,31 @@ function renderMgr(){
     }
   });
 
-  document.getElementById('mgrCount').textContent=groups.length+' products · '+filtered.length+' variants';
-  document.getElementById('mgrGrid').innerHTML=groups.map(({primary:p,siblings})=>{
+  const visGroups = mgrShowHidden ? groups : groups.filter(({primary:p})=>!p.hidden);
+  const hiddenCount = groups.length - groups.filter(({primary:p})=>!p.hidden).length;
+  document.getElementById('mgrCount').textContent = visGroups.length+' products · '+filtered.length+' variants'+(hiddenCount?' · '+hiddenCount+' hidden':'');
+  const shBtn=document.getElementById('mgrShowHiddenBtn');
+  if(shBtn) shBtn.textContent = mgrShowHidden ? '🙈 Hide Hidden' : '👁 Show Hidden'+(hiddenCount?' ('+hiddenCount+')':'');
+  document.getElementById('mgrGrid').classList.toggle('mgr-sel-mode', mgrSelMode);
+  document.getElementById('mgrGrid').innerHTML=visGroups.map(({primary:p,siblings})=>{
     const isEditing=siblings.some(s=>s.pid===editingPid);
-    return `<div class="mgr-card ${isEditing?'sel':''} ${p.hidden?'mgr-card-hidden':''}" onclick="editProductGroup('${escHtml(p.name)}')">
+    const isHidden=!!p.hidden;
+    const isSel=mgrSelected.has(p.name);
+    return `<div class="mgr-card ${isEditing?'sel':''} ${isHidden?'is-hidden':''} ${isSel?'mgr-sel':''}" data-name="${escHtml(p.name)}"
+      onclick="${mgrSelMode?`mgrToggleCard(this,'${escHtml(p.name)}')`:`editProductGroup('${escHtml(p.name)}')`}">
+      <input type="checkbox" class="mgr-check" ${isSel?'checked':''} onclick="event.stopPropagation();mgrToggleCard(this.closest('.mgr-card'),'${escHtml(p.name)}')">
       <img src="${p.image||''}" alt="${p.name}" loading="lazy" onerror="this.style.background='var(--sand-lt)'">
       <div class="mgr-card-body">
-        <div class="mgr-card-name">${p.name}${p.hidden?'<span style="font-size:.6rem;color:var(--red);margin-left:.3rem">Hidden</span>':''}</div>
+        <div class="mgr-card-name">${p.name}${isHidden?'<span class="hidden-tag">hidden</span>':''}</div>
         <div class="mgr-card-meta">
           <span style="display:flex;align-items:center;gap:.2rem">
             ${siblings.map(s=>`<span class="swatch" style="background:${s.hex}" title="${s.color}"></span>`).join('')}
             <span style="font-size:.63rem;color:#bbb">${siblings.length} color${siblings.length>1?'s':''}</span>
           </span>
           <span class="mgr-card-price">${fmt(p.price)}</span>
+        </div>
+        <div style="margin-top:.35rem">
+          <button class="mgr-hide-btn ${isHidden?'is-hidden':''}" onclick="event.stopPropagation();toggleProductHide('${escHtml(p.name)}')">${isHidden?'✓ Unhide':'Hide'}</button>
         </div>
       </div>
     </div>`;
@@ -2606,17 +2888,15 @@ function buildGroupForm(name, siblings){
     <div class="field" style="margin-bottom:.75rem"><label>Material</label><input type="text" id="epMaterial" value="${escHtml(p0.material||'')}" placeholder="e.g. 100% Cotton, Cotton Linen…"></div>
     <div class="field" style="margin-bottom:.75rem"><label>Category</label>
       <select id="epCategory">
-        ${['Uncategorized','Tops','Bottoms','Rompers & Overalls','Sets','Outerwear','Cardigans & Knitwear','Sold Out'].map(c=>
+        ${['Uncategorized','Tops','Bottoms','Rompers & Sets','Outerwear & Knitwear','Sold Out'].map(c=>
           `<option ${(p0.category||'Uncategorized')===c?'selected':''}>${c}</option>`
         ).join('')}
       </select>
     </div>
+    <div class="field" style="margin-bottom:.75rem"><label>Season</label><input type="text" id="epSeason" value="${escHtml(p0.season||'')}" placeholder="e.g. Summer, Winter, Spring/Autumn, All Season"></div>
     <div class="field" style="margin-bottom:.75rem"><label>Bin / Storage Location</label><input type="text" id="epBin" value="${escHtml(p0.bin||'')}" placeholder="e.g. Bin A3, Shelf 2…"></div>
     <div class="field" style="margin-bottom:.75rem"><label>Product ID <span style="font-size:.6rem;color:#bbb">(vendor style no. for restock)</span></label><input type="text" id="epProductId" value="${escHtml(p0.productId||'')}" placeholder="e.g. BP229, BT135…"></div>
-    <div class="field" style="margin-bottom:.75rem;display:flex;align-items:center;gap:.5rem">
-      <input type="checkbox" id="epHidden" ${p0.hidden?'checked':''} style="accent-color:var(--bark);width:14px;height:14px">
-      <label for="epHidden" style="font-size:.72rem;color:#888;text-transform:none;letter-spacing:0;margin:0;cursor:pointer">Hide this product (won't appear in Orders, Inventory, Sold, or Catalog)</label>
-    </div>
+    <div class="field" style="margin-bottom:.75rem;display:flex;align-items:center;gap:.5rem"><input type="checkbox" id="epHidden" ${p0.hidden?'checked':''} style="accent-color:var(--bark);width:14px;height:14px"><label for="epHidden" style="font-size:.72rem;color:#888;text-transform:none;letter-spacing:0;margin:0;cursor:pointer">Hide this product (won't appear in Orders, Inventory, Sold, or Catalog)</label></div>
     <div class="field" style="margin-bottom:.75rem"><label>Sold As</label>
       <select id="epUnit">
         <option value="ea" ${(p0.unit||'ea')==='ea'?'selected':''}>ea (each)</option>
@@ -2707,8 +2987,9 @@ async function saveGroupProduct(){
   const material=document.getElementById('epMaterial').value.trim();
   const category=document.getElementById('epCategory').value||'Uncategorized';
   const bin=document.getElementById('epBin').value.trim();
-  const productId=document.getElementById('epProductId').value.trim();
-  const hidden=document.getElementById('epHidden').checked;
+  const productId=document.getElementById('epProductId')?.value.trim()||'';
+  const hidden=document.getElementById('epHidden')?.checked||false;
+  const season=document.getElementById('epSeason')?.value.trim()||'';
   const unit=document.getElementById('epUnit').value||'ea';
   if(!name){alert('Please enter a product name.');return;}
 
@@ -2731,12 +3012,12 @@ async function saveGroupProduct(){
       const pid=parseInt(existingPid);
       survivingPids.add(pid);
       const ex=products.find(p=>p.pid===pid);
-      if(ex) Object.assign(ex,{name,image,color,hex,sizes,price,bundlePrice,cost,material,saleDiscount,category,bin,unit,productId,hidden});
+      if(ex) Object.assign(ex,{name,image,color,hex,sizes,price,bundlePrice,cost,material,saleDiscount,category,bin,season,unit});
     } else {
       // Create new
       const pid=nextPid();
       survivingPids.add(pid);
-      products.push({pid,name,image,color,hex,sizes,price,bundlePrice,cost,material,saleDiscount,category,bin,unit,productId,hidden});
+      products.push({pid,name,image,color,hex,sizes,price,bundlePrice,cost,material,saleDiscount,category,bin,season,unit});
     }
   });
 
@@ -2840,15 +3121,6 @@ function duplicateAsVariant(){}
    shipments = [{id, name, date, items:[{pid,cm,qty}], received:bool, receivedDate}]
 ═══════════════════════════════════════════════ */
 
-async 
-
-
-
-
-
-
-
-
 
 
 
@@ -2893,6 +3165,9 @@ function renderAnalytics(){
     `<button class="chip ${analyticsFilter===m.key?'active':''}" style="font-size:.67rem" onclick="setAnalyticsFilter('${m.key}')">${m.label}</button>`
   ).join('');
 
+  // Parse date safely as local time (avoid UTC rollback)
+  const parseLocal = s => s ? new Date(s+'T00:00:00') : null;
+
   // Filter orderLog by selected period
   let filtered;
   if(analyticsFilter==='all'){
@@ -2900,7 +3175,7 @@ function renderAnalytics(){
   } else if(analyticsFilter==='this-month'){
     filtered=orderLog.filter(e=>{
       if(!e.date) return false;
-      const d=new Date(e.date);
+      const d=new Date(normDate(e.date)+'T00:00:00');
       return d.getFullYear()===thisYear && d.getMonth()===thisMonth;
     });
   } else if(analyticsFilter==='last-month'){
@@ -2908,7 +3183,7 @@ function renderAnalytics(){
     const lmMonth=thisMonth===0?11:thisMonth-1;
     filtered=orderLog.filter(e=>{
       if(!e.date) return false;
-      const d=new Date(e.date);
+      const d=new Date(normDate(e.date)+'T00:00:00');
       return d.getFullYear()===lmYear && d.getMonth()===lmMonth;
     });
   } else if(analyticsFilter==='custom'){
@@ -2916,13 +3191,13 @@ function renderAnalytics(){
     const to=document.getElementById('analyticsTo')?.value;
     filtered=orderLog.filter(e=>{
       if(!e.date) return false;
-      if(from && e.date < from) return false;
-      if(to && e.date > to) return false;
+      if(from && normDate(e.date) < from) return false;
+      if(to && normDate(e.date) > to) return false;
       return true;
     });
   } else {
     // Year filter
-    filtered=orderLog.filter(e=>e.date&&e.date.startsWith(analyticsFilter));
+    filtered=orderLog.filter(e=>e.date&&normDate(e.date).startsWith(analyticsFilter));
   }
 
   document.getElementById('analyticsMeta').textContent=filtered.length+' order'+(filtered.length!==1?'s':'');
@@ -3049,27 +3324,345 @@ function renderAnalytics(){
 
 
 /* ═══════════════════════════════════════════════
-   VENDORS
-   vendors = [{id, name, contact, items:[{styleNo,category,colors,sizes,price,season,material,moq,notes,link,hidden,qtyOrdered}]}]
+   DRAFTS
+   Each draft: {id, name, savedAt, order, fields}
 ═══════════════════════════════════════════════ */
+let drafts = loadLocal('lb_drafts', []);
+let _activeDraftId = null; // currently loaded draft
+let _autoSaveTimer = null;
+
+function saveDrafts(){ saveLocal('lb_drafts', drafts); }
+
+function draftFields(){
+  return {
+    name:     document.getElementById('fName')?.value||'',
+    address:  document.getElementById('fAddress')?.value||'',
+    tracking: document.getElementById('fTracking')?.value||'',
+    shipIn:   document.getElementById('fShipIn')?.value||'',
+    shipOut:  document.getElementById('fShipOut')?.value||'',
+    fee:      document.getElementById('fFee')?.value||'',
+    notes:    document.getElementById('fNotes')?.value||'',
+    date:     document.getElementById('fDate')?.value||'',
+    status:   document.getElementById('fStatus')?.value||'Paid',
+    payment:  document.getElementById('fPayment')?.value||'Venmo',
+  };
+}
+
+function restoreFields(fields){
+  if(!fields) return;
+  const set = (id, val) => { const el=document.getElementById(id); if(el) el.value=val||''; };
+  set('fName',    fields.name);
+  set('fAddress', fields.address);
+  set('fTracking',fields.tracking);
+  set('fShipIn',  fields.shipIn);
+  set('fShipOut', fields.shipOut);
+  set('fFee',     fields.fee);
+  set('fNotes',   fields.notes);
+  set('fDate',    fields.date);
+  const st=document.getElementById('fStatus'); if(st) st.value=fields.status||'Paid';
+  const pm=document.getElementById('fPayment'); if(pm) pm.value=fields.payment||'Venmo';
+}
+
+function saveDraft(){
+  const entries = Object.entries(order).filter(([,q])=>q>0);
+  const fields = draftFields();
+  const customerName = fields.name||'Unnamed order';
+  const itemCount = entries.reduce((s,[,q])=>s+q, 0);
+
+  if(!entries.length && !fields.name){
+    showToast('Nothing to save — add items or a customer name first');
+    return;
+  }
+
+  const id = _activeDraftId || ('draft_'+Date.now());
+  const existing = drafts.find(d=>d.id===id);
+
+  const draft = {
+    id,
+    name:    customerName,
+    savedAt: new Date().toISOString(),
+    order:   {...order},
+    fields,
+    itemCount,
+  };
+
+  if(existing){
+    Object.assign(existing, draft);
+  } else {
+    drafts.unshift(draft);
+    _activeDraftId = id;
+  }
+
+  saveDrafts();
+  renderDraftsList();
+  updateDraftBadge();
+  showToast('✓ Draft saved — "'+customerName+'"');
+}
+
+function loadDraft(id){
+  const draft = drafts.find(d=>d.id===id);
+  if(!draft) return;
+
+  // Warn if current order has unsaved items
+  const hasItems = Object.values(order).some(q=>q>0);
+  if(hasItems && !confirm('Load this draft? Your current order will be cleared (save it first if needed).')) return;
+
+  // Restore order
+  Object.keys(order).forEach(k=>delete order[k]);
+  Object.entries(draft.order||{}).forEach(([k,v])=>{ order[k]=v; });
+
+  // Restore fields
+  restoreFields(draft.fields);
+
+  _activeDraftId = draft.id;
+
+  // Show restore bar
+  const bar = document.getElementById('draftRestoreBar');
+  const msg = document.getElementById('draftRestoreMsg');
+  if(bar && msg){
+    msg.textContent = '📝 Draft loaded: "'+draft.name+'" — saved '+timeAgo(draft.savedAt);
+    bar.classList.add('on');
+  }
+
+  // Switch to order view
+  switchView('order');
+  renderTable();
+  updatePanel();
+  toggleDraftsDrawer();
+  showToast('✓ Draft restored — "'+draft.name+'"');
+}
+
+function deleteDraft(id, e){
+  e.stopPropagation();
+  const draft = drafts.find(d=>d.id===id);
+  if(!draft) return;
+  if(!confirm('Delete draft "'+draft.name+'"?')) return;
+  drafts = drafts.filter(d=>d.id!==id);
+  if(_activeDraftId===id) _activeDraftId=null;
+  saveDrafts();
+  renderDraftsList();
+  updateDraftBadge();
+  showToast('Draft deleted');
+}
+
+function clearDraftRestore(){
+  document.getElementById('draftRestoreBar')?.classList.remove('on');
+  _activeDraftId = null;
+}
+
+function renderDraftsList(){
+  const el = document.getElementById('draftsList');
+  if(!el) return;
+  if(!drafts.length){
+    el.innerHTML='<div class="draft-empty">No drafts yet.<br>Save a draft to pick up later.</div>';
+    return;
+  }
+  el.innerHTML = drafts.map(d=>`
+    <div class="draft-item" onclick="loadDraft('${d.id}')">
+      <div class="draft-item-name">${escHtml(d.name)}</div>
+      <div class="draft-item-meta">
+        <span>${timeAgo(d.savedAt)}</span>
+        <span class="draft-item-count">${d.itemCount||0} item${(d.itemCount||0)!==1?'s':''}</span>
+        ${_activeDraftId===d.id?'<span style="color:var(--bark);font-size:.63rem">● active</span>':''}
+      </div>
+      <div class="draft-item-actions">
+        <button class="btn sm" onclick="loadDraft('${d.id}')" style="font-size:.65rem;padding:.15rem .4rem">↩ Restore</button>
+        <button class="btn sm" onclick="saveDraftOver('${d.id}',event)" style="font-size:.65rem;padding:.15rem .4rem">💾 Update</button>
+        <button class="btn danger sm" onclick="deleteDraft('${d.id}',event)" style="font-size:.65rem;padding:.15rem .4rem">✕</button>
+      </div>
+    </div>`).join('');
+}
+
+function saveDraftOver(id, e){
+  e.stopPropagation();
+  _activeDraftId = id;
+  saveDraft();
+}
+
+function updateDraftBadge(){
+  const badge = document.getElementById('draftBadge');
+  if(!badge) return;
+  if(drafts.length){
+    badge.textContent = drafts.length;
+    badge.classList.add('on');
+  } else {
+    badge.classList.remove('on');
+  }
+}
+
+function toggleDraftsDrawer(){
+  const drawer = document.getElementById('draftsDrawer');
+  const overlay = document.getElementById('draftsOverlay');
+  if(!drawer) return;
+  const open = drawer.classList.toggle('open');
+  overlay.style.display = open ? 'block' : 'none';
+  if(open) renderDraftsList();
+}
+
+function timeAgo(iso){
+  if(!iso) return '';
+  const diff = Date.now() - new Date(iso).getTime();
+  const min = Math.floor(diff/60000);
+  const hr  = Math.floor(diff/3600000);
+  const day = Math.floor(diff/86400000);
+  if(min < 1)  return 'just now';
+  if(min < 60) return min+'m ago';
+  if(hr  < 24) return hr+'h ago';
+  if(day < 7)  return day+'d ago';
+  return new Date(iso).toLocaleDateString();
+}
+
+// Auto-save every 3 minutes if there are items in the order
+function startAutoSave(){
+  _autoSaveTimer = setInterval(()=>{
+    const hasItems = Object.values(order).some(q=>q>0);
+    if(hasItems){
+      saveDraft();
+      // Silent — no toast for auto-save
+    }
+  }, 3 * 60 * 1000);
+}
+
+// Also auto-mark draft as complete when order is saved to records
+const _origCopyAndSave = copyAndSave;
 
 
+/* ══ PRODUCT HIDE / SELECT ══ */
+let mgrShowHidden = false;
+let mgrSelMode    = false;
+let mgrSelected   = new Set();
+
+function toggleMgrHidden(){
+  mgrShowHidden = !mgrShowHidden;
+  renderMgr();
+}
+function toggleProductHide(name){
+  const siblings = products.filter(p=>p.name===name);
+  const nowHidden = !siblings[0]?.hidden;
+  siblings.forEach(p=>p.hidden=nowHidden);
+  saveProducts(); renderMgr(); renderTable();
+  if(sheetUrl) pushProducts();
+  showToast(nowHidden ? '🚫 "'+name+'" hidden — removed from orders & inventory' : '✓ "'+name+'" visible again');
+}
+function enterMgrSel(){
+  mgrSelMode=true; mgrSelected.clear();
+  document.getElementById('mgrSelBar').classList.add('on');
+  document.getElementById('mgrSelBtn').style.display='none';
+  renderMgr();
+}
+function exitMgrSel(){
+  mgrSelMode=false; mgrSelected.clear();
+  document.getElementById('mgrSelBar').classList.remove('on');
+  document.getElementById('mgrSelBtn').style.display='';
+  renderMgr();
+}
+function mgrToggleCard(cardEl, name){
+  if(!mgrSelMode) return;
+  const cb=cardEl.querySelector('.mgr-check');
+  if(mgrSelected.has(name)){ mgrSelected.delete(name); cardEl.classList.remove('mgr-sel'); if(cb)cb.checked=false; }
+  else { mgrSelected.add(name); cardEl.classList.add('mgr-sel'); if(cb)cb.checked=true; }
+  updateMgrSelCount();
+}
+function mgrSelAll(checked){
+  document.querySelectorAll('.mgr-card[data-name]').forEach(card=>{
+    const name=card.dataset.name; const cb=card.querySelector('.mgr-check');
+    if(checked){ mgrSelected.add(name); card.classList.add('mgr-sel'); if(cb)cb.checked=true; }
+    else { mgrSelected.delete(name); card.classList.remove('mgr-sel'); if(cb)cb.checked=false; }
+  });
+  updateMgrSelCount();
+}
+function updateMgrSelCount(){
+  const n=mgrSelected.size;
+  document.getElementById('mgrSelCount').textContent=n===0?'0 selected':n+' selected';
+}
+function mgrHideSelected(){
+  if(!mgrSelected.size){ showToast('Select items first'); return; }
+  mgrSelected.forEach(name=>products.filter(p=>p.name===name).forEach(p=>p.hidden=true));
+  saveProducts(); renderMgr(); renderTable();
+  if(sheetUrl) pushProducts();
+  showToast('🚫 '+mgrSelected.size+' product'+(mgrSelected.size>1?'s':'')+' hidden');
+  exitMgrSel();
+}
+function mgrUnhideSelected(){
+  if(!mgrSelected.size){ showToast('Select items first'); return; }
+  mgrSelected.forEach(name=>products.filter(p=>p.name===name).forEach(p=>p.hidden=false));
+  saveProducts(); renderMgr(); renderTable();
+  if(sheetUrl) pushProducts();
+  showToast('✓ '+mgrSelected.size+' product'+(mgrSelected.size>1?'s':'')+' unhidden');
+  exitMgrSel();
+}
 
 
+/* ══ EXPORT / IMPORT JSON BACKUP ══ */
+function exportJSON(){
+  const data = {
+    version:   2,
+    exportedAt: new Date().toISOString(),
+    products:  products,
+    stock:     stock,
+    soldCounts:soldCounts,
+    log:       orderLog,
+    archived:  archived,
+    shipments: shipments,
+    drafts:    drafts,
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = 'littlebasics-backup-' + new Date().toISOString().slice(0,10) + '.json';
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('✓ Backup downloaded');
+}
+
+function importJSON(e){
+  const file = e.target.files[0]; if(!file) return;
+  if(!confirm('Import this backup? This will REPLACE your current data. Make sure you exported first.')) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const data = JSON.parse(ev.target.result);
+      if(data.products)   { products  = data.products;   saveProducts(); }
+      if(data.stock)      { stock     = data.stock;       saveStock(); }
+      if(data.soldCounts) { soldCounts= data.soldCounts;  saveSold(); }
+      if(data.log)        { orderLog  = data.log;         saveLog(); }
+      if(data.archived)   { archived  = data.archived;    saveLocal('lb_archived', archived); }
+        if(data.drafts)     { drafts    = data.drafts;      saveDrafts(); }
+      renderTable(); updatePanel(); renderMgr(); renderInventory();
+      showToast('✓ Data restored from backup — ' + (data.products?.length||0) + ' products loaded');
+    } catch(err) {
+      alert('Could not read backup file. Make sure it was exported from this app.');
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = ''; // reset input
+}
 
 
-
-
-
-
-
-
-
-
+// Normalise any date format to YYYY-MM-DD
+function normDate(d){
+  if(!d) return '';
+  const s = String(d).trim();
+  // Already YYYY-MM-DD
+  if(/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+  // M/D/YYYY or MM/DD/YYYY
+  const slash = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if(slash) return slash[3]+'-'+slash[1].padStart(2,'0')+'-'+slash[2].padStart(2,'0');
+  // D/M/YYYY
+  const dmy = s.match(/^(\d{1,2})-(\d{1,2})-(\d{4})$/);
+  if(dmy) return dmy[3]+'-'+dmy[2].padStart(2,'0')+'-'+dmy[1].padStart(2,'0');
+  // Try native parse as fallback
+  try{
+    const dt = new Date(s);
+    if(!isNaN(dt)) return dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0');
+  } catch(e){}
+  return s;
+}
 
 
 /* ═══════════════════════════════════════════════
-   PENDING ORDERS
+   PENDING ORDERS (from catalog bag submissions)
    Columns: timestamp, contact, itemsJSON, total, fulfillment, address, isBundle, shipFee, status, contactInfo
 ═══════════════════════════════════════════════ */
 let pendingOrders = loadLocal('lb_pending_orders', []);
@@ -3093,8 +3686,7 @@ async function pullPendingOrders(){
     try{ items=JSON.parse(itemsRaw||'[]'); }catch(e){}
     pendingOrders.unshift({
       id:'po_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),
-      timestamp:String(timestamp),
-      contact:String(contact||''),
+      timestamp:String(timestamp), contact:String(contact||''),
       items, total:parseFloat(total)||0,
       fulfillment:String(fulfillment||'pickup'),
       address:String(address||''),
@@ -3106,10 +3698,8 @@ async function pullPendingOrders(){
     });
     added++;
   });
-  savePending();
-  renderPending();
-  updatePendingBadge();
-  showToast(added>0?'✓ '+added+' new order'+(added>1?'s':'')+' received!':'Already up to date ✓');
+  savePending(); renderPending(); updatePendingBadge();
+  showToast(added>0?'✓ '+added+' new order'+(added>1?'s':'')+' received!':'Up to date ✓');
 }
 
 function renderPending(){
@@ -3119,14 +3709,9 @@ function renderPending(){
   const active=pendingOrders.filter(o=>!o.dismissed);
   const dismissed=pendingOrders.filter(o=>o.dismissed);
   const all=[...active,...dismissed];
-  document.getElementById('pendingMeta').textContent=
-    active.length+' pending'+(dismissed.length?' · '+dismissed.length+' dismissed':'');
-
-  if(!all.length){
-    list.innerHTML='<div class="no-data">No pending orders yet — click ↓ Refresh to check</div>';
-    return;
-  }
-
+  const meta=document.getElementById('pendingMeta');
+  if(meta) meta.textContent=active.length+' pending'+(dismissed.length?' · '+dismissed.length+' dismissed':'');
+  if(!all.length){ list.innerHTML='<div class="no-data">No pending orders yet — click ↓ Refresh to check</div>'; return; }
   list.innerHTML='';
   all.forEach(order=>{
     const card=document.createElement('div');
@@ -3138,7 +3723,6 @@ function renderPending(){
         <span class="pending-item-name"><strong>${i.name}</strong><br><span style="color:#aaa;font-size:.68rem">${i.color||''} · ${i.size||''}</span></span>
         <span class="pending-item-price">$${parseFloat(i.price||0).toFixed(2)}/${i.unit||'ea'}</span>
       </div>`).join('');
-
     card.innerHTML=`
       <div class="pending-card-head">
         <div>
@@ -3179,132 +3763,56 @@ function clearDismissedPending(){
 function loadPendingToOrder(id){
   const o=pendingOrders.find(po=>po.id===id);
   if(!o) return;
-  // Clear current order
   Object.keys(order).forEach(k=>delete order[k]);
-  // Load items into order builder
   (o.items||[]).forEach(item=>{
-    const p=products.find(pp=>pp.name===item.name&&pp.color===item.color);
+    const p=products.find(pp=>pp.name===item.name&&(pp.color||'')===(item.color||''));
     if(!p) return;
-    const cm=SIZE_CM[item.size]||item.size;
+    const cmMap={'3-6M':'60','6-12M':'70','12-24M':'80','2T':'90','3T':'100','4T':'110','5T':'120','130':'130'};
+    const cm=cmMap[item.size]||item.size;
     if(cm){ const k=skey(p.pid,cm); order[k]=(order[k]||0)+1; }
   });
-  // Pre-fill order details
   if(o.contact) document.getElementById('fName').value=o.contact;
   if(o.address) document.getElementById('fAddress').value=o.address;
-  // Switch to order tab
   switchView('order');
   renderTable(); updatePanel();
-  showToast('✓ Pending order loaded into Order Builder!');
+  showToast('✓ Loaded into Order Builder!');
 }
 
 /* ── BOOT ── */
-document.getElementById('fDate').valueAsDate=new Date();
-if(!sheetUrl){ document.getElementById('setupModal').classList.remove('hidden'); }
-else { document.getElementById('setupModal').classList.add('hidden'); }
-setSyncStatus(sheetUrl?'ok':'','sheetUrl'?'connected':'local');
 renderTable(); updatePanel();
-if(sheetUrl) syncFromSheet();
-async function pushLog(){
-  if(!sheetUrl) return;
-  const rows=[['id','date','name','address','status','tracking','revenue','cost','shipIn','shipOut','fee','profit','items','bundle']];
-  orderLog.forEach(e=>rows.push([
-    e.id, e.date||'', e.name||'', (e.address||'').replace(/\n/g,' '),
-    e.status||'', e.tracking||'',
-    e.revenue||0, e.cost||0, e.shipIn||0, e.shipOut||0, e.fee||0, e.profit||0,
-    JSON.stringify(e.items||[]), e.bundle?1:0
-  ]));
-  await sheetWrite('OrderLog', rows);
-}
+if(sheetUrl){
+  setSyncStatus('ok','connected');
+  // Auto-pull products + stock + sold from sheet on load
+  (async ()=>{
+    try{
+      showToast('🔄 Syncing from sheet…');
+      // Save hidden flags from localStorage before pull overwrites them
+      const hiddenFlags={};
+      products.forEach(p=>{ if(p.hidden) hiddenFlags[p.pid]=true; });
 
-// ── Push sold counts to sheet ──
-async function pushSold(){
-  if(!sheetUrl) return;
-  const rows=[['key','qty']];
-  Object.entries(soldCounts).forEach(([k,v])=>rows.push([k,v]));
-  await sheetWrite('SoldCounts', rows);
-}
+      await pullProducts();
 
-// ── Push archived to sheet ──
-async function pushArchived(){
-  if(!sheetUrl) return;
-  const rows=[['pid','qty']];
-  Object.entries(archived).forEach(([pid,qty])=>rows.push([pid,qty]));
-  await sheetWrite('Archived', rows);
-}
+      // Restore hidden flags — sheet may not have them yet
+      products.forEach(p=>{ if(hiddenFlags[p.pid]) p.hidden=true; });
+      saveProducts();
+      // Push back so sheet stays in sync with hidden flags
+      if(Object.keys(hiddenFlags).length>0) pushProducts();
 
-// ── Pull everything from sheet on load ──
-async function syncFromSheet(){
-  if(!sheetUrl){ setSyncStatus('','local'); return; }
-  setSyncStatus('busy','syncing…');
-  try{
-    const [prodData, stockData, logData, soldData, archivedData] = await Promise.all([
-      sheetRead('Products'),
-      sheetRead('Stock'),
-      sheetRead('OrderLog'),
-      sheetRead('SoldCounts'),
-      sheetRead('Archived'),
-    ]);
-
-    // Products
-    if(prodData&&prodData.length>1){
-      const KNOWN_CM_P=['130','120','110','100','90','80','70','60'];
-      const pulled=[];
-      prodData.slice(1).forEach(row=>{
-        const [pid,name,color,hex,sizesRaw,price,bundlePrice,cost,image,material,saleDiscount,category,bin,unit,productId]=row;
-        if(!pid||!name) return;
-        let rawSzStr=String(sizesRaw||'');
-        let parsedSizes=[];
-        if(rawSzStr.includes(',')){ parsedSizes=rawSzStr.split(',').map(s=>s.trim()).filter(Boolean); }
-        else if(/^\d+$/.test(rawSzStr.replace(/\s/g,''))){
-          let rem=rawSzStr.replace(/\s/g,'');
-          while(rem.length>0){ const m=KNOWN_CM_P.find(cm=>rem.startsWith(cm)); if(m){parsedSizes.push(m);rem=rem.slice(m.length);}else rem=rem.slice(1); }
-        } else { parsedSizes=rawSzStr.split(/\s+/).map(s=>s.trim()).filter(Boolean); }
-        pulled.push({ pid:parseInt(pid), name:String(name), color:String(color||''), hex:String(hex||'#e8ddd0'), sizes:parsedSizes, price:parseFloat(price)||0, bundlePrice:parseFloat(bundlePrice)||0, cost:parseFloat(cost)||0, image:String(image||''), material:String(material||''), saleDiscount:parseFloat(saleDiscount)||0, category:String(category||'Uncategorized'), bin:String(bin||''), unit:String(unit||'ea'), productId:String(productId||'') });
-      });
-      if(pulled.length){ products=pulled; saveProducts(); }
+      await pullInventory();
+      // Clear sold before pulling to avoid accumulation
+      soldCounts={}; saveSold();
+      await pullSold();
+      await pullLog();
+      renderLog();
+      renderMgr();
+      showToast('✓ Synced from sheet');
+    } catch(e){
+      console.warn('Auto-pull failed:', e);
     }
-
-    // Stock
-    if(stockData&&stockData.length>1){
-      stock={};
-      stockData.slice(1).forEach(([k,v])=>{ if(k) stock[String(k)]=parseInt(v)||0; });
-      saveStock();
-    }
-
-    // Order log
-    if(logData&&logData.length>1){
-      const pulled=[];
-      logData.slice(1).forEach(row=>{
-        const [id,date,name,address,status,tracking,revenue,cost,shipIn,shipOut,fee,profit,itemsJson,bundle]=row;
-        if(!id) return;
-        let items=[];
-        try{ items=JSON.parse(itemsJson||'[]'); }catch(e){}
-        pulled.push({ id:parseInt(id)||Number(id), date:String(date||''), name:String(name||''), address:String(address||''), status:String(status||'Paid'), tracking:String(tracking||''), revenue:String(revenue||0), cost:String(cost||0), shipIn:String(shipIn||0), shipOut:String(shipOut||0), fee:String(fee||0), profit:String(profit||0), items, bundle:bundle=='1'||bundle===1 });
-      });
-      if(pulled.length){ orderLog=pulled; saveLog(); }
-    }
-
-    // Sold counts
-    if(soldData&&soldData.length>1){
-      soldCounts={};
-      soldData.slice(1).forEach(([k,v])=>{ if(k) soldCounts[String(k)]=parseInt(v)||0; });
-      saveSold();
-    }
-
-    // Archived
-    if(archivedData&&archivedData.length>1){
-      archived={};
-      archivedData.slice(1).forEach(([pid,qty])=>{ if(pid) archived[parseInt(pid)]=parseInt(qty)||0; });
-      saveArchived();
-    }
-
-    setSyncStatus('ok','synced');
-    renderTable(); updatePanel(); renderLog(); renderSoldSummary();
-    pullPendingOrders();
-  } catch(e){
-    setSyncStatus('err','sync failed');
-  }
-}
+  })();
+} else setSyncStatus('','local');
+updateDraftBadge();
+startAutoSave();
 </script>
 </body>
 </html>
