@@ -257,6 +257,21 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica','Arial'
 .sel-select{width:100%;padding:.38rem .5rem;border:1px solid #d4c5b9;border-radius:.4rem;font-size:.82rem;font-family:inherit;background:#fff;color:#221c13;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='5'%3E%3Cpath d='M0 0l4.5 5L9 0z' fill='%23bbb'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right .5rem center;padding-right:1.5rem}
 .sel-select:focus{outline:none;border-color:#8b7355}
 .sel-select option:disabled{color:#ccc}
+
+/* Custom color dropdown with swatches */
+.color-dropdown-wrap{position:relative;width:100%}
+.color-dropdown-trigger{width:100%;padding:.38rem .5rem;border:1px solid #d4c5b9;border-radius:.4rem;font-size:.82rem;font-family:inherit;background:#faf8f5;color:#221c13;cursor:pointer;display:flex;align-items:center;gap:.5rem;text-align:left}
+.color-dropdown-trigger:focus{outline:none;border-color:#8b7355}
+.color-dropdown-trigger .trigger-swatch{width:14px;height:14px;border-radius:3px;border:1px solid rgba(0,0,0,.12);flex-shrink:0}
+.color-dropdown-trigger .trigger-caret{margin-left:auto;color:#bbb;font-size:.65rem}
+.color-dropdown-list{position:absolute;top:calc(100% + 4px);left:0;right:0;background:#fff;border:1px solid #d4c5b9;border-radius:.4rem;box-shadow:0 4px 16px rgba(0,0,0,.1);z-index:200;max-height:220px;overflow-y:auto;display:none}
+.color-dropdown-list.open{display:block}
+.color-dropdown-opt{display:flex;align-items:center;gap:.5rem;padding:.38rem .55rem;font-size:.8rem;cursor:pointer;color:#221c13;transition:background .12s}
+.color-dropdown-opt:hover{background:#f5f1ed}
+.color-dropdown-opt.selected{background:#f0ebe4;font-weight:600}
+.color-dropdown-opt.disabled{color:#bbb;cursor:default;font-style:italic}
+.color-dropdown-opt.disabled:hover{background:none}
+.color-dropdown-opt .opt-swatch{width:14px;height:14px;border-radius:3px;border:1px solid rgba(0,0,0,.12);flex-shrink:0}
 .selector-btns{display:flex;gap:.5rem;margin-top:1rem}
 .sel-cancel{flex:1;padding:.45rem;border:1px solid #d4c5b9;border-radius:.4rem;background:#fff;color:#aaa;font-size:.8rem;cursor:pointer;font-family:inherit}
 .sel-add{flex:2;padding:.45rem;border:none;border-radius:.4rem;background:#8b7355;color:#fff;font-size:.8rem;font-weight:600;cursor:pointer;font-family:inherit;transition:background .15s}
@@ -633,7 +648,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica','Arial'
  <span class="sel-label">Size</span>
  <select class="sel-select" id="selSize" onchange="updateColorOptions()"></select>
  <span class="sel-label">Color / Pattern</span>
- <select class="sel-select" id="selColor"></select>
+ <div class="color-dropdown-wrap" id="colorDropWrap">
+   <button type="button" class="color-dropdown-trigger" id="colorDropTrigger" onclick="toggleColorDrop()">
+     <span class="trigger-swatch" id="triggerSwatch"></span>
+     <span id="triggerLabel">Select color</span>
+     <span class="trigger-caret">▼</span>
+   </button>
+   <div class="color-dropdown-list" id="colorDropList"></div>
+ </div>
+ <input type="hidden" id="selColor" value="">
  <div class="selector-btns">
  <button class="sel-cancel" onclick="closeSelector()">Cancel</button>
  <button class="sel-add" id="selAdd" onclick="confirmAddToBag()">Add to Bag</button>
@@ -1222,37 +1245,58 @@ function updateColorOptions(){
  const p = _selectorProduct; if(!p) return;
  const sizeVal = document.getElementById('selSize').value;
  const [selectedSize, selectedCm] = sizeVal ? sizeVal.split('|') : ['',''];
- const colorSel = document.getElementById('selColor');
- colorSel.innerHTML = '';
+ // Build custom color dropdown
+ const list = document.getElementById('colorDropList');
+ const trigger = document.getElementById('colorDropTrigger');
+ const triggerSwatch = document.getElementById('triggerSwatch');
+ const triggerLabel = document.getElementById('triggerLabel');
+ const hiddenSel = document.getElementById('selColor');
+ if(!list) return;
+ list.innerHTML = '';
 
  const variants = (_allSheetProducts||[]).filter(x=>x.name===p.name);
+ let firstAvailId = null;
+
+ function buildOpt(id, color, hex, inStock){
+   const div = document.createElement('div');
+   div.className = 'color-dropdown-opt' + (!inStock ? ' disabled' : '');
+   const sw = document.createElement('span');
+   sw.className = 'opt-swatch';
+   sw.style.background = hex||'#e8ddd0';
+   const lbl = document.createElement('span');
+   lbl.textContent = inStock ? color : color + ' — out of stock';
+   div.appendChild(sw); div.appendChild(lbl);
+   if(inStock){
+     div.dataset.id = String(id);
+     div.dataset.hex = hex||'#e8ddd0';
+     div.dataset.color = color;
+     div.onclick = function(){
+       selectColorOpt(this.dataset.id, this.dataset.color, this.dataset.hex);
+     };
+     if(!firstAvailId) firstAvailId = String(id);
+   }
+   list.appendChild(div);
+ }
 
  if(variants.length && selectedCm){
- variants.forEach(v=>{
- // Check if this color has stock in the selected size
- const key = String(v.id)+'_'+String(selectedCm);
- const inStock = !(key in stockData) || stockData[key] > 0;
- // Only show colors that have this size
- const hasSize = (v.sizesCm||[]).some(cm=>String(cm)===String(selectedCm));
- if(!hasSize) return;
- const opt = document.createElement('option');
- opt.value = String(v.id);
- opt.textContent = inStock
- ? (v.color||'Default')
- : (v.color||'Default')+' — out of stock';
- if(!inStock){ opt.disabled = true; opt.style.color='#ccc'; }
- colorSel.appendChild(opt);
- });
- // Auto-select first available
- const firstAvail = colorSel.querySelector('option:not(:disabled)');
- if(firstAvail) firstAvail.selected = true;
+   variants.forEach(v=>{
+     const key = String(v.id)+'_'+String(selectedCm);
+     const inStock = !(key in stockData) || stockData[key] > 0;
+     const hasSize = (v.sizesCm||[]).some(cm=>String(cm)===String(selectedCm));
+     if(!hasSize) return;
+     buildOpt(v.id, v.color||'Default', v.hex||'#e8ddd0', inStock);
+   });
  } else {
- (p.pids||[]).forEach(pid=>{
- const opt = document.createElement('option');
- opt.value = String(pid);
- opt.textContent = p.color||'Default';
- colorSel.appendChild(opt);
- });
+   (p.pids||[]).forEach(pid=>{
+     const v = (_allSheetProducts||[]).find(x=>x.id===pid);
+     buildOpt(pid, v?.color||'Default', v?.hex||'#e8ddd0', true);
+   });
+ }
+
+ // Auto-select first available
+ if(firstAvailId){
+   const first = list.querySelector('[data-id="'+firstAvailId+'"]');
+   if(first) selectColorOpt(first.dataset.id, first.dataset.color, first.dataset.hex);
  }
 
  // Update price display based on selected color
@@ -1266,6 +1310,50 @@ function updateColorOptions(){
  document.getElementById('selProductPrice').textContent = `$${price}${ul}`;
  document.getElementById('selAdd').disabled = !colorSel.querySelector('option:not(:disabled)');
 }
+
+function toggleColorDrop(){
+ const list = document.getElementById('colorDropList');
+ if(list) list.classList.toggle('open');
+}
+
+function selectColorOpt(id, color, hex){
+ const list = document.getElementById('colorDropList');
+ const triggerSwatch = document.getElementById('triggerSwatch');
+ const triggerLabel = document.getElementById('triggerLabel');
+ const hiddenSel = document.getElementById('selColor');
+ // Update trigger display
+ if(triggerSwatch) triggerSwatch.style.background = hex||'#e8ddd0';
+ if(triggerLabel) triggerLabel.textContent = color;
+ if(hiddenSel) hiddenSel.value = id;
+ // Mark selected
+ if(list){
+   list.querySelectorAll('.color-dropdown-opt').forEach(o=>o.classList.remove('selected'));
+   const sel = list.querySelector('[data-id="'+id+'"]');
+   if(sel) sel.classList.add('selected');
+   list.classList.remove('open');
+ }
+ // Update price
+ const pid = parseInt(id)||0;
+ const variant = (_allSheetProducts||[]).find(x=>x.id===pid);
+ const isBundle = bag.length >= 4;
+ const price = isBundle
+   ? (variant?.bundlePrice||0)
+   : (variant?.price||0);
+ const ul = (variant?.unit||'ea')==='ea'?'/ea':'/set';
+ const priceEl = document.getElementById('selProductPrice');
+ if(priceEl) priceEl.textContent = '$'+price+ul;
+ const addBtn = document.getElementById('selAdd');
+ if(addBtn) addBtn.disabled = false;
+}
+
+// Close dropdown when clicking outside
+document.addEventListener('click', function(e){
+ const wrap = document.getElementById('colorDropWrap');
+ if(wrap && !wrap.contains(e.target)){
+   const list = document.getElementById('colorDropList');
+   if(list) list.classList.remove('open');
+ }
+});
 
 function confirmAddToBag(){
  const p = _selectorProduct; if(!p) return;
