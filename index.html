@@ -692,7 +692,10 @@ function deriveCategory(p){
 
 // Derive season from name/material keywords if not set
 function deriveSeason(p){
- if(p.season && p.season.trim()) return p.season.trim();
+ if(p.season && p.season.trim()){
+   // Clean up vendor-style separators (Japanese comma、etc)
+   return p.season.trim().replace(/[、，]/g, '/');
+ }
  const n = (p.name+' '+(p.material||'')).toLowerCase();
  if(/fleece|padded|quilted|knit|wool|warm|winter/.test(n)) return 'Winter';
  if(/muslin|linen|sleeveless|terry|summer/.test(n)) return 'Summer';
@@ -942,9 +945,12 @@ function render(){
  if(season) rows = rows.filter(p=>{
  const ps = deriveSeason(p);
  if(!ps) return false;
- // normalise Spring/Autumn variants
- const norm = s => s.toLowerCase().replace('spring/autumn','spring').replace('spring / autumn','spring');
- return norm(ps) === norm(season);
+ // Split product seasons into individual words, normalize each
+ const norm = s => s.toLowerCase().trim();
+ const productSeasons = ps.split(/[、，,\/\s]+/).map(norm).filter(Boolean);
+ const filterSeasons = season.split(/[、，,\/\s]+/).map(norm).filter(Boolean);
+ // Show product if ANY of its seasons matches ANY of the filter seasons
+ return filterSeasons.some(fs => productSeasons.some(ps2 => ps2.includes(fs) || fs.includes(ps2)));
  });
 
  // Clearance filter
