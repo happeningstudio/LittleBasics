@@ -1306,7 +1306,7 @@ function updateColorOptions(){
  }
 
  // Update price display based on selected color
- const pid = parseInt(colorSel.value)||0;
+ const pid = parseInt(document.getElementById('selColor').value)||0;
  const variant = (_allSheetProducts||[]).find(x=>x.id===pid);
  const isBundle = bag.length >= 4;
  const price = isBundle
@@ -1314,7 +1314,7 @@ function updateColorOptions(){
  : (variant?.price||p.price);
  const ul = (variant?.unit||p.unit||'ea')==='ea'?'/ea':'/set';
  document.getElementById('selProductPrice').textContent = `$${price}${ul}`;
- document.getElementById('selAdd').disabled = !colorSel.querySelector('option:not(:disabled)');
+ document.getElementById('selAdd').disabled = !document.getElementById('selColor').value;
 }
 
 function toggleColorDrop(){
