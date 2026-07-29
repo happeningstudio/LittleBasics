@@ -1096,7 +1096,7 @@ async function loadFromSheet(){
  while(rem.length){ const m=KNOWN_CM.find(c=>rem.startsWith(c)); if(m){sizesCm.push(m);rem=rem.slice(m.length);}else rem=rem.slice(1); }
  } else sizesCm=szStr.split(/\s+/).map(s=>s.trim()).filter(Boolean);
  const sizesDisplay=sizesCm.map(c=>CM_TO_SIZE[c]||c);
- sheet.push({id:parseInt(pid),name:String(name),color:String(color||''),price:parseFloat(price)||0,bundlePrice:parseFloat(bundlePrice)||0,sizes:sizesDisplay,sizesCm,material:String(material||''),saleDiscount:parseFloat(saleDiscount)||0,category:String(category||''),bin:String(bin||''),unit:String(unit||'ea'),season:String(season||''),image:String(image||'')});
+ sheet.push({id:parseInt(pid),name:String(name),color:String(color||''),hex:String(hex||'#e8ddd0'),price:parseFloat(price)||0,bundlePrice:parseFloat(bundlePrice)||0,sizes:sizesDisplay,sizesCm,material:String(material||''),saleDiscount:parseFloat(saleDiscount)||0,category:String(category||''),bin:String(bin||''),unit:String(unit||'ea'),season:String(season||''),image:String(image||'')});
  });
 
  _allSheetProducts = sheet; // store flat for bag color lookup
