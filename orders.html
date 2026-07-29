@@ -1322,8 +1322,8 @@ async function pullProducts(){
 
 // Push products to sheet
 async function pushProducts(){
-  const rows=[['pid','name','color','hex','sizes','price','bundlePrice','cost','image','material','saleDiscount','category','bin','unit','season','hidden']];
-  products.forEach(p=>rows.push([p.pid,p.name,p.color,p.hex,p.sizes.join(','),p.price,p.bundlePrice,p.cost,p.image,typeof p.material==='string'?p.material:'',p.saleDiscount||0,p.category||'Uncategorized',p.bin||'',p.unit||'ea',p.season||'',p.hidden?'1':'']));
+  const rows=[['pid','name','color','hex','sizes','price','bundlePrice','cost','image','material','saleDiscount','category','bin','unit','season','hidden','productId']];
+  products.forEach(p=>rows.push([p.pid,p.name,p.color,p.hex,p.sizes.join(','),p.price,p.bundlePrice,p.cost,p.image,typeof p.material==='string'?p.material:'',p.saleDiscount||0,p.category||'Uncategorized',p.bin||'',p.unit||'ea',p.season||'',p.hidden?'1':'',p.productId||'']));
   await sheetWrite('Products', rows);
 }
 
@@ -3012,12 +3012,12 @@ async function saveGroupProduct(){
       const pid=parseInt(existingPid);
       survivingPids.add(pid);
       const ex=products.find(p=>p.pid===pid);
-      if(ex) Object.assign(ex,{name,image,color,hex,sizes,price,bundlePrice,cost,material,saleDiscount,category,bin,season,unit});
+      if(ex) Object.assign(ex,{name,image,color,hex,sizes,price,bundlePrice,cost,material,saleDiscount,category,bin,season,unit,productId,hidden});
     } else {
       // Create new
       const pid=nextPid();
       survivingPids.add(pid);
-      products.push({pid,name,image,color,hex,sizes,price,bundlePrice,cost,material,saleDiscount,category,bin,season,unit});
+      products.push({pid,name,image,color,hex,sizes,price,bundlePrice,cost,material,saleDiscount,category,bin,season,unit,productId,hidden});
     }
   });
 
