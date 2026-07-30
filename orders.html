@@ -336,6 +336,29 @@ tr.inv-checked-row td{background:rgba(80,160,80,.05)!important}
 .mgr-actions{display:flex;gap:.38rem;margin-top:.65rem}
 .mgr-hint{font-size:.72rem;color:#ccc;text-align:center;padding:2rem 1rem;line-height:1.6}
 /* ════════════════════════════
+   NOTES & CREDITS
+════════════════════════════ */
+.notes-wrap{padding:1rem 1.25rem;height:calc(100vh - var(--top));display:grid;grid-template-columns:1fr 340px;gap:1rem;overflow:hidden}
+.notes-left{display:flex;flex-direction:column;gap:.6rem;overflow:hidden}
+.notes-right{display:flex;flex-direction:column;gap:.6rem;overflow:hidden}
+.notes-card{background:var(--white);border-radius:10px;box-shadow:var(--shadow);padding:.85rem;display:flex;flex-direction:column;gap:.5rem}
+.notes-card h3{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#bbb;margin-bottom:.1rem}
+.notes-textarea{flex:1;width:100%;border:1px solid var(--border);border-radius:6px;padding:.55rem .65rem;font-size:.8rem;font-family:'DM Sans',sans-serif;color:var(--ink);background:var(--mist);resize:none;min-height:200px;transition:border-color .15s;line-height:1.6}
+.notes-textarea:focus{outline:none;border-color:var(--bark)}
+.notes-save-bar{display:flex;align-items:center;gap:.5rem;justify-content:flex-end}
+.credit-list{overflow-y:auto;flex:1}
+.credit-row{display:flex;align-items:center;gap:.5rem;padding:.38rem 0;border-bottom:1px solid #f2ede8;font-size:.76rem}
+.credit-row:last-child{border:none}
+.credit-name{flex:1;font-weight:500;color:var(--ink)}
+.credit-amount{font-weight:700;color:var(--green);white-space:nowrap;min-width:50px;text-align:right}
+.credit-note{font-size:.68rem;color:#aaa;flex:1.5}
+.credit-del{background:none;border:none;cursor:pointer;color:#ddd;font-size:.7rem;padding:.1rem .25rem;border-radius:3px}
+.credit-del:hover{color:var(--red)}
+.credit-add-form{display:grid;grid-template-columns:1fr 80px;gap:.35rem;margin-top:.4rem}
+.credit-add-form input{border:1px solid var(--border);border-radius:5px;padding:.3rem .45rem;font-size:.76rem;font-family:'DM Sans',sans-serif;background:var(--mist);color:var(--ink)}
+.credit-add-form input:focus{outline:none;border-color:var(--bark)}
+
+/* ════════════════════════════
    PENDING ORDERS
 ════════════════════════════ */
 .pending-wrap{padding:.75rem 1.25rem;height:calc(100vh - var(--top));display:flex;flex-direction:column;gap:.5rem;overflow:hidden}
@@ -695,6 +718,7 @@ function doPost(e) {
     <button class="tab-btn" onclick="switchView('pending')">📬 Pending <span id="pendingBadge" style="background:var(--red);color:#fff;font-size:.6rem;padding:.1rem .35rem;border-radius:10px;margin-left:.2rem;display:none">0</span></button>
     <button class="tab-btn" onclick="switchView('log')">🗒 Order Log</button>
     <button class="tab-btn" onclick="switchView('analytics')">📈 Analytics</button>
+    <button class="tab-btn" onclick="switchView('notes')">📝 Notes</button>
     <button class="tab-btn" onclick="switchView('mgr')">⚙️ Products</button>
   </div>
   <div class="topbar-right">
@@ -929,6 +953,38 @@ function doPost(e) {
     </div>
     <div class="analytics-hero" id="analyticsHero"></div>
     <div class="analytics-grid" id="analyticsGrid"></div>
+  </div>
+</div>
+
+<!-- ══ NOTES & CREDITS ══ -->
+<div class="view" id="view-notes">
+  <div class="notes-wrap">
+    <!-- Left: General notepad -->
+    <div class="notes-left">
+      <div class="notes-card" style="flex:1">
+        <h3>📋 General Notes</h3>
+        <textarea class="notes-textarea" id="generalNotes" placeholder="Anything you want to remember — restock ideas, customer requests, to-dos…" oninput="autoSaveNotes()"></textarea>
+        <div class="notes-save-bar">
+          <span style="font-size:.68rem;color:#bbb" id="notesSaveStatus"></span>
+        </div>
+      </div>
+    </div>
+    <!-- Right: Customer credits -->
+    <div class="notes-right">
+      <div class="notes-card" style="flex:1;overflow:hidden;display:flex;flex-direction:column">
+        <h3>💳 Customer Credits</h3>
+        <!-- Add form -->
+        <div style="margin-bottom:.5rem">
+          <div class="credit-add-form">
+            <input type="text" id="creditName" placeholder="Customer name">
+            <input type="number" id="creditAmount" placeholder="$0.00" step="0.01" min="0">
+          </div>
+          <input type="text" id="creditNote" placeholder="Note (e.g. returned item, overpaid…)" style="width:100%;margin-top:.3rem;border:1px solid var(--border);border-radius:5px;padding:.3rem .45rem;font-size:.76rem;font-family:'DM Sans',sans-serif;background:var(--mist);color:var(--ink)">
+          <button class="btn primary sm" onclick="addCredit()" style="width:100%;margin-top:.35rem">+ Add Credit</button>
+        </div>
+        <div class="credit-list" id="creditList"></div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -1420,6 +1476,7 @@ function switchView(v){
   if(v==='pending')   renderPending();
   if(v==='log')       renderLog();
   if(v==='analytics') renderAnalytics();
+  if(v==='notes')     renderNotes();
   if(v==='mgr')       renderMgr();
 }
 
@@ -3777,6 +3834,84 @@ function loadPendingToOrder(id){
   switchView('order');
   renderTable(); updatePanel();
   showToast('✓ Loaded into Order Builder!');
+}
+
+
+/* ═══════════════════════════════════════════════
+   NOTES & CREDITS
+═══════════════════════════════════════════════ */
+let generalNotesText = loadLocal('lb_notes', '');
+let credits = loadLocal('lb_credits', []);
+function saveNotes(){ saveLocal('lb_notes', generalNotesText); }
+function saveCredits(){ saveLocal('lb_credits', credits); }
+
+let notesSaveTimer = null;
+function autoSaveNotes(){
+  generalNotesText = document.getElementById('generalNotes')?.value || '';
+  clearTimeout(notesSaveTimer);
+  const status = document.getElementById('notesSaveStatus');
+  if(status) status.textContent = 'Saving…';
+  notesSaveTimer = setTimeout(()=>{
+    saveNotes();
+    if(status) { status.textContent = '✓ Saved'; setTimeout(()=>status.textContent='', 2000); }
+  }, 800);
+}
+
+function renderNotes(){
+  // Restore notepad
+  const ta = document.getElementById('generalNotes');
+  if(ta) ta.value = generalNotesText;
+  renderCredits();
+}
+
+function renderCredits(){
+  const list = document.getElementById('creditList');
+  if(!list) return;
+  if(!credits.length){
+    list.innerHTML = '<div style="font-size:.75rem;color:#ccc;text-align:center;padding:1rem">No credits yet</div>';
+    return;
+  }
+  // Sort by name
+  const sorted = [...credits].sort((a,b)=>a.name.localeCompare(b.name));
+  list.innerHTML = '';
+  sorted.forEach((c,i)=>{
+    const row = document.createElement('div');
+    row.className = 'credit-row';
+    row.innerHTML = `
+      <span class="credit-name">${c.name}</span>
+      <span class="credit-note">${c.note||''}</span>
+      <span class="credit-amount">$${parseFloat(c.amount||0).toFixed(2)}</span>
+      <button class="credit-del" onclick="deleteCredit(${c.id})" title="Remove">✕</button>`;
+    list.appendChild(row);
+  });
+  // Total
+  const total = credits.reduce((s,c)=>s+parseFloat(c.amount||0),0);
+  const totalRow = document.createElement('div');
+  totalRow.style.cssText = 'display:flex;justify-content:space-between;padding:.4rem 0 0;font-size:.72rem;font-weight:700;color:var(--bark);border-top:2px solid var(--border);margin-top:.25rem';
+  totalRow.innerHTML = `<span>Total credits</span><span>$${total.toFixed(2)}</span>`;
+  list.appendChild(totalRow);
+}
+
+function addCredit(){
+  const name = document.getElementById('creditName')?.value.trim();
+  const amount = parseFloat(document.getElementById('creditAmount')?.value)||0;
+  const note = document.getElementById('creditNote')?.value.trim()||'';
+  if(!name){ showToast('Please enter a customer name.'); return; }
+  if(!amount){ showToast('Please enter a credit amount.'); return; }
+  credits.push({ id: Date.now(), name, amount, note });
+  saveCredits();
+  // Clear form
+  document.getElementById('creditName').value = '';
+  document.getElementById('creditAmount').value = '';
+  document.getElementById('creditNote').value = '';
+  renderCredits();
+  showToast('✓ Credit added for '+name);
+}
+
+function deleteCredit(id){
+  credits = credits.filter(c=>c.id!==id);
+  saveCredits();
+  renderCredits();
 }
 
 /* ── BOOT ── */
