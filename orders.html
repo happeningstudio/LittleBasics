@@ -1568,7 +1568,10 @@ function renderTable(){
         metaDiv.textContent=metaTxt;
         const priceDiv=document.createElement('div');
         priceDiv.style.cssText='font-size:.7rem;color:#bbb;margin-top:.1rem';
-        priceDiv.textContent=fmt(p0.price)+' reg | '+fmt(p0.bundlePrice)+' bundle';
+        const sale0=p0.saleDiscount||0;
+        priceDiv.textContent=sale0>0
+          ? fmt(p0.price-sale0)+' sale'
+          : fmt(p0.price)+' reg | '+fmt(getBundlePrice(p0))+' bundle';
         const arrow=document.createElement('span');
         arrow.className='group-toggle'+(isOpen?' open':'');
         arrow.innerHTML='&#9654;';
@@ -1587,7 +1590,7 @@ function renderTable(){
         const inStock=getStock(p.pid,cm);
         const sale=p.saleDiscount||0;
         // Sale takes priority over bundle — don't apply both
-        const effectiveBundle=bundle&&sale===0;
+        const effectiveBundle=bundle&&sale===0&&getBundlePrice(p)>0;
         const basePrice=sale>0?p.price-sale:p.price;
         const sp=effectiveBundle?getBundlePrice(p):basePrice;
         const line=sp*qty;
@@ -1739,7 +1742,7 @@ function updatePanel(){
     const p=products.find(p=>p.pid===parseInt(pidStr));
     if(!p) return;
     const sale=p.saleDiscount||0;
-    const effectiveBundle=bundle&&sale===0;
+    const effectiveBundle=bundle&&sale===0&&getBundlePrice(p)>0;
     const effectivePrice=effectiveBundle?getBundlePrice(p):(sale>0?p.price-sale:p.price);
     revenue+=effectivePrice*qty;
     cost+=p.cost*qty; tqty+=qty;
@@ -1773,11 +1776,12 @@ function updatePanel(){
     const p=products.find(p=>p.pid===parseInt(pidStr));
     if(!p) return '';
     const sale=p.saleDiscount||0;
-    const effectiveBundle=bundle&&sale===0;
-    const sp=effectiveBundle?getBundlePrice(p):(sale>0?p.price-sale:p.price);
+    const effectiveBundle=bundle&&sale===0&&getBundlePrice(p)>0;
+    const basePrice=p.price>0?p.price:(p.bundlePrice||0);
+    const sp=effectiveBundle?getBundlePrice(p):(sale>0?basePrice-sale:basePrice);
     return `<li class="order-item">
       <span class="oi-name">${p.name}<br><span class="oi-sub">${p.color} · ${toDisplayShort(cm)} (${cm})</span></span>
-      <span class="oi-val">×${qty} ${fmt(sp*qty)}</span>
+      <span class="oi-val">${sale>0?`<s style="color:#ccc;font-weight:400;font-size:.68rem">${fmt(p.price)}</s> `:''}×${qty} ${fmt(sp*qty)}</span>
       <button onclick="removeOrderItem('${k}')" style="background:none;border:none;cursor:pointer;color:#ddd;font-size:.75rem;padding:0 0 0 .4rem;line-height:1;flex-shrink:0" title="Remove">✕</button>
     </li>`;
   }).join('');
@@ -1853,7 +1857,7 @@ async function copyAndSave(){
     const p=products.find(p=>p.pid===parseInt(pidStr));
     if(!p) return;
     const sale=p.saleDiscount||0;
-    const effectiveBundle=bundle&&sale===0;
+    const effectiveBundle=bundle&&sale===0&&getBundlePrice(p)>0;
     const sp=effectiveBundle?getBundlePrice(p):(sale>0?p.price-sale:p.price);
     revenue+=sp*qty; cost+=p.cost*qty; tqty+=qty;
     itemDetails.push({pid:p.pid,name:p.name,color:p.color,cm,qty,sp});
@@ -2561,7 +2565,7 @@ function recalcLogEntry(entry){
     const p=products.find(pp=>pp.pid===i.pid);
     if(!p) { revenue+=i.sp*i.qty; return; }
     const sale=p.saleDiscount||0;
-    const effectiveBundle=isBundle&&sale===0;
+    const effectiveBundle=isBundle&&sale===0&&getBundlePrice(p)>0;
     const sp=effectiveBundle?getBundlePrice(p):(sale>0?p.price-sale:p.price);
     i.sp=sp; // update stored unit price too
     revenue+=sp*i.qty;
