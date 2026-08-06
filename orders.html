@@ -1772,7 +1772,9 @@ function updatePanel(){
     const[pidStr,cm]=k.split('_');
     const p=products.find(p=>p.pid===parseInt(pidStr));
     if(!p) return '';
-    const sp=bundle?getBundlePrice(p):p.price;
+    const sale=p.saleDiscount||0;
+    const effectiveBundle=bundle&&sale===0;
+    const sp=effectiveBundle?getBundlePrice(p):(sale>0?p.price-sale:p.price);
     return `<li class="order-item">
       <span class="oi-name">${p.name}<br><span class="oi-sub">${p.color} · ${toDisplayShort(cm)} (${cm})</span></span>
       <span class="oi-val">×${qty} ${fmt(sp*qty)}</span>
