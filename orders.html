@@ -1422,6 +1422,7 @@ function skey(pid,cm){ return pid+'_'+cm; }
 function getStock(pid,cm){ const k=skey(pid,cm); return stock[k]!==undefined?stock[k]:0; }
 function totalQty(){ return Object.values(order).reduce((s,v)=>s+v,0); }
 function isBundle(){ return totalQty()>=5; }
+function getBundlePrice(p){ return (p.bundlePrice&&p.bundlePrice>0)?p.bundlePrice:p.price; }
 function nextPid(){ return products.length?Math.max(...products.map(p=>p.pid))+1:1; }
 function fmt(n){ return '$'+parseFloat(n||0).toFixed(2); }
 let toastTimer=null;
@@ -1588,7 +1589,7 @@ function renderTable(){
         // Sale takes priority over bundle — don't apply both
         const effectiveBundle=bundle&&sale===0;
         const basePrice=sale>0?p.price-sale:p.price;
-        const sp=effectiveBundle?p.bundlePrice:basePrice;
+        const sp=effectiveBundle?getBundlePrice(p):basePrice;
         const line=sp*qty;
         const inStockCls=inStock===0?'stock-zero':inStock<=2?'stock-low':'stock-ok';
         const inStockLbl=inStock===0?'Out':inStock+' left';
@@ -1739,7 +1740,7 @@ function updatePanel(){
     if(!p) return;
     const sale=p.saleDiscount||0;
     const effectiveBundle=bundle&&sale===0;
-    const effectivePrice=effectiveBundle?p.bundlePrice:(sale>0?p.price-sale:p.price);
+    const effectivePrice=effectiveBundle?getBundlePrice(p):(sale>0?p.price-sale:p.price);
     revenue+=effectivePrice*qty;
     cost+=p.cost*qty; tqty+=qty;
   });
@@ -1771,7 +1772,7 @@ function updatePanel(){
     const[pidStr,cm]=k.split('_');
     const p=products.find(p=>p.pid===parseInt(pidStr));
     if(!p) return '';
-    const sp=bundle?p.bundlePrice:p.price;
+    const sp=bundle?getBundlePrice(p):p.price;
     return `<li class="order-item">
       <span class="oi-name">${p.name}<br><span class="oi-sub">${p.color} · ${toDisplayShort(cm)} (${cm})</span></span>
       <span class="oi-val">×${qty} ${fmt(sp*qty)}</span>
@@ -1851,7 +1852,7 @@ async function copyAndSave(){
     if(!p) return;
     const sale=p.saleDiscount||0;
     const effectiveBundle=bundle&&sale===0;
-    const sp=effectiveBundle?p.bundlePrice:(sale>0?p.price-sale:p.price);
+    const sp=effectiveBundle?getBundlePrice(p):(sale>0?p.price-sale:p.price);
     revenue+=sp*qty; cost+=p.cost*qty; tqty+=qty;
     itemDetails.push({pid:p.pid,name:p.name,color:p.color,cm,qty,sp});
   });
@@ -2559,7 +2560,7 @@ function recalcLogEntry(entry){
     if(!p) { revenue+=i.sp*i.qty; return; }
     const sale=p.saleDiscount||0;
     const effectiveBundle=isBundle&&sale===0;
-    const sp=effectiveBundle?p.bundlePrice:(sale>0?p.price-sale:p.price);
+    const sp=effectiveBundle?getBundlePrice(p):(sale>0?p.price-sale:p.price);
     i.sp=sp; // update stored unit price too
     revenue+=sp*i.qty;
   });
@@ -3822,10 +3823,29 @@ function loadPendingToOrder(id){
   const o=pendingOrders.find(po=>po.id===id);
   if(!o) return;
   Object.keys(order).forEach(k=>delete order[k]);
+  const cmMap={'3-6M':'60','6-12M':'70','12-24M':'80','2T':'90','3T':'100','4T':'110','5T':'120','130':'130','OS':'OS','One Size':'OS'};
+  const unmatched=[];
   (o.items||[]).forEach(item=>{
-    const p=products.find(pp=>pp.name===item.name&&(pp.color||'')===(item.color||''));
-    if(!p) return;
-    const cmMap={'3-6M':'60','6-12M':'70','12-24M':'80','2T':'90','3T':'100','4T':'110','5T':'120','130':'130'};
+    // Try exact match first, then fuzzy name+color match
+    let p=products.find(pp=>pp.name===item.name&&(pp.color||'')===(item.color||''));
+    if(!p){
+      // Case-insensitive name match
+      const nameL=item.name.toLowerCase();
+      const colorL=(item.color||'').toLowerCase();
+      p=products.find(pp=>
+        pp.name.toLowerCase()===nameL &&
+        (pp.color||'').toLowerCase()===colorL
+      );
+    }
+    if(!p){
+      // Name-only match (color might differ slightly)
+      const nameL=item.name.toLowerCase();
+      p=products.find(pp=>pp.name.toLowerCase()===nameL);
+    }
+    if(!p){
+      unmatched.push(item.name+' ('+item.color+')');
+      return;
+    }
     const cm=cmMap[item.size]||item.size;
     if(cm){ const k=skey(p.pid,cm); order[k]=(order[k]||0)+1; }
   });
@@ -3833,7 +3853,11 @@ function loadPendingToOrder(id){
   if(o.address) document.getElementById('fAddress').value=o.address;
   switchView('order');
   renderTable(); updatePanel();
-  showToast('✓ Loaded into Order Builder!');
+  if(unmatched.length){
+    showToast('⚠ '+unmatched.length+' item(s) not matched: '+unmatched.join(', '));
+  } else {
+    showToast('✓ Loaded into Order Builder!');
+  }
 }
 
 
