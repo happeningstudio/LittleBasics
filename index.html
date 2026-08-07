@@ -1058,7 +1058,9 @@ window.addEventListener('scroll',()=>{
 },{passive:true});
 
 /* ── LOAD FROM SHEET ── */
+let _sheetLoadAttempts = 0;
 async function loadFromSheet(){
+ _sheetLoadAttempts++;
  try{
  // Fetch independently so one failure doesn't kill everything
  const safeFetch = async (url) => {
@@ -1118,6 +1120,11 @@ async function loadFromSheet(){
  } else useFallback();
  } catch(e){ console.warn('loadFromSheet error:',e); useFallback(); }
  render();
+ // If stockData still empty after load, retry once after 3 seconds
+ if(Object.keys(stockData).length === 0 && _sheetLoadAttempts < 2){
+   console.log('Stock data empty, retrying in 3s…');
+   setTimeout(loadFromSheet, 3000);
+ }
 }
 
 function useFallback(){
@@ -1375,12 +1382,14 @@ function confirmAddToBag(){
 
  // Check stock for this exact pid+size combo
  const stockKey = String(pid)+'_'+String(sizeCm);
- const availableStock = stockData[stockKey]; // undefined = untracked, treat as unlimited
+ // Only block if stockData has actually loaded (has keys) AND stock is tracked AND exceeded
+ const stockLoaded = Object.keys(stockData).length > 0;
+ const availableStock = stockLoaded ? stockData[stockKey] : undefined;
 
  // Count how many of this exact item (same pid + same size) are already in the bag
  const alreadyInBag = bag.filter(b=>b.colorPid===pid && b.sizeCm===sizeCm).length;
 
- if(availableStock !== undefined && alreadyInBag >= availableStock){
+ if(availableStock !== undefined && availableStock !== null && alreadyInBag >= availableStock && availableStock > 0){
  alert(`Only ${availableStock} left in stock for this size/color — you already have ${alreadyInBag} in your bag.`);
  return;
  }
