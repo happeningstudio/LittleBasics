@@ -1219,20 +1219,20 @@ function openSelector(productName){
  });
  }
 
- // Populate size dropdown — only in-stock sizes
+ // Populate size dropdown — show all sizes, mark out of stock ones
  const SIZE_ORDER = ['3-6M','6-12M','12-24M','1T','2T','3T','4T','5T','NB','OS'];
  const sizeEntries = Object.entries(sizeMap);
  sizeEntries.forEach(([label, {cm, hasStock}])=>{
- if(!hasStock) return; // hide out of stock sizes
  const opt = document.createElement('option');
  opt.value = label+'|'+cm;
- opt.textContent = label;
+ opt.textContent = hasStock ? label : label+' (sold out)';
+ if(!hasStock) opt.style.color = '#bbb';
  sizeSel.appendChild(opt);
  });
 
  if(sizeSel.options.length === 0){
  const opt = document.createElement('option');
- opt.textContent = 'All sizes sold out';
+ opt.textContent = 'No sizes available';
  opt.disabled = true;
  sizeSel.appendChild(opt);
  document.getElementById('selAdd').disabled = true;
@@ -1686,9 +1686,14 @@ async function submitBag(){
  if(confirmEl){
  confirmEl.style.display = 'block';
  confirmEl.innerHTML = `
- <div style="font-size:1.1rem;margin-bottom:.3rem"></div>
- <div style="font-size:.82rem;font-weight:600;color:#5a4a3a;margin-bottom:.2rem">Order received!</div>
- <div style="font-size:.72rem;color:#555;line-height:1.5">We'll check availability and get back to you within 24 hours.</div>`;
+ <div style="font-size:1.4rem;margin-bottom:.4rem">🌿</div>
+ <div style="font-size:.88rem;font-weight:700;color:#3a2e24;margin-bottom:.5rem">Order received!</div>
+ <div style="font-size:.78rem;color:#555;line-height:1.65;background:#f5f1ed;border-radius:.5rem;padding:.65rem .75rem;margin-bottom:.5rem">
+   Reply to us on wherever you found us —<br>
+   <strong>Instagram @littlebasics</strong> or <strong>Facebook Marketplace</strong> —<br>
+   so we can match your order and confirm faster!
+ </div>
+ <div style="font-size:.7rem;color:#aaa">We'll review your order and get back to you shortly.</div>`;
  }
  // Disable submit to prevent double submission
  _submitting = false;
