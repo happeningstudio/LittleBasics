@@ -590,7 +590,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica','Arial'
  <div class="bag-fulfillment">
  <div class="bag-fulfillment-title">Fulfillment</div>
  <div class="fulfillment-opts">
- <button class="f-opt active" id="fOptPickup" onclick="setFulfillment('pickup')">Local Pickup</button>
+ <button class="f-opt active" id="fOptPickup" onclick="setFulfillment('pickup')">🏠 Local Pickup (Los Angeles)</button>
  <button class="f-opt" id="fOptShip" onclick="setFulfillment('shipping')">Shipping</button>
  </div>
  <div id="bagShipDetails" style="display:none">
@@ -1061,18 +1061,34 @@ window.addEventListener('scroll',()=>{
 let _sheetLoadAttempts = 0;
 async function loadFromSheet(){
  _sheetLoadAttempts++;
+ const grid = document.getElementById('productGrid') || document.getElementById('catalogGrid');
+ if(grid) grid.innerHTML = '<div style="text-align:center;padding:3rem;color:#aaa;font-size:.85rem">Loading catalog…</div>';
+
  try{
- // Fetch independently so one failure doesn't kill everything
- const safeFetch = async (url) => {
-   try{ const r=await fetch(url); return await r.json(); }
-   catch(e){ return null; }
- };
- const [prodRows,stockRows,pendingRows,soldRows] = await Promise.all([
-   safeFetch(SHEET_URL+'?action=read&tab=Products'),
-   safeFetch(SHEET_URL+'?action=read&tab=Stock'),
-   safeFetch(SHEET_URL+'?action=read&tab=Pending'),
-   safeFetch(SHEET_URL+'?action=read&tab=Sold')
- ]);
+ // Single request for all tabs — much more reliable than 4 simultaneous requests
+ const res = await fetch(SHEET_URL+'?action=readAll&tabs=Products,Stock,Pending,Sold');
+ const data = res.ok ? await res.json() : null;
+
+ // Fall back to individual requests if readAll not supported by the script
+ let prodRows, stockRows, pendingRows, soldRows;
+ if(data && data.Products){
+   prodRows = data.Products;
+   stockRows = data.Stock;
+   pendingRows = data.Pending;
+   soldRows = data.Sold;
+ } else {
+   // Fallback: fetch individually with small delays to avoid overwhelming the script
+   const safeFetch = async (url) => {
+     try{ const r=await fetch(url); if(!r.ok) return null; return await r.json(); }
+     catch(e){ return null; }
+   };
+   prodRows = await safeFetch(SHEET_URL+'?action=read&tab=Products');
+   await new Promise(r=>setTimeout(r,300));
+   stockRows = await safeFetch(SHEET_URL+'?action=read&tab=Stock');
+   await new Promise(r=>setTimeout(r,300));
+   pendingRows = await safeFetch(SHEET_URL+'?action=read&tab=Pending');
+   soldRows = await safeFetch(SHEET_URL+'?action=read&tab=Sold');
+ }
 
  stockData={};
  if(stockRows&&stockRows.length>1) stockRows.slice(1).forEach(([k,q])=>{ stockData[String(k)]=parseInt(q)||0; });
