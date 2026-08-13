@@ -1,0 +1,31 @@
+name: Compress Images
+
+on:
+  push:
+    paths:
+      - 'images/**'
+
+jobs:
+  compress:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Compress images
+        uses: calibreapp/image-actions@main
+        with:
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          jpegQuality: '75'
+          jpegProgressive: false
+          pngQuality: '75'
+          webpQuality: '75'
+          ignorePaths: 'node_modules/**'
+
+      - name: Commit compressed images
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: 'chore: compress images'
+          file_pattern: 'images/**'
