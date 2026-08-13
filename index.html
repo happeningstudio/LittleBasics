@@ -590,7 +590,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica','Arial'
  <div class="bag-fulfillment">
  <div class="bag-fulfillment-title">Fulfillment</div>
  <div class="fulfillment-opts">
- <button class="f-opt active" id="fOptPickup" onclick="setFulfillment('pickup')">🏠 Local Pickup (Los Angeles)</button>
+ <button class="f-opt active" id="fOptPickup" onclick="setFulfillment('pickup')">Local Pickup</button>
  <button class="f-opt" id="fOptShip" onclick="setFulfillment('shipping')">Shipping</button>
  </div>
  <div id="bagShipDetails" style="display:none">
@@ -1059,39 +1059,77 @@ window.addEventListener('scroll',()=>{
 
 /* ── LOAD FROM SHEET ── */
 let _sheetLoadAttempts = 0;
+const CACHE_KEY = 'lb_cat_v1';
+const CACHE_TTL = 2 * 60 * 60 * 1000; // 2 hours
+
 async function loadFromSheet(){
  _sheetLoadAttempts++;
- const grid = document.getElementById('productGrid') || document.getElementById('catalogGrid');
- if(grid) grid.innerHTML = '<div style="text-align:center;padding:3rem;color:#aaa;font-size:.85rem">Loading catalog…</div>';
 
+ // Show cached data instantly if available
  try{
- // Single request for all tabs — much more reliable than 4 simultaneous requests
- const res = await fetch(SHEET_URL+'?action=readAll&tabs=Products,Stock,Pending,Sold');
- const data = res.ok ? await res.json() : null;
+   const cached = JSON.parse(localStorage.getItem(CACHE_KEY)||'null');
+   if(cached && cached.ts && cached.products && cached.products.length){
+     catalogProducts = cached.products;
+     _allSheetProducts = cached.allSheet||[];
+     stockData = cached.stock||{};
+     soldData = cached.sold||{};
+     render();
+     // If cache is fresh enough, just refresh in background silently
+     if((Date.now()-cached.ts) < CACHE_TTL){
+       fetchSheet(true); return;
+     }
+   }
+ } catch(e){}
 
- // Fall back to individual requests if readAll not supported by the script
+ // No cache or stale — fetch and render
+ fetchSheet(false);
+}
+
+async function fetchSheet(silent){
+ try{
+ const safeFetch = async (url) => {
+   try{
+     const r = await fetch(url);
+     if(!r.ok) return null;
+     const json = await r.json();
+     return Array.isArray(json) ? json : null;
+   }
+   catch(e){ return null; }
+ };
+
+ // Try combined request first
  let prodRows, stockRows, pendingRows, soldRows;
- if(data && data.Products){
-   prodRows = data.Products;
-   stockRows = data.Stock;
-   pendingRows = data.Pending;
-   soldRows = data.Sold;
- } else {
-   // Fallback: fetch individually with small delays to avoid overwhelming the script
-   const safeFetch = async (url) => {
-     try{ const r=await fetch(url); if(!r.ok) return null; return await r.json(); }
-     catch(e){ return null; }
-   };
+ try{
+   const res = await fetch(SHEET_URL+'?action=readAll&tabs=Products,Stock,Pending,Sold');
+   if(res.ok){
+     const combined = await res.json();
+     if(combined && combined.Products){
+       prodRows=combined.Products; stockRows=combined.Stock;
+       pendingRows=combined.Pending; soldRows=combined.Sold;
+     }
+   }
+ } catch(e){}
+
+ // Fallback: individual requests
+ if(!prodRows){
    prodRows = await safeFetch(SHEET_URL+'?action=read&tab=Products');
-   await new Promise(r=>setTimeout(r,300));
-   stockRows = await safeFetch(SHEET_URL+'?action=read&tab=Stock');
-   await new Promise(r=>setTimeout(r,300));
-   pendingRows = await safeFetch(SHEET_URL+'?action=read&tab=Pending');
-   soldRows = await safeFetch(SHEET_URL+'?action=read&tab=Sold');
+   [stockRows,pendingRows,soldRows] = await Promise.all([
+     safeFetch(SHEET_URL+'?action=read&tab=Stock'),
+     safeFetch(SHEET_URL+'?action=read&tab=Pending'),
+     safeFetch(SHEET_URL+'?action=read&tab=Sold')
+   ]);
+ }
+
+ if(!prodRows || prodRows.length < 2){
+   // Sheet failed — if not silent, use fallback
+   if(!silent) useFallback();
+   // Retry once more
+   if(_sheetLoadAttempts < 2) setTimeout(()=>fetchSheet(false), 4000);
+   return;
  }
 
  stockData={};
- if(stockRows&&stockRows.length>1) stockRows.slice(1).forEach(([k,q])=>{ stockData[String(k)]=parseInt(q)||0; });
+ if(stockRows&&stockRows.length>1) stockRows.slice(1).forEach(([k,q])=>{ if(k) stockData[String(k)]=parseInt(q)||0; });
  soldData={};
  if(soldRows&&soldRows.length>1) soldRows.slice(1).forEach(([k,q])=>{ if(k) soldData[String(k)]=(soldData[String(k)]||0)+(parseInt(q)||0); });
  pendingStock={};
@@ -1099,7 +1137,6 @@ async function loadFromSheet(){
 
  const KNOWN_CM=['130','120','110','100','90','80','70','60'];
  const sheet=[];
- if(prodRows&&prodRows.length>1){
  prodRows.slice(1).forEach(row=>{
  const [pid,name,color,hex,sizesRaw,price,bundlePrice,cost,image,material,saleDiscount,category,bin,unit,season]=row;
  if(!pid||!name) return;
@@ -1113,7 +1150,6 @@ async function loadFromSheet(){
  const sizesDisplay=sizesCm.map(c=>CM_TO_SIZE[c]||c);
  sheet.push({id:parseInt(pid),name:String(name),color:String(color||''),hex:String(hex||'#e8ddd0'),price:parseFloat(price)||0,bundlePrice:parseFloat(bundlePrice)||0,sizes:sizesDisplay,sizesCm,material:String(material||''),saleDiscount:parseFloat(saleDiscount)||0,category:String(category||''),bin:String(bin||''),unit:String(unit||'ea'),season:String(season||''),image:String(image||'')});
  });
- }
 
  _allSheetProducts = sheet;
  if(sheet.length){
@@ -1133,14 +1169,21 @@ async function loadFromSheet(){
  pairs.sort((a,b)=>CM_ORDER.indexOf(a.cm)-CM_ORDER.indexOf(b.cm));
  return {...g,sizes:pairs.map(p=>p.label),sizesCm:pairs.map(p=>p.cm),season:g.season||''};
  });
- } else useFallback();
- } catch(e){ console.warn('loadFromSheet error:',e); useFallback(); }
+
+ // Save to cache
+ try{
+   localStorage.setItem(CACHE_KEY, JSON.stringify({
+     ts: Date.now(),
+     products: catalogProducts,
+     allSheet: _allSheetProducts,
+     stock: stockData,
+     sold: soldData
+   }));
+ } catch(e){}
+ } else { if(!silent) useFallback(); }
+
+ } catch(e){ console.warn('fetchSheet error:',e); if(!silent) useFallback(); }
  render();
- // If stockData still empty after load, retry once after 3 seconds
- if(Object.keys(stockData).length === 0 && _sheetLoadAttempts < 2){
-   console.log('Stock data empty, retrying in 3s…');
-   setTimeout(loadFromSheet, 3000);
- }
 }
 
 function useFallback(){
