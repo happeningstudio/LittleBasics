@@ -3735,7 +3735,9 @@ function normDate(d){
    Columns: timestamp, contact, itemsJSON, total, fulfillment, address, isBundle, shipFee, status, contactInfo
 ═══════════════════════════════════════════════ */
 let pendingOrders = loadLocal('lb_pending_orders', []);
+let dismissedTimestamps = loadLocal('lb_dismissed_pending', []); // persists across refreshes
 function savePending(){ saveLocal('lb_pending_orders', pendingOrders); }
+function saveDismissed(){ saveLocal('lb_dismissed_pending', dismissedTimestamps); }
 
 function updatePendingBadge(){
   const active = pendingOrders.filter(o=>!o.dismissed).length;
@@ -3751,6 +3753,7 @@ async function pullPendingOrders(){
     const [timestamp,contact,itemsRaw,total,fulfillment,address,isBundle,shipFee,status,contactInfo]=row;
     if(!timestamp) return;
     if(pendingOrders.find(o=>o.timestamp===String(timestamp))) return;
+    if(dismissedTimestamps.includes(String(timestamp))) return; // was dismissed, don't bring back
     let items=[];
     try{ items=JSON.parse(itemsRaw||'[]'); }catch(e){}
     pendingOrders.unshift({
@@ -3820,10 +3823,19 @@ function renderPending(){
 
 function toggleDismissPending(id){
   const o=pendingOrders.find(o=>o.id===id);
-  if(o){ o.dismissed=!o.dismissed; savePending(); renderPending(); }
+  if(!o) return;
+  o.dismissed=!o.dismissed;
+  if(o.dismissed){
+    if(!dismissedTimestamps.includes(o.timestamp)) dismissedTimestamps.push(o.timestamp);
+  } else {
+    dismissedTimestamps=dismissedTimestamps.filter(t=>t!==o.timestamp);
+  }
+  savePending(); saveDismissed(); renderPending();
 }
 
 function clearDismissedPending(){
+  // Keep dismissed timestamps so they don't come back on refresh
+  // Just remove them from the visible list
   pendingOrders=pendingOrders.filter(o=>!o.dismissed);
   savePending(); renderPending();
   showToast('Dismissed orders cleared');
@@ -3946,6 +3958,69 @@ function deleteCredit(id){
   credits = credits.filter(c=>c.id!==id);
   saveCredits();
   renderCredits();
+}
+
+
+/* ═══════════════════════════════════════════════
+   PUBLISH CATALOG TO GITHUB
+═══════════════════════════════════════════════ */
+const GITHUB_REPO = 'happeningstudio/LittleBasics';
+const GITHUB_FILE = 'catalog-data.json';
+
+function getGithubToken(){ return localStorage.getItem('lb_github_token')||''; }
+function saveGithubToken(t){ localStorage.setItem('lb_github_token', t.trim()); }
+
+async function publishCatalog(){
+  const token = getGithubToken();
+  if(!token){
+    const t = prompt('Enter your GitHub Personal Access Token:');
+    if(!t) return;
+    saveGithubToken(t);
+  }
+
+  showToast('📤 Publishing catalog…');
+
+  // Build catalog data
+  const catalogData = {
+    published: new Date().toISOString(),
+    products: products.filter(p=>!p.hidden),
+    stock: stock,
+    soldCounts: soldCounts
+  };
+
+  const json = JSON.stringify(catalogData);
+  const encoded = btoa(unescape(encodeURIComponent(json)));
+
+  // Get current file SHA (needed for update)
+  let sha = null;
+  try{
+    const r = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${GITHUB_FILE}`,{
+      headers:{ 'Authorization':'token '+getGithubToken(), 'Accept':'application/vnd.github.v3+json' }
+    });
+    if(r.ok){ const d=await r.json(); sha=d.sha; }
+  } catch(e){}
+
+  // Push file
+  const body = { message:'chore: update catalog data', content:encoded };
+  if(sha) body.sha = sha;
+
+  const res = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${GITHUB_FILE}`,{
+    method:'PUT',
+    headers:{
+      'Authorization':'token '+getGithubToken(),
+      'Accept':'application/vnd.github.v3+json',
+      'Content-Type':'application/json'
+    },
+    body: JSON.stringify(body)
+  });
+
+  if(res.ok){
+    showToast('✓ Catalog published! Live in ~30 seconds.');
+  } else {
+    const err = await res.json();
+    showToast('✗ Publish failed: '+( err.message||res.status));
+    console.error(err);
+  }
 }
 
 /* ── BOOT ── */

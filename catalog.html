@@ -1,0 +1,1889 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Little Basics Product Catalog</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica','Arial',sans-serif;background:#faf8f5;color:#221c13}
+
+/* ── HEADER ── */
+.header{background:#fff;border-bottom:1px solid #e8e0d8;position:sticky;top:0;z-index:100}
+.header-inner{max-width:1400px;margin:0 auto;padding:.55rem 1.25rem;display:flex;align-items:center;gap:1rem}
+.header-logo{height:44px;width:auto;object-fit:contain;flex-shrink:0}
+
+/* Carousel strip */
+.header-carousel{flex:1;min-width:0;overflow:hidden;position:relative;height:44px;display:block}
+.carousel-track{display:flex;flex-direction:column;transition:transform .5s ease;width:100%;transform:translateY(0)}
+.carousel-slide{display:flex;align-items:center;justify-content:center;gap:1rem;height:44px;flex-shrink:0;width:100%;flex-wrap:nowrap;box-sizing:border-box}
+.carousel-item{display:flex;align-items:center;gap:.4rem;font-size:.73rem;color:#7a6a5a;white-space:nowrap;flex-shrink:0}
+.carousel-item strong{color:#5a4a3a;font-weight:600}
+.carousel-item a{color:#8b7355;text-decoration:none;display:flex;align-items:center;gap:.3rem}
+.carousel-item a:hover{color:#5a4a3a}
+.carousel-step{display:flex;align-items:center;gap:.5rem}
+.carousel-step-num{width:16px;height:16px;border-radius:50%;background:#8b7355;color:#fff;font-size:.58rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.carousel-step-text{font-size:.68rem;color:#7a6a5a;line-height:1.2;white-space:nowrap}
+.carousel-arrow{font-size:.8rem;color:#bbb;flex-shrink:0}
+
+/* FAQ button */
+.faq-btn{padding:.3rem .65rem;border:1px solid #d4c5b9;border-radius:.4rem;background:#fff;color:#8b7355;font-size:.72rem;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0;transition:all .15s;position:relative}
+.faq-btn:hover{background:#8b7355;color:#fff;border-color:#8b7355}
+
+/* FAQ dropdown */
+.faq-panel{position:absolute;top:100%;right:0;width:min(400px,95vw);background:#fff;border:1px solid #e8e0d8;border-radius:.6rem;box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:200;display:none;margin-top:.35rem}
+.faq-panel.open{display:block}
+.faq-panel-inner{padding:1.1rem 1.25rem;max-height:70vh;overflow-y:auto}
+.faq-item{margin-bottom:.85rem;border-bottom:.5px solid #f0ebe5;padding-bottom:.85rem}
+.faq-item:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
+.faq-q{font-size:.8rem;font-weight:600;color:#3a2e24;margin-bottom:.3rem;cursor:pointer;display:flex;justify-content:space-between;align-items:flex-start;gap:.5rem}
+.faq-a{font-size:.75rem;color:#666;line-height:1.6;display:none}
+.faq-item.open .faq-a{display:block}
+.faq-item.open .faq-q .faq-arrow{transform:rotate(180deg)}
+.faq-arrow{font-size:.6rem;flex-shrink:0;transition:transform .2s;margin-top:2px}
+.faq-header{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#8b7355;padding-bottom:.65rem;border-bottom:1px solid #e8e0d8;margin-bottom:.85rem}
+.faq-wrap{position:relative;flex-shrink:0}
+.ig-link{display:flex;align-items:flex-start;gap:.5rem;text-decoration:none;color:#666;font-size:.82rem;line-height:1.5;transition:color .15s}
+.ig-link:hover{color:#8b7355}
+.ig-icon{width:22px;height:22px;flex-shrink:0;color:#8b7355;margin-top:.05rem}
+.filter-block{display:flex;flex-direction:row;align-items:center;gap:.35rem;flex-wrap:wrap}
+.filter-row{display:contents}
+.filter-row-label{font-size:.68rem;font-weight:600;color:#bbb;text-transform:uppercase;letter-spacing:.07em;white-space:nowrap}
+
+/* size buttons */
+.filter-btn{padding:.25rem .55rem;border:1px solid #d4c5b9;background:#fff;border-radius:.2rem;cursor:pointer;font-size:.72rem;color:#5a5a5a;transition:all .15s;flex-shrink:0;font-family:inherit}
+.filter-btn:hover{border-color:#8b7355;background:#faf6f2}
+.filter-btn.active{background:#8b7355;color:#fff;border-color:#8b7355}
+
+/* dropdowns */
+.filter-select{padding:.25rem 1.5rem .25rem .55rem;border:1px solid #d4c5b9;background:#fff;border-radius:.4rem;cursor:pointer;font-size:.78rem;color:#5a5a5a;font-family:inherit;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='5'%3E%3Cpath d='M0 0l4.5 5L9 0z' fill='%23bbb'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right .5rem center;transition:all .15s}
+.filter-select:focus{outline:none;border-color:#8b7355}
+.filter-select.has-val{border-color:#8b7355;color:#8b7355;font-weight:600}
+
+/* clearance checkbox */
+.clearance-wrap{display:flex;align-items:center;gap:.3rem;cursor:pointer;padding:.25rem .55rem;border:1px solid #d4c5b9;border-radius:.2rem;background:#fff;transition:all .15s;font-size:.78rem;color:#5a5a5a;user-select:none}
+.clearance-wrap:hover{border-color:#b84040;color:#b84040}
+.clearance-wrap.active{border-color:#b84040;background:#fff4f4;color:#b84040;font-weight:600}
+.clearance-wrap input{accent-color:#b84040;width:13px;height:13px;cursor:pointer}
+
+/* mobile filter toggle */
+.mobile-filter-btn{display:none;align-items:center;gap:.4rem;padding:.38rem .75rem;border:1px solid #d4c5b9;background:#fff;border-radius:.4rem;cursor:pointer;font-size:.8rem;color:#5a5a5a;font-family:inherit;flex-shrink:0;transition:all .15s}
+.mobile-filter-btn.open{border-color:#8b7355;color:#8b7355;background:#faf6f2}
+.mobile-filter-drawer{display:none;width:100%;padding:.5rem 0 .3rem}.mobile-filter-drawer.open{display:block}.mdf-row{display:flex;align-items:center;gap:.4rem;flex-wrap:wrap}.mdf-select{flex:1;min-width:90px;padding:.3rem .5rem;border:1px solid #d4c5b9;border-radius:.4rem;background:#fff;font-size:.78rem;color:#5a5a5a;font-family:inherit;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='5'%3E%3Cpath d='M0 0l4.5 5L9 0z' fill='%23bbb'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right .4rem center;padding-right:1.4rem}.mdf-select:focus{outline:none;border-color:#8b7355}.mdf-check{display:flex;align-items:center;gap:.3rem;font-size:.78rem;color:#5a5a5a;cursor:pointer;white-space:nowrap}.mdf-check input{accent-color:#8b7355;width:14px;height:14px}
+.mobile-filter-drawer.open{display:block}
+
+
+/* minimized */
+.header.min .header-logo{height:32px}
+.header.min .header-carousel{height:36px}
+.header.min .header-inner{padding:.4rem 1.25rem}
+
+/* ── RESULTS BAR ── */
+.results-bar{padding:.35rem 0 .5rem;display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
+.results-count{font-size:.75rem;color:#aaa}
+.results-count strong{color:#8b7355}
+.sort-note{font-size:.7rem;color:#ccc;font-style:italic;margin-left:auto}
+.active-filters{display:flex;gap:.3rem;flex-wrap:wrap}
+.active-filter-tag{display:inline-flex;align-items:center;gap:.25rem;padding:.15rem .45rem;background:#f5f0ea;border:1px solid #d4c5b9;border-radius:20px;font-size:.68rem;color:#8b7355;cursor:pointer}
+.active-filter-tag:hover{background:#e8ddd0}
+.active-filter-tag span{color:#bbb;font-size:.6rem}
+
+/* ── PAGE BODY ── */
+.page-body{max-width:1400px;margin:0 auto;display:flex;align-items:flex-start;gap:1.5rem;padding:.75rem 1rem 2rem}
+
+/* ── SIDEBAR FILTERS ── */
+.sidebar-filters{width:180px;flex-shrink:0;position:sticky;top:70px}
+.sf-section{margin-bottom:1.25rem}
+.sf-label{font-size:.68rem;font-weight:600;color:#bbb;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.5rem}
+.sf-options{display:flex;flex-direction:row;flex-wrap:wrap;gap:.3rem}
+.sf-btn{text-align:left;padding:.38rem .6rem;border:1px solid #e0d8d0;background:#fff;border-radius:.35rem;cursor:pointer;font-size:.8rem;color:#5a5a5a;font-family:inherit;transition:all .12s;width:auto;white-space:nowrap}
+.sf-btn:hover{border-color:#8b7355;color:#8b7355;background:#faf6f2}
+.sf-btn.active{background:#8b7355;color:#fff;border-color:#8b7355}
+.sf-check-label{display:flex;align-items:center;gap:.45rem;font-size:.8rem;color:#5a5a5a;cursor:pointer}
+.sf-check-label input{accent-color:#8b7355;width:14px;height:14px;cursor:pointer}
+
+/* ── GRID ── */
+.grid-wrap{flex:1;min-width:0;padding:0}
+.grid{column-count:1;column-gap:.75rem}
+@media(min-width:600px){.grid{column-count:2}}
+@media(min-width:780px){.grid{column-count:3}}
+@media(min-width:1100px){.grid{column-count:4}}
+
+/* ── CARD ── */
+.product-card{break-inside:avoid;margin-bottom:.75rem;background:#fff;border-radius:.5rem;overflow:hidden;border:1px solid #d4c5b9;box-shadow:0 1px 3px rgba(0,0,0,.04);transition:box-shadow .2s}
+.product-card:hover{box-shadow:0 4px 12px rgba(66,55,39,.12)}
+.clearance-card{border-color:#d4c5b9} /* same as regular card */
+.product-image{width:100%;height:auto;display:block}
+.product-details{padding:.8rem .85rem .95rem}
+.badges-row{display:flex;gap:.3rem;flex-wrap:wrap;margin-bottom:.4rem}
+
+/* badges */
+.badge{display:inline-block;font-size:.6rem;font-weight:700;padding:.1rem .38rem;border-radius:3px;text-transform:uppercase;letter-spacing:.04em}
+.badge-clearance{background:#b84040;color:#fff}
+.badge-sale{background:#b84040;color:#fff}
+.badge-low{display:inline-block;font-size:.72rem;background:#f5f1ed;padding:.25rem .5rem;border-radius:.2rem;color:#423727;border:1px solid #ddd6cc;font-weight:400;text-transform:none;letter-spacing:0}
+
+/* season tag — matches size badge style */
+.season-tag{display:inline-block;font-size:.72rem;background:#f5f1ed;padding:.25rem .5rem;border-radius:.2rem;color:#423727;border:1px solid #ddd6cc}
+.season-summer{} .season-winter{} .season-spring{} .season-all{}
+
+.product-name{font-size:.92rem;font-weight:600;margin-bottom:.4rem;color:#221c13;line-height:1.35}
+.price-row{display:flex;align-items:baseline;gap:.4rem;margin-bottom:.15rem;flex-wrap:wrap}
+.product-price{font-size:1rem;font-weight:600;color:#423727}
+.price-was{text-decoration:line-through;color:#bbb;font-size:.9rem;font-weight:400}
+.price-now{color:#b84040;font-weight:600;font-size:1rem}
+.bundle-price{font-size:.75rem;color:#8b7355;opacity:.85;margin-bottom:.4rem}
+.product-material{font-size:.72rem;color:#7a6a5a;margin-bottom:.45rem;opacity:.8}
+.sizes-label{font-size:.7rem;color:#8b7355;font-weight:500;margin-bottom:.28rem}
+.sizes-container{display:flex;flex-wrap:wrap;gap:.28rem}
+.size-badge{font-size:.72rem;background:#f5f1ed;padding:.25rem .5rem;border-radius:.2rem;color:#423727;border:1px solid #ddd6cc}
+.size-badge.out{display:none}
+.size-badge.pending{color:#c97c35;background:#fff8f0;border-color:#f5ddb8;font-size:.68rem}
+
+/* stock dots */
+.stock-wrap{display:flex;align-items:center;gap:.3rem;margin-bottom:.4rem}
+.sdot{width:5px;height:5px;border-radius:50%;background:#e8ddd0}
+.sdot.on{background:#8b7355}
+.sdot.on.lo{background:#c97c35}
+.stock-txt{font-size:.62rem;color:#bbb}
+.stock-txt.lo{color:#c97c35;font-weight:600}
+
+/* no results */
+.no-results{text-align:center;padding:4rem 1rem;color:#bbb;font-size:.88rem}
+
+/* footer */
+.footer{background:#fff;border-top:1px solid #e5e5e5;margin-top:1rem}
+.footer-inner{max-width:1400px;margin:0 auto;padding:1rem;font-size:.72rem;color:#aaa}
+
+/* ── MOBILE ── */
+@media(max-width:768px){
+ .filter-block{display:none}
+ .sidebar-filters{display:none} /* sidebar hidden on mobile — use drawer */
+ .mobile-filter-btn{display:flex}
+ .page-body{padding:.4rem .6rem 2rem;gap:0}
+ .header-inner{gap:.5rem;flex-wrap:nowrap}
+ .header-carousel{display:none}
+ .faq-btn{display:none}
+ .grid{column-count:1;column-gap:.5rem}
+ .grid-wrap{padding:0}
+ .product-details{padding:.6rem .65rem .75rem}
+ .product-name{font-size:.82rem}
+ .product-price,.price-now{font-size:.9rem}
+ /* bundle-price visible on mobile */
+ /* product-material visible on mobile */
+}
+@media(max-width:420px){
+ .grid{column-count:1}
+ .product-name{font-size:.78rem}
+}
+
+/* ── SHOPPING BAG ── */
+.bag-shipping-row{display:flex;align-items:center;justify-content:space-between;padding:.35rem 0;font-size:.75rem;color:var(--color-text-secondary,#666)}
+.bag-shipping-fee{font-weight:600;color:#221c13}
+.bag-zip-wrap{position:relative;margin-top:.35rem}
+.bag-zip-zone{position:absolute;right:.5rem;top:50%;transform:translateY(-50%);font-size:.6rem;font-weight:600;padding:.1rem .3rem;border-radius:3px;display:none}
+.bag-zip-zone.ca{background:#e8f4e8;color:#2d7a4a;display:block}
+.bag-zip-zone.west{background:#e8f0f8;color:#2a6db5;display:block}
+.bag-zip-zone.us{background:#f5f0e8;color:#8b7355;display:block}
+.bag-total-row{display:flex;justify-content:space-between;align-items:center;padding:.25rem 0;font-size:.78rem}
+.bag-total-row.grand{border-top:1px solid #e5e5e5;margin-top:.3rem;padding-top:.5rem}
+.bag-total-row.grand .bag-subtotal-label{font-weight:600;color:#221c13}
+.bag-total-row.grand .bag-subtotal-val{font-size:1.05rem;font-weight:700;color:#221c13}
+
+.contact-opt{padding:.28rem .7rem;border:1.5px solid #d4c5b9;border-radius:2rem;background:#fff;color:#7a6a5a;font-size:.72rem;font-weight:500;cursor:pointer;font-family:inherit;transition:all .15s}
+.contact-opt:hover{border-color:#8b7355;color:#5a4a3a}
+.contact-opt.active{border-color:#8b7355;background:#8b7355;color:#fff;font-weight:600}
+.bag-btn{position:relative;display:flex;align-items:center;gap:.35rem;padding:.35rem .7rem;border:1px solid #d4c5b9;background:#fff;border-radius:.4rem;cursor:pointer;font-size:.78rem;color:#5a5a5a;font-family:inherit;transition:all .15s;flex-shrink:0}
+.bag-btn:hover{border-color:#8b7355;color:#8b7355}
+.bag-count{font-weight:700;color:#8b7355}
+
+/* Bag drawer */
+.bag-overlay{position:fixed;inset:0;background:rgba(0,0,0,.25);z-index:400;display:none}
+.bag-overlay.open{display:block}
+.bag-drawer{position:fixed;top:0;right:0;width:min(420px,100vw);height:100vh;background:#fff;z-index:401;display:flex;flex-direction:column;box-shadow:-4px 0 24px rgba(0,0,0,.12);transform:translateX(100%);transition:transform .22s ease}
+.bag-drawer.open{transform:translateX(0)}
+.bag-head{display:flex;align-items:center;justify-content:space-between;padding:.85rem 1rem;border-bottom:1px solid #e5e5e5;flex-shrink:0}
+.bag-head h3{font-size:1rem;font-weight:600;color:#221c13}
+.bag-close{background:none;border:none;font-size:1.2rem;cursor:pointer;color:#aaa;padding:.2rem}
+.bag-items{flex:1;overflow-y:auto;padding:.75rem 1rem}
+.bag-empty{text-align:center;padding:3rem 1rem;color:#bbb;font-size:.85rem}
+.bag-item{display:flex;gap:.65rem;padding:.65rem 0;border-bottom:.5px solid #f0ebe5}
+.bag-item:last-child{border-bottom:none}
+.bag-item-img{width:60px;height:60px;object-fit:cover;border-radius:6px;flex-shrink:0;background:#f5f1ed}
+.bag-item-info{flex:1;min-width:0}
+.bag-item-name{font-size:.78rem;font-weight:600;color:#221c13;margin-bottom:.18rem;line-height:1.3}
+.bag-item-meta{font-size:.68rem;color:#8b7355;margin-bottom:.25rem}
+.bag-item-price{font-size:.75rem;color:#423727;font-weight:500}
+.bag-item-remove{background:none;border:none;cursor:pointer;color:#ccc;font-size:.8rem;padding:.2rem;flex-shrink:0;transition:color .15s}
+.bag-item-remove:hover{color:#b84040}
+
+/* Bundle banner */
+.bag-bundle{background:#faf6f2;border:1px solid #d4c5b9;border-radius:.4rem;padding:.5rem .75rem;margin:.5rem 0;font-size:.75rem;color:#8b7355;text-align:center;display:none}
+.bag-bundle.show{display:block}
+.bag-bundle strong{font-weight:600}
+
+/* Fulfillment */
+.bag-fulfillment{padding:.65rem 1rem;border-top:1px solid #e5e5e5;flex-shrink:0}
+.bag-fulfillment-title{font-size:.68rem;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:#bbb;margin-bottom:.45rem}
+.fulfillment-opts{display:flex;gap:.4rem;margin-bottom:.5rem;flex-wrap:wrap}
+.f-opt{flex:1;min-width:120px;padding:.4rem .6rem;border:1.5px solid #d4c5b9;border-radius:.4rem;cursor:pointer;font-size:.75rem;color:#5a5a5a;background:#fff;font-family:inherit;transition:all .15s;text-align:center}
+.f-opt:hover{border-color:#8b7355}
+.f-opt.active{border-color:#8b7355;background:#8b7355;color:#fff;font-weight:600}
+.bag-zip{width:100%;padding:.32rem .5rem;border:1px solid #d4c5b9;border-radius:.4rem;font-size:.78rem;font-family:inherit;display:none;box-sizing:border-box}
+.bag-zip.show{display:block}
+.bag-zip:focus{outline:none;border-color:#8b7355}
+
+/* Footer */
+.bag-footer{padding:.75rem 1rem;border-top:1px solid #e5e5e5;flex-shrink:0}
+.bag-subtotal{display:flex;justify-content:space-between;align-items:center;margin-bottom:.55rem}
+.bag-subtotal-label{font-size:.78rem;color:#aaa}
+.bag-subtotal-val{font-size:1.1rem;font-weight:700;color:#221c13}
+.bag-submit{width:100%;padding:.65rem;background:#8b7355;color:#fff;border:none;border-radius:.5rem;font-size:.85rem;font-weight:600;cursor:pointer;font-family:inherit;transition:background .15s}
+.bag-submit:hover{background:#7a6448}
+.bag-submit:disabled{background:#d4c5b9;cursor:not-allowed}
+.bag-copied{text-align:center;font-size:.7rem;color:#8b7355;margin-top:.4rem;min-height:1em;font-weight:500}
+
+/* Add to bag button on card */
+.add-to-bag-btn{width:100%;margin-top:.5rem;padding:.32rem;border:1px solid #d4c5b9;border-radius:.35rem;background:#fff;color:#8b7355;font-size:.72rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s}
+.add-to-bag-btn:hover{background:#8b7355;color:#fff;border-color:#8b7355}
+
+/* Product selector modal */
+.selector-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:500;display:none;align-items:center;justify-content:center;padding:1rem}
+.selector-overlay.open{display:flex}
+.selector-modal{background:#fff;border-radius:.75rem;padding:1.25rem;width:100%;max-width:360px;box-shadow:0 8px 32px rgba(0,0,0,.18)}
+.selector-modal h4{font-size:.92rem;font-weight:700;color:#221c13;margin-bottom:.15rem}
+.selector-subtitle{font-size:.72rem;color:#aaa;margin-bottom:.85rem}
+.sel-label{font-size:.65rem;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:#bbb;margin-bottom:.28rem;margin-top:.6rem;display:block}
+.sel-select{width:100%;padding:.38rem .5rem;border:1px solid #d4c5b9;border-radius:.4rem;font-size:.82rem;font-family:inherit;background:#fff;color:#221c13;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='5'%3E%3Cpath d='M0 0l4.5 5L9 0z' fill='%23bbb'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right .5rem center;padding-right:1.5rem}
+.sel-select:focus{outline:none;border-color:#8b7355}
+.sel-select option:disabled{color:#ccc}
+
+/* Custom color dropdown with swatches */
+.color-dropdown-wrap{position:relative;width:100%}
+.color-dropdown-trigger{width:100%;padding:.38rem .5rem;border:1px solid #d4c5b9;border-radius:.4rem;font-size:.82rem;font-family:inherit;background:#faf8f5;color:#221c13;cursor:pointer;display:flex;align-items:center;gap:.5rem;text-align:left}
+.color-dropdown-trigger:focus{outline:none;border-color:#8b7355}
+.color-dropdown-trigger .trigger-swatch{width:14px;height:14px;border-radius:3px;border:1px solid rgba(0,0,0,.12);flex-shrink:0}
+.color-dropdown-trigger .trigger-caret{margin-left:auto;color:#bbb;font-size:.65rem}
+.color-dropdown-list{position:absolute;top:calc(100% + 4px);left:0;right:0;background:#fff;border:1px solid #d4c5b9;border-radius:.4rem;box-shadow:0 4px 16px rgba(0,0,0,.1);z-index:200;max-height:220px;overflow-y:auto;display:none}
+.color-dropdown-list.open{display:block}
+.color-dropdown-opt{display:flex;align-items:center;gap:.5rem;padding:.38rem .55rem;font-size:.8rem;cursor:pointer;color:#221c13;transition:background .12s}
+.color-dropdown-opt:hover{background:#f5f1ed}
+.color-dropdown-opt.selected{background:#f0ebe4;font-weight:600}
+.color-dropdown-opt.disabled{color:#bbb;cursor:default;font-style:italic}
+.color-dropdown-opt.disabled:hover{background:none}
+.color-dropdown-opt .opt-swatch{width:14px;height:14px;border-radius:3px;border:1px solid rgba(0,0,0,.12);flex-shrink:0}
+.selector-btns{display:flex;gap:.5rem;margin-top:1rem}
+.sel-cancel{flex:1;padding:.45rem;border:1px solid #d4c5b9;border-radius:.4rem;background:#fff;color:#aaa;font-size:.8rem;cursor:pointer;font-family:inherit}
+.sel-add{flex:2;padding:.45rem;border:none;border-radius:.4rem;background:#8b7355;color:#fff;font-size:.8rem;font-weight:600;cursor:pointer;font-family:inherit;transition:background .15s}
+.sel-add:hover{background:#7a6448}
+.sel-add:disabled{background:#d4c5b9;cursor:not-allowed}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header" id="header">
+ <div class="header-inner">
+ <!-- Logo — always fixed left -->
+ <img src="https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/LittleBasics.png" alt="Little Basics" class="header-logo">
+
+ <!-- Rotating carousel — two slides -->
+ <div class="header-carousel">
+ <div class="carousel-track" id="carouselTrack">
+
+ <!-- Slide 1: Info + IG -->
+ <div class="carousel-slide">
+ <div class="carousel-item">
+ <strong>Bundle:</strong>&nbsp;5+ items = bundle pricing
+ </div>
+ <div class="carousel-item" style="color:#d4c5b9">|</div>
+ <div class="carousel-item">
+ Local pickup · Culver City &nbsp;|&nbsp; Shipping available
+ </div>
+ <div class="carousel-item" style="color:#d4c5b9">|</div>
+ <div class="carousel-item">
+ <a href="https://www.instagram.com/little_basics_la/" target="_blank">
+ <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r=".5" fill="currentColor" stroke="none"/></svg>
+ <strong>@little_basics_la</strong>
+ </a>
+ </div>
+ </div>
+
+ <!-- Slide 2: How to order steps -->
+ <div class="carousel-slide" style="justify-content:center">
+ <div class="carousel-item" style="gap:.5rem">
+ <div class="carousel-step"><div class="carousel-step-num">1</div><div class="carousel-step-text">Pick size &amp; color</div></div>
+ <div class="carousel-arrow">→</div>
+ <div class="carousel-step"><div class="carousel-step-num">2</div><div class="carousel-step-text">Add to bag</div></div>
+ <div class="carousel-arrow">→</div>
+ <div class="carousel-step"><div class="carousel-step-num">3</div><div class="carousel-step-text">Submit order</div></div>
+ <div class="carousel-arrow">→</div>
+ <div class="carousel-step"><div class="carousel-step-num">4</div><div class="carousel-step-text">We confirm</div></div>
+ </div>
+ </div>
+
+ </div>
+ </div>
+
+ <!-- FAQ button with dropdown -->
+ <div class="faq-wrap">
+ <button class="faq-btn" onclick="toggleFAQ()" id="faqBtn">FAQ ▾</button>
+ <div class="faq-panel" id="faqPanel">
+ <div class="faq-panel-inner">
+ <div class="faq-header">Frequently Asked Questions</div>
+
+ <div class="faq-item">
+ <div class="faq-q" onclick="toggleFAQItem(this)">How do I place an order? <span class="faq-arrow">▾</span></div>
+ <div class="faq-a">Browse the catalog, add items to your bag by selecting size and color, then hit "Submit Order Draft." We'll receive your request, confirm what's available, and send you payment details via DM. Easy!</div>
+ </div>
+
+ <div class="faq-item">
+ <div class="faq-q" onclick="toggleFAQItem(this)">What is the bundle price? <span class="faq-arrow">▾</span></div>
+ <div class="faq-a">Add 5 or more items to your bag and the bundle price automatically applies to eligible items. The bundle price is shown on each product card. Mix and match any styles!</div>
+ </div>
+
+ <div class="faq-item">
+ <div class="faq-q" onclick="toggleFAQItem(this)">Do you have a size chart? <span class="faq-arrow">▾</span></div>
+ <div class="faq-a">No — but for good reason. Every child is unique. We offer a measuring service upon request, using the actual items you'll receive. No more guessing games.</div>
+ </div>
+
+ <div class="faq-item">
+ <div class="faq-q" onclick="toggleFAQItem(this)">Where do the items come from? Do you sew them yourself? <span class="faq-arrow">▾</span></div>
+ <div class="faq-a">Can't sew a stitch — so you're safe from my creations! Instead, I carefully source from certified vendors who specialize in quality baby and kids clothing. Every item is personally reviewed before it makes it to the catalog. Questions? Just DM me!</div>
+ </div>
+
+ <div class="faq-item">
+ <div class="faq-q" onclick="toggleFAQItem(this)">Why can't I purchase directly from the catalog? <span class="faq-arrow">▾</span></div>
+ <div class="faq-a">Two reasons, both in your favor. First, I sell across a few platforms and manually confirming each order means I never accidentally sell something that's already gone — no surprise cancellations on your end. Second, skipping a built-in checkout means skipping the platform fees that get baked into most online shop prices. That one extra step of sending a message is how I keep prices honest. I think that's a trade worth making.</div>
+ </div>
+
+ <div class="faq-item">
+ <div class="faq-q" onclick="toggleFAQItem(this)">Can I pick up locally or view items in person? <span class="faq-arrow">▾</span></div>
+ <div class="faq-a">Yes! We can schedule an in-person viewing Monday–Friday, 10am–3pm on most days. Contact-free pickup is also available 24/7. Select "Local Pickup" in your bag and we'll coordinate the details via DM.</div>
+ </div>
+
+ <div class="faq-item">
+ <div class="faq-q" onclick="toggleFAQItem(this)">How does shipping work? <span class="faq-arrow">▾</span></div>
+ <div class="faq-a">We ship across the US. Estimated shipping is calculated in your bag based on your ZIP code. California orders typically arrive in 2–4 days. Final shipping cost is confirmed when we finalize your order. All shipped orders include tracking!</div>
+ </div>
+
+ <div class="faq-item">
+ <div class="faq-q" onclick="toggleFAQItem(this)">What payment methods do you accept? <span class="faq-arrow">▾</span></div>
+ <div class="faq-a">We accept Venmo, Zelle, PayPal, and cash (for local pickup). Payment details are sent after we confirm your order.</div>
+ </div>
+
+ <div class="faq-item">
+ <div class="faq-q" onclick="toggleFAQItem(this)">What if my size is sold out? <span class="faq-arrow">▾</span></div>
+ <div class="faq-a">Little Basics restocks monthly! Follow us on Instagram <a href="https://www.instagram.com/little_basics_la/" target="_blank" style="color:#8b7355">@little_basics_la</a> for the latest restock announcements and new arrival updates.</div>
+ </div>
+
+ <div class="faq-item">
+ <div class="faq-q" onclick="toggleFAQItem(this)">Can I return or exchange? <span class="faq-arrow">▾</span></div>
+ <div class="faq-a">Returns and exchanges are accepted within 2 weeks of purchase for unused, brand new items. Buyers are responsible for return shipping. If you have an issue, DM us — we're always happy to work out a solution together.</div>
+ </div>
+
+ <div class="faq-item">
+ <div class="faq-q" onclick="toggleFAQItem(this)">How do I know if my order went through? <span class="faq-arrow">▾</span></div>
+ <div class="faq-a">After submitting your order draft, we receive your order instantly. We'll reach out via Instagram or Facebook DM within 24 hours to confirm availability and send payment details. No extra steps needed from you!</div>
+ </div>
+
+ <div class="faq-item">
+ <div class="faq-q" onclick="toggleFAQItem(this)">Do you do wholesale? <span class="faq-arrow">▾</span></div>
+ <div class="faq-a">Yes! I want these clothes to reach as many families as possible. DM us for more details.</div>
+ </div>
+
+ <div class="faq-item">
+ <div class="faq-q" onclick="toggleFAQItem(this)">Who are you? Why are you selling children's clothes? <span class="faq-arrow">▾</span></div>
+ <div class="faq-a">A mom who got tired of choosing between cute and affordable — so I did something about it. I spent months researching and testing vendors to find cotton clothing that's genuinely safe, comfortable, and won't break the bank. The response surprised me — strangers started stopping us to ask where my son's outfits were from. That's when I knew other families needed this too. Little Basics exists for you.</div>
+ </div>
+ </div>
+ </div>
+ </div>
+
+ <!-- Desktop filters (hidden — replaced by sidebar) -->
+ <div class="filter-block" id="desktopFilters" style="display:none">
+ <!-- Size -->
+ <div class="filter-row">
+ <span class="filter-row-label">Size</span>
+ <button class="filter-btn active" data-sz="all" onclick="setSize(this)">All</button>
+ <button class="filter-btn" data-sz="3-6M" onclick="setSize(this)">3-6M</button>
+ <button class="filter-btn" data-sz="6-12M" onclick="setSize(this)">6-12M</button>
+ <button class="filter-btn" data-sz="12-24M" onclick="setSize(this)">12-24M</button>
+ <button class="filter-btn" data-sz="2T" onclick="setSize(this)">2T</button>
+ <button class="filter-btn" data-sz="3T" onclick="setSize(this)">3T</button>
+ <button class="filter-btn" data-sz="4T" onclick="setSize(this)">4T</button>
+ <button class="filter-btn" data-sz="5T" onclick="setSize(this)">5T</button>
+ </div>
+ <!-- Type + Season + Clearance -->
+ <div class="filter-row">
+ <span class="filter-row-label">Filter</span>
+ <select class="filter-select" id="catSelect" onchange="render()">
+ <option value="">All Types</option>
+ <option value="Tops">Tops</option>
+ <option value="Bottoms">Bottoms</option>
+ <option value="Rompers & Sets">Rompers & Sets</option>
+ <option value="Outerwear & Knitwear">Outerwear & Knitwear</option>
+ </select>
+ <select class="filter-select" id="seasonSelect" onchange="render()">
+ <option value="">All Seasons</option>
+ <option value="Summer">Summer</option>
+ <option value="Winter">Winter</option>
+ <option value="Spring/Autumn">Spring / Autumn</option>
+ <option value="All Season">All Season</option>
+ </select>
+ <label class="clearance-wrap" id="clearanceWrap">
+ <input type="checkbox" id="clearanceCheck" onchange="render()">
+ Clearance only
+ </label>
+ </div>
+ </div>
+
+ <!-- Bag button -->
+ <button class="bag-btn" onclick="openBag()" style="margin-left:auto">
+ Bag (<span id="bagCount">0</span>)
+ </button>
+
+ <!-- Mobile filter toggle -->
+ <button class="mobile-filter-btn" id="mobileFilterBtn" onclick="toggleMobileFilters()">
+ <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/></svg>
+ Filter
+ </button>
+
+ <!-- Mobile filter drawer -->
+ <div class="mobile-filter-drawer" id="mobileDrawer">
+ <div class="mdf-row">
+ <select class="mdf-select" id="mSizeSelect" onchange="setMSize(this.value)">
+ <option value="all">All Sizes</option>
+ <option value="3-6M">3–6M</option>
+ <option value="6-12M">6–12M</option>
+ <option value="12-24M">12–24M</option>
+ <option value="2T">2T</option>
+ <option value="3T">3T</option>
+ <option value="4T">4T</option>
+ <option value="5T">5T</option>
+ </select>
+ <select class="mdf-select" id="mCatSelect" onchange="setMCat(null, this.value)">
+ <option value="">All Types</option>
+ <option value="Tops">Tops</option>
+ <option value="Bottoms">Bottoms</option>
+ <option value="Rompers & Sets">Rompers &amp; Sets</option>
+ <option value="Outerwear & Knitwear">Outerwear &amp; Knitwear</option>
+ </select>
+ <select class="mdf-select" id="mSeasonSelect" onchange="setMSeason(null, this.value)">
+ <option value="">All Seasons</option>
+ <option value="Summer">Summer</option>
+ <option value="Spring/Autumn">Spring / Autumn</option>
+ <option value="Winter">Winter</option>
+ </select>
+ <label class="mdf-check">
+ <input type="checkbox" id="clearanceCheckM" onchange="render()"> Clearance
+ </label>
+ </div>
+ </div>
+
+ </div>
+</div>
+
+<!-- PAGE BODY: sidebar filters + grid -->
+<div class="page-body">
+
+ <!-- LEFT SIDEBAR FILTERS (desktop) -->
+ <aside class="sidebar-filters" id="sidebarFilters">
+ <div class="sf-section">
+ <div class="sf-label">Size</div>
+ <div class="sf-options">
+ <button class="sf-btn active" data-sz="all" onclick="setSize(this)">All Sizes</button>
+ <button class="sf-btn" data-sz="3-6M" onclick="setSize(this)">3–6M</button>
+ <button class="sf-btn" data-sz="6-12M" onclick="setSize(this)">6–12M</button>
+ <button class="sf-btn" data-sz="12-24M" onclick="setSize(this)">12–24M</button>
+ <button class="sf-btn" data-sz="2T" onclick="setSize(this)">2T</button>
+ <button class="sf-btn" data-sz="3T" onclick="setSize(this)">3T</button>
+ <button class="sf-btn" data-sz="4T" onclick="setSize(this)">4T</button>
+ <button class="sf-btn" data-sz="5T" onclick="setSize(this)">5T</button>
+ </div>
+ </div>
+ <div class="sf-section">
+ <div class="sf-label">Type</div>
+ <div class="sf-options">
+ <button class="sf-btn active" data-cat="" onclick="setSFCat(this,'')">All Types</button>
+ <button class="sf-btn" data-cat="Tops" onclick="setSFCat(this,'Tops')">Tops</button>
+ <button class="sf-btn" data-cat="Bottoms" onclick="setSFCat(this,'Bottoms')">Bottoms</button>
+ <button class="sf-btn" data-cat="Rompers & Sets" onclick="setSFCat(this,'Rompers & Sets')">Rompers &amp; Sets</button>
+ <button class="sf-btn" data-cat="Outerwear & Knitwear" onclick="setSFCat(this,'Outerwear & Knitwear')">Outerwear &amp; Knitwear</button>
+ </div>
+ </div>
+ <div class="sf-section">
+ <div class="sf-label">Season</div>
+ <div class="sf-options">
+ <button class="sf-btn active" data-season="" onclick="setSFSeason(this,'')">All Seasons</button>
+ <button class="sf-btn" data-season="Summer" onclick="setSFSeason(this,'Summer')">Summer</button>
+ <button class="sf-btn" data-season="Spring/Autumn" onclick="setSFSeason(this,'Spring/Autumn')">Spring / Autumn</button>
+ <button class="sf-btn" data-season="Winter" onclick="setSFSeason(this,'Winter')">Winter</button>
+ </div>
+ </div>
+ <div class="sf-section">
+ <label class="sf-check-label">
+ <input type="checkbox" id="sfClearance" onchange="render()"> Clearance
+ </label>
+ </div>
+ </aside>
+
+ <!-- GRID -->
+ <div class="grid-wrap">
+ <div class="results-bar">
+ <div class="results-count" id="resultsCount"></div>
+ <div class="active-filters" id="activeFilters"></div>
+ <div class="sort-note" id="sortNote"></div>
+ </div>
+ <div class="grid" id="productGrid">
+ <div class="no-results">Loading products…</div>
+ </div>
+ </div>
+
+</div>
+
+
+<!-- BAG OVERLAY -->
+
+<!-- VACATION NOTICE -->
+<div class="bag-overlay" id="bagOverlay" onclick="closeBag()"></div>
+
+<!-- BAG DRAWER -->
+<div class="bag-drawer" id="bagDrawer">
+ <div class="bag-head">
+ <h3>Shopping Bag</h3>
+ <button class="bag-close" onclick="closeBag()"></button>
+ </div>
+ <div style="padding:.6rem 1rem .5rem;border-bottom:1px solid #e5e5e5;flex-shrink:0">
+  <div style="font-size:.65rem;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:#bbb;margin-bottom:.5rem">How can we reach you? <span style="color:#c0392b">*</span></div>
+
+  <!-- Full Name -->
+  <div style="margin-bottom:.4rem">
+    <label style="font-size:.62rem;color:#aaa;display:block;margin-bottom:.18rem">Full Name <span style="color:#c0392b">*</span></label>
+    <input id="bagCustomerName" placeholder="e.g. Jessica Smith" style="width:100%;padding:.32rem .45rem;border:1px solid #d4c5b9;border-radius:.4rem;font-size:.78rem;font-family:inherit;box-sizing:border-box" oninput="updateSubmitBtn()">
+  </div>
+
+  <!-- Contact method selector -->
+  <div style="margin-bottom:.4rem">
+    <label style="font-size:.62rem;color:#aaa;display:block;margin-bottom:.28rem">Best way to reach you <span style="color:#c0392b">*</span></label>
+    <div style="display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.35rem">
+      <button type="button" class="contact-opt" data-platform="Instagram" onclick="selectContactMethod(this)">Instagram</button>
+      <button type="button" class="contact-opt" data-platform="Facebook" onclick="selectContactMethod(this)">Facebook</button>
+      <button type="button" class="contact-opt" data-platform="Email" onclick="selectContactMethod(this)">Email</button>
+    </div>
+    <div id="bagContactInputWrap" style="display:none">
+      <input id="bagContactInput" placeholder="" style="width:100%;padding:.32rem .45rem;border:1px solid #d4c5b9;border-radius:.4rem;font-size:.78rem;font-family:inherit;box-sizing:border-box" oninput="updateSubmitBtn()">
+    </div>
+  </div>
+
+  <!-- Hidden fields for JS compatibility -->
+  <input type="hidden" id="bagCustomerHandle">
+  <input type="hidden" id="bagContact">
+  <input type="hidden" id="bagPlatform">
+ </div>
+ <div class="bag-items" id="bagItems">
+ <div class="bag-empty">Your bag is empty.<br>Add items from the catalog!</div>
+ </div>
+ <div class="bag-bundle" id="bagBundle">
+ <strong>Bundle price unlocked!</strong> 5+ items — bundle pricing applied.
+ </div>
+ <div class="bag-fulfillment">
+ <div class="bag-fulfillment-title">Fulfillment</div>
+ <div class="fulfillment-opts">
+ <button class="f-opt active" id="fOptPickup" onclick="setFulfillment('pickup')">Local Pickup</button>
+ <button class="f-opt" id="fOptShip" onclick="setFulfillment('shipping')">Shipping</button>
+ </div>
+ <div id="bagShipDetails" style="display:none">
+ <input class="bag-zip show" id="bagAddr1" placeholder="Street address" style="margin-top:.35rem">
+ <input class="bag-zip show" id="bagAddr2" placeholder="Apt / Unit (optional)" style="margin-top:.35rem">
+ <div style="display:flex;gap:.4rem;margin-top:.35rem">
+ <input class="bag-zip show" id="bagCity" placeholder="City" style="flex:2;margin-top:0">
+ <input class="bag-zip show" id="bagState" placeholder="State" style="flex:1;margin-top:0" maxlength="2">
+ <input class="bag-zip show" id="bagZip" placeholder="ZIP" oninput="updateBagTotal()" maxlength="5" style="flex:1;margin-top:0">
+ </div>
+ <div class="bag-shipping-row" id="bagShipRow" style="display:none">
+ <span>Estimated shipping</span>
+ <span class="bag-shipping-fee" id="bagShipFee"></span>
+ </div>
+ </div>
+ </div>
+ <div class="bag-footer">
+ <div class="bag-total-row">
+ <span class="bag-subtotal-label">Items subtotal</span>
+ <span id="bagSubtotal">$0.00</span>
+ </div>
+ <div class="bag-total-row" id="bagShipTotalRow" style="display:none">
+ <span class="bag-subtotal-label">Shipping</span>
+ <span id="bagShipTotal" class="bag-shipping-fee"></span>
+ </div>
+ <div class="bag-total-row" id="bagTaxRow" style="display:none">
+ <span class="bag-subtotal-label">Sales Tax (10.25% CA)</span>
+ <span id="bagTaxTotal" class="bag-shipping-fee"></span>
+ </div>
+ <div class="bag-total-row grand">
+ <span class="bag-subtotal-label">Total</span>
+ <span class="bag-subtotal-val" id="bagGrandTotal">$0.00</span>
+ </div>
+ <div style="font-size:.72rem;color:#8b7355;text-align:center;line-height:1.5;margin-bottom:.5rem;padding:.4rem .5rem;background:#faf6f2;border-radius:.4rem;border:1px solid #e8ddd4">
+ Let us know what you need — we'll check inventory and finalize your order.
+ </div>
+ <button class="bag-submit" id="bagSubmit" onclick="submitBag()" disabled>Submit Order Draft</button>
+ <div class="bag-confirm" id="bagConfirm" style="display:none;text-align:center;padding:.75rem .5rem;background:#faf6f2;border-radius:.4rem;border:1px solid #e8ddd4"></div>
+ </div>
+</div>
+
+<!-- PRODUCT SELECTOR MODAL -->
+<div class="selector-overlay" id="selectorOverlay">
+ <div class="selector-modal">
+ <h4 id="selProductName"></h4>
+ <div class="selector-subtitle" id="selProductPrice"></div>
+ <span class="sel-label">Size</span>
+ <select class="sel-select" id="selSize" onchange="updateColorOptions()"></select>
+ <span class="sel-label">Color / Pattern</span>
+ <div class="color-dropdown-wrap" id="colorDropWrap">
+   <button type="button" class="color-dropdown-trigger" id="colorDropTrigger" onclick="toggleColorDrop()">
+     <span class="trigger-swatch" id="triggerSwatch"></span>
+     <span id="triggerLabel">Select color</span>
+     <span class="trigger-caret">▼</span>
+   </button>
+   <div class="color-dropdown-list" id="colorDropList"></div>
+ </div>
+ <input type="hidden" id="selColor" value="">
+ <div class="selector-btns">
+ <button class="sel-cancel" onclick="closeSelector()">Cancel</button>
+ <button class="sel-add" id="selAdd" onclick="confirmAddToBag()">Add to Bag</button>
+ </div>
+ </div>
+</div>
+<footer class="footer">
+ <div class="footer-inner">Little Basics is part of Epic Layers Inc.</div>
+</footer>
+
+<script>
+const SHEET_URL = 'https://script.google.com/macros/s/AKfycbzolrTY0hQLzMLZI6vfjl2Y6rMoB28QnLQ2JGIsVfZyoUxLqT4ttwt4sDB_GH01pPer/exec';
+
+const SIZE_TO_CM = {'3-6M':'60','6-12M':'70','12-24M':'80','2T':'90','3T':'100','4T':'110','5T':'120','130':'130'};
+const CM_TO_SIZE = {'60':'3-6M','70':'6-12M','80':'12-24M','90':'2T','100':'3T','110':'4T','120':'5T','130':'130'};
+
+// Detect clearance/sale in product name
+function isClearance(p){
+ const n = (p.name||'').toLowerCase();
+ return n.includes('clearance') || n.includes('additional $') || n.includes('additional $') || (p.saleDiscount||0) > 0;
+}
+
+// Derive category from name keywords if not set
+function deriveCategory(p){
+ if(p.category && p.category !== 'Uncategorized') return p.category;
+ const n = p.name.toLowerCase();
+ if(/cardigan|knitwear|knit|jacket|padded|reversib|sweatshirt|sweater|fleece suit|fleece sweat/.test(n)) return 'Outerwear & Knitwear';
+ if(/romper|overall|suit|set/.test(n)) return 'Rompers & Sets';
+ if(/pant|legging|short|bottom/.test(n)) return 'Bottoms';
+ if(/shirt|top|sleeve|tee/.test(n)) return 'Tops';
+ return 'Uncategorized';
+}
+
+// Derive season from name/material keywords if not set
+function deriveSeason(p){
+ if(p.season && p.season.trim()){
+   // Clean up vendor-style separators (Japanese comma、etc)
+   return p.season.trim().replace(/[、，]/g, '/');
+ }
+ const n = (p.name+' '+(p.material||'')).toLowerCase();
+ if(/fleece|padded|quilted|knit|wool|warm|winter/.test(n)) return 'Winter';
+ if(/muslin|linen|sleeveless|terry|summer/.test(n)) return 'Summer';
+ if(/sweatshirt|sweater/.test(n)) return 'Spring/Autumn';
+ return '';
+}
+
+function seasonClass(s){
+ const sl = (s||'').toLowerCase();
+ if(sl.includes('summer')) return 'season-summer';
+ if(sl.includes('winter')) return 'season-winter';
+ if(sl.includes('spring') || sl.includes('autumn')) return 'season-spring';
+ if(sl.includes('all')) return 'season-all';
+ return '';
+}
+
+/* ── FALLBACK PRODUCTS ── */
+const FALLBACK = [
+ {id:1, name:"Cotton Waffle Overall", price:14, bundlePrice:12, sizes:["6-12M"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/6.jpg", category:"Rompers & Sets"},
+ {id:2, name:"Cotton Linen Kimono Overall", price:12, bundlePrice:10, sizes:["6-12M","12-24M","2T"], material:"Cotton Linen", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/28.jpg", category:"Rompers & Sets"},
+ {id:3, name:"Ruffle Cotton Romper, Clearance $4 off", price:14, bundlePrice:12, sizes:["2T"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/11.jpg", category:"Rompers & Sets"},
+ {id:4, name:"Cotton Long Sleeve Shirt", price:12, bundlePrice:10, sizes:["3-6M","6-12M","12-24M","2T"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/68.jpg", category:"Tops"},
+ {id:5, name:"Embroidered Cotton Floral Romper", price:18, bundlePrice:16, sizes:["3-6M","12-24M","2T"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/19.jpg", category:"Rompers & Sets"},
+ {id:6, name:"Cotton Muslin Romper", price:14, bundlePrice:12, sizes:["6-12M","12-24M"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/18.jpg", category:"Rompers & Sets"},
+ {id:7, name:"Lightweight Cotton Terry Solid Romper, Clearance $4 off", price:14, bundlePrice:12, sizes:["3-6M","6-12M"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/27.jpg", category:"Rompers & Sets"},
+ {id:8, name:"Smile Cotton Long Sleeve Shirt with Stripes", price:10, bundlePrice:9, sizes:["12-24M","2T"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/2.jpg", category:"Tops"},
+ {id:9, name:"Solid Cotton Long Sleeve", price:10, bundlePrice:9, sizes:["6-12M","12-24M","3T","4T","5T"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/3.jpg", category:"Tops"},
+ {id:10, name:"Solid Cotton Long Sleeve", price:12, bundlePrice:10, sizes:["6-12M","12-24M","2T","3T","4T"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/12.jpg", category:"Tops"},
+ {id:11, name:"Striped Cotton Long Sleeve Shirt with buttons", price:14, bundlePrice:12, sizes:["6-12M"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/9.jpg", category:"Tops"},
+ {id:12, name:"Cotton Long Sleeve Bear Shirt", price:11, bundlePrice:9, sizes:["6-12M","12-24M"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/17.jpg", category:"Tops"},
+ {id:13, name:"Striped Cotton Sweatshirts", price:18, bundlePrice:16, sizes:["6-12M","12-24M","2T","3T","4T","5T"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/16.jpg", category:"Outerwear & Knitwear"},
+ {id:14, name:"Scalloped Cotton Knitted Cardigan", price:24, bundlePrice:22, sizes:["3-6M","6-12M","12-24M","2T","3T"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/7.jpg", category:"Outerwear & Knitwear"},
+ {id:15, name:"Ruffled Cotton Muslin Pants", price:12, bundlePrice:10, sizes:["3-6M","6-12M","12-24M","2T","3T"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/1.jpg", category:"Bottoms"},
+ {id:16, name:"Ruffled Cotton Denim Romper, Clearance $4 off", price:14, bundlePrice:12, sizes:["6-12M","12-24M","2T"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/5.jpg", category:"Rompers & Sets"},
+ {id:17, name:"Cotton Fleece Leggings, additional $3 off!", price:12, bundlePrice:10, sizes:["6-12M","12-24M","2T","3T","4T","5T"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/14.jpg", category:"Bottoms"},
+ {id:18, name:"Striped Pants", price:14, bundlePrice:12, sizes:["6-12M","12-24M"], material:"Cotton Linen", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/13.jpg", category:"Bottoms"},
+ {id:19, name:"Open Back Cotton Lace Set", price:18, bundlePrice:16, sizes:["12-24M","2T"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/4.jpg", category:"Rompers & Sets"},
+ {id:20, name:"Embroidered Cotton Fleece Suit, additional $5 off", price:24, bundlePrice:22, sizes:["6-12M","12-24M","2T","4T"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/8.jpg", category:"Rompers & Sets"},
+ {id:21, name:"Solid Cotton Track Suit", price:24, bundlePrice:22, sizes:["3-6M","6-12M","2T","4T"], material:"95% Organic Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/10.jpg", category:"Rompers & Sets"},
+ {id:22, name:"Striped Pants", price:14, bundlePrice:12, sizes:["2T","3T","4T","5T"], material:"Cotton Linen", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/26.jpg", category:"Bottoms"},
+ {id:23, name:"Solid Cotton Knit Sweater, additional $5 off!", price:22, bundlePrice:20, sizes:["2T","3T","4T","5T"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/25.jpg", category:"Outerwear & Knitwear"},
+ {id:24, name:"Cropped Striped Pants", price:16, bundlePrice:14, sizes:["12-24M","2T","3T","4T","5T"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/21.jpg", category:"Bottoms"},
+ {id:25, name:"Cotton Solid Sweatshirt, Clearance $4 off", price:20, bundlePrice:18, sizes:["12-24M","2T","3T","4T","5T"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/23.jpg", category:"Outerwear & Knitwear"},
+ {id:26, name:"Cotton Solid Pants", price:18, bundlePrice:16, sizes:["6-12M","12-24M","2T"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/22.jpg", category:"Bottoms"},
+ {id:27, name:"Striped Cotton Fleeced Sweatshirt, additional $5 off!", price:22, bundlePrice:20, sizes:["12-24M","2T","3T","4T","5T"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/32.jpg", category:"Outerwear & Knitwear"},
+ {id:28, name:"Cotton Light Fleeced Leggings, additional $3 off", price:10, bundlePrice:9, sizes:["2T","3T","5T"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/33.jpg", category:"Bottoms"},
+ {id:29, name:"Cotton Knot Leggings", price:9, bundlePrice:8, sizes:["3-6M","6-12M","12-24M"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/34.jpg", category:"Bottoms"},
+ {id:30, name:"Cotton Sleeveless Romper, Clearance $4 off", price:14, bundlePrice:12, sizes:["3-6M"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/35.jpg", category:"Rompers & Sets"},
+ {id:31, name:"Cotton Romper Shirt Set, Clearance $4 off", price:15, bundlePrice:13, sizes:["3-6M"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/36.jpg", category:"Rompers & Sets"},
+ {id:33, name:"Solid Cotton Muslin Pants", price:12, bundlePrice:10, sizes:["6-12M","12-24M"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/38.jpg", category:"Bottoms"},
+ {id:34, name:"Cotton Denim Jacket", price:20, bundlePrice:18, sizes:["12-24M","2T"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/63.jpg", category:"Outerwear & Knitwear"},
+ {id:35, name:"Cotton Knit Animal Cardigan", price:24, bundlePrice:22, sizes:["3-6M","6-12M"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/66.jpg", category:"Outerwear & Knitwear"},
+ {id:36, name:"Cotton Rainbow Suit", price:16, bundlePrice:14, sizes:["6-12M","12-24M","2T","3T"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/43.jpg", category:"Rompers & Sets"},
+ {id:37, name:"Cotton Embroidered Floral Romper", price:18, bundlePrice:15, sizes:["12-24M","2T"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/60.jpg", category:"Rompers & Sets"},
+ {id:38, name:"Cotton Embroidered Floral Romper", price:18, bundlePrice:16, sizes:["12-24M","2T"], material:"Cotton Linen", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/40.jpg", category:"Rompers & Sets"},
+ {id:39, name:"Cotton Reverseable Cardigan", price:20, bundlePrice:18, sizes:["6-12M","12-24M","2T","3T","4T"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/54.jpg", category:"Outerwear & Knitwear"},
+ {id:41, name:"Cotton Waffle Long Sleeve Overall, Clearance $4 off", price:18, bundlePrice:16, sizes:["3-6M","6-12M"], material:"95% Cotton Outer", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/20.jpg", category:"Rompers & Sets"},
+ {id:43, name:"Cotton Stripes Shirt with Elbow Patches", price:12, bundlePrice:10, sizes:["6-12M","12-24M","2T","3T","4T"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/51.jpg", category:"Tops"},
+ {id:44, name:"Cotton Citrus Suit", price:18, bundlePrice:16, sizes:["2T","3T"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/46.jpg", category:"Rompers & Sets"},
+ {id:47, name:"Cotton Padded Reversible Sweatshirt with Pocket, additional $4 off", price:22, bundlePrice:20, sizes:["12-24M"], material:"100% Cotton Outer", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/49.jpg", category:"Outerwear & Knitwear"},
+ {id:48, name:"Cotton Striped Leggings with Knee Patch", price:10, bundlePrice:8, sizes:["3-6M","6-12M"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/50.jpg", category:"Bottoms"},
+ {id:49, name:"Quilt Padded Pants, additional $4 off", price:12, bundlePrice:10, sizes:["2T","3T"], material:"Nylon outer with cotton inner", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/55.jpg", category:"Bottoms"},
+ {id:51, name:"Cotton Muslin Romper", price:14, bundlePrice:12, sizes:["6-12M"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/44.jpg", category:"Rompers & Sets"},
+ {id:52, name:"Cotton Demin Hooded Jacket", price:20, bundlePrice:18, sizes:["3T"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/42.jpg", category:"Outerwear & Knitwear"},
+ {id:53, name:"Cotton Solid Pants with footies, Clearance $4 off", price:12, bundlePrice:10, sizes:["3-6M","6-12M"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/41.jpg", category:"Bottoms"},
+ {id:54, name:"Cotton Striped Smile Shirt", price:7, bundlePrice:6, sizes:["12-24M","2T","3T","4T","5T"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/45.jpg", category:"Tops"},
+ {id:55, name:"Cotton Muslin Solid Pants", price:12, bundlePrice:10, sizes:["2T","3T","4T","5T"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/62.jpg", category:"Bottoms"},
+ {id:56, name:"Cotton Stripe Shirt with Embroidered Face", price:13, bundlePrice:11, sizes:["6-12M","12-24M","2T","3T"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/84.jpg", category:"Tops"},
+ {id:57, name:"Cotton Knit Set, additional $4 off", price:20, bundlePrice:18, sizes:["12-24M"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/64.jpg", category:"Rompers & Sets"},
+ {id:58, name:"Cotton Knit Sprinkle Sweater, additional $4 off", price:18, bundlePrice:16, sizes:["6-12M"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/65.jpg", category:"Outerwear & Knitwear"},
+ {id:59, name:"Cotton Quilted Sweatshirt, additional $5 off!", price:24, bundlePrice:22, sizes:["12-24M","2T","3T","4T","5T"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/39.jpg", category:"Outerwear & Knitwear"},
+ {id:60, name:"Pattern Cotton Muslin Pants", price:12, bundlePrice:10, sizes:["6-12M","12-24M","2T","3T","4T","5T"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/70.jpg", category:"Bottoms"},
+ {id:61, name:"Solid Cotton Shirt", price:12, bundlePrice:10, sizes:["2T","3T","4T","5T"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/69.jpg", category:"Tops"},
+ {id:64, name:"Cotton Striped Short Sleeve Shirt, Clearance $4 off", price:11, bundlePrice:9, sizes:["3-6M","6-12M","12-24M","2T"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/58.jpg", category:"Tops"},
+ {id:65, name:"Cotton Embroidered Floral Set, Clearance $4 off", price:18, bundlePrice:16, sizes:["12-24M"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/72.jpg", category:"Rompers & Sets"},
+ {id:66, name:"Cotton Animal Short Sleeve Shirt", price:10, bundlePrice:8, sizes:["5T"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/73.jpg", category:"Tops"},
+ {id:67, name:"Cotton Muslin Short Sleeve Shirt", price:12, bundlePrice:10, sizes:["12-24M","2T","3T","4T","5T"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/74.jpg", category:"Tops"},
+ {id:68, name:"Cotton Linen Cropped Pants", price:15, bundlePrice:13, sizes:["12-24M","3T"], material:"Cotton Linen", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/79.jpg", category:"Bottoms"},
+ {id:70, name:"Cotton Embroidered Pants", price:15, bundlePrice:13, sizes:["12-24M","2T","3T"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/81.jpg", category:"Bottoms"},
+ {id:71, name:"Cotton Linen Gingham Pants", price:12, bundlePrice:10, sizes:["6-12M","12-24M","2T","3T","4T"], material:"Cotton Linen", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/82.jpg", category:"Bottoms"},
+ {id:72, name:"Cotton Texture Lightweight Cardigan", price:18, bundlePrice:16, sizes:["2T","3T","4T"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/83.jpg", category:"Outerwear & Knitwear"},
+ {id:74, name:"Extra Soft Cotton Checker Pants", price:15, bundlePrice:13, sizes:["12-24M","3T","5T"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/76.jpg", category:"Bottoms"},
+ {id:75, name:"Cotton Lightweight Button Textured Cardigan", price:20, bundlePrice:18, sizes:["12-24M","2T"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/77.jpg", category:"Outerwear & Knitwear"},
+ {id:76, name:"Vintage Style Cotton Checker Shorts", price:15, bundlePrice:13, sizes:["12-24M","2T"], material:"90% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/78.jpg", category:"Bottoms"},
+ {id:77, name:"Cotton Muslin Set", price:18, bundlePrice:16, sizes:["6-12M","12-24M","4T","5T"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/86.jpg", category:"Rompers & Sets"},
+ {id:78, name:"Two Tone Cotton Shirt", price:12, bundlePrice:10, sizes:["12-24M","5T"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/87.jpg", category:"Tops"},
+ {id:79, name:"Cotton Checker Pumpkin Shorts", price:10, bundlePrice:8, sizes:["6-12M","12-24M","2T"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/91.jpg", category:"Bottoms"},
+ {id:80, name:"Cotton Lightweight Gingham Pants", price:12, bundlePrice:10, sizes:["6-12M","12-24M","2T","3T"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/89.jpg", category:"Bottoms"},
+ {id:81, name:"Cotton Muslin Long Sleeve Shirt", price:12, bundlePrice:10, sizes:["6-12M"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/90.jpg", category:"Tops"},
+ {id:83, name:"Cotton Striped Short Sleeve Shirt", price:9, bundlePrice:7, sizes:["6-12M","12-24M","2T","3T"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/92.jpg", category:"Tops"},
+ {id:84, name:"Cotton Two Tone Short Sleeve Shirt", price:10, bundlePrice:8, sizes:["6-12M","12-24M","2T"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/93.jpg", category:"Tops"},
+ {id:85, name:"Cotton Pineapple Set, Clearance $4 off", price:14, bundlePrice:12, sizes:["6-12M"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/94.jpg", category:"Rompers & Sets"}
+];
+
+/* ── STATE ── */
+let catalogProducts = [];
+let stockData = {};
+let pendingStock = {};
+let soldData = {}; // pid_cm -> units sold
+let szFilter = 'all';
+
+function totalSold(product){
+ if(!product.pids) return 0;
+ return product.pids.reduce((total, pid)=>{
+ // sum across all sizes for this pid
+ const pidTotal = Object.entries(soldData)
+ .filter(([k])=>k.startsWith(pid+'_'))
+ .reduce((s,[,v])=>s+v, 0);
+ return total + pidTotal;
+ }, 0);
+}
+
+function getSizeStock(product, label){
+ const cm = product.sizesCm ? product.sizesCm[product.sizes.indexOf(label)] : SIZE_TO_CM[label];
+ if(!cm || !product.pids) return null;
+ const hasKey = product.pids.some(pid => (pid+'_'+cm) in stockData);
+ if(!hasKey) return null;
+ return product.pids.reduce((s,pid)=>{ const k=pid+'_'+cm; return k in stockData?s+stockData[k]:s; }, 0);
+}
+
+function totalStock(product){
+ if(!product.pids) return null;
+ let total = 0, hasAny = false;
+ product.sizes.forEach(label=>{
+ const s = getSizeStock(product, label);
+ if(s !== null){ hasAny = true; total += s; }
+ });
+ return hasAny ? total : null;
+}
+
+
+function normCat(cat){
+ if(!cat) return '';
+ const s = cat.trim();
+ if(s==='Rompers & Overalls'||s==='Sets'||s==='Rompers & Sets') return 'Rompers & Sets';
+ if(s==='Outerwear'||s==='Cardigans & Knitwear'||s==='Outerwear & Knitwear') return 'Outerwear & Knitwear';
+ if(s==='Top') return 'Tops';
+ if(s==='Bottom') return 'Bottoms';
+ return s;
+}
+/* ── SIDEBAR FILTER SETTERS ── */
+window._sfCat = '';
+window._sfSeason = '';
+function setMCat(btn, val){
+ // sync mobile select
+ const ms = document.getElementById('mCatSelect'); if(ms) ms.value = val;
+ // sync sidebar buttons
+ document.querySelectorAll('[data-cat]').forEach(b=>b.classList.toggle('active', b.dataset.cat===val));
+ window._sfCat = val; render();
+}
+function setMSeason(btn, val){
+ // sync mobile select
+ const ms = document.getElementById('mSeasonSelect'); if(ms) ms.value = val;
+ // sync sidebar buttons
+ document.querySelectorAll('[data-season]').forEach(b=>b.classList.toggle('active', b.dataset.season===val));
+ window._sfSeason = val; render();
+}
+function setMSize(val){
+ szFilter = val;
+ // sync sidebar + desktop size buttons
+ document.querySelectorAll('[data-sz]').forEach(b=>b.classList.toggle('active', b.dataset.sz===val));
+ // sync mobile select
+ const ms = document.getElementById('mSizeSelect'); if(ms) ms.value = val;
+ render();
+}
+function setSFCat(btn, val){
+ document.querySelectorAll('[data-cat]').forEach(b=>b.classList.toggle('active', b.dataset.cat===val));
+ const ms=document.getElementById('mCatSelect'); if(ms) ms.value=val;
+ window._sfCat = val; render();
+}
+function setSFSeason(btn, val){
+ document.querySelectorAll('[data-season]').forEach(b=>b.classList.toggle('active', b.dataset.season===val));
+ const ms=document.getElementById('mSeasonSelect'); if(ms) ms.value=val;
+ window._sfSeason = val; render();
+}
+
+/* ── FILTERS ── */
+function getCatFilter(){ return window._sfCat || ''; }
+function getSeasonFilter(){ return window._sfSeason || ''; }
+function getClearance(){ return document.getElementById('sfClearance')?.checked || document.getElementById('clearanceCheckM')?.checked || false; }
+
+// Keep mobile + desktop selects in sync
+function syncSelects(src, targets){
+ targets.forEach(id=>{ const el=document.getElementById(id); if(el) el.value=src.value; });
+ render();
+}
+
+// filter sync handled by setSFCat/setSFSeason/setMCat/setMSeason
+
+function setSize(btn){
+ document.querySelectorAll('[data-sz]').forEach(b=>b.classList.toggle('active', b.dataset.sz===btn.dataset.sz));
+ szFilter = btn.dataset.sz;
+ const ms=document.getElementById('mSizeSelect'); if(ms) ms.value=szFilter;
+ render();
+}
+
+/* ── MOBILE DRAWER ── */
+function toggleMobileFilters(){
+ const drawer = document.getElementById('mobileDrawer');
+ const btn = document.getElementById('mobileFilterBtn');
+ const open = drawer.classList.toggle('open');
+ btn.classList.toggle('open', open);
+ btn.innerHTML = open
+ ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Close'
+ : '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/></svg> Filter';
+}
+
+/* ── RENDER ── */
+function render(){
+ const cat = getCatFilter();
+ const season = getSeasonFilter();
+ const clearance = getClearance();
+ const grid = document.getElementById('productGrid');
+
+ // Style active state on dropdowns
+ // sidebar btn active states handled by setSFCat/setMCat
+
+
+
+ let rows = catalogProducts.filter(p=>p.sizes&&p.sizes.length);
+
+ // Size filter
+ if(szFilter !== 'all'){
+ rows = rows.filter(p=>{
+ if(!p.sizes.includes(szFilter)) return false;
+ const s = getSizeStock(p, szFilter);
+ return s === null || s > 0;
+ });
+ }
+
+ // Hide all-zero stock
+ // Only filter by stock if we actually have stock data loaded
+ if(Object.keys(stockData).length > 0){
+   rows = rows.filter(p=>{
+     const hasData = p.sizes.some(l=>getSizeStock(p,l)!==null);
+     if(!hasData) return false; // new product, no stock yet
+     return p.sizes.some(l=>{ const s=getSizeStock(p,l); return s===null||s>0; });
+   });
+ }
+
+ // Category filter — normalise both sides before comparing
+ if(cat){
+ rows = rows.filter(p=>{
+ const pc = normCat(p.category||'') || normCat(deriveCategory(p));
+ return pc === normCat(cat);
+ });
+ }
+
+ // Season filter
+ if(season) rows = rows.filter(p=>{
+ const ps = deriveSeason(p);
+ if(!ps) return false;
+ // Split product seasons into individual words, normalize each
+ const norm = s => s.toLowerCase().trim();
+ const productSeasons = ps.split(/[、，,\/\s]+/).map(norm).filter(Boolean);
+ const filterSeasons = season.split(/[、，,\/\s]+/).map(norm).filter(Boolean);
+ // Show product if ANY of its seasons matches ANY of the filter seasons
+ return filterSeasons.some(fs => productSeasons.some(ps2 => ps2.includes(fs) || fs.includes(ps2)));
+ });
+
+ // Clearance filter
+ if(clearance) rows = rows.filter(p=>isClearance(p));
+
+ // Sort: most sold first (popularity), fallback to lowest stock for ties
+ rows.sort((a,b)=>{
+ const soldA = totalSold(a);
+ const soldB = totalSold(b);
+ if(soldA !== soldB) return soldB - soldA; // higher sold = first
+ // tiebreak: lower stock first (to sell faster)
+ const sa = totalStock(a);
+ const sb = totalStock(b);
+ if(sa===null && sb===null) return 0;
+ if(sa===null) return 1;
+ if(sb===null) return -1;
+ return sa - sb;
+ });
+
+ // Results bar
+ document.getElementById('resultsCount').innerHTML = `<strong>${rows.length}</strong> item${rows.length!==1?'s':''}`;
+ document.getElementById('sortNote').textContent = '';
+
+ // Active filter tags
+ const tags = [];
+ if(cat) tags.push({label: cat, clear:()=>{ window._sfCat=''; document.querySelectorAll('[data-cat],[data-mcat]').forEach(b=>b.classList.toggle('active',!b.dataset.cat&&!b.dataset.mcat||b.dataset.cat===''||b.dataset.mcat==='')); render(); }});
+ if(season) tags.push({label: season, clear:()=>{ window._sfSeason=''; document.querySelectorAll('[data-season],[data-mseason]').forEach(b=>b.classList.toggle('active',b.dataset.season===''||b.dataset.mseason==='')); render(); }});
+ if(clearance) tags.push({label:'Clearance', clear:()=>{ ['sfClearance','clearanceCheckM'].forEach(id=>{const el=document.getElementById(id);if(el)el.checked=false;}); render(); }});
+ document.getElementById('activeFilters').innerHTML = tags.map((t,i)=>
+ `<div class="active-filter-tag" onclick="clearTag(${i})">${t.label} <span></span></div>`
+ ).join('');
+ window._filterTags = tags;
+
+ if(!rows.length){
+ grid.innerHTML='<div class="no-results">No items match these filters.<br><span style="font-size:.8rem;color:#ccc">Try adjusting your selection.</span></div>';
+ return;
+ }
+
+ grid.innerHTML = rows.map(p=>cardHTML(p)).join('');
+}
+
+function clearTag(i){ window._filterTags[i]?.clear(); }
+
+function cardHTML(p){
+ const sale = p.saleDiscount||0;
+ const unit = p.unit||'ea';
+ const ul = unit==='ea'?'/ea':'/set';
+ const salePrice = sale>0 ? parseFloat(p.price)-sale : null;
+ const clearance = isClearance(p);
+ const season = deriveSeason(p);
+ const sc = seasonClass(season);
+ const ts = totalStock(p);
+ const isLow = ts!==null && ts>0 && ts<=4;
+
+ // Price HTML
+ const priceHTML = salePrice!==null
+ ? `<div class="price-row"><span class="price-was">$${p.price}${ul}</span><span class="price-now">$${salePrice.toFixed(2)}${ul}</span></div>`
+ : `<div class="price-row"><span class="product-price">$${p.price}${ul}</span></div>`;
+
+ const bundleHTML = salePrice===null ? `<div class="bundle-price">Bundle: $${p.bundlePrice}${ul}</div>` : '';
+
+ // Badges
+ const badges = [];
+ // clearance cards show price strikethrough only — no badge needed
+ if(isLow) badges.push('<span class="badge badge-low">Almost gone</span>');
+ if(season && sc) badges.push(`<span class="season-tag ${sc}">${season}</span>`);
+
+ // Size badges
+ const sizeBadges = p.sizes.map(label=>{
+ const s = getSizeStock(p, label);
+ if(s===null) return `<span class="size-badge">${label}</span>`;
+ if(s===0){
+ const cm = p.sizesCm ? p.sizesCm[p.sizes.indexOf(label)] : SIZE_TO_CM[label];
+ const pending = cm && p.pids && p.pids.some(pid=>pendingStock[pid+'_'+cm]);
+ if(pending) return `<span class="size-badge pending">${label} · Soon</span>`;
+ return `<span class="size-badge out">${label}</span>`;
+ }
+ return `<span class="size-badge">${label}</span>`;
+ }).join('');
+
+ // Clean name — strip discount text for display
+ const displayName = p.name
+ .replace(/,?\s*Clearance \$\d+ off/gi,'')
+ .replace(/,?\s*additional \$\d+\.?\d* off!?/gi,'')
+ .trim();
+
+ return `<div class="product-card${clearance?' clearance-card':''}">
+ <img src="${p.image}" alt="${displayName}" class="product-image" loading="lazy">
+ <div class="product-details">
+ ${badges.length?`<div class="badges-row">${badges.join('')}</div>`:''}
+ <div class="product-name">${displayName}</div>
+ ${priceHTML}
+ ${bundleHTML}
+ ${p.material?`<div class="product-material">${p.material}</div>`:''}
+ <div class="sizes-label">Sizes Available</div>
+ <div class="sizes-container">${sizeBadges}</div>
+ <button class="add-to-bag-btn" onclick="event.stopPropagation();openSelector('${p.name}')">+ Add to Bag</button>
+ </div>
+ </div>`;
+}
+
+/* ── SCROLL MINIMISE ── */
+const header = document.getElementById('header');
+let ticking = false;
+window.addEventListener('scroll',()=>{
+ if(!ticking){ requestAnimationFrame(()=>{
+ header.classList.toggle('min', window.scrollY > 180);
+ ticking=false;
+ }); ticking=true; }
+},{passive:true});
+
+/* ── LOAD FROM SHEET ── */
+let _sheetLoadAttempts = 0;
+const CACHE_KEY = 'lb_cat_v1';
+const CACHE_TTL = 2 * 60 * 60 * 1000; // 2 hours
+const JSON_URL = 'https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/catalog-data.json';
+
+async function loadFromSheet(){
+ _sheetLoadAttempts++;
+
+ // Show cached data instantly if available
+ try{
+   const cached = JSON.parse(localStorage.getItem(CACHE_KEY)||'null');
+   if(cached && cached.ts && cached.products && cached.products.length){
+     catalogProducts = cached.products;
+     _allSheetProducts = cached.allSheet||[];
+     stockData = cached.stock||{};
+     soldData = cached.sold||{};
+     render();
+     // Refresh in background
+     fetchCatalogData(true); return;
+   }
+ } catch(e){}
+
+ fetchCatalogData(false);
+}
+
+async function fetchCatalogData(silent){
+ // Try GitHub JSON first — fast, no quota issues
+ try{
+   const res = await fetch(JSON_URL+'?t='+Date.now());
+   if(res.ok){
+     const data = await res.json();
+     if(data && data.products && data.products.length){
+       // Parse into catalog format
+       const prods = data.products;
+       stockData = data.stock || {};
+       soldData = {};
+       _allSheetProducts = prods;
+
+       const grouped={};
+       prods.forEach(p=>{
+         if((p.category||'').toLowerCase().includes('sold out')) return;
+         if(p.hidden) return;
+         if(!grouped[p.name]){
+           grouped[p.name]={...p,allSizes:[...(p.sizes||[])],allSizesCm:[...(p.sizes||[]).map(s=>SIZE_TO_CM[s]||s)],pids:[p.pid||p.id]};
+         } else {
+           (p.sizes||[]).forEach((s,i)=>{
+             if(!grouped[p.name].allSizes.includes(s)){
+               grouped[p.name].allSizes.push(s);
+               grouped[p.name].allSizesCm.push(SIZE_TO_CM[s]||s);
+             }
+           });
+           grouped[p.name].pids.push(p.pid||p.id);
+           if(!grouped[p.name].season && p.season) grouped[p.name].season=p.season;
+         }
+       });
+       const CM_ORDER=['60','70','80','90','100','110','120','130'];
+       catalogProducts = Object.values(grouped).map(g=>{
+         const pairs=g.allSizes.map((s,i)=>({label:s,cm:g.allSizesCm[i]}));
+         pairs.sort((a,b)=>CM_ORDER.indexOf(a.cm)-CM_ORDER.indexOf(b.cm));
+         return {...g,sizes:pairs.map(p=>p.label),sizesCm:pairs.map(p=>p.cm),season:g.season||''};
+       });
+
+       // Save to cache
+       try{
+         localStorage.setItem(CACHE_KEY, JSON.stringify({
+           ts:Date.now(), products:catalogProducts,
+           allSheet:_allSheetProducts, stock:stockData, sold:soldData
+         }));
+       } catch(e){}
+       render();
+       return;
+     }
+   }
+ } catch(e){ console.log('JSON fetch failed, falling back to sheet'); }
+
+ // Fallback: Google Sheet
+ fetchSheet(silent);
+}
+
+async function fetchSheet(silent){
+ try{
+ const safeFetch = async (url) => {
+   try{
+     const r = await fetch(url);
+     if(!r.ok) return null;
+     const json = await r.json();
+     return Array.isArray(json) ? json : null;
+   }
+   catch(e){ return null; }
+ };
+
+ // Try combined request first
+ let prodRows, stockRows, pendingRows, soldRows;
+ try{
+   const res = await fetch(SHEET_URL+'?action=readAll&tabs=Products,Stock,Pending,Sold');
+   if(res.ok){
+     const combined = await res.json();
+     if(combined && combined.Products){
+       prodRows=combined.Products; stockRows=combined.Stock;
+       pendingRows=combined.Pending; soldRows=combined.Sold;
+     }
+   }
+ } catch(e){}
+
+ // Fallback: individual requests
+ if(!prodRows){
+   prodRows = await safeFetch(SHEET_URL+'?action=read&tab=Products');
+   [stockRows,pendingRows,soldRows] = await Promise.all([
+     safeFetch(SHEET_URL+'?action=read&tab=Stock'),
+     safeFetch(SHEET_URL+'?action=read&tab=Pending'),
+     safeFetch(SHEET_URL+'?action=read&tab=Sold')
+   ]);
+ }
+
+ if(!prodRows || prodRows.length < 2){
+   // Sheet failed — if not silent, use fallback
+   if(!silent) useFallback();
+   // Retry once more
+   if(_sheetLoadAttempts < 2) setTimeout(()=>fetchSheet(false), 4000);
+   return;
+ }
+
+ stockData={};
+ if(stockRows&&stockRows.length>1) stockRows.slice(1).forEach(([k,q])=>{ if(k) stockData[String(k)]=parseInt(q)||0; });
+ soldData={};
+ if(soldRows&&soldRows.length>1) soldRows.slice(1).forEach(([k,q])=>{ if(k) soldData[String(k)]=(soldData[String(k)]||0)+(parseInt(q)||0); });
+ pendingStock={};
+ if(pendingRows&&pendingRows.length>1) pendingRows.slice(1).forEach(([k,q])=>{ if(k&&parseInt(q)>0) pendingStock[String(k)]=parseInt(q); });
+
+ const KNOWN_CM=['130','120','110','100','90','80','70','60'];
+ const sheet=[];
+ prodRows.slice(1).forEach(row=>{
+ const [pid,name,color,hex,sizesRaw,price,bundlePrice,cost,image,material,saleDiscount,category,bin,unit,season]=row;
+ if(!pid||!name) return;
+ let szStr=String(sizesRaw||'');
+ let sizesCm=[];
+ if(szStr.includes(',')) sizesCm=szStr.split(',').map(s=>s.trim()).filter(Boolean);
+ else if(/^\d+$/.test(szStr.replace(/\s/g,''))){
+ let rem=szStr.replace(/\s/g,'');
+ while(rem.length){ const m=KNOWN_CM.find(c=>rem.startsWith(c)); if(m){sizesCm.push(m);rem=rem.slice(m.length);}else rem=rem.slice(1); }
+ } else sizesCm=szStr.split(/\s+/).map(s=>s.trim()).filter(Boolean);
+ const sizesDisplay=sizesCm.map(c=>CM_TO_SIZE[c]||c);
+ sheet.push({id:parseInt(pid),name:String(name),color:String(color||''),hex:String(hex||'#e8ddd0'),price:parseFloat(price)||0,bundlePrice:parseFloat(bundlePrice)||0,sizes:sizesDisplay,sizesCm,material:String(material||''),saleDiscount:parseFloat(saleDiscount)||0,category:String(category||''),bin:String(bin||''),unit:String(unit||'ea'),season:String(season||''),image:String(image||'')});
+ });
+
+ _allSheetProducts = sheet;
+ if(sheet.length){
+ const grouped={};
+ sheet.forEach(p=>{
+ if((p.category||'').toLowerCase().includes('sold out')) return;
+ if(!grouped[p.name]){grouped[p.name]={...p,allSizes:[...p.sizes],allSizesCm:[...p.sizesCm],pids:[p.id]};}
+ else{
+ p.sizes.forEach((s,i)=>{ if(!grouped[p.name].allSizes.includes(s)){grouped[p.name].allSizes.push(s);grouped[p.name].allSizesCm.push(p.sizesCm[i]);} });
+ grouped[p.name].pids.push(p.id);
+ if(!grouped[p.name].season && p.season) grouped[p.name].season = p.season;
+ }
+ });
+ const CM_ORDER=['60','70','80','90','100','110','120','130'];
+ catalogProducts=Object.values(grouped).map(g=>{
+ const pairs=g.allSizes.map((s,i)=>({label:s,cm:g.allSizesCm[i]}));
+ pairs.sort((a,b)=>CM_ORDER.indexOf(a.cm)-CM_ORDER.indexOf(b.cm));
+ return {...g,sizes:pairs.map(p=>p.label),sizesCm:pairs.map(p=>p.cm),season:g.season||''};
+ });
+
+ // Save to cache
+ try{
+   localStorage.setItem(CACHE_KEY, JSON.stringify({
+     ts: Date.now(),
+     products: catalogProducts,
+     allSheet: _allSheetProducts,
+     stock: stockData,
+     sold: soldData
+   }));
+ } catch(e){}
+ } else { if(!silent) useFallback(); }
+
+ } catch(e){ console.warn('fetchSheet error:',e); if(!silent) useFallback(); }
+ render();
+}
+
+function useFallback(){
+ catalogProducts=FALLBACK.map(p=>({...p,pids:[p.id],sizesCm:p.sizes.map(s=>SIZE_TO_CM[s]||null)}));
+}
+
+
+/* ══════════════════════════════════════════════
+ SHOPPING BAG
+══════════════════════════════════════════════ */
+let bag = []; // [{product, colorPid, colorName, size, sizeCm, price, image}]
+let fulfillment = 'pickup';
+let _selectorProduct = null;
+let _submitting = false;
+
+
+/* ── SHIPPING CALCULATOR ── */
+const SHIP_FROM_ZIP = '90230'; // Little Basics location
+
+function getZipZone(zip){
+ if(!zip || zip.length < 5) return null;
+ const z = parseInt(zip.substring(0,3));
+ // California: 900-961
+ if(z >= 900 && z <= 961) return 'ca';
+ // West: AZ(850-865), NV(889-891), OR(970-979), WA(980-994), UT(840-847), CO(800-816), ID(832-838), MT(590-599), WY(820-831), NM(870-884), HI(967-968), AK(995-999)
+ const westRanges = [[850,865],[889,891],[970,979],[980,994],[840,847],[800,816],[832,838],[590,599],[820,831],[870,884],[967,968],[995,999]];
+ if(westRanges.some(([lo,hi])=>z>=lo&&z<=hi)) return 'west';
+ return 'us';
+}
+
+function getShippingFee(zip, itemCount){
+ const zone = getZipZone(zip);
+ if(!zone) return null;
+
+ // [CA, West, Rest of US]
+ let tier;
+ if(itemCount <= 4) tier = [8, 9, 10];
+ else if(itemCount <= 7) tier = [9, 10, 11];
+ else if(itemCount <= 10) tier = [10, 11, 12];
+ else tier = [12, 13, 14];
+
+ const zoneIdx = {ca:0, west:1, us:2}[zone];
+ return { fee: tier[zoneIdx], zone };
+}
+
+function getZoneLabel(zone){
+ return {ca:'California', west:'West US', us:'Rest of US'}[zone]||'';
+}
+/* ── Open / Close ── */
+function openBag(){
+ document.getElementById('bagDrawer').classList.add('open');
+ document.getElementById('bagOverlay').classList.add('open');
+ renderBag();
+}
+function closeBag(){
+ document.getElementById('bagDrawer').classList.remove('open');
+ document.getElementById('bagOverlay').classList.remove('open');
+}
+
+/* ── Selector modal ── */
+function openSelector(productName){
+ const p = catalogProducts.find(x=>x.name===productName);
+ if(!p) return;
+ _selectorProduct = p;
+
+ document.getElementById('selProductName').textContent = p.name;
+
+ // Get all variants for this product
+ const variants = (_allSheetProducts||[]).filter(x=>x.name===productName);
+
+ // Collect all unique sizes across all variants that have any stock
+ const sizeSel = document.getElementById('selSize');
+ sizeSel.innerHTML = '';
+
+ // Build a master size list from all variants
+ const sizeMap = {}; // label -> {cm, hasStock}
+ if(variants.length){
+ variants.forEach(v=>{
+ (v.sizes||[]).forEach((label,i)=>{
+ const cm = String(v.sizesCm?.[i]||'');
+ const key = String(v.id)+'_'+cm;
+ const inStock = !(key in stockData) || stockData[key] > 0;
+ if(!sizeMap[label]) sizeMap[label] = {cm, hasStock: false};
+ if(inStock) sizeMap[label].hasStock = true;
+ });
+ });
+ } else {
+ // Fallback from grouped product
+ (p.sizes||[]).forEach((label,i)=>{
+ const cm = String(p.sizesCm?.[i]||'');
+ sizeMap[label] = {cm, hasStock: true};
+ });
+ }
+
+ // Populate size dropdown — show all sizes, mark out of stock ones
+ const SIZE_ORDER = ['3-6M','6-12M','12-24M','1T','2T','3T','4T','5T','NB','OS'];
+ const sizeEntries = Object.entries(sizeMap);
+ sizeEntries.forEach(([label, {cm, hasStock}])=>{
+ const opt = document.createElement('option');
+ opt.value = label+'|'+cm;
+ opt.textContent = hasStock ? label : label+' (sold out)';
+ if(!hasStock) opt.style.color = '#bbb';
+ sizeSel.appendChild(opt);
+ });
+
+ if(sizeSel.options.length === 0){
+ const opt = document.createElement('option');
+ opt.textContent = 'No sizes available';
+ opt.disabled = true;
+ sizeSel.appendChild(opt);
+ document.getElementById('selAdd').disabled = true;
+ } else {
+ sizeSel.options[0].selected = true;
+ document.getElementById('selAdd').disabled = false;
+ }
+
+ // Now populate colors based on selected size
+ updateColorOptions();
+ document.getElementById('selectorOverlay').classList.add('open');
+}
+
+function closeSelector(){
+ document.getElementById('selectorOverlay').classList.remove('open');
+ _selectorProduct = null;
+}
+
+function updateColorOptions(){
+ const p = _selectorProduct; if(!p) return;
+ const sizeVal = document.getElementById('selSize').value;
+ const [selectedSize, selectedCm] = sizeVal ? sizeVal.split('|') : ['',''];
+ // Build custom color dropdown
+ const list = document.getElementById('colorDropList');
+ const trigger = document.getElementById('colorDropTrigger');
+ const triggerSwatch = document.getElementById('triggerSwatch');
+ const triggerLabel = document.getElementById('triggerLabel');
+ const hiddenSel = document.getElementById('selColor');
+ if(!list) return;
+ list.innerHTML = '';
+
+ const variants = (_allSheetProducts||[]).filter(x=>x.name===p.name);
+ let firstAvailId = null;
+
+ function buildOpt(id, color, hex, inStock){
+   const div = document.createElement('div');
+   div.className = 'color-dropdown-opt' + (!inStock ? ' disabled' : '');
+   const sw = document.createElement('span');
+   sw.className = 'opt-swatch';
+   sw.style.background = hex||'#e8ddd0';
+   const lbl = document.createElement('span');
+   lbl.textContent = inStock ? color : color + ' — out of stock';
+   div.appendChild(sw); div.appendChild(lbl);
+   if(inStock){
+     div.dataset.id = String(id);
+     div.dataset.hex = hex||'#e8ddd0';
+     div.dataset.color = color;
+     div.onclick = function(){
+       selectColorOpt(this.dataset.id, this.dataset.color, this.dataset.hex);
+     };
+     if(!firstAvailId) firstAvailId = String(id);
+   }
+   list.appendChild(div);
+ }
+
+ if(variants.length && selectedCm){
+   variants.forEach(v=>{
+     const key = String(v.id)+'_'+String(selectedCm);
+     const inStock = !(key in stockData) || stockData[key] > 0;
+     const hasSize = (v.sizesCm||[]).some(cm=>String(cm)===String(selectedCm));
+     if(!hasSize) return;
+     buildOpt(v.id, v.color||'Default', v.hex||'#e8ddd0', inStock);
+   });
+ } else {
+   (p.pids||[]).forEach(pid=>{
+     const v = (_allSheetProducts||[]).find(x=>x.id===pid);
+     buildOpt(pid, v?.color||'Default', v?.hex||'#e8ddd0', true);
+   });
+ }
+
+ // Auto-select first available
+ if(firstAvailId){
+   const first = list.querySelector('[data-id="'+firstAvailId+'"]');
+   if(first) selectColorOpt(first.dataset.id, first.dataset.color, first.dataset.hex);
+ }
+
+ // Update price display based on selected color
+ const pid = parseInt(document.getElementById('selColor').value)||0;
+ const variant = (_allSheetProducts||[]).find(x=>x.id===pid);
+ const isBundle = bag.length >= 4;
+ const price = isBundle
+ ? (variant?.bundlePrice||p.bundlePrice||p.price)
+ : (variant?.price||p.price);
+ const ul = (variant?.unit||p.unit||'ea')==='ea'?'/ea':'/set';
+ document.getElementById('selProductPrice').textContent = `$${price}${ul}`;
+ document.getElementById('selAdd').disabled = !document.getElementById('selColor').value;
+}
+
+function toggleColorDrop(){
+ const list = document.getElementById('colorDropList');
+ if(list) list.classList.toggle('open');
+}
+
+function selectColorOpt(id, color, hex){
+ const list = document.getElementById('colorDropList');
+ const triggerSwatch = document.getElementById('triggerSwatch');
+ const triggerLabel = document.getElementById('triggerLabel');
+ const hiddenSel = document.getElementById('selColor');
+ // Update trigger display
+ if(triggerSwatch) triggerSwatch.style.background = hex||'#e8ddd0';
+ if(triggerLabel) triggerLabel.textContent = color;
+ if(hiddenSel) hiddenSel.value = id;
+ // Mark selected
+ if(list){
+   list.querySelectorAll('.color-dropdown-opt').forEach(o=>o.classList.remove('selected'));
+   const sel = list.querySelector('[data-id="'+id+'"]');
+   if(sel) sel.classList.add('selected');
+   list.classList.remove('open');
+ }
+ // Update price
+ const pid = parseInt(id)||0;
+ const variant = (_allSheetProducts||[]).find(x=>x.id===pid);
+ const isBundle = bag.length >= 4;
+ const price = isBundle
+   ? (variant?.bundlePrice||0)
+   : (variant?.price||0);
+ const ul = (variant?.unit||'ea')==='ea'?'/ea':'/set';
+ const priceEl = document.getElementById('selProductPrice');
+ if(priceEl) priceEl.textContent = '$'+price+ul;
+ const addBtn = document.getElementById('selAdd');
+ if(addBtn) addBtn.disabled = false;
+}
+
+// Close dropdown when clicking outside
+document.addEventListener('click', function(e){
+ const wrap = document.getElementById('colorDropWrap');
+ if(wrap && !wrap.contains(e.target)){
+   const list = document.getElementById('colorDropList');
+   if(list) list.classList.remove('open');
+ }
+});
+
+function confirmAddToBag(){
+ const p = _selectorProduct; if(!p) return;
+ const sizeVal = document.getElementById('selSize').value;
+ const pid = parseInt(document.getElementById('selColor').value);
+ if(!sizeVal) return;
+ const [size, sizeCm] = sizeVal.split('|');
+
+ // Get color name and image
+ const variant = (_allSheetProducts||[]).find(x=>x.id===pid) || null;
+ const colorName = variant?.color || p.color || '';
+ const image = variant?.image || p.image || '';
+ const isBundle = bag.length >= 4;
+ const price = isBundle ? (variant?.bundlePrice||p.bundlePrice||p.price) : (variant?.price||p.price);
+ const unit = variant?.unit||p.unit||'ea';
+
+ // Check stock for this exact pid+size combo
+ const stockKey = String(pid)+'_'+String(sizeCm);
+ // Only block if stockData has actually loaded (has keys) AND stock is tracked AND exceeded
+ const stockLoaded = Object.keys(stockData).length > 0;
+ const availableStock = stockLoaded ? stockData[stockKey] : undefined;
+
+ // Count how many of this exact item (same pid + same size) are already in the bag
+ const alreadyInBag = bag.filter(b=>b.colorPid===pid && b.sizeCm===sizeCm).length;
+
+ if(availableStock !== undefined && availableStock !== null && alreadyInBag >= availableStock && availableStock > 0){
+ alert(`Only ${availableStock} left in stock for this size/color — you already have ${alreadyInBag} in your bag.`);
+ return;
+ }
+
+ bag.push({
+ id: Date.now(),
+ name: p.name,
+ colorPid: pid,
+ colorName,
+ size,
+ sizeCm,
+ price: parseFloat(price)||0,
+ bundlePrice: parseFloat(variant?.bundlePrice||p.bundlePrice||0),
+ saleDiscount: parseFloat(variant?.saleDiscount||p.saleDiscount||0),
+ unit,
+ image
+ });
+
+ closeSelector();
+ updateBagCount();
+ recalcBagPrices();
+ openBag();
+}
+
+/* ── Bag rendering ── */
+function renderBag(){
+ const el = document.getElementById('bagItems');
+ if(!bag.length){
+ el.innerHTML = '<div class="bag-empty">Your bag is empty.<br>Add items from the catalog!</div>';
+ document.getElementById('bagSubmit').disabled = true;
+ updateSubmitBtn();
+ document.getElementById('bagBundle').classList.remove('show');
+ document.getElementById('bagSubtotal').textContent = '$0.00';
+ return;
+ }
+
+ const isBundle = bag.length >= 5;
+ document.getElementById('bagBundle').classList.toggle('show', isBundle);
+
+ el.innerHTML = bag.map(item=>{
+ const price = (()=>{ const sale=item.saleDiscount||0; const effBundle=isBundle&&sale===0; return effBundle?(item.bundlePrice&&item.bundlePrice>0?item.bundlePrice:item.price):(sale>0?item.price-sale:item.price); })();
+ const ul = item.unit==='ea'?'/ea':'/set';
+ return `<div class="bag-item">
+ <img class="bag-item-img" src="${item.image}" onerror="this.style.background='#f5f1ed'" alt="${item.name}">
+ <div class="bag-item-info">
+ <div class="bag-item-name">${item.name}</div>
+ <div class="bag-item-meta">${item.colorName ? item.colorName+' · ' : ''}${item.size}</div>
+ <div class="bag-item-price">$${price.toFixed(2)}${ul}</div>
+ </div>
+ <button class="bag-item-remove" onclick="removeFromBag(${item.id})"></button>
+ </div>`;
+ }).join('');
+
+ updateBagTotal();
+ updateSubmitBtn();
+}
+
+function removeFromBag(id){
+ bag = bag.filter(x=>x.id!==id);
+ recalcBagPrices();
+ renderBag();
+ updateBagCount();
+}
+
+function recalcBagPrices(){
+ // When bag size changes, prices may switch between regular and bundle
+ // Nothing to change on the item — price recalc happens in renderBag
+}
+
+
+function selectContactMethod(btn){
+  // Deactivate all
+  document.querySelectorAll('.contact-opt').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  const platform = btn.dataset.platform;
+
+  // Update hidden platform field
+  document.getElementById('bagPlatform').value = platform;
+
+  // Show input with correct placeholder
+  const wrap = document.getElementById('bagContactInputWrap');
+  const input = document.getElementById('bagContactInput');
+  wrap.style.display = 'block';
+
+  if(platform === 'Instagram'){
+    input.type = 'text';
+    input.placeholder = 'e.g. @sunshine_mama — exact handle so we can find you';
+  } else if(platform === 'Facebook'){
+    input.type = 'text';
+    input.placeholder = 'e.g. Jessica Smith — exact name on your Facebook profile';
+  } else if(platform === 'Email'){
+    input.type = 'email';
+    input.placeholder = 'e.g. jessica@gmail.com';
+  }
+
+  // Sync to hidden fields
+  input.oninput = function(){
+    if(platform === 'Email'){
+      document.getElementById('bagContact').value = this.value;
+      document.getElementById('bagCustomerHandle').value = '';
+    } else {
+      document.getElementById('bagCustomerHandle').value = this.value;
+      document.getElementById('bagContact').value = '';
+    }
+    updateSubmitBtn();
+  };
+  updateSubmitBtn();
+}
+function updateSubmitBtn(){
+ const name = document.getElementById('bagCustomerName')?.value.trim()||'';
+ const handle = document.getElementById('bagCustomerHandle')?.value.trim()||'';
+ const contact = document.getElementById('bagContact')?.value.trim()||'';
+ const btn = document.getElementById('bagSubmit');
+ if(btn) btn.disabled = !bag.length || (!name && !handle) || !contact;
+}
+
+function updateBagCount(){
+ const badge = document.getElementById('bagCount');
+ if(badge) badge.textContent = bag.length;
+}
+
+function updateBagTotal(){
+ const isBundle = bag.length >= 5;
+ const subtotal = bag.reduce((s,item)=>{
+ const price = (()=>{ const sale=item.saleDiscount||0; const effBundle=isBundle&&sale===0; return effBundle?(item.bundlePrice&&item.bundlePrice>0?item.bundlePrice:item.price):(sale>0?item.price-sale:item.price); })();
+ return s + price;
+ }, 0);
+ document.getElementById('bagSubtotal').textContent = '$'+subtotal.toFixed(2);
+
+ // Shipping
+ let shipFee = 0;
+ const shipRow = document.getElementById('bagShipRow');
+ const shipTotalRow = document.getElementById('bagShipTotalRow');
+ const shipFeeEl = document.getElementById('bagShipFee');
+ const shipTotalEl = document.getElementById('bagShipTotal');
+
+ if(fulfillment === 'shipping'){
+ const zip = document.getElementById('bagZip')?.value.trim()||'';
+ const result = getShippingFee(zip, bag.length);
+ if(result){
+ shipFee = result.fee;
+ const label = getZoneLabel(result.zone);
+ if(shipRow){ shipRow.style.display='flex'; }
+ if(shipFeeEl) shipFeeEl.textContent = '$'+shipFee.toFixed(2);
+ if(shipTotalRow) shipTotalRow.style.display='flex';
+ if(shipTotalEl) shipTotalEl.textContent = '$'+shipFee.toFixed(2);
+ // zone label hidden
+ } else {
+ if(shipRow) shipRow.style.display='none';
+ if(shipTotalRow) shipTotalRow.style.display='none';
+ // zone label hidden
+ }
+ } else {
+ if(shipRow) shipRow.style.display='none';
+ if(shipTotalRow) shipTotalRow.style.display='none';
+ if(zoneEl) zoneEl.className='bag-zip-zone';
+ }
+
+  // CA sales tax 10.25%
+  let taxAmount = 0;
+  const taxRow = document.getElementById('bagTaxRow');
+  const taxEl  = document.getElementById('bagTaxTotal');
+  const zipVal = document.getElementById('bagZip')?.value.trim()||'';
+  const zipEntered = zipVal.length === 5;
+  const isCA   = (fulfillment==='pickup') || (fulfillment==='shipping' && zipEntered && getZipZone(zipVal)==='ca');
+  if(isCA && bag.length>0){
+    taxAmount = subtotal * 0.1025;
+    if(taxRow) taxRow.style.display='flex';
+    if(taxEl)  taxEl.textContent = '$'+taxAmount.toFixed(2);
+  } else {
+    if(taxRow) taxRow.style.display='none';
+  }
+  const grand = subtotal + shipFee + taxAmount;
+ document.getElementById('bagGrandTotal').textContent = '$'+grand.toFixed(2);
+}
+
+/* ── Fulfillment ── */
+function setFulfillment(type){
+ fulfillment = type;
+ document.getElementById('fOptPickup').classList.toggle('active', type==='pickup');
+ document.getElementById('fOptShip').classList.toggle('active', type==='shipping');
+ document.getElementById('bagShipDetails').style.display = type==='shipping' ? '' : 'none';
+ updateBagTotal();
+}
+
+/* ── Submit ── */
+async function submitBag(){
+ if(!bag.length) return;
+ if(_submitting) return; // prevent double submission
+ _submitting = true;
+ const customerName = document.getElementById('bagCustomerName')?.value.trim()||'';
+ const customerHandle = document.getElementById('bagCustomerHandle')?.value.trim()||'';
+ const customerContact = document.getElementById('bagContact')?.value.trim()||'';
+ if(!customerName && !customerHandle){
+ _submitting = false;
+ alert('Please enter your name or Instagram/Facebook handle.'); return;
+ }
+ if(!customerContact){
+ _submitting = false;
+ alert('Please enter your email so we can reach you with payment details.'); return;
+ }
+ // Disable button immediately to prevent double-tap
+ const submitBtn = document.getElementById('bagSubmit');
+ if(submitBtn){ submitBtn.disabled = true; submitBtn.textContent = 'Sending…'; }
+ // Normalize handle — add @ if missing
+  const platform = document.getElementById('bagPlatform')?.value||'';
+  const rawHandle = customerHandle||'';
+  const handle = rawHandle && !rawHandle.startsWith('@') && platform==='Instagram' ? '@'+rawHandle : rawHandle;
+  const platformLine = platform && handle ? platform+': '+handle : handle;
+ const isBundle = bag.length >= 5;
+ const addr1 = document.getElementById('bagAddr1')?.value.trim()||'';
+ const addr2 = document.getElementById('bagAddr2')?.value.trim()||'';
+ const city = document.getElementById('bagCity')?.value.trim()||'';
+ const state = document.getElementById('bagState')?.value.trim()||'';
+ const zip = document.getElementById('bagZip').value.trim();
+ if(fulfillment==='shipping' && (!addr1 || !city || !state || !zip)){
+ alert('Please fill in your full shipping address.');
+ return;
+ }
+ const fullAddress = fulfillment==='shipping'
+ ? [addr1, addr2, [city,state,zip].filter(Boolean).join(', ')].filter(Boolean).join(', ')
+ : '';
+
+ const total = bag.reduce((s,item)=>{
+ const price = (()=>{ const sale=item.saleDiscount||0; const effBundle=isBundle&&sale===0; return effBundle?(item.bundlePrice&&item.bundlePrice>0?item.bundlePrice:item.price):(sale>0?item.price-sale:item.price); })();
+ return s + price;
+ }, 0);
+
+ const shipResult = fulfillment==='shipping' ? getShippingFee(zip, bag.length) : null;
+  const isCAOrder  = fulfillment==='pickup' || (fulfillment==='shipping' && getZipZone(zip)==='ca');
+  const orderTax   = isCAOrder ? total * 0.1025 : 0;
+ const shipFee = shipResult ? shipResult.fee : 0;
+ const zoneLabel = shipResult ? getZoneLabel(shipResult.zone) : '';
+ const fulfillmentLine = fulfillment==='shipping'
+ ? ` Shipping to ZIP: ${zip} (${zoneLabel}) — Est. $${shipFee.toFixed(2)}`
+ : ' Local Pickup';
+
+ // Build clean message
+ const itemLines = bag.map((item,i)=>{
+ const price = (()=>{ const sale=item.saleDiscount||0; const effBundle=isBundle&&sale===0; return effBundle?(item.bundlePrice&&item.bundlePrice>0?item.bundlePrice:item.price):(sale>0?item.price-sale:item.price); })();
+ const ul = item.unit==='ea'?'/ea':'/set';
+ return `${i+1}. ${item.name}${item.colorName?' — '+item.colorName:''} | Size: ${item.size} | $${price.toFixed(2)}${ul}`;
+ }).join('\n');
+
+  const platform2  = document.getElementById('bagPlatform')?.value||'';
+  const inputVal2  = document.getElementById('bagContactInput')?.value.trim()||'';
+  const contactLine = customerName + (platform2 && inputVal2 ? ' · '+platform2+': '+inputVal2 : '');
+ const contactInfo = customerContact;
+ const msg = [
+ ` Little Basics Order Draft`,
+ `From: ${contactLine}`,
+ '─────────────────────────',
+ itemLines,
+ '─────────────────────────',
+ `${isBundle?' Bundle price applied (5+ items)':''}`,
+ `Items: $${total.toFixed(2)}`,
+ shipFee>0?`Shipping: $${shipFee.toFixed(2)}`:'',
+    orderTax>0?`CA Sales Tax (10.25%): $${orderTax.toFixed(2)}`:'',
+    `Total: $${(total+shipFee+orderTax).toFixed(2)}`,
+ fulfillmentLine,
+ ].filter(Boolean).join('\n');
+
+ // Show confirmation — no clipboard needed
+
+ // Fire ntfy FIRST — before anything else can fail
+ try { await sendNtfyNotification(contactLine, bag.length, (total+shipFee).toFixed(2), fulfillment); } catch(e){}
+
+ // Post to Google Sheet as pending order — flat row format that Apps Script understands
+ try {
+ const pendingRow = [
+ new Date().toISOString(), // timestamp
+ contactLine, // name / handle
+ JSON.stringify(bag.map(item=>({ // items JSON
+ name:item.name, color:item.colorName, size:item.size,
+ price: (()=>{ const sale=item.saleDiscount||0; const effBundle=isBundle&&sale===0; return effBundle?(item.bundlePrice&&item.bundlePrice>0?item.bundlePrice:item.price):(sale>0?item.price-sale:item.price); })(),
+ unit:item.unit, image:item.image||''
+ }))),
+ (total+shipFee).toFixed(2), // grand total
+ fulfillment, // pickup or shipping
+ fullAddress||'', // full shipping address
+ isBundle ? '1' : '0', // bundle flag
+ shipFee.toFixed(2), // shipping fee
+ 'pending',  // status
+      contactInfo  // phone or email
+ ];
+ await fetch(SHEET_URL, {
+ method: 'POST',
+ body: JSON.stringify({ action:'append', tab:'PendingOrders', row: pendingRow })
+ });
+ } catch(e){ console.log('Sheet post failed silently', e); }
+
+ // Show confirmation + clear bag
+ const confirmEl = document.getElementById('bagConfirm');
+ if(confirmEl){
+ confirmEl.style.display = 'block';
+ confirmEl.innerHTML = `
+ <div style="font-size:1.4rem;margin-bottom:.4rem">🌿</div>
+ <div style="font-size:.88rem;font-weight:700;color:#3a2e24;margin-bottom:.5rem">Order received!</div>
+ <div style="font-size:.78rem;color:#555;line-height:1.65;background:#f5f1ed;border-radius:.5rem;padding:.65rem .75rem;margin-bottom:.5rem">
+   Reply to us on wherever you found us —<br>
+   <strong>Instagram @littlebasics</strong> or <strong>Facebook Marketplace</strong> —<br>
+   so we can match your order and confirm faster!
+ </div>
+ <div style="font-size:.7rem;color:#aaa">We'll review your order and get back to you shortly.</div>`;
+ }
+ // Disable submit to prevent double submission
+ _submitting = false;
+ document.getElementById('bagSubmit').disabled = true;
+ document.getElementById('bagSubmit').textContent = 'Order Submitted';
+ document.getElementById('bagSubmit').style.background = '#5a4a3a';
+}
+
+/* Keep reference to flat sheet products for color/variant lookup */
+let _allSheetProducts = null;
+
+
+/* ── NTFY.SH NOTIFICATION ── */
+const NTFY_TOPIC = 'lb-pendingorder-noti-1988';
+
+async function sendNtfyNotification(contactLine, itemCount, total, fulfillment){
+ if(!NTFY_TOPIC || NTFY_TOPIC === 'YOUR_TOPIC_HERE') return;
+ const body = [
+ 'From: ' + contactLine,
+ itemCount + ' item' + (itemCount!==1?'s':'') + ' · $' + total,
+ fulfillment==='pickup' ? ' Local Pickup' : ' Shipping'
+ ].join('\n');
+ try {
+ // Use no-cors so browser doesn't block — ntfy.sh accepts this
+ await fetch('https://ntfy.sh/' + NTFY_TOPIC, {
+ method: 'POST',
+ mode: 'no-cors',
+ headers: {
+ 'Content-Type': 'text/plain',
+ 'Title': 'New LB Order',
+ 'Priority': 'high',
+ 'Tags': 'shopping_bags'
+ },
+ body
+ });
+ console.log('ntfy notification sent');
+ } catch(e){
+ console.warn('ntfy notification failed:', e);
+ }
+}
+/* ── CAROUSEL ── */
+let _carouselIdx = 0;
+const CAROUSEL_INTERVAL = 5000;
+let _carouselTimer = null;
+
+function startCarousel(){
+ _carouselTimer = setInterval(()=>{
+ _carouselIdx = (_carouselIdx + 1) % 2;
+ const track = document.getElementById('carouselTrack');
+ if(track) track.style.transform = `translateY(-${_carouselIdx * 44}px)`;
+ }, CAROUSEL_INTERVAL);
+}
+
+/* ── FAQ ── */
+function toggleFAQ(){
+ const panel = document.getElementById('faqPanel');
+ const btn = document.getElementById('faqBtn');
+ panel.classList.toggle('open');
+ btn.textContent = panel.classList.contains('open') ? 'FAQ ▴' : 'FAQ ▾';
+}
+
+function toggleFAQItem(qEl){
+ const item = qEl.closest('.faq-item');
+ item.classList.toggle('open');
+}
+
+// Close FAQ when clicking outside
+document.addEventListener('click', e=>{
+ const wrap = document.getElementById('faqPanel')?.closest('.faq-wrap');
+ if(wrap && !wrap.contains(e.target)){
+ document.getElementById('faqPanel')?.classList.remove('open');
+ const btn = document.getElementById('faqBtn');
+ if(btn) btn.textContent = 'FAQ ▾';
+ }
+});
+
+startCarousel();
+window.scrollTo(0,0);
+loadFromSheet();
+</script>
+</body>
+</html>
