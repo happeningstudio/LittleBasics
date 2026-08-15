@@ -3990,9 +3990,14 @@ async function publishCatalog(){
   showToast('📤 Publishing catalog…');
 
   // Build catalog data
+  const SIZE_LABELS = {"60":"3-6M","70":"6-12M","80":"12-24M","90":"2T","100":"3T","110":"4T","120":"5T","130":"130","OS":"One Size"};
   const catalogData = {
     published: new Date().toISOString(),
-    products: products.filter(p=>!p.hidden),
+    products: products.filter(p=>!p.hidden).map(p=>({
+      ...p,
+      sizesDisplay: (p.sizes||[]).map(cm=>SIZE_LABELS[cm]||cm),
+      sizesCm: p.sizes
+    })),
     stock: stock,
     soldCounts: soldCounts
   };

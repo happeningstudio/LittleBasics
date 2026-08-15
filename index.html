@@ -1094,22 +1094,28 @@ async function fetchCatalogData(silent){
        const prods = data.products;
        stockData = data.stock || {};
        soldData = {};
-       _allSheetProducts = prods;
+       _allSheetProducts = prods.map(p=>({
+         ...p,
+         id: p.pid||p.id,
+         sizes: p.sizesDisplay || p.sizes,
+         sizesCm: p.sizesCm || p.sizes
+       }));
 
        const grouped={};
-       prods.forEach(p=>{
+       _allSheetProducts.forEach(p=>{
          if((p.category||'').toLowerCase().includes('sold out')) return;
          if(p.hidden) return;
+         const pid = p.pid||p.id;
          if(!grouped[p.name]){
-           grouped[p.name]={...p,allSizes:[...(p.sizes||[])],allSizesCm:[...(p.sizes||[]).map(s=>SIZE_TO_CM[s]||s)],pids:[p.pid||p.id]};
+           grouped[p.name]={...p,id:pid,allSizes:[...(p.sizes||[])],allSizesCm:[...(p.sizesCm||p.sizes||[])],pids:[pid]};
          } else {
            (p.sizes||[]).forEach((s,i)=>{
              if(!grouped[p.name].allSizes.includes(s)){
                grouped[p.name].allSizes.push(s);
-               grouped[p.name].allSizesCm.push(SIZE_TO_CM[s]||s);
+               grouped[p.name].allSizesCm.push((p.sizesCm||[])[i]||s);
              }
            });
-           grouped[p.name].pids.push(p.pid||p.id);
+           grouped[p.name].pids.push(pid);
            if(!grouped[p.name].season && p.season) grouped[p.name].season=p.season;
          }
        });
