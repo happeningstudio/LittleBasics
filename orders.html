@@ -794,6 +794,7 @@ function doPost(e) {
         <div class="sum-row"><span class="sum-lbl">Shipping In</span><span class="sum-val" id="sShipIn">$0.00</span></div>
         <div class="sum-row"><span class="sum-lbl">Shipping Out</span><span class="sum-val" id="sShipOut">$0.00</span></div>
         <div class="sum-row"><span class="sum-lbl">PayPal/Venmo Fee</span><span class="sum-val" id="sFee">$0.00</span></div>
+        <div class="sum-row" id="sWholesaleRow" style="display:none"><span class="sum-lbl" style="color:var(--bark)">Wholesale Discount</span><span class="sum-val" id="sWholesale" style="color:var(--bark)">-$0.00</span></div>
         <div class="sum-row total-row"><span class="sum-lbl">Est. Profit</span><span class="sum-val profit" id="sProfit">$0.00</span></div>
         <div class="sum-row"><span class="sum-lbl">Margin</span><span class="sum-val" id="sMargin">—</span></div>
       </div>
@@ -816,9 +817,10 @@ function doPost(e) {
         </div>
         <div class="two-col">
           <div class="field"><label>Fee ($)</label><input type="number" id="fFee" step="0.01" oninput="updatePanel()"></div>
-          <div class="field"><label>Payment</label>
-            <select id="fPayment"><option>Venmo</option><option>PayPal</option><option>Zelle</option><option>Cash</option></select>
-          </div>
+          <div class="field"><label>Wholesale Discount ($)</label><input type="number" id="fWholesale" step="0.01" min="0" placeholder="0.00" oninput="updatePanel()"></div>
+        </div>
+        <div class="field"><label>Payment</label>
+          <select id="fPayment"><option>Venmo</option><option>PayPal</option><option>Zelle</option><option>Cash</option></select>
         </div>
         <div class="field"><label>Status</label>
           <select id="fStatus"><option>Paid</option><option>Packed</option><option>Packed &amp; Shipped</option><option>Picked Up</option></select>
@@ -1755,8 +1757,9 @@ function updatePanel(){
   const shipIn=parseFloat(document.getElementById('fShipIn').value)||0;
   const shipOut=parseFloat(document.getElementById('fShipOut').value)||0;
   const fee=parseFloat(document.getElementById('fFee').value)||0;
-  const profit=revenue+shipIn-cost-shipOut-fee;
-  const margin=revenue>0?((profit/revenue)*100).toFixed(1):null;
+  const wholesale=parseFloat(document.getElementById('fWholesale')?.value)||0;
+  const profit=revenue+shipIn-cost-shipOut-fee-wholesale;
+  const margin=revenue>0?((profit/(revenue+shipIn))*100).toFixed(1):null;
 
   document.getElementById('sItems').textContent=tqty;
   document.getElementById('sRevenue').textContent=fmt(revenue);
@@ -1764,6 +1767,10 @@ function updatePanel(){
   document.getElementById('sShipIn').textContent=fmt(shipIn);
   document.getElementById('sShipOut').textContent=fmt(shipOut);
   document.getElementById('sFee').textContent=fmt(fee);
+  const wRow=document.getElementById('sWholesaleRow');
+  if(wRow) wRow.style.display=wholesale>0?'':'none';
+  const wEl=document.getElementById('sWholesale');
+  if(wEl) wEl.textContent='-'+fmt(wholesale);
   document.getElementById('sMargin').textContent=margin?margin+'%':'—';
   const profEl=document.getElementById('sProfit');
   profEl.textContent=fmt(profit);
@@ -1871,7 +1878,8 @@ async function copyAndSave(){
   const shipIn=parseFloat(document.getElementById('fShipIn').value)||0;
   const shipOut=parseFloat(document.getElementById('fShipOut').value)||0;
   const fee=parseFloat(document.getElementById('fFee').value)||0;
-  const profit=revenue+shipIn-cost-shipOut-fee;
+  const wholesale=parseFloat(document.getElementById('fWholesale')?.value)||0;
+  const profit=revenue+shipIn-cost-shipOut-fee-wholesale;
   const gross=revenue+shipIn;
   const status=document.getElementById('fStatus').value;
   const name=document.getElementById('fName').value;
@@ -1940,7 +1948,7 @@ async function copyAndSave(){
 
 function clearOrder(){
   Object.keys(order).forEach(k=>delete order[k]);
-  ['fName','fAddress','fTracking','fShipIn','fShipOut','fFee','fNotes'].forEach(id=>document.getElementById(id).value='');
+  ['fName','fAddress','fTracking','fShipIn','fShipOut','fFee','fWholesale','fNotes'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
   document.getElementById('fDate').value=(()=>{ const t=new Date(); return t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0'); })();
   document.getElementById('fStatus').value='Paid';
   document.getElementById('fPayment').value='Venmo';
