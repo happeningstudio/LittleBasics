@@ -1408,7 +1408,9 @@ function updateColorOptions(){
  if(variants.length && selectedCm){
    variants.forEach(v=>{
      const key = String(v.id)+'_'+String(selectedCm);
-     const inStock = !(key in stockData) || stockData[key] > 0;
+     const stockTracked = key in stockData;
+     // Only mark out of stock if key exists AND is explicitly 0
+     const inStock = !stockTracked || stockData[key] > 0;
      const hasSize = (v.sizesCm||[]).some(cm=>String(cm)===String(selectedCm));
      if(!hasSize) return;
      buildOpt(v.id, v.color||'Default', v.hex||'#e8ddd0', inStock);
@@ -1497,19 +1499,8 @@ function confirmAddToBag(){
  const price = isBundle ? (variant?.bundlePrice||p.bundlePrice||p.price) : (variant?.price||p.price);
  const unit = variant?.unit||p.unit||'ea';
 
- // Check stock for this exact pid+size combo
- const stockKey = String(pid)+'_'+String(sizeCm);
- // Only block if stockData has actually loaded (has keys) AND stock is tracked AND exceeded
- const stockLoaded = Object.keys(stockData).length > 0;
- const availableStock = stockLoaded ? stockData[stockKey] : undefined;
-
- // Count how many of this exact item (same pid + same size) are already in the bag
- const alreadyInBag = bag.filter(b=>b.colorPid===pid && b.sizeCm===sizeCm).length;
-
- if(availableStock !== undefined && availableStock !== null && alreadyInBag >= availableStock && availableStock > 0){
- alert(`Only ${availableStock} left in stock for this size/color — you already have ${alreadyInBag} in your bag.`);
- return;
- }
+ // Stock is checked manually when you confirm orders
+ // Multiple customers can add the same item — you'll sort it out via DM
 
  bag.push({
  id: Date.now(),
