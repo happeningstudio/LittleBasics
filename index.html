@@ -1547,7 +1547,7 @@ function renderBag(){
  <div class="bag-item-meta">${item.colorName ? item.colorName+' · ' : ''}${item.size}</div>
  <div class="bag-item-price">$${price.toFixed(2)}${ul}</div>
  </div>
- <button class="bag-item-remove" onclick="removeFromBag(${item.id})"></button>
+ <button class="bag-item-remove" onclick="removeFromBag(${item.id})" title="Remove">✕</button>
  </div>`;
  }).join('');
 
