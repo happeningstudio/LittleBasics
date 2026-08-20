@@ -757,7 +757,7 @@ function doPost(e) {
         <button class="chip" data-sz="100" onclick="setFilter(this,'sz')">100</button>
         <button class="chip" data-sz="110" onclick="setFilter(this,'sz')">110</button>
         <button class="chip" data-sz="120" onclick="setFilter(this,'sz')">120</button>
-        <button class="chip" data-sz="130" onclick="setFilter(this,'sz')">130</button>
+        <button class="chip" data-sz="130" onclick="setFilter(this,'sz')">6-7T</button>
         <button class="chip" data-sz="OS"  onclick="setFilter(this,'sz')">One Size</button>
       </div>
       <div class="tbl-wrap">
@@ -1091,11 +1091,11 @@ function toCm(sz){
 }
 // Convert cm → display label (for order builder UI)
 function toDisplay(cm){
-  const map={"60":"3-6M (60)","70":"6-12M (70)","80":"12-24M (80)","90":"2T (90)","100":"3T (100)","110":"4T (110)","120":"5T (120)","130":"130","OS":"One Size"};
+  const map={"60":"3-6M (60)","70":"6-12M (70)","80":"12-24M (80)","90":"2T (90)","100":"3T (100)","110":"4T (110)","120":"5T (120)","130":"6-7T","OS":"One Size"};
   return map[cm] || cm;
 }
 function toDisplayShort(cm){
-  const map={"60":"3-6M","70":"6-12M","80":"12-24M","90":"2T","100":"3T","110":"4T","120":"5T","130":"130","OS":"One Size"};
+  const map={"60":"3-6M","70":"6-12M","80":"12-24M","90":"2T","100":"3T","110":"4T","120":"5T","130":"6-7T","OS":"One Size"};
   return map[cm] || cm;
 }
 
@@ -3993,7 +3993,7 @@ async function publishCatalog(){
   showToast('📤 Publishing catalog…');
 
   // Build catalog data
-  const SIZE_LABELS = {"60":"3-6M","70":"6-12M","80":"12-24M","90":"2T","100":"3T","110":"4T","120":"5T","130":"130","OS":"One Size"};
+  const SIZE_LABELS = {"60":"3-6M","70":"6-12M","80":"12-24M","90":"2T","100":"3T","110":"4T","120":"5T","130":"6-7T","OS":"One Size"};
   const catalogData = {
     published: new Date().toISOString(),
     products: products.filter(p=>!p.hidden).map(p=>({
