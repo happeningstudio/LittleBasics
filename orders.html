@@ -2376,6 +2376,9 @@ function renderLog(){
     inpName.style.fontWeight='600';
     inpName.onchange=function(){ updateLogField(e.id,'name',this.value); };
     tdName.appendChild(inpName);
+    const starSpan=document.createElement('span');
+    starSpan.innerHTML=starBtn(e.name);
+    tdName.appendChild(starSpan);
     tr.appendChild(tdName);
 
     // Address — editable
@@ -3807,7 +3810,7 @@ function renderPending(){
     card.innerHTML=`
       <div class="pending-card-head" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'':'none'" style="cursor:pointer">
         <div>
-          <div style="font-weight:700;font-size:.82rem;color:var(--ink)">${order.contact||'Anonymous'} <span style="font-size:.62rem;color:#bbb;font-weight:400">tap to expand</span></div>
+          <div style="font-weight:700;font-size:.82rem;color:var(--ink)">${order.contact||'Anonymous'} ${starBtn(order.contact)} <span style="font-size:.62rem;color:#bbb;font-weight:400">tap to expand</span></div>
           <div style="font-size:.68rem;color:#aaa;margin-top:.1rem">${date}</div>
           <div style="margin-top:.3rem;display:flex;gap:.3rem;flex-wrap:wrap">
             <span class="pending-tag ${order.fulfillment==='shipping'?'shipping':''}">${order.fulfillment==='shipping'?'📦 Ship':'🏠 Pick Up'}</span>
@@ -4037,7 +4040,40 @@ async function publishCatalog(){
   }
 }
 
-/* ── BOOT ── */
+/* ═══════════════════════════════════════════════
+   STARRED CUSTOMERS (returning customer markers)
+═══════════════════════════════════════════════ */
+let starredCustomers = loadLocal('lb_starred', []);
+function saveStarred(){ saveLocal('lb_starred', starredCustomers); }
+
+function isStarred(name){
+  if(!name) return false;
+  return starredCustomers.some(n=>n.toLowerCase()===name.toLowerCase().trim());
+}
+
+function toggleStar(name){
+  if(!name) return;
+  const key = name.toLowerCase().trim();
+  if(isStarred(name)){
+    starredCustomers = starredCustomers.filter(n=>n.toLowerCase()!==key);
+  } else {
+    starredCustomers.push(name.trim());
+  }
+  saveStarred();
+  renderLog();
+  renderPending();
+}
+
+function starBtn(name){
+  const starred = isStarred(name);
+  return `<button onclick="toggleStar('${(name||'').replace(/'/g,"\\'")}');event.stopPropagation()" 
+    title="${starred?'Remove star':'Mark as returning customer'}"
+    style="background:none;border:none;cursor:pointer;font-size:.9rem;padding:.1rem .2rem;line-height:1;opacity:${starred?'1':'0.3'};transition:opacity .15s"
+    onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='${starred?'1':'0.3'}'"
+  >${starred?'⭐':'☆'}</button>`;
+}
+
+
 renderTable(); updatePanel();
 if(sheetUrl){
   setSyncStatus('ok','connected');
