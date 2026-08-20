@@ -552,7 +552,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica','Arial'
 <div class="bag-drawer" id="bagDrawer">
  <div class="bag-head">
  <h3>Shopping Bag</h3>
- <button class="bag-close" onclick="closeBag()"></button>
+ <div style="display:flex;align-items:center;gap:.75rem">
+   <button onclick="closeBag()" style="background:none;border:none;cursor:pointer;font-size:.8rem;color:var(--bark);font-family:inherit;padding:.2rem .5rem;border:1px solid var(--bark);border-radius:4px">← Continue Shopping</button>
+   <button class="bag-close" onclick="closeBag()">✕</button>
+ </div>
  </div>
  <div style="padding:.6rem 1rem .5rem;border-bottom:1px solid #e5e5e5;flex-shrink:0">
   <div style="font-size:.65rem;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:#bbb;margin-bottom:.5rem">How can we reach you? <span style="color:#c0392b">*</span></div>
@@ -1519,7 +1522,8 @@ function confirmAddToBag(){
  closeSelector();
  updateBagCount();
  recalcBagPrices();
- openBag();
+ // Show a brief toast instead of opening the bag
+ showAddedToast(item.name);
 }
 
 /* ── Bag rendering ── */
@@ -1553,6 +1557,20 @@ function renderBag(){
 
  updateBagTotal();
  updateSubmitBtn();
+}
+
+function showAddedToast(name){
+ let toast = document.getElementById('addedToast');
+ if(!toast){
+   toast = document.createElement('div');
+   toast.id = 'addedToast';
+   toast.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#3a2e24;color:#fff;padding:.5rem 1rem;border-radius:20px;font-size:.78rem;z-index:999;opacity:0;transition:opacity .2s;white-space:nowrap;pointer-events:none';
+   document.body.appendChild(toast);
+ }
+ toast.textContent = '✓ Added to bag!';
+ toast.style.opacity = '1';
+ clearTimeout(toast._timer);
+ toast._timer = setTimeout(()=>{ toast.style.opacity='0'; }, 2000);
 }
 
 function removeFromBag(id){
