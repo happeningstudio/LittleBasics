@@ -794,6 +794,7 @@ function doPost(e) {
         <div class="sum-row"><span class="sum-lbl">Shipping In</span><span class="sum-val" id="sShipIn">$0.00</span></div>
         <div class="sum-row"><span class="sum-lbl">Shipping Out</span><span class="sum-val" id="sShipOut">$0.00</span></div>
         <div class="sum-row"><span class="sum-lbl">PayPal/Venmo Fee</span><span class="sum-val" id="sFee">$0.00</span></div>
+        <div class="sum-row" id="sTaxRow" style="display:none"><span class="sum-lbl">CA Sales Tax (10.25%)</span><span class="sum-val" id="sTax">$0.00</span></div>
         <div class="sum-row" id="sWholesaleRow" style="display:none"><span class="sum-lbl" style="color:var(--bark)">Wholesale Discount</span><span class="sum-val" id="sWholesale" style="color:var(--bark)">-$0.00</span></div>
         <div class="sum-row total-row"><span class="sum-lbl">Est. Profit</span><span class="sum-val profit" id="sProfit">$0.00</span></div>
         <div class="sum-row"><span class="sum-lbl">Margin</span><span class="sum-val" id="sMargin">—</span></div>
@@ -813,7 +814,15 @@ function doPost(e) {
         <div class="field"><label>Tracking #</label><input type="text" id="fTracking"></div>
         <div class="two-col">
           <div class="field"><label>Ship Collected ($)</label><input type="number" id="fShipIn" step="0.01" oninput="updatePanel()"></div>
+          <div class="field"><label>ZIP Code <span style="font-size:.6rem;color:#bbb">auto-calc ship</span></label>
+            <input type="text" id="fZip" maxlength="5" placeholder="e.g. 90210"
+              style="font-family:monospace"
+              oninput="calcShipFromZip()">
+          </div>
+        </div>
+        <div class="two-col">
           <div class="field"><label>Ship Paid Out ($)</label><input type="number" id="fShipOut" step="0.01" oninput="updatePanel()"></div>
+          <div class="field" id="fZipResult" style="display:flex;align-items:flex-end;padding-bottom:.3rem;font-size:.7rem;color:#aaa"></div>
         </div>
         <div class="two-col">
           <div class="field"><label>Fee ($)</label><input type="number" id="fFee" step="0.01" oninput="updatePanel()"></div>
@@ -1758,6 +1767,9 @@ function updatePanel(){
   const shipOut=parseFloat(document.getElementById('fShipOut').value)||0;
   const fee=parseFloat(document.getElementById('fFee').value)||0;
   const wholesale=parseFloat(document.getElementById('fWholesale')?.value)||0;
+  const zip=document.getElementById('fZip')?.value||'';
+  const isCA=getZipZone(zip)==='ca';
+  const tax=isCA?Math.round(revenue*0.1025*100)/100:0;
   const profit=revenue+shipIn-cost-shipOut-fee-wholesale;
   const margin=revenue>0?((profit/(revenue+shipIn))*100).toFixed(1):null;
 
@@ -1767,6 +1779,10 @@ function updatePanel(){
   document.getElementById('sShipIn').textContent=fmt(shipIn);
   document.getElementById('sShipOut').textContent=fmt(shipOut);
   document.getElementById('sFee').textContent=fmt(fee);
+  const taxRow=document.getElementById('sTaxRow');
+  if(taxRow) taxRow.style.display=isCA?'':'none';
+  const taxEl=document.getElementById('sTax');
+  if(taxEl) taxEl.textContent=fmt(tax);
   const wRow=document.getElementById('sWholesaleRow');
   if(wRow) wRow.style.display=wholesale>0?'':'none';
   const wEl=document.getElementById('sWholesale');
@@ -1834,8 +1850,12 @@ function updatePanel(){
         return p.name+' ('+toDisplayShort(cm)+') x'+qty;
       }).filter(Boolean).join('\n');
       const shipIn=parseFloat(document.getElementById('fShipIn').value)||0;
-      const totalForCustomer=revenue+shipIn;
+      const zipVal=document.getElementById('fZip')?.value||'';
+      const isCAzip=getZipZone(zipVal)==='ca';
+      const taxAmt=isCAzip?Math.round(revenue*0.1025*100)/100:0;
+      const totalForCustomer=revenue+shipIn+taxAmt;
       let msg=itemLines+'\n\nThe total is '+fmt(totalForCustomer)+' including shipping and tracking.';
+      if(taxAmt>0) msg+='\n(Includes '+fmt(taxAmt)+' CA sales tax)';
       if(saved>0.009&&bundle) msg+=' You saved '+fmt(saved)+' with the bundle discount!';
       msgBox.style.whiteSpace='pre-wrap';
       msgBox.textContent=msg;
@@ -1879,8 +1899,11 @@ async function copyAndSave(){
   const shipOut=parseFloat(document.getElementById('fShipOut').value)||0;
   const fee=parseFloat(document.getElementById('fFee').value)||0;
   const wholesale=parseFloat(document.getElementById('fWholesale')?.value)||0;
+  const zip=document.getElementById('fZip')?.value||'';
+  const isCA=getZipZone(zip)==='ca';
+  const tax=isCA?Math.round(revenue*0.1025*100)/100:0;
   const profit=revenue+shipIn-cost-shipOut-fee-wholesale;
-  const gross=revenue+shipIn;
+  const gross=revenue+shipIn+tax;
   const status=document.getElementById('fStatus').value;
   const name=document.getElementById('fName').value;
   const date=normDate(document.getElementById('fDate').value);
@@ -1948,7 +1971,7 @@ async function copyAndSave(){
 
 function clearOrder(){
   Object.keys(order).forEach(k=>delete order[k]);
-  ['fName','fAddress','fTracking','fShipIn','fShipOut','fFee','fWholesale','fNotes'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+  ['fName','fAddress','fTracking','fShipIn','fShipOut','fFee','fWholesale','fZip','fNotes'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
   document.getElementById('fDate').value=(()=>{ const t=new Date(); return t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0'); })();
   document.getElementById('fStatus').value='Paid';
   document.getElementById('fPayment').value='Venmo';
@@ -4073,6 +4096,35 @@ function starBtn(name){
   >${starred?'⭐':'☆'}</button>`;
 }
 
+function getZipZone(zip){
+  if(!zip||zip.length<5) return null;
+  const z=parseInt(zip.substring(0,3));
+  if(z>=900&&z<=961) return 'ca';
+  const westRanges=[[850,865],[889,891],[970,979],[980,994],[840,847],[800,816],[832,838],[590,599],[820,831],[870,884],[967,968],[995,999]];
+  if(westRanges.some(([lo,hi])=>z>=lo&&z<=hi)) return 'west';
+  return 'us';
+}
+
+function calcShipFromZip(){
+  const zip=document.getElementById('fZip')?.value||'';
+  const result=document.getElementById('fZipResult');
+  if(zip.length<5){ if(result) result.textContent=''; return; }
+  const zone=getZipZone(zip);
+  if(!zone){ if(result) result.textContent='Invalid ZIP'; return; }
+  const qty=totalQty();
+  let tier;
+  if(qty<=4) tier=[8,9,10];
+  else if(qty<=7) tier=[9,10,11];
+  else if(qty<=10) tier=[10,11,12];
+  else tier=[12,13,14];
+  const zoneIdx={ca:0,west:1,us:2}[zone];
+  const fee=tier[zoneIdx];
+  const zoneLabel={ca:'California',west:'West US',us:'Rest of US'}[zone];
+  const fShipIn=document.getElementById('fShipIn');
+  if(fShipIn) fShipIn.value=fee.toFixed(2);
+  if(result) result.textContent=`📍 ${zoneLabel} — $${fee}`;
+  updatePanel();
+}
 
 renderTable(); updatePanel();
 if(sheetUrl){
