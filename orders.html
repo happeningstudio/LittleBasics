@@ -1903,7 +1903,7 @@ async function copyAndSave(){
   const isCA=getZipZone(zip)==='ca';
   const tax=isCA?Math.round(revenue*0.1025*100)/100:0;
   const profit=revenue+shipIn-cost-shipOut-fee-wholesale;
-  const gross=revenue+shipIn+tax;
+  const gross=revenue+shipIn+tax-wholesale;
   const status=document.getElementById('fStatus').value;
   const name=document.getElementById('fName').value;
   const date=normDate(document.getElementById('fDate').value);
@@ -1933,7 +1933,7 @@ async function copyAndSave(){
   const entry={id:Date.now(),date,name,status,items:itemDetails,bundle,
     revenue:revenue.toFixed(2),cost:cost.toFixed(2),
     shipIn:shipIn.toFixed(2),shipOut:shipOut.toFixed(2),
-    fee:fee.toFixed(2),profit:profit.toFixed(2),
+    fee:fee.toFixed(2),wholesale:wholesale.toFixed(2),profit:profit.toFixed(2),
     notes:document.getElementById('fNotes').value,
     tracking:document.getElementById('fTracking').value,
     address:document.getElementById('fAddress').value};
@@ -2376,7 +2376,7 @@ function renderLog(){
   tbody.innerHTML='';
   filtered.forEach(e=>{
     const profNum=parseFloat(e.profit||0);
-    const gross=parseFloat(e.revenue||0)+parseFloat(e.shipIn||0);
+    const gross=parseFloat(e.revenue||0)+parseFloat(e.shipIn||0)-parseFloat(e.wholesale||0);
     const itemStr=(e.items||[]).map(i=>`${i.qty}× ${i.name} (${toDisplayShort(i.cm)||i.cm})`).join(', ');
     const isRefunded=e.status==='Refunded';
     const sc='status-'+statusClass(e.status);
@@ -2491,7 +2491,7 @@ function renderLog(){
       const entry=orderLog.find(x=>x.id===e.id);
       if(!entry) return;
       entry.shipIn=parseFloat(this.value)||0;
-      entry.profit=(parseFloat(entry.revenue||0)+entry.shipIn-parseFloat(entry.cost||0)-parseFloat(entry.shipOut||0)-parseFloat(entry.fee||0)).toFixed(2);
+      entry.profit=(parseFloat(entry.revenue||0)+entry.shipIn-parseFloat(entry.cost||0)-parseFloat(entry.shipOut||0)-parseFloat(entry.fee||0)-parseFloat(entry.wholesale||0)).toFixed(2);
       saveLog(); renderLog();
       const row=document.getElementById('logexpand-'+e.id);
       if(row&&row.style.display!=='none') row.style.display='';
@@ -2511,7 +2511,7 @@ function renderLog(){
       const entry=orderLog.find(x=>x.id===e.id);
       if(!entry) return;
       entry.shipOut=parseFloat(this.value)||0;
-      entry.profit=(parseFloat(entry.revenue||0)+parseFloat(entry.shipIn||0)-parseFloat(entry.cost||0)-entry.shipOut-parseFloat(entry.fee||0)).toFixed(2);
+      entry.profit=(parseFloat(entry.revenue||0)+parseFloat(entry.shipIn||0)-parseFloat(entry.cost||0)-entry.shipOut-parseFloat(entry.fee||0)-parseFloat(entry.wholesale||0)).toFixed(2);
       saveLog(); renderLog();
       const row=document.getElementById('logexpand-'+e.id);
       if(row&&row.style.display!=='none') row.style.display='';
@@ -2612,7 +2612,7 @@ function recalcLogEntry(entry){
     revenue+=sp*i.qty;
   });
   entry.revenue=revenue.toFixed(2);
-  entry.profit=(revenue+parseFloat(entry.shipIn||0)-parseFloat(entry.cost||0)-parseFloat(entry.shipOut||0)-parseFloat(entry.fee||0)).toFixed(2);
+  entry.profit=(revenue+parseFloat(entry.shipIn||0)-parseFloat(entry.cost||0)-parseFloat(entry.shipOut||0)-parseFloat(entry.fee||0)-parseFloat(entry.wholesale||0)).toFixed(2);
 }
 
 function editLogItem(entryId, idx, newQty){
