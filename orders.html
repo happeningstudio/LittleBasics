@@ -1818,17 +1818,17 @@ function updatePanel(){
   const phraseSec=document.getElementById('orderPhraseSec');
   const phraseEl=document.getElementById('orderPhrase');
   if(tqty>0&&phraseEl){
-    const totalForCustomer=revenue+shipIn;
-    // Savings = regular price total minus what they actually pay (captures bundle + sale discounts)
+    const totalForCustomer=revenue+shipIn-wholesale;
+    // Savings = regular price total minus what they actually pay (captures bundle + sale + wholesale discounts)
     let regularTotal=0;
     entries.forEach(([k,qty])=>{
       const[pidStr]=k.split('_');
       const p=products.find(p=>p.pid===parseInt(pidStr));
       if(p) regularTotal+=p.price*qty;
     });
-    const saved=regularTotal-revenue;
+    const saved=regularTotal-revenue+wholesale;
     let phrase='The total is '+fmt(totalForCustomer)+' including shipping and tracking.';
-    if(saved>0.009&&bundle) phrase+=' You saved '+fmt(saved)+' with the bundle discount!';
+    if(saved>0.009&&(bundle||wholesale>0)) phrase+=' You saved '+fmt(saved)+' with the bundle discount!';
     phraseEl.textContent=phrase;
     phraseSec.style.display='';
   } else if(phraseSec){
@@ -1853,10 +1853,10 @@ function updatePanel(){
       const zipVal=document.getElementById('fZip')?.value||'';
       const isCAzip=getZipZone(zipVal)==='ca';
       const taxAmt=isCAzip?Math.round(revenue*0.1025*100)/100:0;
-      const totalForCustomer=revenue+shipIn+taxAmt;
+      const totalForCustomer=revenue+shipIn+taxAmt-wholesale;
       let msg=itemLines+'\n\nThe total is '+fmt(totalForCustomer)+' including shipping and tracking.';
       if(taxAmt>0) msg+='\n(Includes '+fmt(taxAmt)+' CA sales tax)';
-      if(saved>0.009&&bundle) msg+=' You saved '+fmt(saved)+' with the bundle discount!';
+      if(saved>0.009&&(bundle||wholesale>0)) msg+=' You saved '+fmt(saved)+' with the bundle discount!';
       msgBox.style.whiteSpace='pre-wrap';
       msgBox.textContent=msg;
       if(copyMsgBtn) copyMsgBtn.style.display='';
