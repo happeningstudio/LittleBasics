@@ -2732,12 +2732,18 @@ function setAdjustMode(btn, mode){
   const id=btn.dataset.id;
   const entry=orderLog.find(e=>String(e.id)===String(id));
   if(!entry) return;
-  // Find the parent container — works for both old card and new table layout
-  const panel=btn.closest('[id^="adjust-body-"]')||btn.closest('.adjust-panel')||btn.parentElement.closest('div');
-  if(panel) panel.querySelectorAll('.amode').forEach(b=>b.classList.remove('active'));
+
+  // Find amode container and deactivate others
+  btn.closest('.adjust-modes')?.querySelectorAll('.amode').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
 
-  const body=document.getElementById('adjust-body-'+id);
+  // Find body — try by ID first, then relative to button
+  let body=document.getElementById('adjust-body-'+id);
+  if(!body){
+    // Walk up to find the parent panel, then find the body sibling
+    const modesEl=btn.closest('.adjust-modes');
+    if(modesEl) body=modesEl.nextElementSibling;
+  }
   if(!body) return;
   const items=entry.items||[];
 
