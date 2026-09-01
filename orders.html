@@ -826,6 +826,7 @@ function doPost(e) {
         </div>
         <div class="two-col">
           <div class="field"><label>Fee ($)</label><input type="number" id="fFee" step="0.01" oninput="updatePanel()"></div>
+          <div class="field"><label>CA Sales Tax ($) <span style="font-size:.6rem;color:#bbb">auto or manual</span></label><input type="number" id="fTax" step="0.01" min="0" placeholder="0.00" oninput="updatePanel()"></div>
           <div class="field"><label>Wholesale Discount ($)</label><input type="number" id="fWholesale" step="0.01" min="0" placeholder="0.00" oninput="updatePanel()"></div>
         </div>
         <div class="field"><label>Payment</label>
@@ -1769,7 +1770,9 @@ function updatePanel(){
   const wholesale=parseFloat(document.getElementById('fWholesale')?.value)||0;
   const zip=document.getElementById('fZip')?.value||'';
   const isCA=getZipZone(zip)==='ca';
-  const tax=isCA?Math.round(revenue*0.1025*100)/100:0;
+  const manualTax=parseFloat(document.getElementById('fTax')?.value)||0;
+  const autoTax=isCA?Math.round(revenue*0.1025*100)/100:0;
+  const tax=manualTax>0?manualTax:autoTax;
   const profit=revenue+shipIn-cost-shipOut-fee-wholesale;
   const margin=revenue>0?((profit/(revenue+shipIn))*100).toFixed(1):null;
 
@@ -1780,9 +1783,12 @@ function updatePanel(){
   document.getElementById('sShipOut').textContent=fmt(shipOut);
   document.getElementById('sFee').textContent=fmt(fee);
   const taxRow=document.getElementById('sTaxRow');
-  if(taxRow) taxRow.style.display=isCA?'':'none';
+  if(taxRow) taxRow.style.display=(tax>0)?'':'none';
   const taxEl=document.getElementById('sTax');
   if(taxEl) taxEl.textContent=fmt(tax);
+  // Auto-fill fTax field if CA and not manually set
+  const fTaxEl=document.getElementById('fTax');
+  if(fTaxEl&&!fTaxEl.value&&isCA&&autoTax>0) fTaxEl.value=autoTax.toFixed(2);
   const wRow=document.getElementById('sWholesaleRow');
   if(wRow) wRow.style.display=wholesale>0?'':'none';
   const wEl=document.getElementById('sWholesale');
@@ -1819,7 +1825,7 @@ function updatePanel(){
   const phraseEl=document.getElementById('orderPhrase');
   if(tqty>0&&phraseEl){
     const totalForCustomer=revenue+shipIn-wholesale;
-    // Savings = regular price total minus what they actually pay (captures bundle + sale + wholesale discounts)
+    // Savings = regular price total minus what they actually pay (captures bundle + sale discounts)
     let regularTotal=0;
     entries.forEach(([k,qty])=>{
       const[pidStr]=k.split('_');
@@ -1828,7 +1834,7 @@ function updatePanel(){
     });
     const saved=regularTotal-revenue+wholesale;
     let phrase='The total is '+fmt(totalForCustomer)+' including shipping and tracking.';
-    if(saved>0.009&&(bundle||wholesale>0)) phrase+=' You saved '+fmt(saved)+' with the bundle discount!';
+    if(saved>0.009&&(bundle||wholesale>0)) phrase+=' You saved '+fmt(saved)+(wholesale>0&&bundle?' with bundle + wholesale discount!':(wholesale>0?' with wholesale discount!':' with the bundle discount!'));
     phraseEl.textContent=phrase;
     phraseSec.style.display='';
   } else if(phraseSec){
@@ -1856,7 +1862,7 @@ function updatePanel(){
       const totalForCustomer=revenue+shipIn+taxAmt-wholesale;
       let msg=itemLines+'\n\nThe total is '+fmt(totalForCustomer)+' including shipping and tracking.';
       if(taxAmt>0) msg+='\n(Includes '+fmt(taxAmt)+' CA sales tax)';
-      if(saved>0.009&&(bundle||wholesale>0)) msg+=' You saved '+fmt(saved)+' with the bundle discount!';
+      if(saved>0.009&&bundle) msg+=' You saved '+fmt(saved)+' with the bundle discount!';
       msgBox.style.whiteSpace='pre-wrap';
       msgBox.textContent=msg;
       if(copyMsgBtn) copyMsgBtn.style.display='';
@@ -1901,7 +1907,9 @@ async function copyAndSave(){
   const wholesale=parseFloat(document.getElementById('fWholesale')?.value)||0;
   const zip=document.getElementById('fZip')?.value||'';
   const isCA=getZipZone(zip)==='ca';
-  const tax=isCA?Math.round(revenue*0.1025*100)/100:0;
+  const manualTax2=parseFloat(document.getElementById('fTax')?.value)||0;
+  const autoTax2=isCA?Math.round(revenue*0.1025*100)/100:0;
+  const tax=manualTax2>0?manualTax2:autoTax2;
   const profit=revenue+shipIn-cost-shipOut-fee-wholesale;
   const gross=revenue+shipIn+tax-wholesale;
   const status=document.getElementById('fStatus').value;
@@ -1971,12 +1979,10 @@ async function copyAndSave(){
 
 function clearOrder(){
   Object.keys(order).forEach(k=>delete order[k]);
-  ['fName','fAddress','fTracking','fShipIn','fShipOut','fFee','fWholesale','fZip','fNotes'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+  ['fName','fAddress','fTracking','fShipIn','fShipOut','fFee','fTax','fWholesale','fZip','fNotes'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
   document.getElementById('fDate').value=(()=>{ const t=new Date(); return t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0'); })();
   document.getElementById('fStatus').value='Paid';
   document.getElementById('fPayment').value='Venmo';
-  _activeDraftId = null;
-  document.getElementById('draftRestoreBar')?.classList.remove('on');
   renderTable(); updatePanel();
 }
 
@@ -4124,6 +4130,11 @@ function calcShipFromZip(){
   const zoneLabel={ca:'California',west:'West US',us:'Rest of US'}[zone];
   const fShipIn=document.getElementById('fShipIn');
   if(fShipIn) fShipIn.value=fee.toFixed(2);
+  // Auto-fill CA tax if CA zip
+  if(zone==='ca'){
+    const fTax=document.getElementById('fTax');
+    if(fTax&&!fTax.value) fTax.value=''; // let updatePanel calc it
+  }
   if(result) result.textContent=`📍 ${zoneLabel} — $${fee}`;
   updatePanel();
 }
