@@ -2803,6 +2803,8 @@ function setAdjustMode(btn, mode){
         <button class="btn" onclick="resetAdjustBody(\"${id}\")">Cancel</button>
         <button class="btn primary" data-id="${id}" onclick="applyExchange(this)">⇄ Apply Exchange</button>
       </div>`;
+  }
+
   if(mode==='dollar'){
     body.innerHTML=`
       <p style="font-size:.73rem;color:#666;margin-bottom:.45rem">Issue a dollar refund without restocking (e.g. lost item, goodwill).</p>
@@ -2821,8 +2823,6 @@ function setAdjustMode(btn, mode){
         <button class="btn primary" data-id="${id}" onclick="applyDollarRefund(this)">✓ Apply Refund</button>
       </div>`;
   }
-}
-
 }
 
 function applyDollarRefund(btn){
