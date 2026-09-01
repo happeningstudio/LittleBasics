@@ -2588,6 +2588,7 @@ function renderLog(){
             <button class="amode" onclick="setAdjustMode(this,'full')" data-id="${e.id}">Full Refund</button>
             <button class="amode" onclick="setAdjustMode(this,'partial')" data-id="${e.id}">Partial Return</button>
             <button class="amode" onclick="setAdjustMode(this,'exchange')" data-id="${e.id}">Exchange</button>
+            <button class="amode" onclick="setAdjustMode(this,'dollar')" data-id="${e.id}">$ Refund</button>
           </div>
           <div id="adjust-body-${e.id}"><p style="font-size:.72rem;color:#aaa">Select a mode above.</p></div>
         </div>
@@ -2796,42 +2797,41 @@ function setAdjustMode(btn, mode){
         <button class="btn" onclick="resetAdjustBody(\"${id}\")">Cancel</button>
         <button class="btn primary" data-id="${id}" onclick="applyExchange(this)">⇄ Apply Exchange</button>
       </div>`;
+  if(mode==='dollar'){
+    body.innerHTML=`
+      <p style="font-size:.73rem;color:#666;margin-bottom:.45rem">Issue a dollar refund without restocking (e.g. lost item, goodwill).</p>
+      <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.5rem">
+        <label style="font-size:.72rem;color:#888;white-space:nowrap">Refund amount ($)</label>
+        <input type="number" id="dollarRefundAmt-${id}" min="0" step="0.01" placeholder="0.00"
+          style="width:80px;border:1px solid var(--border);border-radius:4px;padding:.25rem .35rem;font-size:.75rem;font-family:'DM Sans',sans-serif;background:var(--mist)">
+      </div>
+      <div style="margin-bottom:.5rem">
+        <label style="font-size:.72rem;color:#888">Note (optional)</label>
+        <input type="text" id="dollarRefundNote-${id}" placeholder="e.g. Lost in transit"
+          style="width:100%;border:1px solid var(--border);border-radius:4px;padding:.25rem .35rem;font-size:.75rem;font-family:'DM Sans',sans-serif;background:var(--mist);margin-top:.2rem">
+      </div>
+      <div class="adjust-footer">
+        <button class="btn" onclick="resetAdjustBody('${id}')">Cancel</button>
+        <button class="btn primary" data-id="${id}" onclick="applyDollarRefund(this)">✓ Apply Refund</button>
+      </div>`;
   }
 }
 
-function deleteLog(btn, reverse=false){
+}
+
+function applyDollarRefund(btn){
   const id=btn.dataset.id;
   const entry=orderLog.find(e=>String(e.id)===String(id));
   if(!entry) return;
-
-  const itemStr=(entry.items||[]).map(i=>`${i.qty}× ${i.name} (${toDisplayShort(i.cm)||i.cm})`).join('\n');
-  const msg=reverse
-    ? `↩ Remove & reverse stock?\n\nThis will add back to Inventory and reduce Sold counts for:\n\n${itemStr}`
-    : `✕ Remove from log only?\n\nInventory and sold counts will NOT change.\n\n${itemStr}`;
-
-  if(!confirm(msg)) return;
-
-  // Flash the entry red then fade out before removing
-  const entryEl=document.getElementById('logentry-'+id);
-  if(entryEl){
-    entryEl.style.transition='opacity .4s, background .3s';
-    entryEl.style.background='#fde8e8';
-    entryEl.style.opacity='0.4';
-  }
-
-  setTimeout(()=>{
-    if(reverse){
-      (entry.items||[]).forEach(i=>{
-        const k=skey(i.pid,i.cm);
-        stock[k]=(stock[k]||0)+i.qty;
-        soldCounts[k]=Math.max(0,(soldCounts[k]||0)-i.qty);
-      });
-      saveStock(); saveSold(); pushStock();
-    }
-    orderLog=orderLog.filter(e=>String(e.id)!==String(id));
-    saveLog(); renderLog(); renderSoldSummary(); renderTable();
-    showToast(reverse ? '↩ Removed & stock restored ✓' : '✕ Order removed from log ✓');
-  }, 400);
+  const amt=parseFloat(document.getElementById('dollarRefundAmt-'+id)?.value)||0;
+  if(!amt){ showToast('Please enter a refund amount.'); return; }
+  const note=document.getElementById('dollarRefundNote-'+id)?.value||'';
+  // Subtract from profit only — no stock change, no revenue change
+  entry.profit=(parseFloat(entry.profit||0)-amt).toFixed(2);
+  entry.notes=(entry.notes?entry.notes+' | ':'')+'$ Refund: $'+amt.toFixed(2)+(note?' ('+note+')':'');
+  saveLog(); pushLog();
+  renderLog();
+  showToast('✓ $'+amt.toFixed(2)+' refund recorded.');
 }
 
 function applyFullRefund(btn){
