@@ -2722,15 +2722,22 @@ function toggleAdjust(btn){
   panel.classList.toggle('open');
 }
 
+function resetAdjustBody(id){
+  const body=document.getElementById('adjust-body-'+id);
+  if(body) body.innerHTML='<p style="font-size:.72rem;color:#aaa">Select a mode above.</p>';
+}
+
 function setAdjustMode(btn, mode){
   const id=btn.dataset.id;
   const entry=orderLog.find(e=>String(e.id)===String(id));
   if(!entry) return;
-  const panel=document.getElementById('adjust-'+id);
-  panel.querySelectorAll('.amode').forEach(b=>b.classList.remove('active'));
+  // Find the parent container — works for both old card and new table layout
+  const panel=btn.closest('[id^="adjust-body-"]')||btn.closest('.adjust-panel')||btn.parentElement.closest('div');
+  if(panel) panel.querySelectorAll('.amode').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
 
   const body=document.getElementById('adjust-body-'+id);
+  if(!body) return;
   const items=entry.items||[];
 
   if(mode==='full'){
@@ -2738,7 +2745,7 @@ function setAdjustMode(btn, mode){
       <p style="font-size:.73rem;color:#666;margin-bottom:.5rem">Customer returns all items. Stock will be restored, sold counts reduced, order marked <strong>Refunded</strong>.</p>
       <div style="font-size:.72rem;color:#888;margin-bottom:.5rem">${items.map(i=>`${i.qty}× ${i.name} (${toDisplayShort(i.cm)||i.cm})`).join('<br>')}</div>
       <div class="adjust-footer">
-        <button class="btn" onclick="document.getElementById('adjust-${id}').classList.remove('open')">Cancel</button>
+        <button class="btn" onclick="resetAdjustBody(\"${id}\")">Cancel</button>
         <button class="btn primary" data-id="${id}" onclick="applyFullRefund(this)">✓ Apply Full Refund</button>
       </div>`;
   }
@@ -2757,7 +2764,7 @@ function setAdjustMode(btn, mode){
             style="width:42px;border:1px solid var(--border);border-radius:4px;padding:.2rem;font-size:.72rem;text-align:center;font-family:'DM Sans',sans-serif;background:var(--mist)">
         </div>`).join('')}
       <div class="adjust-footer">
-        <button class="btn" onclick="document.getElementById('adjust-${id}').classList.remove('open')">Cancel</button>
+        <button class="btn" onclick="resetAdjustBody(\"${id}\")">Cancel</button>
         <button class="btn primary" data-id="${id}" onclick="applyPartialReturn(this)">✓ Apply Return</button>
       </div>`;
   }
@@ -2786,7 +2793,7 @@ function setAdjustMode(btn, mode){
         </select>
       </div>
       <div class="adjust-footer">
-        <button class="btn" onclick="document.getElementById('adjust-${id}').classList.remove('open')">Cancel</button>
+        <button class="btn" onclick="resetAdjustBody(\"${id}\")">Cancel</button>
         <button class="btn primary" data-id="${id}" onclick="applyExchange(this)">⇄ Apply Exchange</button>
       </div>`;
   }
