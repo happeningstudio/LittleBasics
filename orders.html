@@ -1773,11 +1773,13 @@ function updatePanel(){
   const manualTax=parseFloat(document.getElementById('fTax')?.value)||0;
   const autoTax=isCA?Math.round(revenue*0.1025*100)/100:0;
   const tax=manualTax>0?manualTax:autoTax;
-  const profit=revenue+shipIn-cost-shipOut-fee-wholesale;
-  const margin=revenue>0?((profit/(revenue+shipIn))*100).toFixed(1):null;
+  // Tax is collected from customer (adds to gross) but must be remitted to state (expense)
+  const gross=revenue+shipIn+tax-wholesale;
+  const profit=gross-cost-shipOut-fee-tax; // tax nets to 0 (collected then remitted)
+  const margin=gross>0?((profit/gross)*100).toFixed(1):null;
 
   document.getElementById('sItems').textContent=tqty;
-  document.getElementById('sRevenue').textContent=fmt(revenue);
+  document.getElementById('sRevenue').textContent=fmt(gross);
   document.getElementById('sCost').textContent=fmt(cost);
   document.getElementById('sShipIn').textContent=fmt(shipIn);
   document.getElementById('sShipOut').textContent=fmt(shipOut);
@@ -1824,7 +1826,7 @@ function updatePanel(){
   const phraseSec=document.getElementById('orderPhraseSec');
   const phraseEl=document.getElementById('orderPhrase');
   if(tqty>0&&phraseEl){
-    const totalForCustomer=revenue+shipIn-wholesale;
+    const totalForCustomer=revenue+shipIn+tax-wholesale;
     // Savings = regular price total minus what they actually pay (captures bundle + sale discounts)
     let regularTotal=0;
     entries.forEach(([k,qty])=>{
@@ -1911,8 +1913,7 @@ async function copyAndSave(){
   const autoTax2=isCA?Math.round(revenue*0.1025*100)/100:0;
   const tax=manualTax2>0?manualTax2:autoTax2;
   const profit=revenue+shipIn-cost-shipOut-fee-wholesale;
-  const gross=revenue+shipIn+tax-wholesale;
-  const status=document.getElementById('fStatus').value;
+  const gross=revenue+shipIn+tax-wholesale;  const status=document.getElementById('fStatus').value;
   const name=document.getElementById('fName').value;
   const date=normDate(document.getElementById('fDate').value);
   const itemSum=itemDetails.map(i=>`${i.qty}x ${i.name} (${toDisplayShort(i.cm)})`).join(', ');
