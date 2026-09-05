@@ -1594,12 +1594,13 @@ function recalcBagPrices(){
 
 function syncContactInput(input){
   const platform = document.getElementById('bagPlatform')?.value||'Instagram';
+  const val = input.value;
   if(platform === 'Email'){
-    document.getElementById('bagContact').value = input.value;
+    document.getElementById('bagContact').value = val;
     document.getElementById('bagCustomerHandle').value = '';
   } else {
-    document.getElementById('bagCustomerHandle').value = input.value;
-    document.getElementById('bagContact').value = '';
+    document.getElementById('bagCustomerHandle').value = val;
+    document.getElementById('bagContact').value = val; // also store in contact so validation passes
   }
   updateSubmitBtn();
 }
@@ -1646,8 +1647,10 @@ function updateSubmitBtn(){
  const name = document.getElementById('bagCustomerName')?.value.trim()||'';
  const handle = document.getElementById('bagCustomerHandle')?.value.trim()||'';
  const contact = document.getElementById('bagContact')?.value.trim()||'';
+ const contactInput = document.getElementById('bagContactInput')?.value.trim()||'';
  const btn = document.getElementById('bagSubmit');
- if(btn) btn.disabled = !bag.length || (!name && !handle) || !contact;
+ // Need: items in bag + a name or handle + some contact info
+ if(btn) btn.disabled = !bag.length || (!name && !handle && !contactInput);
 }
 
 function updateBagCount(){
