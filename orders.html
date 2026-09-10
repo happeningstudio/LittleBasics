@@ -915,6 +915,7 @@ function doPost(e) {
     <div class="pending-toolbar">
       <button class="btn sm" onclick="pullPendingOrders()">↓ Refresh</button>
       <button class="btn sm" onclick="clearDismissedPending()" style="color:#aaa">Clear Dismissed</button>
+      <button class="btn sm" onclick="resetAllDismissed()" style="color:#aaa;font-size:.65rem" title="Use if new orders aren't showing">Reset Dismissed List</button>
       <span style="font-size:.7rem;color:#aaa;margin-left:auto" id="pendingMeta"></span>
     </div>
     <div class="pending-scroll" id="pendingList">
@@ -945,6 +946,7 @@ function doPost(e) {
             <th style="width:60px;text-align:right">Cost</th>
             <th style="width:60px;text-align:right">Ship In</th>
             <th style="width:60px;text-align:right">Ship Out</th>
+            <th style="width:55px;text-align:right">Tax</th>
             <th style="width:70px;text-align:right">Profit</th>
             <th style="width:64px;text-align:center">Actions</th>
           </tr>
@@ -1942,7 +1944,7 @@ async function copyAndSave(){
   const entry={id:Date.now(),date,name,status,items:itemDetails,bundle,
     revenue:revenue.toFixed(2),cost:cost.toFixed(2),
     shipIn:shipIn.toFixed(2),shipOut:shipOut.toFixed(2),
-    fee:fee.toFixed(2),wholesale:wholesale.toFixed(2),profit:profit.toFixed(2),
+    fee:fee.toFixed(2),wholesale:wholesale.toFixed(2),tax:tax.toFixed(2),profit:profit.toFixed(2),
     notes:document.getElementById('fNotes').value,
     tracking:document.getElementById('fTracking').value,
     address:document.getElementById('fAddress').value};
@@ -2525,6 +2527,13 @@ function renderLog(){
     };
     tdShipOut.appendChild(inpShipOut);
     tr.appendChild(tdShipOut);
+
+    // Tax
+    const tdTax=document.createElement('td');
+    tdTax.style.cssText='text-align:right;font-size:.74rem;color:#aaa';
+    const taxVal=parseFloat(e.tax||0);
+    tdTax.textContent=taxVal>0?fmt(taxVal):'—';
+    tr.appendChild(tdTax);
 
     // Profit
     const tdProfit=document.createElement('td');
@@ -3888,6 +3897,13 @@ function toggleDismissPending(id){
     dismissedTimestamps=dismissedTimestamps.filter(t=>t!==o.timestamp);
   }
   savePending(); saveDismissed(); renderPending();
+}
+
+function resetAllDismissed(){
+  if(!confirm('This will allow all previously dismissed orders to come back on next Refresh. Continue?')) return;
+  dismissedTimestamps=[];
+  saveDismissed();
+  showToast('Dismissed list cleared — hit Refresh to reload all orders');
 }
 
 function clearDismissedPending(){
