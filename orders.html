@@ -2197,7 +2197,7 @@ function renderSold(){ renderSoldSummary(); }
 
 function renderSoldSummary(){
   const search=(document.getElementById('soldSearch')?.value||'').toLowerCase();
-  const filtered=products.filter(p=>!p.hidden&&(!search||p.name.toLowerCase().includes(search)||p.color.toLowerCase().includes(search)));
+  const filtered=products.filter(p=>(!search||p.name.toLowerCase().includes(search)||p.color.toLowerCase().includes(search)));
   const usedSizes=ALL_CM; // always show all sizes, 0 if none sold
 
   // Build header
@@ -2528,11 +2528,21 @@ function renderLog(){
     tdShipOut.appendChild(inpShipOut);
     tr.appendChild(tdShipOut);
 
-    // Tax
+    // Tax — editable
     const tdTax=document.createElement('td');
-    tdTax.style.cssText='text-align:right;font-size:.74rem;color:#aaa';
-    const taxVal=parseFloat(e.tax||0);
-    tdTax.textContent=taxVal>0?fmt(taxVal):'—';
+    tdTax.style.cssText='text-align:right';
+    const inpTax=document.createElement('input');
+    inpTax.type='number'; inpTax.step='0.01'; inpTax.min='0';
+    inpTax.className='log-cell-edit';
+    inpTax.value=parseFloat(e.tax||0).toFixed(2);
+    inpTax.style.cssText='font-size:.72rem;text-align:right;width:52px';
+    inpTax.onchange=function(){
+      const entry=orderLog.find(x=>x.id===e.id);
+      if(!entry) return;
+      entry.tax=parseFloat(this.value)||0;
+      saveLog(); renderLog();
+    };
+    tdTax.appendChild(inpTax);
     tr.appendChild(tdTax);
 
     // Profit
