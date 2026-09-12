@@ -2557,8 +2557,8 @@ function renderLog(){
     tdAct.style.cssText='text-align:center;white-space:nowrap';
     tdAct.innerHTML=`
       <button class="log-expand-btn" onclick="toggleLogExpand(${e.id})" title="Details / Adjust">⇄</button>
-      <button class="log-del" onclick="deleteLog(this,false)" data-id="${e.id}" title="Remove from log only">✕</button>
-      <button class="log-del" onclick="deleteLog(this,true)" data-id="${e.id}" title="Remove + restore stock" style="color:#e8c4c4">↩</button>`;
+      <button class="log-del" onclick="deleteLog(${e.id},false)" title="Remove from log only">✕</button>
+      <button class="log-del" onclick="deleteLog(${e.id},true)" title="Remove + restore stock" style="color:#e8c4c4">↩</button>`;
     tr.appendChild(tdAct);
     tbody.appendChild(tr);
 
