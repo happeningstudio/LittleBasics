@@ -1730,13 +1730,16 @@ async function submitBag(){
  const customerName = document.getElementById('bagCustomerName')?.value.trim()||'';
  const customerHandle = document.getElementById('bagCustomerHandle')?.value.trim()||'';
  const customerContact = document.getElementById('bagContact')?.value.trim()||'';
- if(!customerName && !customerHandle){
- _submitting = false;
- alert('Please enter your name or Instagram/Facebook handle.'); return;
+ const contactInput = document.getElementById('bagContactInput')?.value.trim()||'';
+ // Accept either a handle (Instagram/FB) or contact (email)
+ const hasContact = customerHandle || customerContact || contactInput;
+ if(!customerName && !hasContact){
+   _submitting = false;
+   alert('Please enter your name and how we can reach you.'); return;
  }
- if(!customerContact){
- _submitting = false;
- alert('Please enter your email so we can reach you with payment details.'); return;
+ if(!hasContact){
+   _submitting = false;
+   alert('Please enter your Instagram handle, Facebook name, or email so we can reach you.'); return;
  }
  // Disable button immediately to prevent double-tap
  const submitBtn = document.getElementById('bagSubmit');
@@ -1783,8 +1786,8 @@ async function submitBag(){
 
   const platform2  = document.getElementById('bagPlatform')?.value||'';
   const inputVal2  = document.getElementById('bagContactInput')?.value.trim()||'';
-  const contactLine = customerName + (platform2 && inputVal2 ? ' · '+platform2+': '+inputVal2 : '');
- const contactInfo = customerContact;
+  const contactLine = customerName + (platform2 && inputVal2 ? ' · '+platform2+': '+inputVal2 : (inputVal2?' · '+inputVal2:''));
+ const contactInfo = customerContact || inputVal2;
  const msg = [
  ` Little Basics Order Draft`,
  `From: ${contactLine}`,
