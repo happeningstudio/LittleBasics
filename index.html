@@ -1527,8 +1527,7 @@ function confirmAddToBag(){
 
  closeSelector();
  updateBagCount();
- recalcBagPrices();
- // Show a brief toast instead of opening the bag
+ renderBag(); // re-render so bundle pricing updates for all items
  showAddedToast(item.name);
 }
 
@@ -1581,8 +1580,7 @@ function showAddedToast(name){
 
 function removeFromBag(id){
  bag = bag.filter(x=>x.id!==id);
- recalcBagPrices();
- renderBag();
+ renderBag(); // re-render so bundle pricing updates
  updateBagCount();
 }
 
