@@ -2688,7 +2688,7 @@ function addLogItem(entryId){
 function setLogFilter(f){ logFilter=f; renderLog(); }
 
 function deleteLog(id, reverse=false){
-  const entry=orderLog.find(e=>e.id===id);
+  const entry=orderLog.find(e=>String(e.id)===String(id));
   if(!entry) return;
 
   const itemStr=(entry.items||[]).map(i=>`${i.qty}× ${i.name} (${toDisplayShort(i.cm)||i.cm})`).join('\n');
@@ -2710,7 +2710,7 @@ function deleteLog(id, reverse=false){
     pushStock(); // sync to sheet
   }
 
-  orderLog=orderLog.filter(e=>e.id!==id);
+  orderLog=orderLog.filter(e=>String(e.id)!==String(id));
   saveLog();
   renderLog();
   renderSoldSummary();
