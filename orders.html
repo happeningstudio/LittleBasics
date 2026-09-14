@@ -3884,8 +3884,8 @@ function renderPending(){
           ${order.contactInfo?`<div style="font-size:.7rem;color:#888;margin-top:.1rem">📞 ${order.contactInfo}</div>`:''}
         </div>
         <div style="text-align:right;flex-shrink:0">
-          <div style="font-size:1rem;font-weight:700;color:var(--bark)">$${order.total.toFixed(2)}</div>
-          ${order.shipFee>0?`<div style="font-size:.68rem;color:#aaa">incl. $${order.shipFee.toFixed(2)} ship</div>`:''}
+          <div style="font-size:1rem;font-weight:700;color:var(--bark)">$${(parseFloat(order.total)||0).toFixed(2)}</div>
+          ${parseFloat(order.shipFee)>0?`<div style="font-size:.68rem;color:#aaa">incl. $${(parseFloat(order.shipFee)||0).toFixed(2)} ship</div>`:''}
           <div style="display:flex;gap:.3rem;margin-top:.4rem;justify-content:flex-end;flex-wrap:wrap">
             ${!order.dismissed?`<button class="btn primary sm" onclick="loadPendingToOrder('${order.id}')">→ Load to Order</button>`:''}
             <button class="btn sm" onclick="toggleDismissPending('${order.id}')">${order.dismissed?'Restore':'Dismiss'}</button>
