@@ -684,10 +684,11 @@ function isClearance(p){
 function deriveCategory(p){
  if(p.category && p.category !== 'Uncategorized') return p.category;
  const n = p.name.toLowerCase();
- if(/cardigan|knitwear|knit|jacket|padded|reversib|sweatshirt|sweater|fleece suit|fleece sweat/.test(n)) return 'Outerwear & Knitwear';
- if(/romper|overall|suit|set/.test(n)) return 'Rompers & Sets';
- if(/pant|legging|short|bottom/.test(n)) return 'Bottoms';
- if(/shirt|top|sleeve|tee/.test(n)) return 'Tops';
+ if(/cardigan|knitwear|knit jacket|padded|reversib|sweatshirt|sweater|fleece suit|fleece sweat/.test(n)) return 'Outerwear & Knitwear';
+ if(/shirt|top|sleeve|tee|blouse/.test(n)) return 'Tops';
+ if(/pant|legging|short|bottom|trouser/.test(n)) return 'Bottoms';
+ if(/romper|overall|jumpsuit/.test(n)) return 'Rompers & Sets';
+ if(/set\b/.test(n)) return 'Rompers & Sets';
  return 'Uncategorized';
 }
 
@@ -830,12 +831,15 @@ function totalStock(product){
 
 function normCat(cat){
  if(!cat) return '';
- const s = cat.trim();
- if(s==='Rompers & Overalls'||s==='Sets'||s==='Rompers & Sets') return 'Rompers & Sets';
- if(s==='Outerwear'||s==='Cardigans & Knitwear'||s==='Outerwear & Knitwear') return 'Outerwear & Knitwear';
- if(s==='Top') return 'Tops';
- if(s==='Bottom') return 'Bottoms';
- return s;
+ const s = cat.trim().toLowerCase();
+ if(s==='tops'||s==='top') return 'Tops';
+ if(s==='bottoms'||s==='bottom') return 'Bottoms';
+ if(s==='rompers & sets'||s==='rompers & overalls'||s==='sets'||s==='romper'||s==='rompers') return 'Rompers & Sets';
+ if(s==='outerwear & knitwear'||s==='outerwear'||s==='cardigans & knitwear'||s==='knitwear') return 'Outerwear & Knitwear';
+ if(s==='accessory'||s==='accessories') return 'Accessory';
+ if(s==='uncategorized'||s==='') return 'Uncategorized';
+ // Return original with proper case for anything else
+ return cat.trim();
 }
 /* ── SIDEBAR FILTER SETTERS ── */
 window._sfCat = '';
