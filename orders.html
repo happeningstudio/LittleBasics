@@ -1950,6 +1950,7 @@ async function copyAndSave(){
     address:document.getElementById('fAddress').value};
   orderLog.unshift(entry);
   saveLog();
+  renderAnalytics(); // keep analytics current after every save
   if(sheetUrl) pushLog(); // keep sheet in sync
 
   // 4. Sync to Google Sheets
