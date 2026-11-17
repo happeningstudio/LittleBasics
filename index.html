@@ -1291,9 +1291,9 @@ function getShippingFee(zip, itemCount){
 
  // [CA, West, Rest of US]
  let tier;
- if(itemCount <= 4) tier = [8, 9, 10];
- else if(itemCount <= 7) tier = [9, 10, 11];
- else if(itemCount <= 10) tier = [10, 11, 12];
+ if(itemCount <= 4) tier = [8, 9, 12];
+ else if(itemCount <= 7) tier = [9, 10, 13];
+ else if(itemCount <= 10) tier = [10, 11, 14];
  else tier = [12, 13, 14];
 
  const zoneIdx = {ca:0, west:1, us:2}[zone];

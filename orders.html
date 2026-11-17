@@ -3825,6 +3825,13 @@ function updatePendingBadge(){
 async function pullPendingOrders(){
   const res = await sheetRead('PendingOrders');
   if(!res||res.length<2){ showToast('No pending orders in sheet yet.'); return; }
+  // Auto-clear dismissed timestamps older than 30 days so old dismissals don't block new orders
+  const thirtyDaysAgo = Date.now() - (30 * 24 * 60 * 60 * 1000);
+  dismissedTimestamps = dismissedTimestamps.filter(t => {
+    const ts = new Date(t).getTime();
+    return !isNaN(ts) && ts > thirtyDaysAgo;
+  });
+  saveDismissed();
   let added=0;
   res.slice(1).forEach(row=>{
     const [timestamp,contact,itemsRaw,total,fulfillment,address,isBundle,shipFee,status,contactInfo]=row;
