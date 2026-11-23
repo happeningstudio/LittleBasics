@@ -340,7 +340,7 @@ tr.inv-checked-row td{background:rgba(80,160,80,.05)!important}
 ════════════════════════════ */
 .notes-wrap{padding:1rem 1.25rem;height:calc(100vh - var(--top));display:grid;grid-template-columns:1fr 340px;gap:1rem;overflow:hidden}
 .notes-left{display:flex;flex-direction:column;gap:.6rem;overflow:hidden}
-.notes-right{display:flex;flex-direction:column;gap:.6rem;overflow:hidden}
+.notes-right{display:flex;flex-direction:column;gap:.6rem;overflow-y:auto;overflow-x:hidden}
 .notes-card{background:var(--white);border-radius:10px;box-shadow:var(--shadow);padding:.85rem;display:flex;flex-direction:column;gap:.5rem}
 .notes-card h3{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#bbb;margin-bottom:.1rem}
 .notes-textarea{flex:1;width:100%;border:1px solid var(--border);border-radius:6px;padding:.55rem .65rem;font-size:.8rem;font-family:'DM Sans',sans-serif;color:var(--ink);background:var(--mist);resize:none;min-height:200px;transition:border-color .15s;line-height:1.6}
@@ -988,9 +988,9 @@ function doPost(e) {
         </div>
       </div>
     </div>
-    <!-- Right: Customer credits -->
+    <!-- Right: Customer credits + Gift Cards -->
     <div class="notes-right">
-      <div class="notes-card" style="flex:1;overflow:hidden;display:flex;flex-direction:column">
+      <div class="notes-card" style="overflow:hidden;display:flex;flex-direction:column">
         <h3>💳 Customer Credits</h3>
         <!-- Add form -->
         <div style="margin-bottom:.5rem">
@@ -1002,6 +1002,35 @@ function doPost(e) {
           <button class="btn primary sm" onclick="addCredit()" style="width:100%;margin-top:.35rem">+ Add Credit</button>
         </div>
         <div class="credit-list" id="creditList"></div>
+      </div>
+
+      <!-- Gift Cards -->
+      <div class="notes-card" style="display:flex;flex-direction:column;gap:.5rem">
+        <h3>🎁 Gift Cards</h3>
+        <div style="display:grid;grid-template-columns:1fr 80px;gap:.35rem">
+          <input type="text" id="gcRecipient" placeholder="Recipient name" style="border:1px solid var(--border);border-radius:5px;padding:.3rem .45rem;font-size:.76rem;font-family:'DM Sans',sans-serif;background:var(--mist);color:var(--ink)">
+          <input type="number" id="gcAmount" placeholder="$0.00" step="0.01" min="0" style="border:1px solid var(--border);border-radius:5px;padding:.3rem .45rem;font-size:.76rem;font-family:'DM Sans',sans-serif;background:var(--mist);color:var(--ink)">
+        </div>
+        <input type="text" id="gcBuyer" placeholder="Bought by (if different from recipient)" style="width:100%;border:1px solid var(--border);border-radius:5px;padding:.3rem .45rem;font-size:.76rem;font-family:'DM Sans',sans-serif;background:var(--mist);color:var(--ink)">
+        <div style="display:flex;gap:.35rem;align-items:center">
+          <input type="text" id="gcCode" placeholder="Code e.g. LB-GIFT-50A" style="flex:1;border:1px solid var(--border);border-radius:5px;padding:.3rem .45rem;font-size:.76rem;font-family:'DM Sans',sans-serif;background:var(--mist);color:var(--ink)">
+          <button class="btn sm" onclick="generateGcCode()" style="white-space:nowrap">Auto</button>
+        </div>
+        <button class="btn primary sm" onclick="addGiftCard()" style="width:100%">+ Issue Gift Card</button>
+        <div style="border-top:1px solid var(--border);padding-top:.5rem;margin-top:.1rem">
+          <div style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#bbb;margin-bottom:.4rem">Active Cards</div>
+          <div id="gcList"></div>
+        </div>
+        <!-- Redeem section -->
+        <div style="border-top:1px solid var(--border);padding-top:.5rem">
+          <div style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#bbb;margin-bottom:.4rem">Redeem / Adjust Balance</div>
+          <div style="display:grid;grid-template-columns:1fr 80px;gap:.35rem">
+            <input type="text" id="gcRedeemCode" placeholder="Enter code" oninput="gcLookup(this.value)" style="border:1px solid var(--border);border-radius:5px;padding:.3rem .45rem;font-size:.76rem;font-family:'DM Sans',sans-serif;background:var(--mist);color:var(--ink)">
+            <input type="number" id="gcRedeemAmt" placeholder="Deduct $" step="0.01" min="0" style="border:1px solid var(--border);border-radius:5px;padding:.3rem .45rem;font-size:.76rem;font-family:'DM Sans',sans-serif;background:var(--mist);color:var(--ink)">
+          </div>
+          <div id="gcRedeemInfo" style="font-size:.72rem;color:var(--bark);min-height:1.2rem;margin:.25rem 0"></div>
+          <button class="btn primary sm" onclick="redeemGiftCard()" style="width:100%">Apply Redemption</button>
+        </div>
       </div>
     </div>
   </div>
@@ -3996,6 +4025,7 @@ function renderNotes(){
   const ta = document.getElementById('generalNotes');
   if(ta) ta.value = generalNotesText;
   renderCredits();
+  renderGiftCards();
 }
 
 function renderCredits(){
@@ -4048,6 +4078,148 @@ function deleteCredit(id){
   renderCredits();
 }
 
+
+/* ═══════════════════════════════════════════════
+   GIFT CARDS
+═══════════════════════════════════════════════ */
+let giftCards = loadLocal('lb_gift_cards', []);
+function saveGiftCards(){ saveLocal('lb_gift_cards', giftCards); }
+
+function generateGcCode(){
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let code = 'LB-';
+  for(let i=0;i<4;i++) code += chars[Math.floor(Math.random()*chars.length)];
+  document.getElementById('gcCode').value = code;
+}
+
+function addGiftCard(){
+  const recipient = document.getElementById('gcRecipient')?.value.trim();
+  const amount = parseFloat(document.getElementById('gcAmount')?.value)||0;
+  const buyer = document.getElementById('gcBuyer')?.value.trim()||'';
+  let code = document.getElementById('gcCode')?.value.trim().toUpperCase();
+  if(!recipient){ showToast('Please enter recipient name.'); return; }
+  if(!amount){ showToast('Please enter gift card amount.'); return; }
+  if(!code){ generateGcCode(); code = document.getElementById('gcCode').value; }
+  // Check code uniqueness
+  if(giftCards.find(g=>g.code===code)){
+    showToast('Code already used — please change it.'); return;
+  }
+  const gc = {
+    id: Date.now(),
+    code,
+    recipient,
+    buyer,
+    originalAmount: amount,
+    balance: amount,
+    issuedDate: new Date().toLocaleDateString('en-US'),
+    ledger: [{ date: new Date().toLocaleDateString('en-US'), note: 'Issued', change: amount, balance: amount }]
+  };
+  giftCards.push(gc);
+  saveGiftCards();
+  syncGiftCardsToSheet();
+  document.getElementById('gcRecipient').value = '';
+  document.getElementById('gcAmount').value = '';
+  document.getElementById('gcBuyer').value = '';
+  document.getElementById('gcCode').value = '';
+  renderGiftCards();
+  showToast(`✓ Gift card ${code} issued for ${recipient} ($${amount.toFixed(2)})`);
+}
+
+function renderGiftCards(){
+  const list = document.getElementById('gcList');
+  if(!list) return;
+  const active = giftCards.filter(g=>g.balance>0);
+  const used = giftCards.filter(g=>g.balance<=0);
+  if(!giftCards.length){
+    list.innerHTML = '<div style="font-size:.75rem;color:#ccc;text-align:center;padding:.6rem">No gift cards yet</div>';
+    return;
+  }
+  list.innerHTML = '';
+
+  const renderCard = (g, dimmed) => {
+    const pct = Math.round((g.balance/g.originalAmount)*100);
+    const bar = `<div style="height:4px;background:var(--border);border-radius:2px;margin:.2rem 0"><div style="height:4px;background:${dimmed?'#ccc':'var(--bark)'};border-radius:2px;width:${pct}%"></div></div>`;
+    const div = document.createElement('div');
+    div.style.cssText = `background:${dimmed?'var(--mist)':'#fff'};border:1px solid var(--border);border-radius:7px;padding:.45rem .5rem;margin-bottom:.35rem;opacity:${dimmed?.6:1}`;
+    div.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:.72rem;font-weight:700;font-family:monospace;color:var(--bark)">${g.code}</span>
+        <span style="font-size:.72rem;font-weight:700;color:${g.balance>0?'var(--bark)':'#aaa'}">${g.balance>0?'$'+g.balance.toFixed(2):'Used'}</span>
+      </div>
+      ${bar}
+      <div style="font-size:.68rem;color:#888">${g.recipient}${g.buyer&&g.buyer!==g.recipient?' · from '+g.buyer:''} · ${g.issuedDate}</div>
+      <div style="font-size:.66rem;color:#bbb">Original: $${g.originalAmount.toFixed(2)}</div>
+      ${g.balance>0?`<button onclick="deleteGiftCard(${g.id})" style="font-size:.6rem;color:#ccc;background:none;border:none;cursor:pointer;padding:0;margin-top:.1rem">✕ remove</button>`:''}`;
+    list.appendChild(div);
+  };
+
+  active.forEach(g=>renderCard(g,false));
+  if(used.length){
+    const sep = document.createElement('div');
+    sep.style.cssText = 'font-size:.63rem;color:#ccc;margin:.3rem 0 .2rem;text-transform:uppercase;letter-spacing:.06em';
+    sep.textContent = 'Fully used';
+    list.appendChild(sep);
+    used.forEach(g=>renderCard(g,true));
+  }
+}
+
+function deleteGiftCard(id){
+  if(!confirm('Remove this gift card record?')) return;
+  giftCards = giftCards.filter(g=>g.id!==id);
+  saveGiftCards();
+  renderGiftCards();
+}
+
+function redeemGiftCard(){
+  const code = document.getElementById('gcRedeemCode')?.value.trim().toUpperCase();
+  const amt = parseFloat(document.getElementById('gcRedeemAmt')?.value)||0;
+  const info = document.getElementById('gcRedeemInfo');
+  if(!code){ showToast('Please enter a gift card code.'); return; }
+  const gc = giftCards.find(g=>g.code===code);
+  if(!gc){ if(info) info.textContent = '❌ Code not found'; showToast('Gift card code not found.'); return; }
+  if(gc.balance<=0){ if(info) info.textContent = '⚠ This card is fully used'; showToast('Gift card is already fully used.'); return; }
+  if(amt<=0){
+    // Just lookup
+    if(info) info.textContent = `✓ ${gc.code} — ${gc.recipient} · Balance: $${gc.balance.toFixed(2)}`;
+    return;
+  }
+  const deduct = Math.min(amt, gc.balance);
+  gc.balance = parseFloat((gc.balance - deduct).toFixed(2));
+  gc.ledger = gc.ledger||[];
+  gc.ledger.push({ date: new Date().toLocaleDateString('en-US'), note: 'Redeemed', change: -deduct, balance: gc.balance });
+  saveGiftCards();
+  syncGiftCardsToSheet();
+  if(info) info.textContent = `✓ Deducted $${deduct.toFixed(2)} · New balance: $${gc.balance.toFixed(2)}`;
+  document.getElementById('gcRedeemCode').value = '';
+  document.getElementById('gcRedeemAmt').value = '';
+  renderGiftCards();
+  showToast(`✓ Gift card ${code} — $${deduct.toFixed(2)} redeemed. Balance: $${gc.balance.toFixed(2)}`);
+}
+
+function gcLookup(val){
+  const info = document.getElementById('gcRedeemInfo');
+  if(!info) return;
+  const code = val.trim().toUpperCase();
+  if(!code){ info.textContent=''; return; }
+  const gc = giftCards.find(g=>g.code===code);
+  if(!gc){ info.textContent='❌ Code not found'; return; }
+  if(gc.balance<=0){ info.textContent=`⚠ ${gc.code} fully used (${gc.recipient})`; return; }
+  info.textContent=`✓ ${gc.code} · ${gc.recipient} · Balance: $${gc.balance.toFixed(2)}`;
+}
+
+function syncGiftCardsToSheet(){
+  const url = typeof SHEET_URL !== 'undefined' ? SHEET_URL : null;
+  if(!url) return;
+  const rows = [['Code','Recipient','Buyer','Original Amount','Balance','Issued Date']];
+  giftCards.forEach(g=>{
+    rows.push([g.code, g.recipient, g.buyer||'', g.originalAmount, g.balance, g.issuedDate]);
+  });
+  fetch(url, {
+    method:'POST', mode:'no-cors',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ action:'write', tab:'GiftCards', data: rows })
+  }).catch(()=>{});
+}
 
 /* ═══════════════════════════════════════════════
    PUBLISH CATALOG TO GITHUB
