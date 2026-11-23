@@ -1016,8 +1016,11 @@ function cardHTML(p){
  // Gift card special card
  if(p.isGiftCard || p.category==='Gift Card'){
    const amt = p.price;
-   return `<div class="product-card" style="background:linear-gradient(135deg,#fdf6ee 0%,#f9ede0 100%);border:2px solid #e8d5be">
- <div style="display:flex;align-items:center;justify-content:center;height:140px;font-size:3.5rem">🎁</div>
+   const imgHTML = p.image
+     ? `<img src="${p.image}" alt="Gift Card $${amt}" class="product-image" loading="lazy">`
+     : `<div style="display:flex;align-items:center;justify-content:center;height:140px;font-size:3.5rem">🎁</div>`;
+   return `<div class="product-card" style="border:2px solid #e8d5be">
+ ${imgHTML}
  <div class="product-details">
    <div class="badges-row"><span class="badge" style="background:#8b7355;color:#fff">Gift Card</span></div>
    <div class="product-name">Little Basics Gift Card</div>
@@ -1113,6 +1116,8 @@ async function loadFromSheet(){
      soldData = cached.sold||{};
      injectGiftCards();
      render();
+     // If no gift cards in cache, force a fresh fetch
+     if(!catalogProducts.some(p=>p.category==='Gift Card')) { fetchCatalogData(true); }
      // Refresh in background
      fetchCatalogData(true); return;
    }
