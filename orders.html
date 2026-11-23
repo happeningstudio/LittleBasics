@@ -1486,7 +1486,7 @@ function showToast(msg, dur=3000){
   toastTimer=setTimeout(()=>toast.classList.remove('show'), dur);
 }
 
-const CAT_ORDER=['Tops','Bottoms','Rompers & Sets','Outerwear & Knitwear','Accessory','Uncategorized','Sold Out'];
+const CAT_ORDER=['Tops','Bottoms','Rompers & Sets','Outerwear & Knitwear','Accessory','Gift Card','Uncategorized','Sold Out'];
 
 function getCategory(p){ return p.category||'Uncategorized'; }
 
@@ -1555,8 +1555,9 @@ function renderTable(){
     if(getCategory(p)==='Sold Out') return;
     if(p.hidden) return; // hidden products excluded from order builder
     if(!groups[p.name]) groups[p.name]=[];
+    const isGC = getCategory(p)==='Gift Card';
     p.sizes.forEach(cm=>{
-      if(szFilter!=='all'&&cm!==szFilter) return;
+      if(!isGC && szFilter!=='all'&&cm!==szFilter) return;
       if(search&&!p.name.toLowerCase().includes(search)&&!p.color.toLowerCase().includes(search)) return;
       groups[p.name].push({p,cm});
     });
@@ -1633,17 +1634,18 @@ function renderTable(){
 
       rows.forEach(function(rowObj){
         var p=rowObj.p, cm=rowObj.cm;
+        const isGCRow = getCategory(p)==='Gift Card';
         const k=skey(p.pid,cm);
         const qty=order[k]||0;
-        const inStock=getStock(p.pid,cm);
+        const inStock=isGCRow ? null : getStock(p.pid,cm);
         const sale=p.saleDiscount||0;
         // Sale takes priority over bundle — don't apply both
-        const effectiveBundle=bundle&&sale===0&&getBundlePrice(p)>0;
+        const effectiveBundle=!isGCRow&&bundle&&sale===0&&getBundlePrice(p)>0;
         const basePrice=sale>0?p.price-sale:p.price;
         const sp=effectiveBundle?getBundlePrice(p):basePrice;
         const line=sp*qty;
-        const inStockCls=inStock===0?'stock-zero':inStock<=2?'stock-low':'stock-ok';
-        const inStockLbl=inStock===0?'Out':inStock+' left';
+        const inStockCls=inStock===0?'stock-zero':inStock!==null&&inStock<=2?'stock-low':'stock-ok';
+        const inStockLbl=isGCRow?'🎁':(inStock===0?'Out':inStock+' left');
         const tr=document.createElement('tr');
         tr.className='variant-row'+(qty>0?' in-order':'');
 
@@ -1699,7 +1701,7 @@ function renderTable(){
 
         const tdSz=document.createElement('td');
         const szSpan=document.createElement('span');
-        szSpan.className='spill'; szSpan.textContent=toDisplay(cm);
+        szSpan.className='spill'; szSpan.textContent=isGCRow?'':toDisplay(cm);
         tdSz.appendChild(szSpan); tr.appendChild(tdSz);
 
         const tdSt=document.createElement('td');

@@ -425,6 +425,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica','Arial'
  <option value="Rompers & Sets">Rompers & Sets</option>
  <option value="Outerwear & Knitwear">Outerwear & Knitwear</option>
  <option value="Accessory">Accessory</option>
+ <option value="Gift Card">Gift Cards</option>
  </select>
  <select class="filter-select" id="seasonSelect" onchange="render()">
  <option value="">All Seasons</option>
@@ -472,6 +473,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica','Arial'
  <option value="Rompers & Sets">Rompers &amp; Sets</option>
  <option value="Outerwear & Knitwear">Outerwear &amp; Knitwear</option>
  <option value="Accessory">Accessory</option>
+ <option value="Gift Card">Gift Cards</option>
  </select>
  <select class="mdf-select" id="mSeasonSelect" onchange="setMSeason(null, this.value)">
  <option value="">All Seasons</option>
@@ -516,6 +518,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica','Arial'
  <button class="sf-btn" data-cat="Rompers & Sets" onclick="setSFCat(this,'Rompers & Sets')">Rompers &amp; Sets</button>
  <button class="sf-btn" data-cat="Outerwear & Knitwear" onclick="setSFCat(this,'Outerwear & Knitwear')">Outerwear &amp; Knitwear</button>
  <button class="sf-btn" data-cat="Accessory" onclick="setSFCat(this,'Accessory')">Accessory</button>
+ <button class="sf-btn" data-cat="Gift Card" onclick="setSFCat(this,'Gift Card')">🎁 Gift Cards</button>
  </div>
  </div>
  <div class="sf-section">
@@ -789,7 +792,11 @@ const FALLBACK = [
  {id:81, name:"Cotton Muslin Long Sleeve Shirt", price:12, bundlePrice:10, sizes:["6-12M"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/90.jpg", category:"Tops"},
  {id:83, name:"Cotton Striped Short Sleeve Shirt", price:9, bundlePrice:7, sizes:["6-12M","12-24M","2T","3T"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/92.jpg", category:"Tops"},
  {id:84, name:"Cotton Two Tone Short Sleeve Shirt", price:10, bundlePrice:8, sizes:["6-12M","12-24M","2T"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/93.jpg", category:"Tops"},
- {id:85, name:"Cotton Pineapple Set, Clearance $4 off", price:14, bundlePrice:12, sizes:["6-12M"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/94.jpg", category:"Rompers & Sets"}
+ {id:85, name:"Cotton Pineapple Set, Clearance $4 off", price:14, bundlePrice:12, sizes:["6-12M"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/94.jpg", category:"Rompers & Sets"},
+ // Gift Cards
+ {id:901, name:"Little Basics Gift Card", price:25, bundlePrice:25, sizes:["$25"], material:"Digital gift card", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/gift-card.png", category:"Gift Card", isGiftCard:true},
+ {id:902, name:"Little Basics Gift Card", price:50, bundlePrice:50, sizes:["$50"], material:"Digital gift card", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/gift-card.png", category:"Gift Card", isGiftCard:true},
+ {id:903, name:"Little Basics Gift Card", price:100, bundlePrice:100, sizes:["$100"], material:"Digital gift card", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/gift-card.png", category:"Gift Card", isGiftCard:true}
 ];
 
 /* ── STATE ── */
@@ -922,6 +929,10 @@ function render(){
 
  let rows = catalogProducts.filter(p=>p.sizes&&p.sizes.length);
 
+ // Always show gift cards; skip size/stock filters for them
+ const gcRows = rows.filter(p=>p.category==='Gift Card');
+ rows = rows.filter(p=>p.category!=='Gift Card');
+
  // Size filter
  if(szFilter !== 'all'){
  rows = rows.filter(p=>{
@@ -940,6 +951,9 @@ function render(){
      return p.sizes.some(l=>{ const s=getSizeStock(p,l); return s===null||s>0; });
    });
  }
+
+ // Re-add gift cards (always visible unless category filter hides them)
+ rows = [...rows, ...gcRows];
 
  // Category filter — normalise both sides before comparing
  if(cat){
@@ -1003,6 +1017,20 @@ function render(){
 function clearTag(i){ window._filterTags[i]?.clear(); }
 
 function cardHTML(p){
+ // Gift card special card
+ if(p.isGiftCard || p.category==='Gift Card'){
+   const amt = p.price;
+   return `<div class="product-card" style="background:linear-gradient(135deg,#fdf6ee 0%,#f9ede0 100%);border:2px solid #e8d5be">
+ <div style="display:flex;align-items:center;justify-content:center;height:140px;font-size:3.5rem">🎁</div>
+ <div class="product-details">
+   <div class="badges-row"><span class="badge" style="background:#8b7355;color:#fff">Gift Card</span></div>
+   <div class="product-name">Little Basics Gift Card</div>
+   <div class="price-row"><span class="product-price" style="font-size:1.2rem;font-weight:800">$${amt}</span></div>
+   <div style="font-size:.72rem;color:#a08060;margin:.2rem 0 .5rem">Sent as a unique code by DM or email.<br>Never expires.</div>
+   <button class="add-to-bag-btn" onclick="event.stopPropagation();addGiftCardToBag(${amt})">+ Add to Bag</button>
+ </div>
+ </div>`;
+ }
  const sale = p.saleDiscount||0;
  const unit = p.unit||'ea';
  const ul = unit==='ea'?'/ea':'/set';
@@ -1291,9 +1319,9 @@ function getShippingFee(zip, itemCount){
 
  // [CA, West, Rest of US]
  let tier;
- if(itemCount <= 4) tier = [8, 9, 12];
- else if(itemCount <= 7) tier = [9, 10, 13];
- else if(itemCount <= 10) tier = [10, 11, 14];
+ if(itemCount <= 4) tier = [8, 9, 10];
+ else if(itemCount <= 7) tier = [9, 10, 11];
+ else if(itemCount <= 10) tier = [10, 11, 12];
  else tier = [12, 13, 14];
 
  const zoneIdx = {ca:0, west:1, us:2}[zone];
@@ -1497,6 +1525,28 @@ document.addEventListener('click', function(e){
  }
 });
 
+function addGiftCardToBag(amount){
+ const gcCard = {
+   id: Date.now(),
+   name: 'Little Basics Gift Card',
+   colorPid: 900 + amount,
+   colorName: '$'+amount+' Gift Card',
+   size: '$'+amount,
+   sizeCm: '',
+   price: parseFloat(amount),
+   bundlePrice: parseFloat(amount),
+   saleDiscount: 0,
+   unit: 'ea',
+   image: '', // emoji card, no image needed
+   isGiftCard: true
+ };
+ bag.push(gcCard);
+ updateBagCount();
+ renderBag();
+ showAddedToast('Little Basics Gift Card ($'+amount+')');
+ openBag();
+}
+
 function confirmAddToBag(){
  const p = _selectorProduct; if(!p) return;
  const sizeVal = document.getElementById('selSize').value;
@@ -1547,14 +1597,18 @@ function renderBag(){
  return;
  }
 
- const isBundle = bag.length >= 5;
+ const clothingCount = bag.filter(x=>!x.isGiftCard).length;
+ const isBundle = clothingCount >= 5;
  document.getElementById('bagBundle').classList.toggle('show', isBundle);
 
  el.innerHTML = bag.map(item=>{
- const price = (()=>{ const sale=item.saleDiscount||0; const effBundle=isBundle&&sale===0; return effBundle?(item.bundlePrice&&item.bundlePrice>0?item.bundlePrice:item.price):(sale>0?item.price-sale:item.price); })();
+ const price = item.isGiftCard ? item.price : (()=>{ const sale=item.saleDiscount||0; const effBundle=isBundle&&sale===0; return effBundle?(item.bundlePrice&&item.bundlePrice>0?item.bundlePrice:item.price):(sale>0?item.price-sale:item.price); })();
  const ul = item.unit==='ea'?'/ea':'/set';
+ const imgHTML = item.isGiftCard
+   ? `<div class="bag-item-img" style="background:linear-gradient(135deg,#fdf6ee,#f9ede0);display:flex;align-items:center;justify-content:center;font-size:1.6rem;border-radius:8px;flex-shrink:0">🎁</div>`
+   : `<img class="bag-item-img" src="${item.image}" onerror="this.style.background='#f5f1ed'" alt="${item.name}">`;
  return `<div class="bag-item">
- <img class="bag-item-img" src="${item.image}" onerror="this.style.background='#f5f1ed'" alt="${item.name}">
+ ${imgHTML}
  <div class="bag-item-info">
  <div class="bag-item-name">${item.name}</div>
  <div class="bag-item-meta">${item.colorName ? item.colorName+' · ' : ''}${item.size}</div>
@@ -1661,9 +1715,9 @@ function updateBagCount(){
 }
 
 function updateBagTotal(){
- const isBundle = bag.length >= 5;
+ const isBundle = bag.filter(x=>!x.isGiftCard).length >= 5;
  const subtotal = bag.reduce((s,item)=>{
- const price = (()=>{ const sale=item.saleDiscount||0; const effBundle=isBundle&&sale===0; return effBundle?(item.bundlePrice&&item.bundlePrice>0?item.bundlePrice:item.price):(sale>0?item.price-sale:item.price); })();
+ const price = item.isGiftCard ? item.price : (()=>{ const sale=item.saleDiscount||0; const effBundle=isBundle&&sale===0; return effBundle?(item.bundlePrice&&item.bundlePrice>0?item.bundlePrice:item.price):(sale>0?item.price-sale:item.price); })();
  return s + price;
  }, 0);
  document.getElementById('bagSubtotal').textContent = '$'+subtotal.toFixed(2);
@@ -1677,7 +1731,7 @@ function updateBagTotal(){
 
  if(fulfillment === 'shipping'){
  const zip = document.getElementById('bagZip')?.value.trim()||'';
- const result = getShippingFee(zip, bag.length);
+ const result = getShippingFee(zip, bag.filter(x=>!x.isGiftCard).length);
  if(result){
  shipFee = result.fee;
  const label = getZoneLabel(result.zone);
@@ -1751,7 +1805,7 @@ async function submitBag(){
   const rawHandle = customerHandle||'';
   const handle = rawHandle && !rawHandle.startsWith('@') && platform==='Instagram' ? '@'+rawHandle : rawHandle;
   const platformLine = platform && handle ? platform+': '+handle : handle;
- const isBundle = bag.length >= 5;
+ const isBundle = bag.filter(x=>!x.isGiftCard).length >= 5;
  const addr1 = document.getElementById('bagAddr1')?.value.trim()||'';
  const addr2 = document.getElementById('bagAddr2')?.value.trim()||'';
  const city = document.getElementById('bagCity')?.value.trim()||'';
@@ -1766,11 +1820,11 @@ async function submitBag(){
  : '';
 
  const total = bag.reduce((s,item)=>{
- const price = (()=>{ const sale=item.saleDiscount||0; const effBundle=isBundle&&sale===0; return effBundle?(item.bundlePrice&&item.bundlePrice>0?item.bundlePrice:item.price):(sale>0?item.price-sale:item.price); })();
+ const price = item.isGiftCard ? item.price : (()=>{ const sale=item.saleDiscount||0; const effBundle=isBundle&&sale===0; return effBundle?(item.bundlePrice&&item.bundlePrice>0?item.bundlePrice:item.price):(sale>0?item.price-sale:item.price); })();
  return s + price;
  }, 0);
 
- const shipResult = fulfillment==='shipping' ? getShippingFee(zip, bag.length) : null;
+ const shipResult = fulfillment==='shipping' ? getShippingFee(zip, bag.filter(x=>!x.isGiftCard).length) : null;
   const isCAOrder  = fulfillment==='pickup' || (fulfillment==='shipping' && getZipZone(zip)==='ca');
   const orderTax   = isCAOrder ? total * 0.1025 : 0;
  const shipFee = shipResult ? shipResult.fee : 0;
@@ -1781,9 +1835,10 @@ async function submitBag(){
 
  // Build clean message
  const itemLines = bag.map((item,i)=>{
- const price = (()=>{ const sale=item.saleDiscount||0; const effBundle=isBundle&&sale===0; return effBundle?(item.bundlePrice&&item.bundlePrice>0?item.bundlePrice:item.price):(sale>0?item.price-sale:item.price); })();
+ const price = item.isGiftCard ? item.price : (()=>{ const sale=item.saleDiscount||0; const effBundle=isBundle&&sale===0; return effBundle?(item.bundlePrice&&item.bundlePrice>0?item.bundlePrice:item.price):(sale>0?item.price-sale:item.price); })();
  const ul = item.unit==='ea'?'/ea':'/set';
- return `${i+1}. ${item.name}${item.colorName?' — '+item.colorName:''} | Size: ${item.size} | $${price.toFixed(2)}${ul}`;
+ const gcNote = item.isGiftCard ? ' 🎁' : '';
+ return `${i+1}. ${item.name}${gcNote}${item.colorName&&!item.isGiftCard?' — '+item.colorName:''} | ${item.isGiftCard?'Amount':'Size'}: ${item.size} | $${price.toFixed(2)}${ul}`;
  }).join('\n');
 
   const platform2  = document.getElementById('bagPlatform')?.value||'';
