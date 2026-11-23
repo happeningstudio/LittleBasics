@@ -1287,6 +1287,19 @@ async function fetchSheet(silent){
 
 function useFallback(){
  catalogProducts=FALLBACK.map(p=>({...p,pids:[p.id],sizesCm:p.sizes.map(s=>SIZE_TO_CM[s]||null)}));
+ // FALLBACK already contains gift cards, nothing extra needed
+}
+
+const GC_PRODUCTS = [
+ {id:901, name:'Little Basics Gift Card $25',  price:25,  bundlePrice:25,  sizes:['$25'],  sizesCm:['$25'],  pids:[901], material:'Digital gift card', image:'', category:'Gift Card', isGiftCard:true, season:''},
+ {id:902, name:'Little Basics Gift Card $50',  price:50,  bundlePrice:50,  sizes:['$50'],  sizesCm:['$50'],  pids:[902], material:'Digital gift card', image:'', category:'Gift Card', isGiftCard:true, season:''},
+ {id:903, name:'Little Basics Gift Card $100', price:100, bundlePrice:100, sizes:['$100'], sizesCm:['$100'], pids:[903], material:'Digital gift card', image:'', category:'Gift Card', isGiftCard:true, season:''},
+];
+
+function injectGiftCards(){
+ // Remove any existing GC entries then re-add so they don't stack on refresh
+ catalogProducts = catalogProducts.filter(p=>p.category!=='Gift Card');
+ catalogProducts = catalogProducts.concat(GC_PRODUCTS);
 }
 
 
