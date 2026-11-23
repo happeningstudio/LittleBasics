@@ -3065,7 +3065,7 @@ function buildGroupForm(name, siblings){
     <div class="field" style="margin-bottom:.75rem"><label>Material</label><input type="text" id="epMaterial" value="${escHtml(p0.material||'')}" placeholder="e.g. 100% Cotton, Cotton Linen…"></div>
     <div class="field" style="margin-bottom:.75rem"><label>Category</label>
       <select id="epCategory">
-        ${['Uncategorized','Tops','Bottoms','Rompers & Sets','Outerwear & Knitwear','Accessory','Sold Out'].map(c=>
+        ${['Uncategorized','Tops','Bottoms','Rompers & Sets','Outerwear & Knitwear','Accessory','Gift Card','Sold Out'].map(c=>
           `<option ${(p0.category||'Uncategorized')===c?'selected':''}>${c}</option>`
         ).join('')}
       </select>
