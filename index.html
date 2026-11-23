@@ -792,11 +792,7 @@ const FALLBACK = [
  {id:81, name:"Cotton Muslin Long Sleeve Shirt", price:12, bundlePrice:10, sizes:["6-12M"], material:"100% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/90.jpg", category:"Tops"},
  {id:83, name:"Cotton Striped Short Sleeve Shirt", price:9, bundlePrice:7, sizes:["6-12M","12-24M","2T","3T"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/92.jpg", category:"Tops"},
  {id:84, name:"Cotton Two Tone Short Sleeve Shirt", price:10, bundlePrice:8, sizes:["6-12M","12-24M","2T"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/93.jpg", category:"Tops"},
- {id:85, name:"Cotton Pineapple Set, Clearance $4 off", price:14, bundlePrice:12, sizes:["6-12M"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/94.jpg", category:"Rompers & Sets"},
- // Gift Cards
- {id:901, name:"Little Basics Gift Card", price:25, bundlePrice:25, sizes:["$25"], material:"Digital gift card", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/gift-card.png", category:"Gift Card", isGiftCard:true},
- {id:902, name:"Little Basics Gift Card", price:50, bundlePrice:50, sizes:["$50"], material:"Digital gift card", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/gift-card.png", category:"Gift Card", isGiftCard:true},
- {id:903, name:"Little Basics Gift Card", price:100, bundlePrice:100, sizes:["$100"], material:"Digital gift card", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/main/images/gift-card.png", category:"Gift Card", isGiftCard:true}
+ {id:85, name:"Cotton Pineapple Set, Clearance $4 off", price:14, bundlePrice:12, sizes:["6-12M"], material:"95% Cotton", image:"https://raw.githubusercontent.com/happeningstudio/LittleBasics/refs/heads/main/images/94.jpg", category:"Rompers & Sets"}
 ];
 
 /* ── STATE ── */
@@ -1027,7 +1023,7 @@ function cardHTML(p){
    <div class="product-name">Little Basics Gift Card</div>
    <div class="price-row"><span class="product-price" style="font-size:1.2rem;font-weight:800">$${amt}</span></div>
    <div style="font-size:.72rem;color:#a08060;margin:.2rem 0 .5rem">Sent as a unique code by DM or email.<br>Never expires.</div>
-   <button class="add-to-bag-btn" onclick="event.stopPropagation();addGiftCardToBag(${amt})">+ Add to Bag</button>
+   <button class="add-to-bag-btn" onclick="event.stopPropagation();addGiftCardToBag(${p.id},${amt})">+ Add to Bag</button>
  </div>
  </div>`;
  }
@@ -1115,6 +1111,7 @@ async function loadFromSheet(){
      _allSheetProducts = cached.allSheet||[];
      stockData = cached.stock||{};
      soldData = cached.sold||{};
+     injectGiftCards();
      render();
      // Refresh in background
      fetchCatalogData(true); return;
@@ -1167,6 +1164,7 @@ async function fetchCatalogData(silent){
          return {...g,sizes:pairs.map(p=>p.label),sizesCm:pairs.map(p=>p.cm),season:g.season||''};
        });
 
+       injectGiftCards();
        // Save to cache
        try{
          localStorage.setItem(CACHE_KEY, JSON.stringify({
@@ -1269,6 +1267,7 @@ async function fetchSheet(silent){
  return {...g,sizes:pairs.map(p=>p.label),sizesCm:pairs.map(p=>p.cm),season:g.season||''};
  });
 
+ injectGiftCards();
  // Save to cache
  try{
    localStorage.setItem(CACHE_KEY, JSON.stringify({
@@ -1282,6 +1281,7 @@ async function fetchSheet(silent){
  } else { if(!silent) useFallback(); }
 
  } catch(e){ console.warn('fetchSheet error:',e); if(!silent) useFallback(); }
+ injectGiftCards();
  render();
 }
 
@@ -1290,16 +1290,9 @@ function useFallback(){
  // FALLBACK already contains gift cards, nothing extra needed
 }
 
-const GC_PRODUCTS = [
- {id:901, name:'Little Basics Gift Card $25',  price:25,  bundlePrice:25,  sizes:['$25'],  sizesCm:['$25'],  pids:[901], material:'Digital gift card', image:'', category:'Gift Card', isGiftCard:true, season:''},
- {id:902, name:'Little Basics Gift Card $50',  price:50,  bundlePrice:50,  sizes:['$50'],  sizesCm:['$50'],  pids:[902], material:'Digital gift card', image:'', category:'Gift Card', isGiftCard:true, season:''},
- {id:903, name:'Little Basics Gift Card $100', price:100, bundlePrice:100, sizes:['$100'], sizesCm:['$100'], pids:[903], material:'Digital gift card', image:'', category:'Gift Card', isGiftCard:true, season:''},
-];
-
 function injectGiftCards(){
- // Remove any existing GC entries then re-add so they don't stack on refresh
- catalogProducts = catalogProducts.filter(p=>p.category!=='Gift Card');
- catalogProducts = catalogProducts.concat(GC_PRODUCTS);
+ // Mark any sheet-loaded gift cards with isGiftCard flag so they render correctly
+ catalogProducts.forEach(p=>{ if(p.category==='Gift Card') p.isGiftCard=true; });
 }
 
 
@@ -1538,11 +1531,11 @@ document.addEventListener('click', function(e){
  }
 });
 
-function addGiftCardToBag(amount){
+function addGiftCardToBag(pid, amount){
  const gcCard = {
    id: Date.now(),
    name: 'Little Basics Gift Card',
-   colorPid: 900 + amount,
+   colorPid: pid||900,
    colorName: '$'+amount+' Gift Card',
    size: '$'+amount,
    sizeCm: '',
