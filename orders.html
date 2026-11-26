@@ -890,6 +890,7 @@ function doPost(e) {
       <div class="search-wrap">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
         <button class="btn primary sm" onclick="rebuildSoldFromLog()">🔧 Rebuild from Order Log</button>
+        <button class="btn sm" onclick="pushSold()" style="margin-right:.25rem">⬆ Push Sold to Sheet</button>
         <button class="btn sm" onclick="resetSoldFromSheet()" style="color:var(--red);margin-right:.5rem">↺ Reset from Sheet</button>
         <input class="search-input" type="text" id="soldSearch" placeholder="Search…" oninput="renderSoldSummary()">
       </div>
@@ -1355,6 +1356,13 @@ async function pullSold(){
   // REPLACE don't accumulate — otherwise counts double on every page load
   const fresh={};
   data.slice(1).forEach(([k,v])=>{ if(k && parseInt(v)>0) fresh[String(k)]=parseInt(v)||0; });
+  // Guard: if sheet has fewer records than local, keep local (sheet may be stale/empty)
+  const freshTotal=Object.values(fresh).reduce((s,v)=>s+v,0);
+  const localTotal=Object.values(soldCounts).reduce((s,v)=>s+v,0);
+  if(freshTotal===0 && localTotal>0){
+    console.warn('pullSold: sheet Sold tab appears empty but local has data — keeping local. Push to Sheet to sync.');
+    return;
+  }
   soldCounts=fresh;
   saveSold();
 }
@@ -4378,8 +4386,7 @@ if(sheetUrl){
       if(Object.keys(hiddenFlags).length>0) pushProducts();
 
       await pullInventory();
-      // Clear sold before pulling to avoid accumulation
-      soldCounts={}; saveSold();
+      // Pull sold — pullSold() already replaces (no pre-wipe needed; pre-wipe was erasing local data when sheet was empty)
       await pullSold();
       await pullLog();
       renderLog();
